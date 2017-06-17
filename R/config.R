@@ -28,13 +28,12 @@ bb_config <- function(file) {
     } else {
         list(global=tibble(
                  wget_flags="--progress=dot:giga",
-                 http_proxy:"",
-                 ftp_proxy:"",
-                 local_file_root:"",
-                 clobber:1,
-                 skip_downloads:false,
-                 wait:0
-             ),
+                 http_proxy="",
+                 ftp_proxy="",
+                 local_file_root="",
+                 clobber=1,
+                 skip_downloads=FALSE,
+                 wait=0),
              sources=tibble()
              )
     }
@@ -53,46 +52,3 @@ add <- function(cf,source) {
     cf
 }
 
-
-#' Configuration information for external data sources
-#'
-#' @param ids character vector: one or more identifiers of pre-packaged source configurations
-#'
-#' @return tibble
-#'
-#' @seealso \code{\link{bb_config}}
-#'
-#' @examples
-#' \dontrun{
-#'   cf <- bb_config() %>%
-#'     add(bb_source("seaice_smmr_ssmi_nasateam"))
-#' }
-#'
-#' @export
-bb_source <- function(ids=c("seaice_smmr_ssmi_nasateam")) {
-    if (!missing(ids)) {
-        assert_that(is.character(ids))
-        do.call(bind_rows,lapply(ids,bb_source_defs))
-    }
-}
-
-
-bb_source_defs <- function(id) {
-    switch(id,
-           seaice_smmr_ssmi_nasateam=tibble(
-               name="NSIDC SMMR-SSM/I Nasateam sea ice concentration",
-               description="Passive-microwave estimates of sea ice concentration at 25km spatial resolution. Daily and monthly resolution, available from 1-Oct-1978 to present.",
-               reference="http://nsidc.org/data/nsidc-0051.html",
-               source_urls="ftp://sidads.colorado.edu/pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/",
-               citation="Cavalieri, D. J., C. L. Parkinson, P. Gloersen, and H. Zwally. 1996, updated yearly. Sea Ice Concentrations from Nimbus-7 SMMR and DMSP SSM/I-SSMIS Passive Microwave Data. [indicate subset used]. Boulder, Colorado USA: NASA National Snow and Ice Data Center Distributed Active Archive Center. http://dx.doi.org/10.5067/8GQ8LZQVL0VL",
-               license="Please cite, see http://nsidc.org/about/use_copyright.html",
-               comment="",
-               method="wget",
-               method_flags="--exclude-directories=pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/browse,pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/north --recursive --level=inf",
-               postprocess="",
-               access_function="readice",
-               data_group="Sea ice"),
-           stop("unknown data source id: ",id)
-           )
-}
-               

@@ -34,7 +34,7 @@ Build up a configuration by choosing from data sources that are provided as part
 ```{r,eval=FALSE}
 cf <- bb_config(local_file_root="/your/data/directory",
                 wget_flags="--no-passive-ftp") %>%
-    add(bb_source("seaice_smmr_ssmi_nasateam")
+    add(bb_sources() %>% dplyr::filter(id=="seaice_smmr_ssmi_nasateam"))
 ```
 
 Or define your own data source:

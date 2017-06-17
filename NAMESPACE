@@ -2,8 +2,10 @@
 
 export(bb_config)
 export(bb_source)
+export(bb_sources)
 import(assertthat)
 importFrom(digest,digest)
+importFrom(dplyr,"%>%")
 importFrom(dplyr,bind_rows)
 importFrom(dplyr,tbl_df)
 importFrom(dplyr,tibble)
