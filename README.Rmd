@@ -1,0 +1,43 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+An R package for maintaining a local collection of sparkly data sets.
+
+See [RAADTools](https://github.com/AustralianAntarcticDivision/raadtools) for reading, plotting, and manipulating these data.
+
+## Installing
+
+```{r,eval=FALSE}
+install.packages("devtools")
+library(devtools)
+install_github("AustralianAntarcticDivision/bowerbird")
+```
+
+## Configuring data sources
+
+`bowerbird` must be configured to tell it which data sets to synchronise and where to put them.
+
+
+
+Load and save configurations directly:
+
+```{r,eval=FALSE}
+cf <- ... ## set up configuration to your liking
+bb_save_config(cf,"/path/to/your/config.json")
+
+## load up a saved configuration
+cf <- bb_read_config("/path/to/your/config.json")
+
+sync_repo(cf)
+```

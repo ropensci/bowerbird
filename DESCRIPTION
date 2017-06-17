@@ -1,0 +1,21 @@
+Package: bowerbird
+Type: Package
+Title: Keep a Collection of Sparkly Data Resources
+Version: 0.0.1
+Author: Ben Raymond, Michael Sumner
+Maintainer: Ben Raymond <ben.raymond@aad.gov.au>
+Description: Tools to get and maintain a data repository from third-party data providers.
+License: MIT + file LICENSE
+Imports:
+    assertthat,
+    digest,
+    dplyr,
+    jsonlite
+LazyLoad: yes
+RoxygenNote: 6.0.1
+Suggests:
+    archive,
+    testthat,
+    covr
+Remotes:
+    jimhester/archive
