@@ -24,20 +24,51 @@ library(devtools)
 install_github("AustralianAntarcticDivision/bowerbird")
 ```
 
-## Configuring data sources
+## Usage
 
-`bowerbird` must be configured to tell it which data sets to synchronise and where to put them.
+`bowerbird` must be configured to tell it which data sets to synchronise and where to save them on the local file system.
 
+
+Build up a configuration by choosing from data sources that are provided as part of the package:
+
+```{r,eval=FALSE}
+cf <- bb_config(local_file_root="/your/data/directory",
+                wget_flags="--no-passive-ftp") %>%
+    add(bb_source("seaice_smmr_ssmi_nasateam")
+```
+
+Or define your own data source:
+```{r,eval=FALSE}
+my_source <- bb_source(
+    name="GSHHG coastline data",
+    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
+    reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
+    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical, High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
+    source_urls="ftp://ftp.soest.hawaii.edu/gshhg/*",
+    license="",
+    comment="",
+    method="wget",
+    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
+    postprocess="unzip")
+
+cf <- bb_config(local_file_root="/your/data/directory") %>%
+    add(my_source)
+```
 
 
 Load and save configurations directly:
 
 ```{r,eval=FALSE}
 cf <- ... ## set up configuration to your liking
+
+## save it for direct use later
 bb_save_config(cf,"/path/to/your/config.json")
 
 ## load up a saved configuration
-cf <- bb_read_config("/path/to/your/config.json")
+cf <- bb_config(file="/path/to/your/config.json")
+```
 
-sync_repo(cf)
+And once the configuration is defined, run the sync process:
+```{r,eval=FALSE}
+bb_sync(cf)
 ```
