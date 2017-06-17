@@ -40,14 +40,17 @@ bb_config <- function(file) {
 }
 
 #' @rdname bb_config
+#' @export
 bb_save_config <- function(cf,file) {
     assert_that(is.string(file))
     writeLines(as.character(toJSON(cf,pretty=TRUE)),con=file)
 }
 
 #' @rdname bb_config
+#' @export
 add <- function(cf,source) {
     ## need to do this by using global parms, if not overridden by source-specific values
+    ## check that name and/or ID is unique?
     cf$sources <- dplyr::bind_rows(cf$sources,source)
     cf
 }
