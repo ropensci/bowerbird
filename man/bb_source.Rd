@@ -2,21 +2,22 @@
 % Please edit documentation in R/sources.R
 \name{bb_source}
 \alias{bb_source}
-\title{Configuration information for external data sources}
+\title{Define an external data source}
 \usage{
-bb_source(id, name, description, reference, source_urls, citation, license,
-  comment, method, method_flags, postprocess, access_function, data_group)
+bb_source(id, name, description = "", reference, source_urls, citation,
+  license, comment = "", method = "wget", method_flags = "",
+  postprocess = "", access_function = "", data_group = "")
 }
 \arguments{
 \item{id}{string: a short, unique identifier for the data source}
 
-\item{name}{string:}
+\item{name}{string: a (longer) name for the data source}
 
-\item{description}{string:}
+\item{description}{string: a description of the data source}
 
-\item{reference}{string:}
+\item{reference}{string: URL to the metadata record or home page of the data source}
 
-\item{source_urls}{character vector:}
+\item{source_urls}{character vector: the source URL}
 
 \item{citation}{string:}
 
@@ -28,7 +29,7 @@ bb_source(id, name, description, reference, source_urls, citation, license,
 
 \item{method_flags}{string:}
 
-\item{postprocess}{string or function:}
+\item{postprocess}{string:}
 
 \item{access_function}{string:}
 
@@ -38,13 +39,25 @@ bb_source(id, name, description, reference, source_urls, citation, license,
 tibble
 }
 \description{
-Configuration information for external data sources
+Define an external data source
 }
 \examples{
-\dontrun{
-  cf <- bb_config() \%>\%
-    add(bb_sources() \%>\% dplyr::filter(id=="seaice_smmr_ssmi_nasateam"))
-}
+
+my_source <- bb_source(
+   name="GSHHG coastline data",
+   description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
+   reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
+   citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
+     High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
+   source_urls="ftp://ftp.soest.hawaii.edu/gshhg/*",
+   license="",
+   comment="",
+   method="wget",
+   method_flags="--recursive --level=1 --accept=\\"*bin*.zip,README.TXT\\"",
+   postprocess="unzip")
+
+cf <- bb_config()
+cf <- add(cf,my_source)
 
 }
 \seealso{
