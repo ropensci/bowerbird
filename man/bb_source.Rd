@@ -17,7 +17,7 @@ bb_source(id, name, description = "", reference, source_urls, citation,
 
 \item{reference}{string: URL to the metadata record or home page of the data source}
 
-\item{source_urls}{character vector: the source URL}
+\item{source_urls}{string or list of strings: the source URL}
 
 \item{citation}{string:}
 
@@ -29,7 +29,7 @@ bb_source(id, name, description = "", reference, source_urls, citation,
 
 \item{method_flags}{string:}
 
-\item{postprocess}{string:}
+\item{postprocess}{string or list of strings:}
 
 \item{access_function}{string:}
 
