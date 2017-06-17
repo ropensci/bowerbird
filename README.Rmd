@@ -29,12 +29,17 @@ install_github("AustralianAntarcticDivision/bowerbird")
 `bowerbird` must be configured to tell it which data sets to synchronise and where to save them on the local file system.
 
 
-Build up a configuration by choosing from data sources that are provided as part of the package:
+Build up a configuration by first defining global options such as the destination on your local file system:
 
 ```{r,eval=FALSE}
 cf <- bb_config(local_file_root="/your/data/directory",
-                wget_flags="--no-passive-ftp") %>%
-    add(bb_sources() %>% dplyr::filter(id=="seaice_smmr_ssmi_nasateam"))
+                wget_flags="--no-passive-ftp")
+```
+
+Add data sources by choosing from those already defined in bowerbird:
+
+```{r,eval=FALSE}
+cf <- cf %>% add(bb_sources() %>% dplyr::filter(id=="seaice_smmr_ssmi_nasateam"))
 ```
 
 Or define your own data source:
