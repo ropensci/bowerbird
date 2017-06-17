@@ -23,8 +23,15 @@
 bb_config <- function(file) {
     if (!missing(file)) {
         cf <- fromJSON(file)
-        if ("global" %in% names(cf)) cf$global <- tbl_df(cf$global)
-        if ("sources" %in% names(cf)) cf$sources <- tbl_df(cf$sources)
+        if ("global" %in% names(cf)) {
+            cf$global <- tbl_df(cf$global)
+            cf$global$clobber <- as.numeric(cf$global$clobber)
+            cf$global$wait <- as.numeric(cf$global$wait)
+        }
+        if ("sources" %in% names(cf)) {
+            cf$sources <- tbl_df(cf$sources)
+        }
+        cf
     } else {
         list(global=tibble(
                  wget_flags="--progress=dot:giga",
