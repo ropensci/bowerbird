@@ -22,16 +22,7 @@
 #' @export
 bb_config <- function(file) {
     if (!missing(file)) {
-        cf <- fromJSON(file)
-        if ("global" %in% names(cf)) {
-            cf$global <- tbl_df(cf$global)
-            cf$global$clobber <- as.numeric(cf$global$clobber)
-            cf$global$wait <- as.numeric(cf$global$wait)
-        }
-        if ("sources" %in% names(cf)) {
-            cf$sources <- tbl_df(cf$sources)
-        }
-        cf
+        readRDS(file)
     } else {
         list(global=tibble(
                  wget_flags="--progress=dot:giga",
@@ -50,7 +41,7 @@ bb_config <- function(file) {
 #' @export
 bb_save_config <- function(cf,file) {
     assert_that(is.string(file))
-    writeLines(as.character(toJSON(cf,pretty=TRUE)),con=file)
+    saveRDS(cf,file=file)
 }
 
 #' @rdname bb_config
