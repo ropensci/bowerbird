@@ -13,10 +13,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE) {
     assert_that(is.flag(create_root))
     assert_that(is.flag(verbose))
     ## check that wget can be found
-    tryCatch(
-        system("wget --help",intern=TRUE),
-        error=function(e) stop("could not find wget executable (error message was: ",e,")")
-    )
+    blah <- wget_exe()
     ## save some current settings: path and proxy env values
     settings <- save_current_settings()
     ## iterate through each dataset in turn
