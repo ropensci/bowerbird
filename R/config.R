@@ -16,7 +16,7 @@
 #'
 #' @examples
 #' \dontrun{
-#'   cf <- bb_config() %>%
+#'   cf <- bb_config("/my/file/root") %>%
 #'     add(bb_source("seaice_smmr_ssmi_nasateam"))
 #' 
 #'   ## save to file

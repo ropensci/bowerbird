@@ -67,10 +67,10 @@ Load and save configurations directly:
 cf <- ... ## set up configuration to your liking
 
 ## save it for direct use later
-bb_save_config(cf,"/path/to/your/config.json")
+bb_save_config(cf,"/path/to/your/config.rds")
 
 ## load up a saved configuration
-cf <- bb_config(file="/path/to/your/config.json")
+cf <- bb_config(file="/path/to/your/config.rds")
 ```
 
 And once the configuration is defined, run the sync process:

@@ -6,14 +6,27 @@
 \alias{add}
 \title{Load or initialize bowerbird configuration}
 \usage{
-bb_config(file)
+bb_config(local_file_root, wget_flags = "--progress=dot:giga",
+  http_proxy = NULL, ftp_proxy = NULL, clobber = 1, wait = 0, file)
 
 bb_save_config(cf, file)
 
 add(cf, source)
 }
 \arguments{
-\item{file}{string: file name of configuration to load. All other parameters are ignored if \code{file} is provided.}
+\item{local_file_root}{string: location of data repository on local file system}
+
+\item{wget_flags}{string: default flags to be passed to wget. These are overridden on a per-data source basis if the data source defines its own wget_flags}
+
+\item{http_proxy}{string: URL of HTTP proxy to use e.g. 'http://your.proxy:8080' (NULL for no proxy)}
+
+\item{ftp_proxy}{string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)}
+
+\item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files}
+
+\item{wait}{numeric: seconds to wait in between web calls. Some servers become unhappy if repeated calls are made too quickly from the same client address}
+
+\item{file}{string: file name of configuration to load. All other parameters are ignored if \code{file} is provided}
 
 \item{cf}{list: configuration, as returned by \code{bb_config}}
 
@@ -27,7 +40,7 @@ If \code{file} is provided, load that configuration. Otherwise initialize an emp
 }
 \examples{
 \dontrun{
-  cf <- bb_config() \%>\%
+  cf <- bb_config("/my/file/root") \%>\%
     add(bb_source("seaice_smmr_ssmi_nasateam"))
 
   ## save to file
