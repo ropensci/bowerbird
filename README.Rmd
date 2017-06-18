@@ -32,14 +32,14 @@ install_github("AustralianAntarcticDivision/bowerbird")
 Build up a configuration by first defining global options such as the destination on your local file system:
 
 ```{r,eval=FALSE}
-cf <- bb_config(local_file_root="/your/data/directory",
-                wget_flags="--no-passive-ftp")
+cf <- bb_config(local_file_root="/your/data/directory")
 ```
 
 Add data sources by choosing from those already defined in bowerbird:
 
 ```{r,eval=FALSE}
-cf <- cf %>% add(bb_sources() %>% dplyr::filter(id=="seaice_smmr_ssmi_nasateam"))
+library(magrittr)
+cf <- cf %>% add(bb_sources("CERSAT SSM/I sea ice concentration"))
 ```
 
 Or define your own data source:
@@ -66,14 +66,14 @@ Load and save configurations directly:
 ```{r,eval=FALSE}
 cf <- ... ## set up configuration to your liking
 
-## save it for direct use later
+## save it for use later
 bb_save_config(cf,"/path/to/your/config.rds")
 
 ## load up a saved configuration
 cf <- bb_config(file="/path/to/your/config.rds")
 ```
 
-And once the configuration is defined, run the sync process:
+And once the configuration is defined or loaded, run the sync process:
 ```{r,eval=FALSE}
 bb_sync(cf)
 ```
