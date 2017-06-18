@@ -1,6 +1,6 @@
 ## list of global flags, stored as attributes on the configuration tibble
 ## internal function
-bb_global_atts <- function() c("wget_flags","http_proxy","ftp_proxy","local_file_root","clobber","wait")
+bb_global_atts <- function() c("wget_flags","http_proxy","ftp_proxy","local_file_root","clobber")
 
 
 #' Load or initialize bowerbird configuration
@@ -12,7 +12,6 @@ bb_global_atts <- function() c("wget_flags","http_proxy","ftp_proxy","local_file
 #' @param http_proxy string: URL of HTTP proxy to use e.g. 'http://your.proxy:8080' (NULL for no proxy)
 #' @param ftp_proxy string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)
 #' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)
-#' @param wait numeric: seconds to wait in between web calls. Some servers become unhappy if repeated calls are made too quickly from the same client address
 #' @param cf tibble: configuration, as returned by \code{bb_config}
 #' @return configuration tibble
 #'
@@ -30,7 +29,7 @@ bb_global_atts <- function() c("wget_flags","http_proxy","ftp_proxy","local_file
 #' }
 #'
 #' @export
-bb_config <- function(local_file_root,wget_flags="--progress=dot:giga",http_proxy=NULL,ftp_proxy=NULL,clobber=1,wait=0,file) {
+bb_config <- function(local_file_root,wget_flags="--progress=dot:giga",http_proxy=NULL,ftp_proxy=NULL,clobber=1,file) {
     if (!missing(file)) {
         readRDS(file)
     } else {
@@ -40,7 +39,6 @@ bb_config <- function(local_file_root,wget_flags="--progress=dot:giga",http_prox
         attr(cf,"ftp_proxy") <- ftp_proxy
         attr(cf,"local_file_root") <- local_file_root
         attr(cf,"clobber") <- clobber
-        attr(cf,"wait") <- wait
         cf
     }
 }
@@ -68,7 +66,7 @@ bb_save_config <- function(cf,file) {
 #' @export
 add <- function(cf,source) {
     ## need to do this by using global parms, if not overridden by source-specific values
-    ##bb_global_atts() ## c("wget_flags","http_proxy","ftp_proxy","local_file_root","clobber","wait")
+    ##bb_global_atts() ## c("wget_flags","http_proxy","ftp_proxy","local_file_root","clobber")
 
     ## check that name is unique?
     dplyr::bind_rows(cf,source)
