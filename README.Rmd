@@ -24,12 +24,13 @@ library(devtools)
 install_github("AustralianAntarcticDivision/bowerbird")
 ```
 
-Bowerbird uses `wget` to recursively download files from data providers. `wget` is typically installed by default on Linux. For Windows you can try the `install_wget()` function or download it yourself (e.g. from https://eternallybored.org/misc/wget/current/wget.exe) and make sure it is on your path.
+Bowerbird requires the third-party utility `wget` to recursively download files from data providers. `wget` is typically installed by default on Linux.
+On Windows you can try the `install_wget()` function or download it yourself (e.g. from https://eternallybored.org/misc/wget/current/wget.exe) and make sure it is on your path.
 
 
 ## Usage
 
-`bowerbird` must be configured to tell it which data sets to synchronise and where to save them on the local file system.
+Bowerbird must be configured to tell it which data sets to synchronise and where to save them on the local file system.
 
 
 Build up a configuration by first defining global options such as the destination on your local file system:
