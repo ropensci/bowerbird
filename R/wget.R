@@ -21,7 +21,7 @@ install_wget <- function() {
         ok <- download.file("https://eternallybored.org/misc/wget/current/wget.exe",
                       destfile=file.path(path,"wget.exe"),
                       mode="wb")
-        ok==0
+        invisible(ok==0)
     } else {
         stop("Sorry, could not find the user APPDATA directory to install wget into")
     }
@@ -41,9 +41,8 @@ wget_exe <- function() {
     }
 }
 wget_test <- function(wget_path) {
-    tryCatch(system(paste0(wget_path," --help"),intern=TRUE),
-             error=function(e) return(FALSE))
-    TRUE
+    try({system(paste0(wget_path," --help"),intern=TRUE);return(TRUE)},silent=TRUE)
+    FALSE
 }
                 
 ##dir_exists <- function(z) utils::file_test("-d",z)
