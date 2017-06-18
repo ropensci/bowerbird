@@ -1,8 +1,10 @@
 #' Helper function to install wget on Windows
 #'
+#' The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:\Users\username\AppData\Roaming\)
+#' 
 #' @references https://eternallybored.org/misc/wget/current/wget.exe
 #'
-#' @return TRUE on success
+#' @return TRUE (invisibly) on success
 #'
 #' @examples
 #' \dontrun{
@@ -13,6 +15,7 @@
 install_wget <- function() {
     if (.Platform$OS.type!="windows")
         stop("install_wget only supports windows platforms")
+    ## NOTE, could also use e.g. https://github.com/r-lib/rappdirs to find this directory
     path <- Sys.getenv("APPDATA")
     if (dir_exists(path)) {
         path <- file.path(path,"bowerbird")
@@ -40,6 +43,7 @@ wget_exe <- function() {
         stop("could not find the wget executable")
     }
 }
+## test a potential wget executable path
 wget_test <- function(wget_path) {
     try({system(paste0(wget_path," --help"),intern=TRUE);return(TRUE)},silent=TRUE)
     FALSE
