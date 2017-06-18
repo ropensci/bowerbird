@@ -15,7 +15,13 @@ add(cf, source)
 configuration tibble
 }
 \description{
-To do: include details of how this is done, and how global options are treated.
+Add a new data source to a bowerbird configuration
+}
+\examples{
+\dontrun{
+  cf <- bb_config("/my/file/root") \%>\%
+    add(bb_source("seaice_smmr_ssmi_nasateam"))
+}
 }
 \seealso{
 \code{\link{bb_source}} \code{\link{bb_config}}

@@ -6,7 +6,7 @@
 \title{Load or initialize bowerbird configuration}
 \usage{
 bb_config(local_file_root, wget_flags = "--progress=dot:giga",
-  http_proxy = NULL, ftp_proxy = NULL, clobber = 1, wait = 0, file)
+  http_proxy = NULL, ftp_proxy = NULL, clobber = 1, file)
 
 bb_save_config(cf, file)
 }
@@ -20,8 +20,6 @@ bb_save_config(cf, file)
 \item{ftp_proxy}{string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)}
 
 \item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)}
-
-\item{wait}{numeric: seconds to wait in between web calls. Some servers become unhappy if repeated calls are made too quickly from the same client address}
 
 \item{file}{string: file name of configuration to load (for \code{bb_config}) or save to (for \code{bb_save_config}). For \code{bb_config}, all other parameters are ignored if \code{file} is provided}
 

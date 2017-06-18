@@ -53,8 +53,6 @@ bb_save_config <- function(cf,file) {
 
 
 #' Add a new data source to a bowerbird configuration
-#'
-#' To do: include details of how this is done, and how global options are treated.
 #' 
 #' @param cf tibble: configuration, as returned by \code{bb_config}
 #' @param source tibble: data source definition to add to the configuration, as returned by \code{bb_source}
@@ -62,12 +60,13 @@ bb_save_config <- function(cf,file) {
 #' @return configuration tibble
 #'
 #' @seealso \code{\link{bb_source}} \code{\link{bb_config}}
-#'
+#' @examples
+#' \dontrun{
+#'   cf <- bb_config("/my/file/root") %>%
+#'     add(bb_source("seaice_smmr_ssmi_nasateam"))
+#' }
 #' @export
 add <- function(cf,source) {
-    ## need to do this by using global parms, if not overridden by source-specific values
-    ##bb_global_atts() ## c("wget_flags","http_proxy","ftp_proxy","local_file_root","clobber")
-
     ## check that name is unique?
     dplyr::bind_rows(cf,source)
 }
