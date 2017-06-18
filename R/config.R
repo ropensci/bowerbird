@@ -39,6 +39,7 @@ bb_config <- function(local_file_root,wget_flags="--progress=dot:giga",http_prox
         attr(cf,"ftp_proxy") <- ftp_proxy
         attr(cf,"local_file_root") <- local_file_root
         attr(cf,"clobber") <- clobber
+        ## do we need user, password, skip_downloads?
         cf
     }
 }
