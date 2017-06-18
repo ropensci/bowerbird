@@ -196,7 +196,7 @@ do_decompress_files <- function(method,files,overwrite=TRUE) {
 
 build_wget_call <- function(dataset) {
     ## build wget system call given our dataset config
-    wget_call <- wget_exe()
+    wget_call <- getOption("bowerbird")$wget_exe
     ## resolve fileset-specific flags (method_flags) and global flags (wget_flags, which were inherited from config$global)
     this_flags <- if (is.na(dataset$method_flags)) dataset$wget_default_flags else dataset$method_flags
     ## add wget_global_flags
@@ -236,8 +236,7 @@ do_wget <- function(wget_call,dataset) {
             ## sink() won't catch the output of system commands, which means we miss stuff in our log
             ## workaround: send output to temporary file so that we can capture it
             output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
-            my_wget_exe <- wget_exe()
-            wget_call <- sub(paste0(my_wget_exe," "),paste0(my_wget_exe," -o \"",output_file,"\" "),wget_call,fixed=TRUE)
+            wget_call <- sub(paste0(getOption("bowerbird")$wget_exe," "),paste0(getOption("bowerbird")$wget_exe," -o \"",output_file,"\" "),wget_call,fixed=TRUE)
             system(wget_call)
             ## now echo the contents of output_file to console, so that sink() captures it
             cat(readLines(output_file),sep="\n")

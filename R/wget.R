@@ -1,6 +1,6 @@
 #' Helper function to install wget on Windows
 #'
-#' The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:\Users\username\AppData\Roaming\)
+#' The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
 #' 
 #' @references https://eternallybored.org/misc/wget/current/wget.exe
 #'
