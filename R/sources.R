@@ -3,13 +3,13 @@
 #' @param name string: a (unique) name for the data source
 #' @param description string: a description of the data source
 #' @param reference string: URL to the metadata record or home page of the data source
-#' @param source_urls string or list of strings: the source URL
+#' @param source_urls character vector: one or more source URLs
 #' @param citation string:
 #' @param license string:
 #' @param comment string:
 #' @param method string:
 #' @param method_flags string:
-#' @param postprocess string or list of strings:
+#' @param postprocess character vector:
 #' @param access_function string:
 #' @param data_group string:
 #'
@@ -49,8 +49,8 @@ bb_source <- function(name,description="",reference,source_urls,citation,license
         ##warning("no source_urls provided")
         source_urls <- as.character(NA)
     }
-    if (is.character(source_urls)) source_urls <- as.list(source_urls)
-    if (is.character(postprocess)) postprocess <- as.list(postprocess)
+    if (is.character(source_urls)) source_urls <- list(source_urls)
+    if (is.character(postprocess)) postprocess <- list(postprocess)
     tibble(
         name=if (assert_that(is.string(name))) name,
         description=if (assert_that(is.string(description))) description,
