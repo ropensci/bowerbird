@@ -10,6 +10,7 @@ Imports:
     assertthat,
     digest,
     dplyr,
+    R.utils,
     stringr
 LazyLoad: yes
 RoxygenNote: 6.0.1

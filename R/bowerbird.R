@@ -6,5 +6,7 @@
 #' @import assertthat
 #' @importFrom digest digest
 #' @importFrom dplyr bind_rows tbl_df tibble %>%
-#' @importFrom stringr str_detect str_match str_trim
+#' @importFrom stringr str_detect str_match str_split str_trim
+#' @importFrom R.utils gunzip bunzip2
+#' @importFrom utils unzip
 NULL
