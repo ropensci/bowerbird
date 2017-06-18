@@ -2,14 +2,11 @@
 % Please edit documentation in R/config.R
 \name{bb_config}
 \alias{bb_config}
-\alias{bb_save_config}
-\title{Load or initialize bowerbird configuration}
+\title{Initialize a bowerbird configuration}
 \usage{
 bb_config(local_file_root, wget_default_flags = NULL,
   wget_global_flags = "--restrict-file-names=windows --progress=dot:giga",
-  http_proxy = NULL, ftp_proxy = NULL, clobber = 1, file)
-
-bb_save_config(cf, file)
+  http_proxy = NULL, ftp_proxy = NULL, clobber = 1)
 }
 \arguments{
 \item{local_file_root}{string: location of data repository on local file system}
@@ -23,16 +20,12 @@ bb_save_config(cf, file)
 \item{ftp_proxy}{string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)}
 
 \item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)}
-
-\item{file}{string: file name of configuration to load (for \code{bb_config}) or save to (for \code{bb_save_config}). For \code{bb_config}, all other parameters are ignored if \code{file} is provided}
-
-\item{cf}{tibble: configuration, as returned by \code{bb_config}}
 }
 \value{
 configuration tibble
 }
 \description{
-If \code{file} is provided to \code{bb_config}, load that configuration. Otherwise initialize an empty configuration.
+Initialize a bowerbird configuration
 }
 \examples{
 \dontrun{
@@ -40,9 +33,9 @@ If \code{file} is provided to \code{bb_config}, load that configuration. Otherwi
     add(bb_source("seaice_smmr_ssmi_nasateam"))
 
   ## save to file
-  bb_save_config(cf,file="my_config.rds")
+  saveRDS(cf,file="my_config.rds")
   ## load previously saved config
-  cf <- bb_config(file="my_config.rds")
+  cf <- readRDS(file="my_config.rds")
 }
 
 }

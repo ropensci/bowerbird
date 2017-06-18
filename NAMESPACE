@@ -2,7 +2,6 @@
 
 export(add)
 export(bb_config)
-export(bb_save_config)
 export(bb_source)
 export(bb_sources)
 export(bb_sync)
@@ -20,5 +19,4 @@ importFrom(stringr,str_match)
 importFrom(stringr,str_split)
 importFrom(stringr,str_trim)
 importFrom(utils,download.file)
-importFrom(utils,file_test)
 importFrom(utils,unzip)

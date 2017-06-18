@@ -63,19 +63,7 @@ cf <- bb_config(local_file_root="/your/data/directory") %>%
     add(my_source)
 ```
 
-Load and save configurations directly:
-
-```{r,eval=FALSE}
-cf <- ... ## set up configuration to your liking
-
-## save it for use later
-bb_save_config(cf,"/path/to/your/config.rds")
-
-## load up a saved configuration
-cf <- bb_config(file="/path/to/your/config.rds")
-```
-
-And once the configuration is defined or loaded, run the sync process:
+Once the configuration has been defined, run the sync process:
 
 ```{r,eval=FALSE}
 bb_sync(cf)
