@@ -9,13 +9,13 @@ bb_source(name, description = "", reference, source_urls, citation, license,
   access_function = "", data_group = "")
 }
 \arguments{
-\item{name}{string: a (unique) name for the data source}
+\item{name}{string: the name of the data source}
 
 \item{description}{string: a description of the data source}
 
 \item{reference}{string: URL to the metadata record or home page of the data source}
 
-\item{source_urls}{string or list of strings: the source URL}
+\item{source_urls}{character vector: one or more source URLs}
 
 \item{citation}{string:}
 
@@ -27,7 +27,7 @@ bb_source(name, description = "", reference, source_urls, citation, license,
 
 \item{method_flags}{string:}
 
-\item{postprocess}{string or list of strings:}
+\item{postprocess}{character vector:}
 
 \item{access_function}{string:}
 

@@ -1,6 +1,6 @@
 #' Define an external data source
 #'
-#' @param name string: a (unique) name for the data source
+#' @param name string: the name of the data source
 #' @param description string: a description of the data source
 #' @param reference string: URL to the metadata record or home page of the data source
 #' @param source_urls character vector: one or more source URLs
@@ -178,7 +178,7 @@ bb_sources <- function(name,data_group) {
                 description="Grids and other support files for Artist AMSR-E passive-microwave sea ice data.",
                 reference="http://icdc.zmaw.de/1/daten/cryosphere/seaiceconcentration-asi-amsre.html",
                 citation="See the citation details of the particular sea ice dataset used",
-                source_urls=list(c("ftp://ftp-projects.zmaw.de/seaice/AMSR-E_ASI_IceConc/Landmasks/","ftp://ftp-projects.zmaw.de/seaice/AMSR-E_ASI_IceConc/LonLatGrids/")),
+                source_urls=c("ftp://ftp-projects.zmaw.de/seaice/AMSR-E_ASI_IceConc/Landmasks/","ftp://ftp-projects.zmaw.de/seaice/AMSR-E_ASI_IceConc/LonLatGrids/"),
                 license="",
                 comment="",
                 method="wget",
@@ -299,7 +299,7 @@ bb_sources <- function(name,data_group) {
                 reference="http://www.ngdc.noaa.gov/mgg/global/etopo2.html",
                 citation="",
                 license="",
-                source_urls=list(c("http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2/ETOPO2v2-2006/ETOPO2v2c/netCDF/ETOPO2v2c_f4_netCDF.zip","http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2/ETOPO2v2-2006/ETOPO2v2c/ETOPO2v2c_ReadMe.txt")),
+                source_urls=c("http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2/ETOPO2v2-2006/ETOPO2v2c/netCDF/ETOPO2v2c_f4_netCDF.zip","http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2/ETOPO2v2-2006/ETOPO2v2c/ETOPO2v2c_ReadMe.txt"),
                 method="wget",
                 method_flags="--recursive --no-parent",
                 comment="",
@@ -374,7 +374,7 @@ bb_sources <- function(name,data_group) {
                 reference="http://www.ibcso.org/",
                 citation="Arndt, J.E., H. W. Schenke, M. Jakobsson, F. Nitsche, G. Buys, B. Goleby, M. Rebesco, F. Bohoyo, J.K. Hong, J. Black, R. Greku, G. Udintsev, F. Barrios, W. Reynoso-Peralta, T. Morishita, R. Wigley, The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 - A new bathymetric compilation covering circum-Antarctic waters, 2013, Geophysical Research Letters, Vol. 40, p. 3111-3117, doi: 10.1002/grl.50413",
                 license="CC-BY",
-                source_urls=list(c("http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_bed_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_is_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_sid_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_is_PS71_500m_tif.zip","http://www.ibcso.org/data/IBCSO_background_hq.zip")),
+                source_urls=c("http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_bed_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_is_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_sid_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_is_PS71_500m_tif.zip","http://www.ibcso.org/data/IBCSO_background_hq.zip"),
                 method="wget",
                 method_flags="--recursive --no-parent",
                 postprocess="unzip",
@@ -402,7 +402,7 @@ bb_sources <- function(name,data_group) {
                 reference="http://epic.awi.de/30738/",
                 citation="Timmermann, Ralph; Le Brocq, Anne M; Deen, Tara J; Domack, Eugene W; Dutrieux, Pierre; Galton-Fenzi, Ben; Hellmer, Hartmut H; Humbert, Angelika; Jansen, Daniela; Jenkins, Adrian; Lambrecht, Astrid; Makinson, Keith; Niederjasper, Fred; Nitsche, Frank-Oliver; N\uf8st, Ole Anders; Smedsrud, Lars Henrik; Smith, Walter (2010): A consistent dataset of Antarctic ice sheet topography, cavity geometry, and global bathymetry. Earth System Science Data, 2(2), 261-273, doi:10.5194/essd-2-261-2010",
                 license="CC-BY",
-                source_urls=list(c("http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_data.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_aux.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_50S.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_coast.asc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_gl.asc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_bathy.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_draft.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_height.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_famask.jpg")),
+                source_urls=c("http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_data.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_aux.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_50S.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_coast.asc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_gl.asc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_bathy.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_draft.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_height.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_famask.jpg"),
                 method="wget",
                 method_flags="--recursive --no-parent",
                 postprocess="",
@@ -416,13 +416,13 @@ bb_sources <- function(name,data_group) {
                 reference="http://nsidc.org/data/nsidc-0082",
                 citation="Liu, H., K. Jezek, B. Li, and Z. Zhao. 2001. Radarsat Antarctic Mapping Project Digital Elevation Model Version 2. [indicate subset used]. Boulder, Colorado USA: National Snow and Ice Data Center. http://dx.doi.org/10.5067/PXKC81A7WAXD",
                 license="Please cite",
-                source_urls=list(c("ftp://sidads.colorado.edu/pub/DATASETS/nsidc0082_radarsat_dem_v02/200M/BINARY/*","ftp://sidads.colorado.edu/pub/DATASETS/nsidc0082_radarsat_dem_v02/1KM/BINARY/*","ftp://sidads.colorado.edu/pub/DATASETS/nsidc0082_radarsat_dem_v02/00README_v2.txt")),
+                source_urls=c("ftp://sidads.colorado.edu/pub/DATASETS/nsidc0082_radarsat_dem_v02/200M/BINARY/*","ftp://sidads.colorado.edu/pub/DATASETS/nsidc0082_radarsat_dem_v02/1KM/BINARY/*","ftp://sidads.colorado.edu/pub/DATASETS/nsidc0082_radarsat_dem_v02/00README_v2.txt"),
                 method="wget",
                 method_flags="--recursive --no-parent --reject=\"*.txt.gz,*.tar.gz\"",
                 comment="Only the 200m and 1km binary files are retrieved here: adjust the source_urls or method_flags for others",
                 postprocess="gunzip",
                 access_function="",
-                data_group="Topography"            )        
+                data_group="Topography")
         ) %>%
         bind_rows(
             bb_source(
@@ -480,7 +480,7 @@ bb_sources <- function(name,data_group) {
                 method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
                 postprocess="unzip",
                 access_function="",
-                data_group="Topography"            )        
+                data_group="Topography"            )
         ) ##%>%
         ##bind_rows(
         ##    bb_source(
