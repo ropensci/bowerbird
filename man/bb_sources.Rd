@@ -4,10 +4,10 @@
 \alias{bb_sources}
 \title{Bowerbird configurations for various data sources}
 \usage{
-bb_sources(id_or_name, data_group)
+bb_sources(name, data_group)
 }
 \arguments{
-\item{id_or_name}{character vector: only return data sources with id or name matching these values}
+\item{name}{character vector: only return data sources with name matching these values}
 
 \item{data_group}{character vector: only return data sources belonging to these data groups}
 }

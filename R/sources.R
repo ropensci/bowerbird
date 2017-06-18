@@ -1,7 +1,6 @@
 #' Define an external data source
 #'
-#' @param id string: a short, unique identifier for the data source
-#' @param name string: a (longer) name for the data source
+#' @param name string: a (unique) name for the data source
 #' @param description string: a description of the data source
 #' @param reference string: URL to the metadata record or home page of the data source
 #' @param source_urls string or list of strings: the source URL
@@ -37,8 +36,10 @@
 #' cf <- add(cf,my_source)
 #'
 #' @export
-bb_source <- function(id,name,description="",reference,source_urls,citation,license,comment="",method="wget",method_flags="",postprocess="",access_function="",data_group="") {
+bb_source <- function(name,description="",reference,source_urls,citation,license,comment="",method="wget",method_flags="",postprocess="",access_function="",data_group="") {
     ## todo: allow method, postprocess to be passed as functions?
+    if (missing(name))
+        stop("A data source requires a name")
     if (missing(license) || missing(citation)) 
         stop("Please provide license and citation information for the data source, so that users properly acknowledge it")
     if (missing(reference))
@@ -49,12 +50,8 @@ bb_source <- function(id,name,description="",reference,source_urls,citation,lice
         source_urls <- as.character(NA)
     }
     if (is.character(source_urls)) source_urls <- as.list(source_urls)
-    if (missing(name) && missing(id)) stop("A data source requires either a name or id")
-    if (missing(id)) id <- ""
-    if (missing(name)) name <- ""
     if (is.character(postprocess)) postprocess <- as.list(postprocess)
     tibble(
-        id=if (assert_that(is.string(id))) id,
         name=if (assert_that(is.string(name))) name,
         description=if (assert_that(is.string(description))) description,
         reference=if (assert_that(is.string(reference))) reference,
@@ -73,7 +70,7 @@ bb_source <- function(id,name,description="",reference,source_urls,citation,lice
 
 #' Bowerbird configurations for various data sources
 #'
-#' @param id_or_name character vector: only return data sources with id or name matching these values
+#' @param name character vector: only return data sources with name matching these values
 #' @param data_group character vector: only return data sources belonging to these data groups
 #'
 #' @references See \code{reference} and \code{citation} field in each row of the returned tibble
@@ -86,9 +83,8 @@ bb_source <- function(id,name,description="",reference,source_urls,citation,lice
 #' bb_sources()
 #'
 #' @export
-bb_sources <- function(id_or_name,data_group) {
+bb_sources <- function(name,data_group) {
     out <- bb_source(
-        id="seaice_smmr_ssmi_nasateam",
         name="NSIDC SMMR-SSM/I Nasateam sea ice concentration",
         description="Passive-microwave estimates of sea ice concentration at 25km spatial resolution. Daily and monthly resolution, available from 1-Oct-1978 to present.",
         reference="http://nsidc.org/data/nsidc-0051.html",
@@ -103,7 +99,6 @@ bb_sources <- function(id_or_name,data_group) {
         data_group="Sea ice") %>%
         bind_rows(
             bb_source(
-                id="seaice_smmr_ssmi_nasateam_nrt",
                 name="NSIDC SMMR-SSM/I Nasateam near-real-time sea ice concentration",
                 description="Passive-microwave estimates of sea ice concentration at 25km, daily, near-real-time resolution.",
                 reference="http://nsidc.org/data/nsidc-0081.html",
@@ -119,7 +114,6 @@ bb_sources <- function(id_or_name,data_group) {
         ) %>%
         bind_rows(
             bb_source(
-                id="seaice_nsidc_supporting",
                 name="NSIDC passive microwave supporting files",
                 description="Grids and other support files for NSIDC passive-microwave sea ice data.",
                 reference="http://nsidc.org/data/nsidc-0051.html",
@@ -273,7 +267,7 @@ bb_sources <- function(id_or_name,data_group) {
         ##    )        
         ##) %>%
     
-    if (!missing(id_or_name)) out <- out[out$name %in% id_or_name | out$id %in% id_or_name,]
+    if (!missing(name)) out <- out[out$name %in% name,]
     if (!missing(data_group)) out <- out[out$data_group %in% data_group,]
     out
 }

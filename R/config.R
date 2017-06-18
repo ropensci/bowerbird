@@ -57,7 +57,7 @@ bb_save_config <- function(cf,file) {
 #' @export
 add <- function(cf,source) {
     ## need to do this by using global parms, if not overridden by source-specific values
-    ## check that name and/or ID is unique?
+    ## check that name is unique?
     cf$sources <- dplyr::bind_rows(cf$sources,source)
     cf
 }

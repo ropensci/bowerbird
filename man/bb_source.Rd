@@ -4,14 +4,12 @@
 \alias{bb_source}
 \title{Define an external data source}
 \usage{
-bb_source(id, name, description = "", reference, source_urls, citation,
-  license, comment = "", method = "wget", method_flags = "",
-  postprocess = "", access_function = "", data_group = "")
+bb_source(name, description = "", reference, source_urls, citation, license,
+  comment = "", method = "wget", method_flags = "", postprocess = "",
+  access_function = "", data_group = "")
 }
 \arguments{
-\item{id}{string: a short, unique identifier for the data source}
-
-\item{name}{string: a (longer) name for the data source}
+\item{name}{string: a (unique) name for the data source}
 
 \item{description}{string: a description of the data source}
 
