@@ -32,7 +32,7 @@
 #'    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
 #'    postprocess="unzip")
 #'
-#' cf <- bb_config()
+#' cf <- bb_config("/my/repo/root")
 #' cf <- add(cf,my_source)
 #'
 #' @export
