@@ -25,13 +25,11 @@ install_github("AustralianAntarcticDivision/bowerbird")
 ```
 
 Bowerbird requires the third-party utility `wget` to recursively download files from data providers. `wget` is typically installed by default on Linux.
-On Windows you can try the `install_wget()` function or download it yourself (e.g. from https://eternallybored.org/misc/wget/current/wget.exe) and make sure it is on your path.
-
+On Windows you can use the `install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from https://eternallybored.org/misc/wget/current/wget.exe) and make sure it is on your path.
 
 ## Usage
 
 Bowerbird must be configured to tell it which data sets to synchronise and where to save them on the local file system.
-
 
 Build up a configuration by first defining global options such as the destination on your local file system:
 
@@ -47,6 +45,7 @@ cf <- cf %>% add(bb_sources("CERSAT SSM/I sea ice concentration"))
 ```
 
 Or define your own data source:
+
 ```{r,eval=FALSE}
 my_source <- bb_source(
     name="GSHHG coastline data",
@@ -64,7 +63,6 @@ cf <- bb_config(local_file_root="/your/data/directory") %>%
     add(my_source)
 ```
 
-
 Load and save configurations directly:
 
 ```{r,eval=FALSE}
@@ -78,6 +76,7 @@ cf <- bb_config(file="/path/to/your/config.rds")
 ```
 
 And once the configuration is defined or loaded, run the sync process:
+
 ```{r,eval=FALSE}
 bb_sync(cf)
 ```
