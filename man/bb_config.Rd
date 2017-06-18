@@ -3,15 +3,12 @@
 \name{bb_config}
 \alias{bb_config}
 \alias{bb_save_config}
-\alias{add}
 \title{Load or initialize bowerbird configuration}
 \usage{
 bb_config(local_file_root, wget_flags = "--progress=dot:giga",
   http_proxy = NULL, ftp_proxy = NULL, clobber = 1, wait = 0, file)
 
 bb_save_config(cf, file)
-
-add(cf, source)
 }
 \arguments{
 \item{local_file_root}{string: location of data repository on local file system}
@@ -22,21 +19,19 @@ add(cf, source)
 
 \item{ftp_proxy}{string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)}
 
-\item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files}
+\item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)}
 
 \item{wait}{numeric: seconds to wait in between web calls. Some servers become unhappy if repeated calls are made too quickly from the same client address}
 
-\item{file}{string: file name of configuration to load. All other parameters are ignored if \code{file} is provided}
+\item{file}{string: file name of configuration to load (for \code{bb_config}) or save to (for \code{bb_save_config}). For \code{bb_config}, all other parameters are ignored if \code{file} is provided}
 
-\item{cf}{list: configuration, as returned by \code{bb_config}}
-
-\item{source}{tibble: external data source definition to add to the configuration}
+\item{cf}{tibble: configuration, as returned by \code{bb_config}}
 }
 \value{
-configuration
+configuration tibble
 }
 \description{
-If \code{file} is provided, load that configuration. Otherwise initialize an empty configuration.
+If \code{file} is provided to \code{bb_config}, load that configuration. Otherwise initialize an empty configuration.
 }
 \examples{
 \dontrun{
@@ -44,9 +39,9 @@ If \code{file} is provided, load that configuration. Otherwise initialize an emp
     add(bb_source("seaice_smmr_ssmi_nasateam"))
 
   ## save to file
-  bb_save_config(cf,file="saved_config.json")
+  bb_save_config(cf,file="my_config.rds")
   ## load previously saved config
-  cf <- bb_config(file="saved_config.json")
+  cf <- bb_config(file="my_config.rds")
 }
 
 }

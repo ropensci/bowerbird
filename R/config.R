@@ -1,16 +1,20 @@
+## list of global flags, stored as attributes on the configuration tibble
+## internal function
+bb_global_atts <- function() c("wget_flags","http_proxy","ftp_proxy","local_file_root","clobber","wait")
+
+
 #' Load or initialize bowerbird configuration
 #'
-#' If \code{file} is provided, load that configuration. Otherwise initialize an empty configuration.
-#' @param file string: file name of configuration to load. All other parameters are ignored if \code{file} is provided
+#' If \code{file} is provided to \code{bb_config}, load that configuration. Otherwise initialize an empty configuration.
+#' @param file string: file name of configuration to load (for \code{bb_config}) or save to (for \code{bb_save_config}). For \code{bb_config}, all other parameters are ignored if \code{file} is provided
 #' @param local_file_root string: location of data repository on local file system
 #' @param wget_flags string: default flags to be passed to wget. These are overridden on a per-data source basis if the data source defines its own wget_flags
 #' @param http_proxy string: URL of HTTP proxy to use e.g. 'http://your.proxy:8080' (NULL for no proxy)
 #' @param ftp_proxy string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)
-#' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files
+#' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)
 #' @param wait numeric: seconds to wait in between web calls. Some servers become unhappy if repeated calls are made too quickly from the same client address
-#' @param cf list: configuration, as returned by \code{bb_config}
-#' @param source tibble: external data source definition to add to the configuration
-#' @return configuration
+#' @param cf tibble: configuration, as returned by \code{bb_config}
+#' @return configuration tibble
 #'
 #' @seealso \code{\link{bb_source}}
 #'
@@ -20,9 +24,9 @@
 #'     add(bb_source("seaice_smmr_ssmi_nasateam"))
 #' 
 #'   ## save to file
-#'   bb_save_config(cf,file="saved_config.json")
+#'   bb_save_config(cf,file="my_config.rds")
 #'   ## load previously saved config
-#'   cf <- bb_config(file="saved_config.json")
+#'   cf <- bb_config(file="my_config.rds")
 #' }
 #'
 #' @export
@@ -48,10 +52,24 @@ bb_save_config <- function(cf,file) {
     saveRDS(cf,file=file)
 }
 
-#' @rdname bb_config
+
+
+#' Add a new data source to a bowerbird configuration
+#'
+#' To do: include details of how this is done, and how global options are treated.
+#' 
+#' @param cf tibble: configuration, as returned by \code{bb_config}
+#' @param source tibble: data source definition to add to the configuration, as returned by \code{bb_source}
+#'
+#' @return configuration tibble
+#'
+#' @seealso \code{\link{bb_source}} \code{\link{bb_config}}
+#'
 #' @export
 add <- function(cf,source) {
     ## need to do this by using global parms, if not overridden by source-specific values
+    ##bb_global_atts() ## c("wget_flags","http_proxy","ftp_proxy","local_file_root","clobber","wait")
+
     ## check that name is unique?
     dplyr::bind_rows(cf,source)
 }

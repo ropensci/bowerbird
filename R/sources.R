@@ -137,7 +137,7 @@ bb_sources <- function(name,data_group) {
                 license="CC-BY",
                 comment="",
                 method="wget",
-                method_flags="--recursive --level=inf --timestamping --no-parent --reject=\"index.html\"",
+                method_flags="--recursive --level=inf --no-parent --reject=\"index.html\"",
                 postprocess="",
                 access_function="",
                 data_group="Sea ice")
@@ -197,7 +197,7 @@ bb_sources <- function(name,data_group) {
                 license="",
                 comment="--reject-regex=\"^/amsr2data/\" to prevent download from recursing into unwanted directories",
                 method="wget",
-                method_flags="--recursive --level=inf --timestamping --accept=\"asi*.hdf\" --accept=\"asi*.png\" --accept=\"asi*.tif\" --reject-regex=\"^/amsr2data/\" --no-parent",
+                method_flags="--recursive --level=inf --accept=\"asi*.hdf\" --accept=\"asi*.png\" --accept=\"asi*.tif\" --reject-regex=\"^/amsr2data/\" --no-parent",
                 postprocess="",
                 access_function="",
                 data_group="Sea ice")        
@@ -212,7 +212,7 @@ bb_sources <- function(name,data_group) {
                 license="",
                 comment="--reject-regex=\"^/amsr2data/\" to prevent download from recursing into unwanted directories",
                 method="wget",
-                method_flags="--recursive --level=inf --timestamping --accept=\"asi*.hdf\" --accept=\"asi*.tif\" --accept=\"asi*.png\" --reject-regex=\"^/amsr2data/\" --no-parent",
+                method_flags="--recursive --level=inf --accept=\"asi*.hdf\" --accept=\"asi*.tif\" --accept=\"asi*.png\" --reject-regex=\"^/amsr2data/\" --no-parent",
                 postprocess="",
                 access_function="",
                 data_group="Sea ice")        
@@ -227,7 +227,7 @@ bb_sources <- function(name,data_group) {
                 license="",
                 comment="",
                 method="wget",
-                method_flags="--recursive --level=inf --timestamping --accept=hdf --no-parent",
+                method_flags="--recursive --level=inf --accept=hdf --no-parent",
                 postprocess="",
                 access_function="",
                 data_group="Sea ice")        
@@ -362,7 +362,7 @@ bb_sources <- function(name,data_group) {
                 license="CC BY 4.0",
                 comment="",
                 method="wget",
-                method_flags="--recursive --level=inf --timestamping --accept=zip --no-parent",
+                method_flags="--recursive --level=inf --accept=zip --no-parent",
                 postprocess="unzip",
                 access_function="",
                 data_group="Topography")  
@@ -434,7 +434,7 @@ bb_sources <- function(name,data_group) {
                 license="Please cite",
                 comment="",
                 method="wget",
-                method_flags="--recursive --level=inf --timestamping --no-parent",
+                method_flags="--recursive --level=inf --no-parent",
                 postprocess="",
                 access_function="",
                 data_group="Topography"            )        
