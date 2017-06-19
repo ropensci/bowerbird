@@ -5,7 +5,7 @@
 \title{Define an external data source}
 \usage{
 bb_source(name, description = "", reference, source_url, citation, license,
-  comment = "", method = "webget", method_flags = "", postprocess,
+  comment = "", method = webget, method_flags = "", postprocess,
   access_function = "", data_group = "")
 }
 \arguments{
@@ -23,7 +23,7 @@ bb_source(name, description = "", reference, source_url, citation, license,
 
 \item{comment}{string:}
 
-\item{method}{string:}
+\item{method}{function: the function that handles the synchronisation process for this data source}
 
 \item{method_flags}{string:}
 
@@ -50,7 +50,7 @@ my_source <- bb_source(
    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
    license="",
    comment="",
-   method="webget",
+   method=webget,
    method_flags="--recursive --level=1 --accept=\\"*bin*.zip,README.TXT\\"",
    postprocess=pp_unzip)
 

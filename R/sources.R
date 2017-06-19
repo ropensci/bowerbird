@@ -7,7 +7,7 @@
 #' @param citation string:
 #' @param license string:
 #' @param comment string:
-#' @param method string:
+#' @param method function: the function that handles the synchronisation process for this data source
 #' @param method_flags string:
 #' @param postprocess function, call, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
 #' @param access_function string:
@@ -28,7 +28,7 @@
 #'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
 #'    license="",
 #'    comment="",
-#'    method="webget",
+#'    method=webget,
 #'    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
 #'    postprocess=pp_unzip)
 #'
@@ -36,8 +36,8 @@
 #' cf <- add(cf,my_source)
 #'
 #' @export
-bb_source <- function(name,description="",reference,source_url,citation,license,comment="",method="webget",method_flags="",postprocess,access_function="",data_group="") {
-    ## todo: allow method, postprocess to be passed as functions?
+bb_source <- function(name,description="",reference,source_url,citation,license,comment="",method=webget,method_flags="",postprocess,access_function="",data_group="") {
+    assert_that(is.function(method))
     if (missing(name))
         stop("Each data source requires a name")
     if (missing(license) || missing(citation))
@@ -45,7 +45,7 @@ bb_source <- function(name,description="",reference,source_url,citation,license,
     if (missing(reference))
         stop("Please provide a reference (a URL to the data source's metadata record or home page")
     if (missing(source_url)) {
-        if (method=="webget") stop("method 'webget' requires at least one source URL")
+        if (identical(method,webget)) stop("method 'webget' requires at least one source URL")
         ##warning("no source_urls provided")
         source_url <- as.character(NA)
     }
@@ -64,7 +64,7 @@ bb_source <- function(name,description="",reference,source_url,citation,license,
         citation=if (assert_that(is.string(citation))) citation,
         license=if (assert_that(is.string(license))) license,
         comment=if (assert_that(is.string(comment))) comment,
-        method=method,
+        method=list(method),
         method_flags=if (assert_that(is.string(method_flags))) method_flags,
         postprocess=list(postprocess),
         access_function=if (assert_that(is.string(access_function))) access_function,

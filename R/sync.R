@@ -83,7 +83,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     }
     file_pattern <- sub(".*/","",this_dataset$source_url)
     if (nchar(file_pattern)<1) file_pattern <- NULL
-    if (this_dataset$method=="aadc_eds") file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
+    if (identical(this_dataset$method[[1]],aadc_eds)) file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
     ## build file list if postprocessing required
     if (length(pp)>0) {
         ## take snapshot of this directory before we start syncing
@@ -101,41 +101,42 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         ##cat(str(file_list_before),"\n")
         if (verbose) cat(sprintf("done.\n"))
     }
-    if (this_dataset$method=="webget") {
-        ##do_wget(build_wget_call(this_dataset),this_dataset)
-        webget(this_dataset)
-    } else if (this_dataset$method=="aadc_eds") {
-        ## clumsy way to get around AADC EDS file naming issues
-        ## e.g. if we ask for http://data.aad.gov.au/eds/file/4494
-        ## then we get local file named data.aad.gov.au/eds/file/4494 (which is most likely a zipped file)
-        ## if we unzip this here, we get this zip's files mixed with others
-        ## change into subdirectory named by file_id of file, so that we don't get files mixed together in data.aad.gov.au/eds/file/
-        ## note that this requires the "--recursive" flag NOT TO BE USED
-        this_file_id <- str_match(this_dataset$source_url,"/file/(\\d+)$")[2]
-        if (!file.exists(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id))) {
-            dir.create(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id),recursive=TRUE)
-        }
-        setwd(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id))
-        if (!grepl("--content-disposition",this_dataset$method_flags,ignore.case=TRUE)) {
-            this_dataset$method_flags <- paste(this_dataset$method_flags,"--content-disposition",sep=" ")
-        }
-        ## these two should be doable in a single regex, but done separately until I can figure it out
-        if (grepl("--recursive ",this_dataset$method_flags,ignore.case=TRUE)) {
-            this_dataset$method_flags <- str_trim(sub("--recursive ","",this_dataset$method_flags))
-        }
-        if (grepl("--recursive$",this_dataset$method_flags,ignore.case=TRUE)) {
-            this_dataset$method_flags <- str_trim(sub("--recursive$","",this_dataset$method_flags))
-        }
-        ##do_wget(build_wget_call(this_dataset),this_dataset)
-        webget(this_dataset)
-        setwd(this_dataset$local_file_root)
-    } else if (exists(this_dataset$method,mode="function")) {
-        ## dispatch to custom handler
-        if (verbose) cat(sprintf(" using custom handler \"%s\"\n",this_dataset$method))
-        eval(parse(text=paste0(this_dataset$method,"(this_dataset)")))
-    } else {
-        stop("unsupported method ",this_dataset$method," specified")
-    }
+    this_dataset$method[[1]](this_dataset)
+    ##if (this_dataset$method=="webget") {
+    ##    ##do_wget(build_wget_call(this_dataset),this_dataset)
+    ##    webget(this_dataset)
+    ##} else if (this_dataset$method=="aadc_eds") {
+    ##    ## clumsy way to get around AADC EDS file naming issues
+    ##    ## e.g. if we ask for http://data.aad.gov.au/eds/file/4494
+    ##    ## then we get local file named data.aad.gov.au/eds/file/4494 (which is most likely a zipped file)
+    ##    ## if we unzip this here, we get this zip's files mixed with others
+    ##    ## change into subdirectory named by file_id of file, so that we don't get files mixed together in data.aad.gov.au/eds/file/
+    ##    ## note that this requires the "--recursive" flag NOT TO BE USED
+    ##    this_file_id <- str_match(this_dataset$source_url,"/file/(\\d+)$")[2]
+    ##    if (!file.exists(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id))) {
+    ##        dir.create(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id),recursive=TRUE)
+    ##    }
+    ##    setwd(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id))
+    ##    if (!grepl("--content-disposition",this_dataset$method_flags,ignore.case=TRUE)) {
+    ##        this_dataset$method_flags <- paste(this_dataset$method_flags,"--content-disposition",sep=" ")
+    ##    }
+    ##    ## these two should be doable in a single regex, but done separately until I can figure it out
+    ##    if (grepl("--recursive ",this_dataset$method_flags,ignore.case=TRUE)) {
+    ##        this_dataset$method_flags <- str_trim(sub("--recursive ","",this_dataset$method_flags))
+    ##    }
+    ##    if (grepl("--recursive$",this_dataset$method_flags,ignore.case=TRUE)) {
+    ##        this_dataset$method_flags <- str_trim(sub("--recursive$","",this_dataset$method_flags))
+    ##    }
+    ##    ##do_wget(build_wget_call(this_dataset),this_dataset)
+    ##    webget(this_dataset)
+    ##    setwd(this_dataset$local_file_root)
+    ##} else if (exists(this_dataset$method,mode="function")) {
+    ##    ## dispatch to custom handler
+    ##    if (verbose) cat(sprintf(" using custom handler \"%s\"\n",this_dataset$method))
+    ##    eval(parse(text=paste0(this_dataset$method,"(this_dataset)")))
+    ##} else {
+    ##    stop("unsupported method ",this_dataset$method," specified")
+    ##}
 
     ## build file list if postprocessing required
     if (length(pp)>0) {
