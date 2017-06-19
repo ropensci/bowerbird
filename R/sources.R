@@ -9,7 +9,7 @@
 #' @param comment string:
 #' @param method string:
 #' @param method_flags string:
-#' @param postprocess character vector:
+#' @param postprocess function, call, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
 #' @param access_function string:
 #' @param data_group string:
 #'
@@ -30,17 +30,17 @@
 #'    comment="",
 #'    method="wget",
 #'    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
-#'    postprocess="unzip")
+#'    postprocess=pp_unzip)
 #'
 #' cf <- bb_config("/my/repo/root")
 #' cf <- add(cf,my_source)
 #'
 #' @export
-bb_source <- function(name,description="",reference,source_urls,citation,license,comment="",method="wget",method_flags="",postprocess="",access_function="",data_group="") {
+bb_source <- function(name,description="",reference,source_urls,citation,license,comment="",method="wget",method_flags="",postprocess,access_function="",data_group="") {
     ## todo: allow method, postprocess to be passed as functions?
     if (missing(name))
-        stop("A data source requires a name")
-    if (missing(license) || missing(citation)) 
+        stop("Each data source requires a name")
+    if (missing(license) || missing(citation))
         stop("Please provide license and citation information for the data source, so that users properly acknowledge it")
     if (missing(reference))
         stop("Please provide a reference (a URL to the data source's metadata record or home page")
@@ -50,7 +50,13 @@ bb_source <- function(name,description="",reference,source_urls,citation,license
         source_urls <- as.character(NA)
     }
     if (is.character(source_urls)) source_urls <- list(source_urls)
-    if (is.character(postprocess)) postprocess <- list(postprocess)
+    if (missing(postprocess) || is.null(postprocess)) {
+        postprocess <- list()
+    } else {
+        if (is.function(postprocess) || inherits(postprocess,"call")) postprocess <- list(postprocess)
+        ppchk <- is.list(postprocess) && all(sapply(postprocess,function(z)is.function(z) || inherits(z,"call")))
+        if (!ppchk) stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
+    }
     tibble(
         name=if (assert_that(is.string(name))) name,
         description=if (assert_that(is.string(description))) description,
@@ -61,7 +67,7 @@ bb_source <- function(name,description="",reference,source_urls,citation,license
         comment=if (assert_that(is.string(comment))) comment,
         method=method,
         method_flags=if (assert_that(is.string(method_flags))) method_flags,
-        postprocess=if (assert_that(is.list(postprocess))) postprocess,
+        postprocess=list(postprocess),
         access_function=if (assert_that(is.string(access_function))) access_function,
         data_group=if (assert_that(is.string(data_group))) data_group)
 }
@@ -94,7 +100,7 @@ bb_sources <- function(name,data_group) {
         comment="",
         method="wget",
         method_flags="--exclude-directories=pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/browse,pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/north --recursive --level=inf",
-        postprocess="",
+        postprocess=NULL,
         access_function="readice",
         data_group="Sea ice") %>%
         bind_rows(
@@ -108,7 +114,7 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--exclude-directories=pub/DATASETS/nsidc0081_nrt_nasateam_seaice/browse,pub/DATASETS/nsidc0081_nrt_nasateam_seaice/north --recursive --level=inf",
-                postprocess="",
+                postprocess=NULL,
                 access_function="readice",
                 data_group="Sea ice")
         ) %>%
@@ -123,7 +129,7 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --level=inf",
-                postprocess="",
+                postprocess=NULL,
                 access_function="readice",
                 data_group="Sea ice")
         ) %>%
@@ -138,12 +144,12 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --level=inf --no-parent --reject=\"index.html\"",
-                postprocess="",
+                postprocess=NULL,
                 access_function="",
                 data_group="Sea ice")
         ) %>%
         bind_rows(
-            bb_source( 
+            bb_source(
                 name="Nimbus Ice Edge Points from Nimbus Visible Imagery",
                 description="This data set (NmIcEdg2) estimates the location of the North and South Pole sea ice edges at various times during the mid to late 1960s, based on recovered Nimbus 1 (1964), Nimbus 2 (1966), and Nimbus 3 (1969) visible imagery.",
                 reference="http://nsidc.org/data/nmicedg2/",
@@ -153,7 +159,7 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --level=inf --no-parent",
-                postprocess="",
+                postprocess=NULL,
                 access_function="",
                 data_group="Sea ice")
         ) %>%
@@ -168,9 +174,9 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --level=inf --follow-ftp",
-                postprocess="gunzip",
+                postprocess=pp_gunzip,
                 access_function="readice",
-                data_group="Sea ice")        
+                data_group="Sea ice")
         ) %>%
         bind_rows(
             bb_source(
@@ -183,9 +189,9 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --level=inf --follow-ftp",
-                postprocess="",
+                postprocess=NULL,
                 access_function="readice",
-                data_group="Sea ice")        
+                data_group="Sea ice")
         ) %>%
         bind_rows(
             bb_source(
@@ -198,9 +204,9 @@ bb_sources <- function(name,data_group) {
                 comment="--reject-regex=\"^/amsr2data/\" to prevent download from recursing into unwanted directories",
                 method="wget",
                 method_flags="--recursive --level=inf --accept=\"asi*.hdf\" --accept=\"asi*.png\" --accept=\"asi*.tif\" --reject-regex=\"^/amsr2data/\" --no-parent",
-                postprocess="",
+                postprocess=NULL,
                 access_function="",
-                data_group="Sea ice")        
+                data_group="Sea ice")
         ) %>%
         bind_rows(
             bb_source(
@@ -213,9 +219,9 @@ bb_sources <- function(name,data_group) {
                 comment="--reject-regex=\"^/amsr2data/\" to prevent download from recursing into unwanted directories",
                 method="wget",
                 method_flags="--recursive --level=inf --accept=\"asi*.hdf\" --accept=\"asi*.tif\" --accept=\"asi*.png\" --reject-regex=\"^/amsr2data/\" --no-parent",
-                postprocess="",
+                postprocess=NULL,
                 access_function="",
-                data_group="Sea ice")        
+                data_group="Sea ice")
         ) %>%
         bind_rows(
             bb_source(
@@ -228,9 +234,9 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --level=inf --accept=hdf --no-parent",
-                postprocess="",
+                postprocess=NULL,
                 access_function="",
-                data_group="Sea ice")        
+                data_group="Sea ice")
         ) %>%
         bind_rows(
             bb_source(
@@ -243,9 +249,9 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --level=inf --no-parent",
-                postprocess="uncompress",
+                postprocess=pp_uncompress,
                 access_function="readice",
-                data_group="Sea ice")        
+                data_group="Sea ice")
         ) %>%
         bind_rows(
             bb_source(
@@ -258,9 +264,9 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="aadc_eds",
                 method_flags="",
-                postprocess="unzip",
+                postprocess=pp_unzip,
                 access_function="",
-                data_group="Sea ice")        
+                data_group="Sea ice")
         ) %>%
         bind_rows(
             bb_source(
@@ -273,9 +279,9 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --level=1 --no-parent",
-                postprocess="",
+                postprocess=NULL,
                 access_function="readbathy",
-                data_group="Topography")        
+                data_group="Topography")
         ) %>%
         bind_rows(
             bb_source(
@@ -288,9 +294,9 @@ bb_sources <- function(name,data_group) {
                 method="wget",
                 method_flags="--recursive --no-parent --accept=\"*gdal*,*.txt\"",
                 comment="",
-                postprocess="gunzip",
+                postprocess=pp_gunzip,
                 access_function="readtopo",
-                data_group="Topography")        
+                data_group="Topography")
         ) %>%
         bind_rows(
             bb_source(
@@ -303,7 +309,7 @@ bb_sources <- function(name,data_group) {
                 method="wget",
                 method_flags="--recursive --no-parent",
                 comment="",
-                postprocess="unzip",
+                postprocess=pp_unzip,
                 access_function="readtopo",
                 data_group="Topography")
         ) %>%
@@ -318,9 +324,9 @@ bb_sources <- function(name,data_group) {
                 method="wget",
                 method_flags="--recursive --no-parent -e robots=off --accept=\"*bin.zip,*tiff.zip,*.txt,*.rtf\" --no-check-certificate",
                 comment="--no-check-certificate flag to wget until certificate authority issue fixed",
-                postprocess="unzip",
+                postprocess=pp_unzip,
                 access_function="",
-                data_group="Topography")        
+                data_group="Topography")
         ) %>%
         bind_rows(
             bb_source(
@@ -333,9 +339,9 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --no-parent",
-                postprocess="unzip",
+                postprocess=pp_unzip,
                 access_function="",
-                data_group="Topography")        
+                data_group="Topography")
         ) %>%
         bind_rows(
             bb_source(
@@ -348,9 +354,9 @@ bb_sources <- function(name,data_group) {
                 method="aadc_eds",
                 method_flags="",
                 comment="",
-                postprocess="unzip",
+                postprocess=pp_unzip,
                 access_function="",
-                data_group="Topography")        
+                data_group="Topography")
         ) %>%
         bind_rows(
             bb_source(
@@ -363,9 +369,9 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --level=inf --accept=zip --no-parent",
-                postprocess="unzip",
+                postprocess=pp_unzip,
                 access_function="",
-                data_group="Topography")  
+                data_group="Topography")
         ) %>%
         bind_rows(
             bb_source(
@@ -377,9 +383,9 @@ bb_sources <- function(name,data_group) {
                 source_urls=c("http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_bed_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_is_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_sid_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_is_PS71_500m_tif.zip","http://www.ibcso.org/data/IBCSO_background_hq.zip"),
                 method="wget",
                 method_flags="--recursive --no-parent",
-                postprocess="unzip",
+                postprocess=pp_unzip,
                 access_function="",
-                data_group="Topography")  
+                data_group="Topography")
         ) %>%
         bind_rows(
             bb_source(
@@ -391,9 +397,9 @@ bb_sources <- function(name,data_group) {
                 source_urls="http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_digital_chart_pdfA.pdf",
                 method="wget",
                 method_flags="--recursive --no-parent",
-                postprocess="",
+                postprocess=NULL,
                 access_function="",
-                data_group="Topography"            )        
+                data_group="Topography"            )
         ) %>%
         bind_rows(
             bb_source(
@@ -405,9 +411,9 @@ bb_sources <- function(name,data_group) {
                 source_urls=c("http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_data.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_aux.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_50S.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_coast.asc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_gl.asc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_bathy.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_draft.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_height.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_famask.jpg"),
                 method="wget",
                 method_flags="--recursive --no-parent",
-                postprocess="",
+                postprocess=NULL,
                 access_function="",
-                data_group="Topography")        
+                data_group="Topography")
         ) %>%
         bind_rows(
             bb_source(
@@ -420,7 +426,7 @@ bb_sources <- function(name,data_group) {
                 method="wget",
                 method_flags="--recursive --no-parent --reject=\"*.txt.gz,*.tar.gz\"",
                 comment="Only the 200m and 1km binary files are retrieved here: adjust the source_urls or method_flags for others",
-                postprocess="gunzip",
+                postprocess=pp_gunzip,
                 access_function="",
                 data_group="Topography")
         ) %>%
@@ -435,9 +441,9 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --level=inf --no-parent",
-                postprocess="",
+                postprocess=NULL,
                 access_function="",
-                data_group="Topography"            )        
+                data_group="Topography"            )
         ) %>%
         bind_rows(
             bb_source(
@@ -449,9 +455,9 @@ bb_sources <- function(name,data_group) {
                 source_urls="http://homepages.see.leeds.ac.uk/~py10ts/cpom_cryosat2_antarctic_dem/",
                 method="wget",
                 method_flags="--recursive --no-parent --reject=\"index.html\"",
-                postprocess="",
+                postprocess=NULL,
                 access_function="",
-                data_group="Topography"            )        
+                data_group="Topography"            )
         ) %>%
         bind_rows(
             bb_source(
@@ -463,9 +469,9 @@ bb_sources <- function(name,data_group) {
                 source_urls="http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/10m_physical.zip",
                 method="wget",
                 method_flags="--recursive --no-parent",
-                postprocess="unzip",
+                postprocess=pp_unzip,
                 access_function="",
-                data_group="Topography"            )        
+                data_group="Topography"            )
         ) %>%
         bind_rows(
             bb_source(
@@ -478,15 +484,15 @@ bb_sources <- function(name,data_group) {
                 comment="",
                 method="wget",
                 method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
-                postprocess="unzip",
+                postprocess=pp_unzip,
                 access_function="",
                 data_group="Topography"            )
         ) ##%>%
         ##bind_rows(
         ##    bb_source(
-        ##    )        
+        ##    )
         ##) %>%
-    
+
     if (!missing(name)) out <- out[out$name %in% name,]
     if (!missing(data_group)) out <- out[out$data_group %in% data_group,]
     out

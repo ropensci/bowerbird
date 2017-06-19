@@ -5,7 +5,7 @@
 \title{Define an external data source}
 \usage{
 bb_source(name, description = "", reference, source_urls, citation, license,
-  comment = "", method = "wget", method_flags = "", postprocess = "",
+  comment = "", method = "wget", method_flags = "", postprocess,
   access_function = "", data_group = "")
 }
 \arguments{
@@ -27,7 +27,7 @@ bb_source(name, description = "", reference, source_urls, citation, license,
 
 \item{method_flags}{string:}
 
-\item{postprocess}{character vector:}
+\item{postprocess}{function, call, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied}
 
 \item{access_function}{string:}
 
@@ -52,7 +52,7 @@ my_source <- bb_source(
    comment="",
    method="wget",
    method_flags="--recursive --level=1 --accept=\\"*bin*.zip,README.TXT\\"",
-   postprocess="unzip")
+   postprocess=pp_unzip)
 
 cf <- bb_config("/my/repo/root")
 cf <- add(cf,my_source)
