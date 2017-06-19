@@ -1,21 +1,81 @@
-##             do_wget(build_wget_call(this_dataset),this_dataset)
 
 
-#' Use wget to mirror an external data repository
+#' Mirror an external data source using the wget utility
+#'
+#' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#'
+#' @return TRUE on success
+#'
+#' @seealso \code{\link{wget}}
+#'
+#' @examples
+#'
+#' @export
+webget <- function(data_source) {
+    assert_that(is.data.frame(data_source))
+    assert_that(nrow(data_source)==1)
+
+    this_flags <- if (is.na(data_source$method_flags)) data_source$wget_default_flags else data_source$method_flags
+    ## add wget_global_flags
+    if (!is.null(data_source$wget_global_flags)) this_flags <- paste(this_flags,data_source$wget_global_flags,sep=" ")
+    ## proxy-user and proxy-password flags
+    ## this needs to decide whether it should use http_proxy_user or ftp_proxy_user info - exclude for now
+    #if (!grepl("proxy-user=",data_source$wget_flags)) {
+    #    data_source$wget_flags=paste(data_source$wget_flags,paste0("--proxy-user=",data_source$http_proxy_user),sep=" ")
+    #}
+    #if (!grepl("proxy-password=",data_source$wget_flags)) {
+    #    data_source$wget_flags=paste(data_source$wget_flags,paste0("--proxy-password=",data_source$http_proxy_password),sep=" ")
+                                        #}
+    ## add flags for clobber behaviour
+    if (!is.null(data_source$clobber) && !is.na(data_source$clobber) && data_source$clobber %in% c(0,1)) {
+        if (data_source$clobber==0) {
+            this_flags <- resolve_wget_clobber_flags(this_flags,"--no-clobber")
+        } else {
+            this_flags <- resolve_wget_clobber_flags(this_flags,"--timestamping")
+        }
+    }
+    ## skip the user and password flags until/if implemented in bb_config
+    ##if (nchar(data_source$user)>0) this_flags <- paste0(this_flags," --user=",data_source$user)
+    ##if (nchar(data_source$password)>0) this_flags <- paste0(this_flags," --password=",data_source$password)
+    ##if (data_source$wait>0) this_flags <- paste0(this_flags," --wait=",data_source$wait)
+    
+
+    ##if (data_source$skip_downloads) {
+    ##    cat(sprintf(" skip_downloads is TRUE, not executing: %s\n",wget_call))
+    ##} else {
+    if (sink.number()>0) {
+        ## we have a sink() redirection in place
+        ## sink() won't catch the output of system commands, which means we miss stuff in our log
+        ## workaround: send output to temporary file so that we can capture it
+        output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
+        this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
+        ok <- wget(data_source$source_url,this_flags)
+        ## now echo the contents of output_file to console, so that sink() captures it
+        cat(readLines(output_file),sep="\n")
+    } else {
+        ok <- wget(data_source$source_url,this_flags)
+    }
+    ##}
+    ok
+}
+
+
+
+#' Make a wget call
 #'
 #' @param url string: the URL to retrieve 
-#' @param flags string: command-line flags to pass to wget 
+#' @param flags string: command-line flags to pass to wget
+#' @param verbose logical: print trace output?
 #'
 #' @return TRUE on success
 #'
 #' @seealso \code{\link{install_wget}}
 #'
 # @export
-wget <- function(url,flags) {
-    wgetexe <- wget_exe()
+wget <- function(url,flags,verbose=TRUE) {
+    if (verbose) cat(sprintf(" executing wget call: flags %s, URL: %s\n",flags,url))
+    system(paste(wget_exe(),flags,url,sep=" "))==0
 }
-
-
 
 #' Helper function to install wget on Windows
 #'

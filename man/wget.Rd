@@ -2,20 +2,22 @@
 % Please edit documentation in R/wget.R
 \name{wget}
 \alias{wget}
-\title{Use wget to mirror an external data repository}
+\title{Make a wget call}
 \usage{
-wget(url, flags)
+wget(url, flags, verbose = TRUE)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
 
 \item{flags}{string: command-line flags to pass to wget}
+
+\item{verbose}{logical: print trace output?}
 }
 \value{
 TRUE on success
 }
 \description{
-Use wget to mirror an external data repository
+Make a wget call
 }
 \seealso{
 \code{\link{install_wget}}
