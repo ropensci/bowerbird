@@ -4,7 +4,8 @@
 \alias{pp_cleanup}
 \title{Postprocessing: remove unwanted files}
 \usage{
-pp_cleanup(data_source, pattern, recursive = FALSE, ignore_case = FALSE)
+pp_cleanup(data_source, pattern, recursive = FALSE, ignore_case = FALSE,
+  ...)
 }
 \arguments{
 \item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}
@@ -14,6 +15,8 @@ pp_cleanup(data_source, pattern, recursive = FALSE, ignore_case = FALSE)
 \item{recursive}{logical: should the cleanup recurse into subdirectories?}
 
 \item{ignore_case}{logical: should pattern matching be case-insensitive?}
+
+\item{...}{: additional arguments (currently ignored)}
 }
 \value{
 TRUE on success

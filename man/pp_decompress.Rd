@@ -7,10 +7,10 @@
 \alias{pp_uncompress}
 \alias{pp_unzip}
 \title{Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy
-\code{pp_unzip}, \code{pp_*} are convenience wrappers around \code{pp_decompress} that specify the method}
+\code{pp_unzip}, \code{pp_gunzip}, \code{pp_bunzip2}, and \code{pp_uncompress} are convenience wrappers around \code{pp_decompress} that specify the method.
+The dots argument indicates additional arguments that are passed to \code{pp_decompress}. Some may be passed by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.}
 \usage{
-pp_decompress(data_source, delete = FALSE, file_list_before, file_list_after,
-  method)
+pp_decompress(data_source, delete = FALSE, method, ...)
 
 pp_unzip(...)
 
@@ -25,20 +25,17 @@ pp_uncompress(...)
 
 \item{delete}{logical: delete the zip files after extracting their contents?}
 
-\item{file_list_before}{data.frame: files present in the directory before synchronising, as returned by \code{file.info}. Only required if delete=TRUE}
-
-\item{file_list_after}{data.frame: files present in the directory after synchronising, as returned by \code{file.info}. Only required if delete=TRUE}
-
 \item{method}{string: one of "unzip","gunzip","bunzip2","decompress"}
 
-\item{...}{: arguments passed to \code{pp_decompress}}
+\item{...}{: additional arguments passed to \code{pp_decompress}}
 }
 \value{
 TRUE on success
 }
 \description{
 Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy
-\code{pp_unzip}, \code{pp_*} are convenience wrappers around \code{pp_decompress} that specify the method
+\code{pp_unzip}, \code{pp_gunzip}, \code{pp_bunzip2}, and \code{pp_uncompress} are convenience wrappers around \code{pp_decompress} that specify the method.
+The dots argument indicates additional arguments that are passed to \code{pp_decompress}. Some may be passed by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
 }
 \examples{
 

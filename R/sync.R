@@ -68,21 +68,16 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         ## was expecting a list
         this_dataset$source_urls <- list(this_dataset$source_urls)
     }
+    ## check postprocessing
+    ## should be a list of functions or call objects
+    if (!(is.list(this_dataset$postprocess) && all(sapply(this_dataset$postprocess,function(z)is.function(z) || inherits(z,"call")))))
+        stop("postprocess arguments should be a list of functions or calls (unevaluated functions)")
+
     ## do the main synchonization, usually directly with wget, otherwise with custom methods
     for (si in 1:length(this_dataset$source_urls[[1]])) {
         ## iterate through source_urls
         this_dataset$source_url <- this_dataset$source_urls[[1]][[si]]
         cat(sprintf("\n---\nProcessing source_url: %s\n",this_dataset$source_url))
-
-        ## postprocessing
-        pp <- this_dataset$postprocess
-        ## change this to deal with pp as list of expressions or functions
-        if (is.list(pp) && length(pp)==1) {
-            pp <- pp[[1]] ## may get char vector embedded in single-element list
-        }
-        if (!is.null(pp) && pp %in% c(NA,"NA")) pp <- NULL
-        pp <- tolower(pp)
-        pp <- Filter(nchar,pp) ## drop empty entries
         this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(this_dataset$source_url))
         if (verbose) {
             cat(sprintf(" this dataset path is: %s\n",this_path_no_trailing_sep))
@@ -91,7 +86,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         if (nchar(file_pattern)<1) file_pattern <- NULL
         if (this_dataset$method=="aadc_eds") file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
         ## build file list if postprocessing required
-        if (length(pp)>0) {
+        if (length(this_dataset$postprocess)>0) {
             ## take snapshot of this directory before we start syncing
             if (verbose) {
                 cat(sprintf(" building file list ... "))
@@ -143,7 +138,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         }
 
         ## build file list if postprocessing required
-        if (length(pp)>0) {
+        if (length(this_dataset$postprocess)>0) {
             if (verbose) { cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep)) }
             file_list_after <- file.info(list.files(path=this_path_no_trailing_sep,pattern=file_pattern,recursive=TRUE,full.names=TRUE))
             if (file.exists(this_path_no_trailing_sep)) {
@@ -157,76 +152,21 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             if (verbose) cat(sprintf("done.\n"))
         }
 
-        ## decompression behaviour: for *_delete, unconditionally decompress all compressed files and then delete them
-        ## for gunzip/bunzip2 (which can only contain a single file), decompress only if .gz/.bz2 file has changed
-        ## for unzip (which can contain multiple files), decompress all if the zip file has changed, or if there are any files present in the zip file that don't exist in decompressed form
+        pp <- this_dataset$postprocess
         if (length(pp)>0) {
             for (i in 1:length(pp)) {
-                if (FALSE) {
-                    ## for when postprocessing steps are passed as functions or calls
-                    qq <- pp[[i]]
-                    if (inherits(qq,"call")) {
-                        qq$data_source <- this_dataset
-                        qq_args <- all.names(qq) ## find args that are part of the qq call
-                        ## add any required arguments
-                        if ("file_list_before" %in% qq_args) qq$file_list_before <- file_list_before
-                        if ("file_list_after" %in% qq_args) qq$file_list_after <- file_list_after
-                        ## evaluate
-                        eval(qq)
-                    } else if (is.function(qq)) {
-                        ## if qq was passed as a function, then we just pass data_source
-                        ## evaluate
-                        do.call(qq,list(data_source=this_dataset))
-                    }
-                }
-                if (pp[i]=="unzip_delete") {
-                    ## unconditionally decompress any zipped files and then delete them
-                    files_to_decompress <- list.files(directory_from_url(this_dataset$source_url),pattern="\\.zip$",recursive=TRUE)
-                    do_decompress_files(pp[i],files=files_to_decompress)
-                } else if (pp[i] %in% c("gunzip_delete","bunzip2_delete","uncompress_delete")) {
-                    ## unconditionally unzip then delete
-                    file_pattern <- switch(pp[i],
-                                           "gunzip_delete"="\\.gz$",
-                                           "bunzip2_delete"="\\.bz2$",
-                                           "uncompress_delete"="\\.Z$",
-                                           stop("unrecognized decompression")
-                                           )
-                    files_to_decompress <- list.files(directory_from_url(this_dataset$source_url),pattern=file_pattern,recursive=TRUE)
-                    do_decompress_files(pp[i],files=files_to_decompress)
-                } else if (pp[i] %in% c("gunzip","bunzip2","uncompress")) {
-                    ## decompress but retain compressed file. decompress only if .gz/.bz2 file has changed
-                    file_pattern <- switch(pp[i],
-                                           "gunzip"="\\.gz$",
-                                           "bunzip2"="\\.bz2$",
-                                           "uncompress"="\\.Z$",
-                                           stop("unrecognized decompression")
-                                           )
-                    files_to_decompress <- find_changed_files(file_list_before,file_list_after,file_pattern)
-                    do_decompress_files(pp[i],files=files_to_decompress)
-                    ## also decompress if uncompressed file does not exist
-                    files_to_decompress <- setdiff(rownames(file_list_after),files_to_decompress) ## those that we haven't just dealt with
-                    files_to_decompress <- files_to_decompress[str_detect(files_to_decompress,file_pattern)] ## only .gz/.bz2 files
-                    do_decompress_files(pp[i],files=files_to_decompress,overwrite=FALSE)
-                    ## nb this may be slow, so might be worth explicitly checking for the existence of uncompressed files
-                } else if (pp[i]=="unzip") {
-                    ## decompress but retain compressed file
-                    ## since the zip file will have been retained from previous runs, decompress only if the zip file has changed
-                    files_to_decompress <- find_changed_files(file_list_before,file_list_after,"\\.zip$")
-                    do_decompress_files(pp[i],files=files_to_decompress)
-                    ## also decompress any files present in the zip file that don't exist in decompressed form
-                    files_to_decompress <- setdiff(rownames(file_list_after),files_to_decompress) ## those that we haven't just dealt with
-                    files_to_decompress <- files_to_decompress[str_detect(files_to_decompress,"\\.zip$")] ## only zip files
-                    do_decompress_files(pp[i],files=files_to_decompress,overwrite=FALSE)
-                } else if (grepl("^cleanup",pp[i])) {
-                    file_pattern <- sub("(cleanup|cleanup_recursive) ","",pp[i])
-                    recursive <- grepl("^cleanup_recursive",tolower(pp[i]))
-                    to_delete <- list.files(pattern=file_pattern,recursive=recursive)
-                    cat(sprintf("cleaning up files: %s\n",paste(to_delete,collapse=",")))
-                    unlink(to_delete)
-                } else if (nchar(pp[i])<1) {
-                    ## empty string, do nothing
-                } else {
-                    stop("unrecognized postprocess option ",pp[i])
+                ## postprocessing steps are passed as functions or calls
+                qq <- pp[[i]]
+                if (inherits(qq,"call")) {
+                    ## add extra args
+                    qq$data_source <- this_dataset
+                    qq$file_list_before <- file_list_before
+                    qq$file_list_after <- file_list_after
+                    ## evaluate
+                    eval(qq)
+                } else if (is.function(qq)) {
+                    ## evaluate with extra args
+                    do.call(qq,list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
                 }
             }
         }
