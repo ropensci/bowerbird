@@ -69,9 +69,15 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         this_dataset$source_urls <- list(this_dataset$source_urls)
     }
     ## check postprocessing
-    ## should be a list of functions or call objects
-    if (!(is.list(this_dataset$postprocess) && all(sapply(this_dataset$postprocess,function(z)is.function(z) || inherits(z,"call")))))
-        stop("postprocess arguments should be a list of functions or calls (unevaluated functions)")
+    ## should be a nested list of (list of functions or call objects, or empty list)
+    pp <- this_dataset$postprocess
+    if (length(pp)==1) {
+        pp <- pp[[1]]
+    } else {
+        stop("expecting nested list for the postprocess argument")
+    }
+    if (!(is.list(pp) && (length(pp)<1 || all(sapply(pp,function(z)is.function(z) || inherits(z,"call"))))))
+        stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
 
     ## do the main synchonization, usually directly with wget, otherwise with custom methods
     for (si in 1:length(this_dataset$source_urls[[1]])) {
@@ -86,7 +92,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         if (nchar(file_pattern)<1) file_pattern <- NULL
         if (this_dataset$method=="aadc_eds") file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
         ## build file list if postprocessing required
-        if (length(this_dataset$postprocess)>0) {
+        if (length(pp)>0) {
             ## take snapshot of this directory before we start syncing
             if (verbose) {
                 cat(sprintf(" building file list ... "))
@@ -138,7 +144,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         }
 
         ## build file list if postprocessing required
-        if (length(this_dataset$postprocess)>0) {
+        if (length(pp)>0) {
             if (verbose) { cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep)) }
             file_list_after <- file.info(list.files(path=this_path_no_trailing_sep,pattern=file_pattern,recursive=TRUE,full.names=TRUE))
             if (file.exists(this_path_no_trailing_sep)) {
@@ -152,7 +158,6 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             if (verbose) cat(sprintf("done.\n"))
         }
 
-        pp <- this_dataset$postprocess
         if (length(pp)>0) {
             for (i in 1:length(pp)) {
                 ## postprocessing steps are passed as functions or calls
