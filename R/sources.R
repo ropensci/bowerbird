@@ -3,7 +3,7 @@
 #' @param name string: the name of the data source
 #' @param description string: a description of the data source
 #' @param reference string: URL to the metadata record or home page of the data source
-#' @param source_urls character vector: one or more source URLs
+#' @param source_url character vector: one or more source URLs
 #' @param citation string:
 #' @param license string:
 #' @param comment string:
@@ -25,7 +25,7 @@
 #'    reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
 #'    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
 #'      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
-#'    source_urls="ftp://ftp.soest.hawaii.edu/gshhg/*",
+#'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
 #'    license="",
 #'    comment="",
 #'    method="wget",
@@ -36,7 +36,7 @@
 #' cf <- add(cf,my_source)
 #'
 #' @export
-bb_source <- function(name,description="",reference,source_urls,citation,license,comment="",method="wget",method_flags="",postprocess,access_function="",data_group="") {
+bb_source <- function(name,description="",reference,source_url,citation,license,comment="",method="wget",method_flags="",postprocess,access_function="",data_group="") {
     ## todo: allow method, postprocess to be passed as functions?
     if (missing(name))
         stop("Each data source requires a name")
@@ -44,12 +44,11 @@ bb_source <- function(name,description="",reference,source_urls,citation,license
         stop("Please provide license and citation information for the data source, so that users properly acknowledge it")
     if (missing(reference))
         stop("Please provide a reference (a URL to the data source's metadata record or home page")
-    if (missing(source_urls)) {
+    if (missing(source_url)) {
         if (method=="wget") stop("method 'wget' requires at least one source URL")
         ##warning("no source_urls provided")
-        source_urls <- as.character(NA)
+        source_url <- as.character(NA)
     }
-    if (is.character(source_urls)) source_urls <- list(source_urls)
     if (missing(postprocess) || is.null(postprocess)) {
         postprocess <- list()
     } else {
@@ -61,7 +60,7 @@ bb_source <- function(name,description="",reference,source_urls,citation,license
         name=if (assert_that(is.string(name))) name,
         description=if (assert_that(is.string(description))) description,
         reference=if (assert_that(is.string(reference))) reference,
-        source_urls=if (assert_that(is.list(source_urls))) source_urls,
+        source_url=if (assert_that(is.character(source_url))) source_url,
         citation=if (assert_that(is.string(citation))) citation,
         license=if (assert_that(is.string(license))) license,
         comment=if (assert_that(is.string(comment))) comment,

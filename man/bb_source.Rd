@@ -4,7 +4,7 @@
 \alias{bb_source}
 \title{Define an external data source}
 \usage{
-bb_source(name, description = "", reference, source_urls, citation, license,
+bb_source(name, description = "", reference, source_url, citation, license,
   comment = "", method = "wget", method_flags = "", postprocess,
   access_function = "", data_group = "")
 }
@@ -15,7 +15,7 @@ bb_source(name, description = "", reference, source_urls, citation, license,
 
 \item{reference}{string: URL to the metadata record or home page of the data source}
 
-\item{source_urls}{character vector: one or more source URLs}
+\item{source_url}{character vector: one or more source URLs}
 
 \item{citation}{string:}
 
@@ -47,7 +47,7 @@ my_source <- bb_source(
    reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
-   source_urls="ftp://ftp.soest.hawaii.edu/gshhg/*",
+   source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
    license="",
    comment="",
    method="wget",

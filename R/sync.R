@@ -50,7 +50,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             stop("local_file_root: ",this_dataset$local_file_root," does not exist. Either create it or run bb_sync with create_root=TRUE")
         }
     }
-    cat(sprintf("\n%s\nSynchronizing dataset: %s\n----------------------------------------------------------------------------------------------------------\n\n",base::date(),this_dataset$name))
+    cat(sprintf("\n%s\nSynchronizing dataset: %s with source URL %s\n----------------------------------------------------------------------------------------------------------\n\n",base::date(),this_dataset$name,this_dataset$source_url))
     setwd(this_dataset$local_file_root)
 
     ## set proxy env vars
@@ -64,10 +64,6 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         if (verbose) cat(sprintf("done.\n"))
     }
 
-    if (is.character(this_dataset$source_urls)) {
-        ## was expecting a list
-        this_dataset$source_urls <- list(this_dataset$source_urls)
-    }
     ## check postprocessing
     ## should be a nested list of (list of functions or call objects, or empty list)
     pp <- this_dataset$postprocess
@@ -80,102 +76,97 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
 
     ## do the main synchonization, usually directly with wget, otherwise with custom methods
-    for (si in 1:length(this_dataset$source_urls[[1]])) {
-        ## iterate through source_urls
-        this_dataset$source_url <- this_dataset$source_urls[[1]][[si]]
-        cat(sprintf("\n---\nProcessing source_url: %s\n",this_dataset$source_url))
-        this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(this_dataset$source_url))
+    cat(sprintf("\n---\nProcessing source_url: %s\n",this_dataset$source_url))
+    this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(this_dataset$source_url))
+    if (verbose) {
+        cat(sprintf(" this dataset path is: %s\n",this_path_no_trailing_sep))
+    }
+    file_pattern <- sub(".*/","",this_dataset$source_url)
+    if (nchar(file_pattern)<1) file_pattern <- NULL
+    if (this_dataset$method=="aadc_eds") file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
+    ## build file list if postprocessing required
+    if (length(pp)>0) {
+        ## take snapshot of this directory before we start syncing
         if (verbose) {
-            cat(sprintf(" this dataset path is: %s\n",this_path_no_trailing_sep))
+            cat(sprintf(" building file list ... "))
         }
-        file_pattern <- sub(".*/","",this_dataset$source_url)
-        if (nchar(file_pattern)<1) file_pattern <- NULL
-        if (this_dataset$method=="aadc_eds") file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
-        ## build file list if postprocessing required
-        if (length(pp)>0) {
-            ## take snapshot of this directory before we start syncing
-            if (verbose) {
-                cat(sprintf(" building file list ... "))
-            }
-            file_list_before <- file.info(list.files(path=this_path_no_trailing_sep,pattern=file_pattern,recursive=TRUE,full.names=TRUE)) ## full.names TRUE so that names are relative to current working directory
-            if (file.exists(this_path_no_trailing_sep)) {
-                ## in some cases this points directly to a file
-                temp <- file.info(this_path_no_trailing_sep)
-                temp <- temp[!temp$isdir,]
-                if (nrow(temp)>0) { file_list_before <- rbind(file_list_before,temp) }
-            }
-            ##cat("file list before:\n")
-            ##cat(str(file_list_before),"\n")
-            if (verbose) cat(sprintf("done.\n"))
+        file_list_before <- file.info(list.files(path=this_path_no_trailing_sep,pattern=file_pattern,recursive=TRUE,full.names=TRUE)) ## full.names TRUE so that names are relative to current working directory
+        if (file.exists(this_path_no_trailing_sep)) {
+            ## in some cases this points directly to a file
+            temp <- file.info(this_path_no_trailing_sep)
+            temp <- temp[!temp$isdir,]
+            if (nrow(temp)>0) { file_list_before <- rbind(file_list_before,temp) }
         }
-        if (this_dataset$method=="wget") {
-            do_wget(build_wget_call(this_dataset),this_dataset)
-        } else if (this_dataset$method=="aadc_eds") {
-            ## clumsy way to get around AADC EDS file naming issues
-            ## e.g. if we ask for http://data.aad.gov.au/eds/file/4494
-            ## then we get local file named data.aad.gov.au/eds/file/4494 (which is most likely a zipped file)
-            ## if we unzip this here, we get this zip's files mixed with others
-            ## change into subdirectory named by file_id of file, so that we don't get files mixed together in data.aad.gov.au/eds/file/
-            ## note that this requires the "--recursive" flag NOT TO BE USED
-            this_file_id <- str_match(this_dataset$source_url,"/file/(\\d+)$")[2]
-            if (!file.exists(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id))) {
-                dir.create(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id),recursive=TRUE)
-            }
-            setwd(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id))
-            if (!grepl("--content-disposition",this_dataset$method_flags,ignore.case=TRUE)) {
-                this_dataset$method_flags <- paste(this_dataset$method_flags,"--content-disposition",sep=" ")
-            }
-            ## these two should be doable in a single regex, but done separately until I can figure it out
-            if (grepl("--recursive ",this_dataset$method_flags,ignore.case=TRUE)) {
-                this_dataset$method_flags <- str_trim(sub("--recursive ","",this_dataset$method_flags))
-            }
-            if (grepl("--recursive$",this_dataset$method_flags,ignore.case=TRUE)) {
-                this_dataset$method_flags <- str_trim(sub("--recursive$","",this_dataset$method_flags))
-            }
-            do_wget(build_wget_call(this_dataset),this_dataset)
-            setwd(this_dataset$local_file_root)
-            ## note that unzipping of files is odd, if there are multiple source_urls defined. The second and after will get unzipped multiple times
-        } else if (exists(this_dataset$method,mode="function")) {
-            ## dispatch to custom handler
-            if (verbose) cat(sprintf(" using custom handler \"%s\"\n",this_dataset$method))
-            eval(parse(text=paste0(this_dataset$method,"(this_dataset)")))
-        } else {
-            stop("unsupported method ",this_dataset$method," specified")
+        ##cat("file list before:\n")
+        ##cat(str(file_list_before),"\n")
+        if (verbose) cat(sprintf("done.\n"))
+    }
+    if (this_dataset$method=="wget") {
+        do_wget(build_wget_call(this_dataset),this_dataset)
+    } else if (this_dataset$method=="aadc_eds") {
+        ## clumsy way to get around AADC EDS file naming issues
+        ## e.g. if we ask for http://data.aad.gov.au/eds/file/4494
+        ## then we get local file named data.aad.gov.au/eds/file/4494 (which is most likely a zipped file)
+        ## if we unzip this here, we get this zip's files mixed with others
+        ## change into subdirectory named by file_id of file, so that we don't get files mixed together in data.aad.gov.au/eds/file/
+        ## note that this requires the "--recursive" flag NOT TO BE USED
+        this_file_id <- str_match(this_dataset$source_url,"/file/(\\d+)$")[2]
+        if (!file.exists(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id))) {
+            dir.create(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id),recursive=TRUE)
         }
+        setwd(file.path(this_dataset$local_file_root,"data.aad.gov.au","eds","file",this_file_id))
+        if (!grepl("--content-disposition",this_dataset$method_flags,ignore.case=TRUE)) {
+            this_dataset$method_flags <- paste(this_dataset$method_flags,"--content-disposition",sep=" ")
+        }
+        ## these two should be doable in a single regex, but done separately until I can figure it out
+        if (grepl("--recursive ",this_dataset$method_flags,ignore.case=TRUE)) {
+            this_dataset$method_flags <- str_trim(sub("--recursive ","",this_dataset$method_flags))
+        }
+        if (grepl("--recursive$",this_dataset$method_flags,ignore.case=TRUE)) {
+            this_dataset$method_flags <- str_trim(sub("--recursive$","",this_dataset$method_flags))
+        }
+        do_wget(build_wget_call(this_dataset),this_dataset)
+        setwd(this_dataset$local_file_root)
+    } else if (exists(this_dataset$method,mode="function")) {
+        ## dispatch to custom handler
+        if (verbose) cat(sprintf(" using custom handler \"%s\"\n",this_dataset$method))
+        eval(parse(text=paste0(this_dataset$method,"(this_dataset)")))
+    } else {
+        stop("unsupported method ",this_dataset$method," specified")
+    }
 
-        ## build file list if postprocessing required
-        if (length(pp)>0) {
-            if (verbose) { cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep)) }
-            file_list_after <- file.info(list.files(path=this_path_no_trailing_sep,pattern=file_pattern,recursive=TRUE,full.names=TRUE))
-            if (file.exists(this_path_no_trailing_sep)) {
-                ## in some cases this points directly to a file
-                temp <- file.info(this_path_no_trailing_sep)
-                temp <- temp[!temp$isdir,]
-                if (nrow(temp)>0) { file_list_after <- rbind(file_list_after,temp) }
-            }
-            ##cat("file list after:\n")
-            ##cat(str(file_list_after),"\n")
-            if (verbose) cat(sprintf("done.\n"))
+    ## build file list if postprocessing required
+    if (length(pp)>0) {
+        if (verbose) { cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep)) }
+        file_list_after <- file.info(list.files(path=this_path_no_trailing_sep,pattern=file_pattern,recursive=TRUE,full.names=TRUE))
+        if (file.exists(this_path_no_trailing_sep)) {
+            ## in some cases this points directly to a file
+            temp <- file.info(this_path_no_trailing_sep)
+            temp <- temp[!temp$isdir,]
+            if (nrow(temp)>0) { file_list_after <- rbind(file_list_after,temp) }
         }
+        ##cat("file list after:\n")
+        ##cat(str(file_list_after),"\n")
+        if (verbose) cat(sprintf("done.\n"))
+    }
 
-        if (length(pp)>0) {
-            for (i in 1:length(pp)) {
-                ## postprocessing steps are passed as functions or calls
-                qq <- pp[[i]]
-                if (inherits(qq,"call")) {
-                    ## add extra args
-                    qq$data_source <- this_dataset
-                    qq$file_list_before <- file_list_before
-                    qq$file_list_after <- file_list_after
-                    ## evaluate
-                    eval(qq)
-                } else if (is.function(qq)) {
-                    ## evaluate with extra args
-                    do.call(qq,list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
-                }
+    if (length(pp)>0) {
+        for (i in 1:length(pp)) {
+            ## postprocessing steps are passed as functions or calls
+            qq <- pp[[i]]
+            if (inherits(qq,"call")) {
+                ## add extra args
+                qq$data_source <- this_dataset
+                qq$file_list_before <- file_list_before
+                qq$file_list_after <- file_list_after
+                ## evaluate
+                eval(qq)
+            } else if (is.function(qq)) {
+                ## evaluate with extra args
+                do.call(qq,list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
             }
         }
-    } ## end looping through multiple source urls
-    cat(sprintf("\n%s dataset synchronization complete: %s\n",base::date(),this_dataset$name))
+    }
+    cat(sprintf("\n%s dataset synchronization complete: %s (%s)\n",base::date(),this_dataset$name,this_dataset$source_url))
     TRUE
 }
