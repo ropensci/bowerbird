@@ -15,9 +15,6 @@ TRUE on success
 \description{
 Mirror an external data source using the wget utility
 }
-\examples{
-
-}
 \seealso{
 \code{\link{wget}}
 }

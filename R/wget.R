@@ -1,5 +1,3 @@
-
-
 #' Mirror an external data source using the wget utility
 #'
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
@@ -7,8 +5,6 @@
 #' @return TRUE on success
 #'
 #' @seealso \code{\link{wget}}
-#'
-#' @examples
 #'
 #' @export
 webget <- function(data_source) {
@@ -58,7 +54,6 @@ webget <- function(data_source) {
     ##}
     ok
 }
-
 
 
 #' Make a wget call
