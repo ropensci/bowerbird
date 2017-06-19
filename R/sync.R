@@ -101,7 +101,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         ##cat(str(file_list_before),"\n")
         if (verbose) cat(sprintf("done.\n"))
     }
-    if (this_dataset$method=="wget") {
+    if (this_dataset$method=="webget") {
         do_wget(build_wget_call(this_dataset),this_dataset)
     } else if (this_dataset$method=="aadc_eds") {
         ## clumsy way to get around AADC EDS file naming issues

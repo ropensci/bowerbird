@@ -28,7 +28,7 @@
 #'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
 #'    license="",
 #'    comment="",
-#'    method="wget",
+#'    method="webget",
 #'    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
 #'    postprocess=pp_unzip)
 #'
@@ -36,7 +36,7 @@
 #' cf <- add(cf,my_source)
 #'
 #' @export
-bb_source <- function(name,description="",reference,source_url,citation,license,comment="",method="wget",method_flags="",postprocess,access_function="",data_group="") {
+bb_source <- function(name,description="",reference,source_url,citation,license,comment="",method="webget",method_flags="",postprocess,access_function="",data_group="") {
     ## todo: allow method, postprocess to be passed as functions?
     if (missing(name))
         stop("Each data source requires a name")
@@ -45,7 +45,7 @@ bb_source <- function(name,description="",reference,source_url,citation,license,
     if (missing(reference))
         stop("Please provide a reference (a URL to the data source's metadata record or home page")
     if (missing(source_url)) {
-        if (method=="wget") stop("method 'wget' requires at least one source URL")
+        if (method=="webget") stop("method 'webget' requires at least one source URL")
         ##warning("no source_urls provided")
         source_url <- as.character(NA)
     }

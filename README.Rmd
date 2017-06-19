@@ -56,7 +56,7 @@ my_source <- bb_source(
     source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
     license="",
     comment="",
-    method="wget",
+    method="webget",
     method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
     postprocess=pp_unzip)
 
