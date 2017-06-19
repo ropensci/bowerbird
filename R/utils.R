@@ -204,57 +204,57 @@ do_decompress_files <- function(method,files,overwrite=TRUE) {
 ##-------------------------------------------
 ## helper functions for wget
 
-build_wget_call <- function(dataset) {
-    ## build wget system call given our dataset config
-    wget_call <- getOption("bowerbird")$wget_exe
-    ## resolve fileset-specific flags (method_flags) and global flags (wget_flags, which were inherited from config$global)
-    this_flags <- if (is.na(dataset$method_flags)) dataset$wget_default_flags else dataset$method_flags
-    ## add wget_global_flags
-    if (!is.null(dataset$wget_global_flags)) this_flags <- paste(this_flags,dataset$wget_global_flags,sep=" ")
-    ## proxy-user and proxy-password flags
-    ## this needs to decide whether it should use http_proxy_user or ftp_proxy_user info - exclude for now
-    #if (!grepl("proxy-user=",dataset$wget_flags)) {
-    #    dataset$wget_flags=paste(dataset$wget_flags,paste0("--proxy-user=",dataset$http_proxy_user),sep=" ")
-    #}
-    #if (!grepl("proxy-password=",dataset$wget_flags)) {
-    #    dataset$wget_flags=paste(dataset$wget_flags,paste0("--proxy-password=",dataset$http_proxy_password),sep=" ")
-                                        #}
-    ## add flags for clobber behaviour
-    if (!is.null(dataset$clobber) && !is.na(dataset$clobber) && dataset$clobber %in% c(0,1)) {
-        if (dataset$clobber==0) {
-            this_flags <- resolve_wget_clobber_flags(this_flags,"--no-clobber")
-        } else {
-            this_flags <- resolve_wget_clobber_flags(this_flags,"--timestamping")
-        }
-    }
-    ## skip the user and password flags until/if implemented in bb_config
-    ##if (nchar(dataset$user)>0) wget_call <- paste0(wget_call," --user=",dataset$user)
-    ##if (nchar(dataset$password)>0) wget_call <- paste0(wget_call," --password=",dataset$password)
-    wget_call <- paste(wget_call,this_flags,sep=" ")
-    ##if (dataset$wait>0) wget_call <- paste0(wget_call," --wait=",dataset$wait)
-    paste(wget_call,dataset$source_url,sep=" ")
-}
+##build_wget_call <- function(dataset) {
+##    ## build wget system call given our dataset config
+##    wget_call <- getOption("bowerbird")$wget_exe
+##    ## resolve fileset-specific flags (method_flags) and global flags (wget_flags, which were inherited from config$global)
+##    this_flags <- if (is.na(dataset$method_flags)) dataset$wget_default_flags else dataset$method_flags
+##    ## add wget_global_flags
+##    if (!is.null(dataset$wget_global_flags)) this_flags <- paste(this_flags,dataset$wget_global_flags,sep=" ")
+##    ## proxy-user and proxy-password flags
+##    ## this needs to decide whether it should use http_proxy_user or ftp_proxy_user info - exclude for now
+##    #if (!grepl("proxy-user=",dataset$wget_flags)) {
+##    #    dataset$wget_flags=paste(dataset$wget_flags,paste0("--proxy-user=",dataset$http_proxy_user),sep=" ")
+##    #}
+##    #if (!grepl("proxy-password=",dataset$wget_flags)) {
+##    #    dataset$wget_flags=paste(dataset$wget_flags,paste0("--proxy-password=",dataset$http_proxy_password),sep=" ")
+##                                        #}
+##    ## add flags for clobber behaviour
+##    if (!is.null(dataset$clobber) && !is.na(dataset$clobber) && dataset$clobber %in% c(0,1)) {
+##        if (dataset$clobber==0) {
+##            this_flags <- resolve_wget_clobber_flags(this_flags,"--no-clobber")
+##        } else {
+##            this_flags <- resolve_wget_clobber_flags(this_flags,"--timestamping")
+##        }
+##    }
+##    ## skip the user and password flags until/if implemented in bb_config
+##    ##if (nchar(dataset$user)>0) wget_call <- paste0(wget_call," --user=",dataset$user)
+##    ##if (nchar(dataset$password)>0) wget_call <- paste0(wget_call," --password=",dataset$password)
+##    wget_call <- paste(wget_call,this_flags,sep=" ")
+##    ##if (dataset$wait>0) wget_call <- paste0(wget_call," --wait=",dataset$wait)
+##    paste(wget_call,dataset$source_url,sep=" ")
+##}
 
-do_wget <- function(wget_call,dataset) {
-    assert_that(is.string(wget_call))
-    if (dataset$skip_downloads) {
-        cat(sprintf(" skip_downloads is TRUE, not executing: %s\n",wget_call))
-    } else {
-        cat(sprintf(" executing: %s\n",wget_call))
-        if (sink.number()>0) {
-            ## we have a sink() redirection in place
-            ## sink() won't catch the output of system commands, which means we miss stuff in our log
-            ## workaround: send output to temporary file so that we can capture it
-            output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
-            wget_call <- sub(paste0(getOption("bowerbird")$wget_exe," "),paste0(getOption("bowerbird")$wget_exe," -o \"",output_file,"\" "),wget_call,fixed=TRUE)
-            system(wget_call)
-            ## now echo the contents of output_file to console, so that sink() captures it
-            cat(readLines(output_file),sep="\n")
-        } else {
-            system(wget_call)
-        }
-    }
-}
+##do_wget <- function(wget_call,dataset) {
+##    assert_that(is.string(wget_call))
+##    if (dataset$skip_downloads) {
+##        cat(sprintf(" skip_downloads is TRUE, not executing: %s\n",wget_call))
+##    } else {
+##        cat(sprintf(" executing: %s\n",wget_call))
+##        if (sink.number()>0) {
+##            ## we have a sink() redirection in place
+##            ## sink() won't catch the output of system commands, which means we miss stuff in our log
+##            ## workaround: send output to temporary file so that we can capture it
+##            output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
+##            wget_call <- sub(paste0(getOption("bowerbird")$wget_exe," "),paste0(getOption("bowerbird")$wget_exe," -o \"",output_file,"\" "),wget_call,fixed=TRUE)
+##            system(wget_call)
+##            ## now echo the contents of output_file to console, so that sink() captures it
+##            cat(readLines(output_file),sep="\n")
+##        } else {
+##            system(wget_call)
+##        }
+##    }
+##}
 
 resolve_wget_clobber_flags <- function(primary_flags,secondary_flags) {
     wgf <- str_split(primary_flags,"[ ]+")[[1]]
