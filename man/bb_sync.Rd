@@ -19,3 +19,4 @@ vector of logical values indicating success of each data source in config
 \description{
 Run a bowerbird data repository synchronisation
 }
+

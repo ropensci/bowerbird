@@ -26,3 +26,4 @@ Add a new data source to a bowerbird configuration
 \seealso{
 \code{\link{bb_source}} \code{\link{bb_config}}
 }
+

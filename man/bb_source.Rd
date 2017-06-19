@@ -61,3 +61,4 @@ cf <- add(cf,my_source)
 \seealso{
 \code{\link{bb_config}}
 }
+
