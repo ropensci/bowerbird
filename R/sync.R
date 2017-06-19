@@ -76,6 +76,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
 
         ## postprocessing
         pp <- this_dataset$postprocess
+        ## change this to deal with pp as list of expressions or functions
         if (is.list(pp) && length(pp)==1) {
             pp <- pp[[1]] ## may get char vector embedded in single-element list
         }
@@ -161,6 +162,23 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         ## for unzip (which can contain multiple files), decompress all if the zip file has changed, or if there are any files present in the zip file that don't exist in decompressed form
         if (length(pp)>0) {
             for (i in 1:length(pp)) {
+                if (FALSE) {
+                    ## for when postprocessing steps are passed as functions or calls
+                    qq <- pp[[i]]
+                    if (inherits(qq,"call")) {
+                        qq$data_source <- this_dataset
+                        qq_args <- all.names(qq) ## find args that are part of the qq call
+                        ## add any required arguments
+                        if ("file_list_before" %in% qq_args) qq$file_list_before <- file_list_before
+                        if ("file_list_after" %in% qq_args) qq$file_list_after <- file_list_after
+                        ## evaluate
+                        eval(qq)
+                    } else if (is.function(qq)) {
+                        ## if qq was passed as a function, then we just pass data_source
+                        ## evaluate
+                        do.call(qq,list(data_source=this_dataset))
+                    }
+                }
                 if (pp[i]=="unzip_delete") {
                     ## unconditionally decompress any zipped files and then delete them
                     files_to_decompress <- list.files(directory_from_url(this_dataset$source_url),pattern="\\.zip$",recursive=TRUE)
@@ -192,7 +210,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
                     ## nb this may be slow, so might be worth explicitly checking for the existence of uncompressed files
                 } else if (pp[i]=="unzip") {
                     ## decompress but retain compressed file
-                    ## decompress unconditionally if the zip file has changed
+                    ## since the zip file will have been retained from previous runs, decompress only if the zip file has changed
                     files_to_decompress <- find_changed_files(file_list_before,file_list_after,"\\.zip$")
                     do_decompress_files(pp[i],files=files_to_decompress)
                     ## also decompress any files present in the zip file that don't exist in decompressed form
