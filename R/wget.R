@@ -1,3 +1,22 @@
+##             do_wget(build_wget_call(this_dataset),this_dataset)
+
+
+#' Use wget to mirror an external data repository
+#'
+#' @param url string: the URL to retrieve 
+#' @param flags string: command-line flags to pass to wget 
+#'
+#' @return TRUE on success
+#'
+#' @seealso \code{\link{install_wget}}
+#'
+# @export
+wget <- function(url,flags) {
+    wgetexe <- wget_exe()
+}
+
+
+
 #' Helper function to install wget on Windows
 #'
 #' The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
@@ -31,17 +50,29 @@ install_wget <- function() {
 }
 
 ## helper function to return the wget executable name (possibly with path)
+## if successfully identified, set the bowerbird$wget_exe option (and use this on subsequent calls)
 wget_exe <- function() {
+    bb_opts <- getOption("bowerbird")
+    if (!is.null(bb_opts)) {
+        if (!is.null(bb_opts$wget_exe)) return(bb_opts$wget_exe)
+    } else {
+        bb_opts <- list()
+    }
     if (wget_test("wget")) {
-        "wget"
+        myexe <- "wget"
     } else {
         if (.Platform$OS.type=="windows") {
-            trythis <- file.path(Sys.getenv("APPDATA"),"bowerbird","wget.exe")
-            if (wget_test(trythis)) return(trythis)
-            stop("Could not find the wget executable. Try the install_wget() function, or install it yourself and ensure that it is on the path")
+            myexe <- file.path(Sys.getenv("APPDATA"),"bowerbird","wget.exe")
+            if (!wget_text(myexe)) {
+                stop("could not find the wget executable. Try the install_wget() function, or install it yourself and ensure that it is on the path")
+            }
+        } else {
+            stop("could not find the wget executable")
         }
-        stop("could not find the wget executable")
     }
+    bb_opts$wget_exe <- myexe
+    options(bowerbird=bb_opts)
+    myexe
 }
 ## test a potential wget executable path
 wget_test <- function(wget_path) {
