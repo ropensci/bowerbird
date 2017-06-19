@@ -15,6 +15,8 @@
 #'
 #' @export
 pp_decompress <- function(data_source,delete=FALSE,method,...){##file_list_before,file_list_after,method) {
+    assert_that(is.data.frame(data_source))
+    assert_that(nrow(data_source)==1)
     assert_that(is.flag(delete))
     assert_that(is.string(method))
     method <- match.arg(tolower(method),c("unzip","gunzip","bunzip2","uncompress"))
@@ -108,6 +110,8 @@ pp_uncompress <- function(...) pp_decompress(...,method="uncompress")
 #'
 #' @export
 pp_cleanup <- function(data_source,pattern,recursive=FALSE,ignore_case=FALSE,...) {
+    assert_that(is.data.frame(data_source))
+    assert_that(nrow(data_source)==1)
     to_delete <- list.files(pattern=pattern,recursive=recursive,ignore.case=ignore_case)
     cat(sprintf("cleaning up files: %s\n",paste(to_delete,collapse=",")))
     unlink(to_delete)==0
