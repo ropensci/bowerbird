@@ -68,6 +68,7 @@ do_decompress_files <- function(method,files,overwrite=TRUE) {
     options(warn=0) ## so that we can be sure that last.warning will be set
     ## MDS: this should use tail(warnings(), 1) instead
     last.warning <- NULL ## to avoid check note
+    all_OK <- TRUE
     for (thisf in files) {
         ## decompress, check for errors in doing so
         cat(sprintf("  decompressing: %s ... ",thisf))
@@ -113,11 +114,13 @@ do_decompress_files <- function(method,files,overwrite=TRUE) {
                            cat(sprintf("  problem unzipping %s, not deleting\n",thisf))
                        }
                    }
+                   all_OK <- all_OK && was_ok
                },
                "gunzip_delete"=,
                "gunzip"={
                    ## gunzip takes care of deleting the compressed file if remove is TRUE
                    unzip_this <- TRUE
+                   was_ok <- FALSE
                    if (!overwrite) {
                        ## check if file exists, so that we can issue a more informative trace message to the user
                        destname <- gsub("[.]gz$","",thisf,ignore.case=TRUE)
@@ -128,18 +131,20 @@ do_decompress_files <- function(method,files,overwrite=TRUE) {
                    }
                    if (unzip_this) {
                        ## wrap this in tryCatch block so that errors do not halt our whole process
-                       tryCatch(gunzip(thisf,destname=sub("\\.gz$","",thisf),remove=method=="gunzip_delete",overwrite=overwrite),
+                       tryCatch({gunzip(thisf,destname=sub("\\.gz$","",thisf),remove=method=="gunzip_delete",overwrite=overwrite); was_ok <- TRUE},
                                 error=function(e){
                                     cat(sprintf("  problem gunzipping %s: %s",thisf,e))
                                 }
                                 )
                    }
+                   all_OK <- all_OK && was_ok
                    cat(sprintf("done\n"))
                },
                "bunzip2_delete"=,
                "bunzip2"={
                    ## same as for gunzip
                    unzip_this <- TRUE
+                   was_ok <- FALSE
                    if (!overwrite) {
                        ## check if file exists, so that we can issue a more informative trace message to the user
                        destname <- gsub("[.]bz2$","",thisf,ignore.case=TRUE)
@@ -150,17 +155,19 @@ do_decompress_files <- function(method,files,overwrite=TRUE) {
                    }
                    if (unzip_this) {
                        ## wrap this in tryCatch block so that errors do not halt our whole process
-                       tryCatch(bunzip2(thisf,destname=sub("\\.bz2$","",thisf),remove=method=="bunzip2_delete",overwrite=overwrite),
+                       tryCatch({bunzip2(thisf,destname=sub("\\.bz2$","",thisf),remove=method=="bunzip2_delete",overwrite=overwrite);was_ok <- TRUE},
                                 error=function(e){
                                     cat(sprintf("  problem bunzipping %s: %s",thisf,e))
                                 }
                                 )
                    }
+                   all_OK <- all_OK && was_ok
                    cat(sprintf("done\n"))
                },
                "uncompress_delete"=,
                "uncompress"={
                    unzip_this <- TRUE
+                   was_ok <- FALSE
                    destname <- gsub("\\.Z$","",thisf,ignore.case=TRUE)
                    if (!overwrite) {
                        ## check if file exists, so that we can issue a more informative trace message to the user
@@ -177,17 +184,20 @@ do_decompress_files <- function(method,files,overwrite=TRUE) {
                            writeBin(readBin(ff,"raw",fsize),destname)
                            close(ff)
                            if (grepl("delete",method)) file.remove(thisf)
+                           was_ok <- TRUE
                        },
                        error=function(e){
                            cat(sprintf("  problem uncompressing %s: %s",thisf,e))
                        })
                    }
+                   all_OK <- all_OK && was_ok
                    cat(sprintf("done\n"))
                },
                stop("unsupported decompress method ",method)
                )
     }
     options(warn=warn) ## reset
+    all_OK
 }
 
 
