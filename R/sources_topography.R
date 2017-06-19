@@ -209,7 +209,7 @@ sources_topography <- function() {
                 reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
                 citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical, High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
                 source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
-                license="",
+                license="LGPL",
                 comment="",
                 method=webget,
                 method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
