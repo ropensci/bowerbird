@@ -63,7 +63,7 @@ wget_exe <- function() {
     } else {
         if (.Platform$OS.type=="windows") {
             myexe <- file.path(Sys.getenv("APPDATA"),"bowerbird","wget.exe")
-            if (!wget_text(myexe)) {
+            if (!wget_test(myexe)) {
                 stop("could not find the wget executable. Try the install_wget() function, or install it yourself and ensure that it is on the path")
             }
         } else {
