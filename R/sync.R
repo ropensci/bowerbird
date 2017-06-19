@@ -102,7 +102,8 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         if (verbose) cat(sprintf("done.\n"))
     }
     if (this_dataset$method=="webget") {
-        do_wget(build_wget_call(this_dataset),this_dataset)
+        ##do_wget(build_wget_call(this_dataset),this_dataset)
+        webget(this_dataset)
     } else if (this_dataset$method=="aadc_eds") {
         ## clumsy way to get around AADC EDS file naming issues
         ## e.g. if we ask for http://data.aad.gov.au/eds/file/4494
@@ -125,7 +126,8 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         if (grepl("--recursive$",this_dataset$method_flags,ignore.case=TRUE)) {
             this_dataset$method_flags <- str_trim(sub("--recursive$","",this_dataset$method_flags))
         }
-        do_wget(build_wget_call(this_dataset),this_dataset)
+        ##do_wget(build_wget_call(this_dataset),this_dataset)
+        webget(this_dataset)
         setwd(this_dataset$local_file_root)
     } else if (exists(this_dataset$method,mode="function")) {
         ## dispatch to custom handler
