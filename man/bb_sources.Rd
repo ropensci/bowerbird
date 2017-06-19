@@ -27,4 +27,3 @@ See \code{reference} and \code{citation} field in each row of the returned tibbl
 \seealso{
 \code{\link{bb_config}}
 }
-

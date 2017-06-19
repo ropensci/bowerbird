@@ -42,4 +42,3 @@ Initialize a bowerbird configuration
 \seealso{
 \code{\link{bb_source}}
 }
-
