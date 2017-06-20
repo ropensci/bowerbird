@@ -4,9 +4,11 @@
 \alias{bb_source}
 \title{Define an external data source}
 \usage{
-bb_source(name, description = "", reference, source_url, citation, license,
-  comment = "", method = webget, method_flags = "", postprocess,
-  access_function = "", data_group = "")
+bb_source(name, description = as.character(NA), reference, source_url,
+  citation, license, comment = as.character(NA), method = webget,
+  method_flags = as.character(NA), postprocess, user = as.character(NA),
+  password = as.character(NA), access_function = as.character(NA),
+  data_group = as.character(NA))
 }
 \arguments{
 \item{name}{string: the name of the data source}
@@ -28,6 +30,10 @@ bb_source(name, description = "", reference, source_url, citation, license,
 \item{method_flags}{string:}
 
 \item{postprocess}{function, call, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied}
+
+\item{user}{string: username, if required}
+
+\item{password}{string: password, if required}
 
 \item{access_function}{string:}
 
