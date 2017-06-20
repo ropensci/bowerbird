@@ -12,3 +12,33 @@ test_that("predefined sources work", {
     expect_lt(nrow(src_si),nrow(src_all))
     expect_true(all(src_si$data_group=="Sea ice"))
 })
+
+test_that("bb_source works with multiple postprocess actions", {
+    bb_source(
+        name="Oceandata test",
+        description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
+        reference= "http://oceancolor.gsfc.nasa.gov/",
+        citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
+        source_url="",
+        license="Please cite",
+        comment="",
+        method=oceandata_get,
+        method_flags="search=T20000322000060.L3m_MO_SST_sst_9km.nc",
+        postprocess=list(quote(pp_unzip(delete=TRUE)),pp_gunzip),
+        access_function="",
+        data_group="Sea surface temperature")
+    
+    bb_source(
+        name="Oceandata test",
+        description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
+        reference= "http://oceancolor.gsfc.nasa.gov/",
+        citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
+        source_url="",
+        license="Please cite",
+        comment="",
+        method=oceandata_get,
+        method_flags="search=T20000322000060.L3m_MO_SST_sst_9km.nc",
+        postprocess=list(pp_unzip,pp_gunzip),
+        access_function="",
+        data_group="Sea surface temperature")
+})
