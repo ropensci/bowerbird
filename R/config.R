@@ -28,6 +28,8 @@ bb_global_atts <- function() c("wget_default_flags","wget_global_flags","http_pr
 #'
 #' @export
 bb_config <- function(local_file_root,wget_default_flags=NULL,wget_global_flags="--restrict-file-names=windows --progress=dot:giga",http_proxy=NULL,ftp_proxy=NULL,clobber=1) {
+    assert_that(is.string(local_file_root))
+    assert_that(clobber %in% c(0,1,2))
     cf <- tibble()
     attr(cf,"wget_default_flags") <- wget_default_flags
     attr(cf,"wget_global_flags") <- wget_global_flags
@@ -54,10 +56,28 @@ bb_config <- function(local_file_root,wget_default_flags=NULL,wget_global_flags=
 #' }
 #' @export
 add <- function(cf,source) {
-    cf_attr <- attributes(cf)
-    cf_attr <- cf_attr[names(cf_attr) %in% bb_global_atts()]
-    out <- dplyr::bind_rows(cf,source)
-    attributes(out) <- c(attributes(out),cf_attr)
-    out
+    copy_bb_attributes(dplyr::bind_rows(cf,source),cf)
 }
 
+## helper functions to manage attributes
+bb_attributes <- function(obj) {
+    out <- attributes(obj)
+    out[names(out) %in% bb_global_atts()]
+}
+
+## copy attributes
+copy_bb_attributes <- function(to,from) {
+    attributes(to) <- c(attributes(to),bb_attributes(from))
+    to
+}
+
+## subset one or more rows
+bb_slice <- function(obj,rows) copy_bb_attributes(obj[rows,],obj)
+
+## copy each bb attribute into column
+bb_attributes_to_cols <- function(obj) {
+    for (nm in bb_global_atts()) {
+        if (!is.null(attr(obj,nm))) obj[,nm] <- attr(obj,nm)
+    }
+    obj
+}
