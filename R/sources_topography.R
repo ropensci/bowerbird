@@ -74,7 +74,7 @@ sources_topography <- function() {
                 citation="Beaman, Robin (2009, updated 2015) A bathymetric Digital Elevation Model (DEM) of the George V and Terre Adelie continental shelf and margin Australian Antarctic Data Centre - CAASM Metadata (https://data.aad.gov.au/aadc/metadata/metadata_redirect.cfm?md=/AMD/AU/GVdem_2008)",
                 license="CC-BY",
                 source_url="https://data.aad.gov.au/eds/file/4494",
-                method=aadc_eds_handler,
+                method=aadc_eds_get,
                 method_flags="",
                 postprocess=pp_unzip,
                 data_group="Topography")

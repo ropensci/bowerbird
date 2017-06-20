@@ -79,7 +79,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     }
     file_pattern <- sub(".*/","",this_dataset$source_url)
     if (nchar(file_pattern)<1) file_pattern <- NULL
-    if (identical(this_dataset$method[[1]],aadc_eds_handler)) file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
+    if (identical(this_dataset$method[[1]],aadc_eds_get)) file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
     ## build file list if postprocessing required
     if (length(pp)>0) {
         ## take snapshot of this directory before we start syncing
