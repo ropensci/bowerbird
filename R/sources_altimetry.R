@@ -60,5 +60,20 @@ sources_altimetry <- function() {
                 password="valid_aviso_account_password_needed",
                 access_function="readssh",
                 data_group="Altimetry")
-            )
+        ) %>%
+        bind_rows(
+            bb_source(
+                name="CNES-CLS09 Mean Dynamic Topography",
+                description="CNES-CLS09 Mean Dynamic Topography (v1.1 release)",
+                reference= "http://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html",
+                citation= "Rio, M-H, P. Schaeffer, G. Moreaux, J-M Lemoine, E. Bronner (2009) : A new Mean Dynamic Topography computed over the global ocean from GRACE data, altimetry and in-situ measurements . Poster communication at OceanObs09 symposium, 21-25 September 2009, Venice.",
+                source_url="ftp://ftp.aviso.altimetry.fr/auxiliary/mdt/",
+                license="See http://www.aviso.altimetry.fr/en/data/product-information/citation-and-aviso-products-licence.html",
+                method=bb_wget,
+                method_flags="--recursive --level=inf --follow-ftp --no-parent",
+                postprocess=NULL,
+                user="valid_aviso_account_user_name_needed",
+                password="valid_aviso_account_password_needed",
+                access_function="raster",
+                data_group="Altimetry"))
 }
