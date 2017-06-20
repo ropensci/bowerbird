@@ -4,7 +4,7 @@
 \alias{wget}
 \title{Make a wget call}
 \usage{
-wget(url, flags, verbose = TRUE)
+wget(url, flags, verbose = TRUE, ...)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
@@ -12,13 +12,15 @@ wget(url, flags, verbose = TRUE)
 \item{flags}{string: command-line flags to pass to wget}
 
 \item{verbose}{logical: print trace output?}
+
+\item{...}{: additional paramaters passed to \code{system2}}
 }
 \value{
-TRUE on success
+the result of the system2 call
 }
 \description{
 Make a wget call
 }
 \seealso{
-\code{\link{install_wget}}
+\code{\link{install_wget}} \code{\link{system2}}
 }

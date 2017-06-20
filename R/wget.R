@@ -52,7 +52,7 @@ webget <- function(data_source) {
         ok <- wget(data_source$source_url,this_flags)
     }
     ##}
-    ok
+    ok==0
 }
 
 
@@ -61,15 +61,16 @@ webget <- function(data_source) {
 #' @param url string: the URL to retrieve 
 #' @param flags string: command-line flags to pass to wget
 #' @param verbose logical: print trace output?
+#' @param ... : additional paramaters passed to \code{system2}
 #'
-#' @return TRUE on success
+#' @return the result of the system2 call
 #'
-#' @seealso \code{\link{install_wget}}
+#' @seealso \code{\link{install_wget}} \code{\link{system2}}
 #'
 # @export
-wget <- function(url,flags,verbose=TRUE) {
+wget <- function(url,flags,verbose=TRUE,...) {
     if (verbose) cat(sprintf(" executing wget call: flags %s, URL: %s\n",flags,url))
-    system(paste(wget_exe(),flags,url,sep=" "))==0
+    system2(wget_exe(),paste(flags,url,sep=" "),...)
 }
 
 #' Helper function to install wget on Windows
