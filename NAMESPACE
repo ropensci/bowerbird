@@ -2,6 +2,7 @@
 
 export(aadc_eds_get)
 export(add)
+export(bb_attributes)
 export(bb_config)
 export(bb_source)
 export(bb_sources)
