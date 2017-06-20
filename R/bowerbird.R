@@ -7,9 +7,10 @@
 #' @importFrom digest digest
 #' @importFrom dplyr bind_rows tbl_df tibble %>%
 #' @importFrom stringr regex str_detect str_match str_split str_trim
+#' @importFrom R.cache addMemoization
 #' @importFrom R.utils bunzip2 gunzip
-#' @importFrom utils download.file unzip
+#' @importFrom stats na.omit
+#' @importFrom utils download.file read.table str unzip
 NULL
-
 
 # @importFrom utils file_test

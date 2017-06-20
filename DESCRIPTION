@@ -11,6 +11,7 @@ Imports:
     assertthat,
     digest,
     dplyr,
+    R.cache,
     R.utils,
     stringr
 LazyLoad: yes
