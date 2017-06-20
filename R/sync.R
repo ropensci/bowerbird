@@ -51,7 +51,9 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             stop("local_file_root: ",this_dataset$local_file_root," does not exist. Either create it or run bb_sync with create_root=TRUE")
         }
     }
-    cat(sprintf("\n%s\nSynchronizing dataset: %s with source URL %s\n----------------------------------------------------------------------------------------------------------\n\n",base::date(),this_dataset$name,this_dataset$source_url))
+    cat(sprintf("\n%s\nSynchronizing dataset: %s\n",base::date(),this_dataset$name))
+    if (!is.na(this_dataset$source_url)) cat(sprintf("Source URL %s\n",this_dataset$source_url))
+    cat("--------------------------------------------------------------------------------------------\n\n")
     setwd(this_dataset$local_file_root)
 
     ## set proxy env vars
@@ -77,13 +79,12 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
 
     ## do the main synchonization, usually directly with wget, otherwise with custom methods
-    cat(sprintf("\n---\nProcessing source_url: %s\n",this_dataset$source_url))
     this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(this_dataset$source_url))
     if (verbose) {
         cat(sprintf(" this dataset path is: %s\n",this_path_no_trailing_sep))
     }
     file_pattern <- sub(".*/","",this_dataset$source_url)
-    if (nchar(file_pattern)<1) file_pattern <- NULL
+    if (is.na(file_pattern) || nchar(file_pattern)<1) file_pattern <- NULL
     if (identical(this_dataset$method[[1]],aadc_eds_get)) file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
     ## build file list if postprocessing required
     if (length(pp)>0) {
@@ -136,6 +137,6 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             }
         }
     }
-    cat(sprintf("\n%s dataset synchronization complete: %s (%s)\n",base::date(),this_dataset$name,this_dataset$source_url))
+    cat(sprintf("\n%s dataset synchronization complete: %s\n",base::date(),this_dataset$name))
     TRUE
 }
