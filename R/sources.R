@@ -96,14 +96,15 @@ bb_sources <- function(name,data_group) {
     if (!missing(name)) assert_that(is.character(name))
     if (!missing(data_group)) assert_that(is.character(data_group))
     out <- bind_rows(
-        if (missing(data_group) || (!missing(data_group) && "Sea ice" %in% data_group)) sources_seaice(),
-        if (missing(data_group) || (!missing(data_group) && "Topography" %in% data_group)) sources_topography(),
-        if (missing(data_group) || (!missing(data_group) && "Sea surface temperature" %in% data_group)) sources_sst(),
-        if (missing(data_group) || (!missing(data_group) && "Altimetry" %in% data_group)) sources_altimetry(),
-        if (missing(data_group) || (!missing(data_group) && "Oceanographic" %in% data_group)) sources_oceanographic(),
-        if (missing(data_group) || (!missing(data_group) && "meteorological" %in% data_group)) sources_meteorological(),
-        if (missing(data_group) || (!missing(data_group) && "Reanalysis" %in% data_group)) sources_reanalysis()
+        if (missing(data_group) || (!missing(data_group) && "sea ice" %in% tolower(data_group))) sources_seaice(),
+        if (missing(data_group) || (!missing(data_group) && "topography" %in% tolower(data_group))) sources_topography(),
+        if (missing(data_group) || (!missing(data_group) && "sea surface temperature" %in% tolower(data_group))) sources_sst(),
+        if (missing(data_group) || (!missing(data_group) && "altimetry" %in% tolower(data_group))) sources_altimetry(),
+        if (missing(data_group) || (!missing(data_group) && "oceanographic" %in% tolower(data_group))) sources_oceanographic(),
+        if (missing(data_group) || (!missing(data_group) && any(c("ocean colour","ocean color") %in% tolower(data_group)))) sources_ocean_colour(),
+        if (missing(data_group) || (!missing(data_group) && "meteorological" %in% tolower(data_group))) sources_meteorological(),
+        if (missing(data_group) || (!missing(data_group) && "reanalysis" %in% tolower(data_group))) sources_reanalysis()
         )
-    if (!missing(name)) out <- out[out$name %in% name,]
+    if (!missing(name)) out <- out[tolower(out$name) %in% tolower(name),]
     out
 }
