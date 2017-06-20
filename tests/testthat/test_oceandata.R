@@ -1,5 +1,34 @@
 context("oceandata handler")
 
+test_that("oceandata_get works",{
+    ods <- bb_source(
+        name="Oceandata test",
+        description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
+        reference= "http://oceancolor.gsfc.nasa.gov/",
+        citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
+        source_url="",
+        license="Please cite",
+        comment="",
+        method=oceandata_get,
+        method_flags="search=T20000322000060.L3m_MO_SST_sst_9km.nc",
+        postprocess=NULL,
+        access_function="",
+        data_group="Sea surface temperature")
+    temp_root <- tempdir()
+    ocf <- add(bb_config(local_file_root="irrelevant_here"),ods)
+    ## will be calling oceandata_get directly, not via bb_sync, so do some extra steps
+    for (nm in bb_global_atts()) { if (!is.null(attr(ocf,nm))) ocf[1,nm] <- attr(ocf,nm) }
+    cwd <- getwd()
+    setwd(temp_root)
+    oceandata_get(ocf)
+    fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc" ## relative file name
+    expect_true(file.exists(fnm))
+    expect_true(file.exists(file.path(temp_root,fnm)))
+    fi <- file.info(fnm)
+    expect_gt(fi$size,6e6)
+    setwd(cwd)
+})
+
 test_that("url mapper works", {
     expect_identical(oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A20021852007192.L3m_WC_SST_9.bz2",path_only=TRUE),"oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/8D_Climatology/9km/SST/")
     expect_identical(oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A20030012003008.L3m_8D_KD490_Kd_490_9km.bz2",path_only=TRUE),"oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/8Day/9km/Kd/2003/")
