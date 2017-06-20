@@ -6,7 +6,8 @@
 \usage{
 bb_config(local_file_root, wget_default_flags = NULL,
   wget_global_flags = "--restrict-file-names=windows --progress=dot:giga",
-  http_proxy = NULL, ftp_proxy = NULL, clobber = 1)
+  http_proxy = NULL, ftp_proxy = NULL, clobber = 1,
+  skip_downloads = FALSE)
 }
 \arguments{
 \item{local_file_root}{string: location of data repository on local file system}
@@ -20,6 +21,8 @@ bb_config(local_file_root, wget_default_flags = NULL,
 \item{ftp_proxy}{string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)}
 
 \item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)}
+
+\item{skip_downloads}{logical: if TRUE, \code{bb_sync} will do a dry run of the synchronisation process but without actually downloading files. For data sources using method bb_wget, this means that the wget calls will not be executed, so e.g. any recursion handled by wget itself will not be simulated}
 }
 \value{
 configuration tibble
