@@ -100,7 +100,7 @@ bb_sources <- function(name,data_group) {
         if (missing(data_group) || (!missing(data_group) && "Topography" %in% data_group)) sources_topography(),
         if (missing(data_group) || (!missing(data_group) && "Sea surface temperature" %in% data_group)) sources_sst(),
         if (missing(data_group) || (!missing(data_group) && "Altimetry" %in% data_group)) sources_altimetry(),
-        if (missing(data_group) || (!missing(data_group) && "Derived layers" %in% data_group)) sources_derived(),
+        if (missing(data_group) || (!missing(data_group) && "Oceanographic" %in% data_group)) sources_oceanographic(),
         if (missing(data_group) || (!missing(data_group) && "Reanalysis" %in% data_group)) sources_reanalysis()
         )
     if (!missing(name)) out <- out[out$name %in% name,]
