@@ -6,7 +6,6 @@ sources_sst <- function() {
         citation="Richard W. Reynolds, Viva F. Banzon, and NOAA CDR Program (2008): NOAA Optimum Interpolation 1/4 Degree Daily Sea Surface Temperature (OISST) Analysis, Version 2. [indicate subset used]. NOAA National Climatic Data Center. doi:10.7289/V5SQ8XB5 [access date]",
         source_url="ftp://eclipse.ncdc.noaa.gov/pub/OI-daily-v2/NetCDF/*",
         license="Please cite",
-        comment="",
         method=webget,
         method_flags="--recursive --level=inf --accept=\"avhrr-only*\" --reject=\"*preliminary*\" --follow-ftp --no-parent",
         postprocess=pp_gunzip,
@@ -20,7 +19,6 @@ sources_sst <- function() {
                 citation="NOAA_OI_SST_V2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
                 source_url="ftp://ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/*",
                 license="Please cite",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=1 --no-parent",
                 postprocess=NULL,
@@ -35,11 +33,9 @@ sources_sst <- function() {
                 citation="NOAA_ERSST_V3 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
                 source_url="ftp://ftp.cdc.noaa.gov/Datasets/noaa.ersst/*",
                 license="Please cite",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=1 --no-parent",
                 postprocess=NULL,
-                access_function="",
                 data_group="Sea surface temperature")
         ) %>%
         bind_rows(
@@ -50,11 +46,9 @@ sources_sst <- function() {
                 citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
                 source_url="",
                 license="Please cite",
-                comment="",
                 method=oceandata_get,
                 method_flags="search=T*L3m_MO_SST_sst_9km.nc",
                 postprocess=NULL,
-                access_function="",
                 data_group="Sea surface temperature")
         ) %>%
         bind_rows(
@@ -64,12 +58,11 @@ sources_sst <- function() {
                 reference="https://podaac.jpl.nasa.gov/Multi-scale_Ultra-high_Resolution_MUR-SST",
                 citation="Cite as: US NASA; Jet Propulsion Laboratory; Physical Oceanography Distributed Active Archive Center (JPL PO.DAAC) (2002). GHRSST Level 4 MUR Global Foundation Sea Surface Temperature Analysis (v4.1) (GDS versions 1 and 2). National Oceanographic Data Center, NOAA. Dataset. [access date]",
                 source_url="ftp://podaac-ftp.jpl.nasa.gov/allData/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/",
-                license="",
-                comment="Note: this collection is large! You may wish to specify one or more source_urls with only particular years, e.g. ftp://podaac-ftp.jpl.nasa.gov/allData/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/2015/",
+                license="Please cite",
+                comment="Note: this collection is large! You may wish to specify one or more source_url values with only particular years, e.g. ftp://podaac-ftp.jpl.nasa.gov/allData/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/2015/",
                 method=ghrsst_get,
                 method_flags="--recursive --level=inf --no-parent",
                 postprocess=pp_bunzip2,
-                access_function="",
                 data_group="Sea surface temperature")
         )   
 }
