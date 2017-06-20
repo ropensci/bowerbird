@@ -35,23 +35,24 @@ bb_wget <- function(data_source) {
     if (!is.na(data_source$password) && nchar(data_source$password)>0) this_flags <- paste0(this_flags," --password=",data_source$password)
     ##if (data_source$wait>0) this_flags <- paste0(this_flags," --wait=",data_source$wait)
 
-    ##if (data_source$skip_downloads) {
-    ##    cat(sprintf(" skip_downloads is TRUE, not executing: %s\n",wget_call))
-    ##} else {
-    if (sink.number()>0) {
-        ## we have a sink() redirection in place
-        ## sink() won't catch the output of system commands, which means we miss stuff in our log
-        ## workaround: send output to temporary file so that we can capture it
-        output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
-        this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
-        ok <- wget(data_source$source_url,this_flags)
-        ## now echo the contents of output_file to console, so that sink() captures it
-        cat(readLines(output_file),sep="\n")
+    if (!is.null(data_source$skip_downloads) && data_source$skip_downloads) {
+        cat(sprintf(" skip_downloads is TRUE, not executing: wget %s %s\n",this_flags,data_source$source_url))
+        ok <- TRUE
     } else {
-        ok <- wget(data_source$source_url,this_flags)
+        if (sink.number()>0) {
+            ## we have a sink() redirection in place
+            ## sink() won't catch the output of system commands, which means we miss stuff in our log
+            ## workaround: send output to temporary file so that we can capture it
+            output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
+            this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
+            ok <- wget(data_source$source_url,this_flags)
+            ## now echo the contents of output_file to console, so that sink() captures it
+            cat(readLines(output_file),sep="\n")
+        } else {
+            ok <- wget(data_source$source_url,this_flags)
+        }
     }
-    ##}
-    ok==0
+    ok==0    
 }
 
 
