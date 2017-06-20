@@ -10,6 +10,7 @@
 #' @param method function: the function that handles the synchronisation process for this data source
 #' @param method_flags string:
 #' @param postprocess function, call, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
+#' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
 #' @param user string: username, if required
 #' @param password string: password, if required
 #' @param access_function string:
@@ -38,10 +39,13 @@
 #' cf <- add(cf,my_source)
 #'
 #' @export
-bb_source <- function(name,description=as.character(NA),reference,source_url,citation,license,comment=as.character(NA),method=bb_wget,method_flags=as.character(NA),postprocess,user=as.character(NA),password=as.character(NA),access_function=as.character(NA),data_group=as.character(NA)) {
+bb_source <- function(name,description=as.character(NA),reference,source_url,citation,license,comment=as.character(NA),method=bb_wget,method_flags=as.character(NA),postprocess,authentication_note=as.character(NA),user=as.character(NA),password=as.character(NA),access_function=as.character(NA),data_group=as.character(NA)) {
     assert_that(is.function(method))
     if (missing(name))
         stop("Each data source requires a name")
+    if (!is.na(authentication_note) && (na_or_empty(user) || na_or_empty(password))) {
+        warning(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s",name,authentication_note))
+    }
     if (missing(license) || missing(citation))
         stop("Please provide license and citation information for the data source, so that users properly acknowledge it")
     if (missing(reference))
@@ -69,6 +73,7 @@ bb_source <- function(name,description=as.character(NA),reference,source_url,cit
         method=list(method),
         method_flags=if (assert_that(is.string(method_flags))) method_flags,
         postprocess=list(postprocess),
+        authentication_note=if (assert_that(is.string(authentication_note))) authentication_note,
         user=if (assert_that(is.string(user))) user,
         password=if (assert_that(is.string(password))) password,
         access_function=if (assert_that(is.string(access_function))) access_function,

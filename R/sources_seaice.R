@@ -41,27 +41,17 @@ sources_seaice <- function() {
         ) %>%
         bind_rows(
             bb_source(
-                name="NSIDC SMMR-SSM/I Nasateam sea ice time since melt",
-                description="Time since sea ice melted calculated from NSIDC SMMR-SSM/I Nasateam sea ice concentration data",
-                reference="",
-                citation="",
-                source_url="http://webdav.data.aad.gov.au/data/environmental/smmr_ssmi_nasateam/time_since_melt/",
-                license="CC-BY",
-                method=bb_wget,
-                method_flags="--recursive --level=inf --no-parent --reject=\"index.html\"",
-                postprocess=NULL,
-                data_group="Sea ice")
-        ) %>%
-        bind_rows(
-            bb_source(
                 name="Nimbus Ice Edge Points from Nimbus Visible Imagery",
                 description="This data set (NmIcEdg2) estimates the location of the North and South Pole sea ice edges at various times during the mid to late 1960s, based on recovered Nimbus 1 (1964), Nimbus 2 (1966), and Nimbus 3 (1969) visible imagery.",
                 reference="http://nsidc.org/data/nmicedg2/",
                 citation="Gallaher, D. and G. Campbell. 2014. Nimbus Ice Edge Points from Nimbus Visible Imagery L2, CSV. [indicate subset used]. Boulder, Colorado USA: NASA National Snow and Ice Data Center Distributed Active Archive Center. http://dx.doi.org/10.5067/NIMBUS/NmIcEdg2",
                 source_url="ftp://n5eil01u.ecs.nsidc.org/SAN/NIMBUS/NmIcEdg2.001/",
                 license="Please cite, see http://nsidc.org/about/use_copyright.html",
+                authentication_note="Requires Earthdata login, see https://urs.earthdata.nasa.gov/",
                 method=bb_wget,
                 method_flags="--recursive --level=inf --no-parent",
+                user="",
+                password="",
                 postprocess=NULL,
                 data_group="Sea ice")
         ) %>%

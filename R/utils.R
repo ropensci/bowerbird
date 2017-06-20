@@ -2,6 +2,9 @@
 ## various helper functions
 ## not exported for user
 
+## NA or empty string
+na_or_empty <- function(z) is.na(z) | !nzchar(z)
+    
 save_current_settings <- function() {
     return(list(working_dir=getwd(), ## current working directory
                 env_http_proxy=Sys.getenv("http_proxy"), ## proxy env vars

@@ -1,11 +1,12 @@
 context("data config")
 
 test_that("config save/load works", {
-    cf <- add(bb_config("/dummy/file/root"),bb_sources())
-    expect_type(cf,"list")
+    suppressWarnings(src <- bb_sources())
+    cf <- add(bb_config("/dummy/file/root"),src)
+    expect_s3_class(cf,"data.frame")
     tmpfile <- tempfile()
     saveRDS(cf,tmpfile)
-    expect_identical(cf,readRDS(file=tmpfile))
+    expect_identical(serialize(cf,NULL),serialize(readRDS(file=tmpfile),NULL))
 })
 
 test_that("config operations preserve attributes", {

@@ -2,15 +2,16 @@ sources_altimetry <- function() {
     bb_source(
         name="Ssalto/Duacs gridded absolute dynamic topography",
         description="Gridded sea surface heights above geoid from satellite altimetry (delayed and near-real-time products)",
-        reference= "http://www.aviso.altimetry.fr/en/data/products/sea-surface-height-products/global/madt.html",
+        reference="http://www.aviso.altimetry.fr/en/data/products/sea-surface-height-products/global/madt.html",
         citation="The altimeter products were produced by Ssalto/Duacs and distributed by Aviso, with support from Cnes (http://www.aviso.altimetry.fr/duacs/)",
         source_url=c("ftp://ftp.aviso.altimetry.fr/global/delayed-time/grids/madt/all-sat-merged/h/*","ftp://ftp.aviso.altimetry.fr/global/near-real-time/grids/madt/all-sat-merged/h/*"),
         license="See http://www.aviso.altimetry.fr/en/data/product-information/citation-and-aviso-products-licence.html",
         method=bb_wget,
         method_flags="--recursive --level=inf --follow-ftp --no-parent",
         postprocess=pp_gunzip,
-        user="valid_aviso_account_user_name_needed",
-        password="valid_aviso_account_password_needed",
+        authentication_note="AVISO login required, see https://www.aviso.altimetry.fr/en/data/data-access/endatadata-accessregistration-form.html",
+        user="",
+        password="",
         access_function="readssh",
         data_group="Altimetry") %>%
         bind_rows(
@@ -24,8 +25,9 @@ sources_altimetry <- function() {
                 method=bb_wget,
                 method_flags="--recursive --level=inf --timestamping --follow-ftp --no-parent",
                 postprocess=pp_gunzip,
-                user="valid_aviso_account_user_name_needed",
-                password="valid_aviso_account_password_needed",
+                authentication_note="AVISO login required, see https://www.aviso.altimetry.fr/en/data/data-access/endatadata-accessregistration-form.html",
+                user="",
+                password="",
                 access_function="readcurr",
                 data_group="Altimetry")
         ) %>%
@@ -40,8 +42,9 @@ sources_altimetry <- function() {
                 method=bb_wget,
                 method_flags="--recursive --level=inf --follow-ftp --no-parent",
                 postprocess=pp_gunzip,
-                user="valid_aviso_account_user_name_needed",
-                password="valid_aviso_account_password_needed",
+                authentication_note="AVISO login required, see https://www.aviso.altimetry.fr/en/data/data-access/endatadata-accessregistration-form.html",
+                user="",
+                password="",
                 access_function="readssh",
                 data_group="Altimetry")
         ) %>%
@@ -56,8 +59,9 @@ sources_altimetry <- function() {
                 method=bb_wget,
                 method_flags="--recursive --level=inf --follow-ftp --no-parent",
                 postprocess=pp_gunzip,
-                user="valid_aviso_account_user_name_needed",
-                password="valid_aviso_account_password_needed",
+                authentication_note="AVISO login required, see https://www.aviso.altimetry.fr/en/data/data-access/endatadata-accessregistration-form.html",
+                user="",
+                password="",
                 access_function="readssh",
                 data_group="Altimetry")
         ) %>%
@@ -72,8 +76,9 @@ sources_altimetry <- function() {
                 method=bb_wget,
                 method_flags="--recursive --level=inf --follow-ftp --no-parent",
                 postprocess=NULL,
-                user="valid_aviso_account_user_name_needed",
-                password="valid_aviso_account_password_needed",
+                authentication_note="AVISO login required, see https://www.aviso.altimetry.fr/en/data/data-access/endatadata-accessregistration-form.html",
+                user="",
+                password="",
                 access_function="raster",
                 data_group="Altimetry"))
 }
