@@ -54,7 +54,10 @@ bb_config <- function(local_file_root,wget_default_flags=NULL,wget_global_flags=
 #' }
 #' @export
 add <- function(cf,source) {
-    ## check that name is unique?
-    dplyr::bind_rows(cf,source)
+    cf_attr <- attributes(cf)
+    cf_attr <- cf_attr[!names(cf_attr) %in% c("names","class","row.names")]
+    out <- dplyr::bind_rows(cf,source)
+    attributes(out) <- c(attributes(out),cf_attr)
+    out
 }
 
