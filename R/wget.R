@@ -69,7 +69,7 @@ webget <- function(data_source) {
 #'
 # @export
 wget <- function(url,flags,verbose=TRUE,...) {
-    if (verbose) cat(sprintf(" executing wget call: flags %s, URL: %s\n",flags,url))
+    if (verbose) cat(sprintf(" executing wget %s %s\n",flags,url))
     system2(wget_exe(),paste(flags,url,sep=" "),...)
 }
 
