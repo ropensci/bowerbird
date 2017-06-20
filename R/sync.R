@@ -38,9 +38,9 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
 
 do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     on.exit({ restore_settings(settings) })
-    if (nrow(this_dataset)>1) stop("unexpected: multiple rows in dataset")
-    ## copy bb attrs into this_dataset, and convert to list
-    this_dataset <- as.list(bb_attributes_to_cols(this_dataset))
+    if (nrow(this_dataset)!=1) stop("expecting single-row data set")
+    ## copy bb attrs into this_dataset
+    this_dataset <- bb_attributes_to_cols(this_dataset)
     ## check that the root directory exists
     if (!dir_exists(this_dataset$local_file_root)) {
         ## no, it does not exist
@@ -55,13 +55,13 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     setwd(this_dataset$local_file_root)
 
     ## set proxy env vars
-    if (!is.null(this_dataset$http_proxy) || !is.null(this_dataset$ftp_proxy)) {
+    if (any(c("ftp_proxy","http_proxy") %in% names(this_dataset))) {
         if (verbose) cat(sprintf(" setting proxy variables ... "))
-        if (!is.null(this_dataset$http_proxy)) {
+        if ("http_proxy" %in% names(this_dataset)) {
             Sys.setenv(http_proxy=this_dataset$http_proxy)
             Sys.setenv(https_proxy=this_dataset$http_proxy)
         }
-        if (!is.null(this_dataset$ftp_proxy)) Sys.setenv(ftp_proxy=this_dataset$ftp_proxy)
+        if ("ftp_proxy" %in% names(this_dataset)) Sys.setenv(ftp_proxy=this_dataset$ftp_proxy)
         if (verbose) cat(sprintf("done.\n"))
     }
 
