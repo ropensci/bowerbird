@@ -6,7 +6,6 @@ sources_topography <- function() {
                 citation="Smith, W. H. F., and D. T. Sandwell, Global seafloor topography from satellite altimetry and ship depth soundings, Science, v. 277, p. 1957-1962, 26 Sept., 1997",
                 source_url="ftp://topex.ucsd.edu/pub/global_topo_1min/*",
                 license="See ftp://topex.ucsd.edu/pub/global_topo_1min/COPYRIGHT.txt",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=1 --no-parent",
                 postprocess=NULL,
@@ -22,7 +21,6 @@ sources_topography <- function() {
                 source_url="http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/netcdf/",
                 method=webget,
                 method_flags="--recursive --no-parent --accept=\"*gdal*,*.txt\"",
-                comment="",
                 postprocess=pp_gunzip,
                 access_function="readtopo",
                 data_group="Topography")
@@ -37,7 +35,6 @@ sources_topography <- function() {
                 source_url=c("http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2/ETOPO2v2-2006/ETOPO2v2c/netCDF/ETOPO2v2c_f4_netCDF.zip","http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2/ETOPO2v2-2006/ETOPO2v2c/ETOPO2v2c_ReadMe.txt"),
                 method=webget,
                 method_flags="--recursive --no-parent",
-                comment="",
                 postprocess=pp_unzip,
                 access_function="readtopo",
                 data_group="Topography")
@@ -54,7 +51,6 @@ sources_topography <- function() {
                 method_flags="--recursive --no-parent -e robots=off --accept=\"*bin.zip,*tiff.zip,*.txt,*.rtf\" --no-check-certificate",
                 comment="--no-check-certificate flag to wget until certificate authority issue fixed",
                 postprocess=pp_unzip,
-                access_function="",
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -65,11 +61,9 @@ sources_topography <- function() {
                 citation="Beaman, R.J. & O'Brien, P., 2011. Kerguelen Plateau Bathymetric Grid, November 2010. Record  2011/022. Geoscience Australia, Canberra",
                 source_url="http://ftt.jcu.edu.au/deepreef/kergdem/gmt/kerg_dem_gmt.zip",
                 license="CC-BY",
-                comment="",
                 method=webget,
                 method_flags="--recursive --no-parent",
                 postprocess=pp_unzip,
-                access_function="",
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -82,9 +76,7 @@ sources_topography <- function() {
                 source_url="https://data.aad.gov.au/eds/file/4494",
                 method=aadc_eds,
                 method_flags="",
-                comment="",
                 postprocess=pp_unzip,
-                access_function="",
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -95,17 +87,15 @@ sources_topography <- function() {
                 citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
                 source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
                 license="CC-BY 4.0",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=inf --accept=zip --no-parent",
                 postprocess=pp_unzip,
-                access_function="",
                 data_group="Topography")
         ) %>%
         bind_rows(
             bb_source(
                 name="The International Bathymetric Chart of the Southern Ocean (IBCSO) - digital bathymetric model",
-                description="",
+                description="The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 is a new digital bathymetric model (DBM) portraying the seafloor of the circum-Antarctic waters south of 60S. IBCSO is a regional mapping project of the General Bathymetric Chart of the Oceans (GEBCO). The IBCSO Version 1.0 DBM has been compiled from all available bathymetric data collectively gathered by more than 30 institutions from 15 countries. These data include multibeam and single-beam echo soundings, digitized depths from nautical charts, regional bathymetric gridded compilations, and predicted bathymetry. Specific gridding techniques were applied to compile the DBM from the bathymetric data of different origin, spatial distribution, resolution, and quality. The IBCSO Version 1.0 DBM has a resolution of 500 x 500 m, based on a polar stereographic projection, and is publicly available together with a digital chart for printing from the project website (www.ibcso.org) and at http://dx.doi.org/10.1594/PANGAEA.805736.",
                 reference="http://www.ibcso.org/",
                 citation="Arndt, J.E., H. W. Schenke, M. Jakobsson, F. Nitsche, G. Buys, B. Goleby, M. Rebesco, F. Bohoyo, J.K. Hong, J. Black, R. Greku, G. Udintsev, F. Barrios, W. Reynoso-Peralta, T. Morishita, R. Wigley, The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 - A new bathymetric compilation covering circum-Antarctic waters, 2013, Geophysical Research Letters, Vol. 40, p. 3111-3117, doi: 10.1002/grl.50413",
                 license="CC-BY",
@@ -113,13 +103,12 @@ sources_topography <- function() {
                 method=webget,
                 method_flags="--recursive --no-parent",
                 postprocess=pp_unzip,
-                access_function="",
                 data_group="Topography")
         ) %>%
         bind_rows(
             bb_source(
                 name="The International Bathymetric Chart of the Southern Ocean (IBCSO) - digital chart for printing",
-                description="",
+                description="The IBCSO Poster, 2013, is a polar stereographic view of the Southern Ocean displaying bathymetric contours south of 60S at a scale of 1:7,000,000. The poster size is 39.25 x 47.125 inches.",
                 reference="http://www.ibcso.org/",
                 citation="Arndt, J.E., H. W. Schenke, M. Jakobsson, F. Nitsche, G. Buys, B. Goleby, M. Rebesco, F. Bohoyo, J.K. Hong, J. Black, R. Greku, G. Udintsev, F. Barrios, W. Reynoso-Peralta, T. Morishita, R. Wigley, The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 - A new bathymetric compilation covering circum-Antarctic waters, 2013, Geophysical Research Letters, Vol. 40, p. 3111-3117, doi: 10.1002/grl.50413",
                 license="CC-BY",
@@ -127,7 +116,6 @@ sources_topography <- function() {
                 method=webget,
                 method_flags="--recursive --no-parent",
                 postprocess=NULL,
-                access_function="",
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -141,7 +129,6 @@ sources_topography <- function() {
                 method=webget,
                 method_flags="--recursive --no-parent",
                 postprocess=NULL,
-                access_function="",
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -156,7 +143,6 @@ sources_topography <- function() {
                 method_flags="--recursive --no-parent --reject=\"*.txt.gz,*.tar.gz\"",
                 comment="Only the 200m and 1km binary files are retrieved here: adjust the source_url or method_flags for others",
                 postprocess=pp_gunzip,
-                access_function="",
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -167,11 +153,9 @@ sources_topography <- function() {
                 citation="Mitchell, J.S., Mackay, K.A., Neil, H.L., Mackay, E.J., Pallentin, A., Notman P., 2012. Undersea New Zealand, 1:5,000,000. NIWA Chart, Miscellaneous Series No. 92",
                 source_url="ftp://ftp.niwa.co.nz/bathymetry/NZBathy_DTM_2016_binary_grid.zip",
                 license="Please cite",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=inf --no-parent",
                 postprocess=NULL,
-                access_function="",
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -185,7 +169,6 @@ sources_topography <- function() {
                 method=webget,
                 method_flags="--recursive --no-parent --reject=\"index.html\"",
                 postprocess=NULL,
-                access_function="",
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -199,7 +182,6 @@ sources_topography <- function() {
                 method=webget,
                 method_flags="--recursive --no-parent",
                 postprocess=pp_unzip,
-                access_function="",
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -210,11 +192,9 @@ sources_topography <- function() {
                 citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical, High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
                 source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
                 license="LGPL",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
                 postprocess=pp_unzip,
-                access_function="",
                 data_group="Topography"            )
         )
 }

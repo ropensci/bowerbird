@@ -6,7 +6,6 @@ sources_seaice <- function() {
         source_url="ftp://sidads.colorado.edu/pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/",
         citation="Cavalieri, D. J., C. L. Parkinson, P. Gloersen, and H. Zwally. 1996, updated yearly. Sea Ice Concentrations from Nimbus-7 SMMR and DMSP SSM/I-SSMIS Passive Microwave Data. [indicate subset used]. Boulder, Colorado USA: NASA National Snow and Ice Data Center Distributed Active Archive Center. http://dx.doi.org/10.5067/8GQ8LZQVL0VL",
         license="Please cite, see http://nsidc.org/about/use_copyright.html",
-        comment="",
         method=webget,
         method_flags="--exclude-directories=pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/browse,pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/north --recursive --level=inf",
         postprocess=NULL,
@@ -20,7 +19,6 @@ sources_seaice <- function() {
                 citation="Maslanik, J. and J. Stroeve. 1999, updated daily. Near-Real-Time DMSP SSMIS Daily Polar Gridded Sea Ice Concentrations. [indicate subset used]. Boulder, Colorado USA: NASA National Snow and Ice Data Center Distributed Active Archive Center. http://dx.doi.org/10.5067/U8C09DWVX9LM",
                 source_url="ftp://sidads.colorado.edu/pub/DATASETS/nsidc0081_nrt_nasateam_seaice/",
                 license="Please cite, see http://nsidc.org/about/use_copyright.html",
-                comment="",
                 method=webget,
                 method_flags="--exclude-directories=pub/DATASETS/nsidc0081_nrt_nasateam_seaice/browse,pub/DATASETS/nsidc0081_nrt_nasateam_seaice/north --recursive --level=inf",
                 postprocess=NULL,
@@ -35,7 +33,6 @@ sources_seaice <- function() {
                 citation="See the citation details of the particular sea ice dataset used",
                 source_url="ftp://sidads.colorado.edu/pub/DATASETS/seaice/polar-stereo/",
                 license="Please cite, see http://nsidc.org/about/use_copyright.html",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=inf",
                 postprocess=NULL,
@@ -50,11 +47,9 @@ sources_seaice <- function() {
                 citation="",
                 source_url="http://webdav.data.aad.gov.au/data/environmental/smmr_ssmi_nasateam/time_since_melt/",
                 license="CC-BY",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=inf --no-parent --reject=\"index.html\"",
                 postprocess=NULL,
-                access_function="",
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -65,11 +60,9 @@ sources_seaice <- function() {
                 citation="Gallaher, D. and G. Campbell. 2014. Nimbus Ice Edge Points from Nimbus Visible Imagery L2, CSV. [indicate subset used]. Boulder, Colorado USA: NASA National Snow and Ice Data Center Distributed Active Archive Center. http://dx.doi.org/10.5067/NIMBUS/NmIcEdg2",
                 source_url="ftp://n5eil01u.ecs.nsidc.org/SAN/NIMBUS/NmIcEdg2.001/",
                 license="Please cite, see http://nsidc.org/about/use_copyright.html",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=inf --no-parent",
                 postprocess=NULL,
-                access_function="",
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -80,7 +73,6 @@ sources_seaice <- function() {
                 citation="Include the acknowledgement: \"ASI Algorithm AMSR-E sea ice concentration were obtained for [PERIOD] from the Integrated Climate Date Center (ICDC, http://icdc.zmaw,de/), University of Hamburg, Hamburg, Germany.\" Also please cite: Spreen, G., L. Kaleschke, and G. Heygster (2008), Sea ice remote sensing using AMSR-E 89 GHz channels, J. Geophys. Res. 113, C02S03, doi:10.1029/2005JC003384",
                 source_url="ftp://ftp-projects.zmaw.de/seaice/AMSR-E_ASI_IceConc/no_landmask/hdf/s6250/*",
                 license="Please cite",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=inf --follow-ftp",
                 postprocess=pp_gunzip,
@@ -95,7 +87,6 @@ sources_seaice <- function() {
                 citation="See the citation details of the particular sea ice dataset used",
                 source_url=c("ftp://ftp-projects.zmaw.de/seaice/AMSR-E_ASI_IceConc/Landmasks/","ftp://ftp-projects.zmaw.de/seaice/AMSR-E_ASI_IceConc/LonLatGrids/"),
                 license="Please cite",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=inf --follow-ftp",
                 postprocess=NULL,
@@ -114,7 +105,7 @@ sources_seaice <- function() {
                 method=webget,
                 method_flags="--recursive --level=inf --accept=\"asi*.hdf\" --accept=\"asi*.png\" --accept=\"asi*.tif\" --reject-regex=\"^/amsr2data/\" --no-parent",
                 postprocess=NULL,
-                access_function="",
+                access_function="readice",
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -129,7 +120,7 @@ sources_seaice <- function() {
                 method=webget,
                 method_flags="--recursive --level=inf --accept=\"asi*.hdf\" --accept=\"asi*.tif\" --accept=\"asi*.png\" --reject-regex=\"^/amsr2data/\" --no-parent",
                 postprocess=NULL,
-                access_function="",
+                access_function="readice",
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -140,11 +131,9 @@ sources_seaice <- function() {
                 citation="See the citation details of the particular sea ice dataset used",
                 source_url="http://www.iup.uni-bremen.de:8084/amsredata/asi_daygrid_swath/l1a/s6250/grid_coordinates/LongitudeLatitudeGrid-s6250-Antarctic.hdf",
                 license="Please cite",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=inf --accept=hdf --no-parent",
                 postprocess=NULL,
-                access_function="",
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -155,7 +144,6 @@ sources_seaice <- function() {
                 citation="",
                 source_url="ftp://ftp.ifremer.fr//ifremer/cersat/products/gridded/psi-concentration/data/antarctic/daily/netcdf/*",
                 license="Unknown",
-                comment="",
                 method=webget,
                 method_flags="--recursive --level=inf --no-parent",
                 postprocess=pp_uncompress,
@@ -170,11 +158,9 @@ sources_seaice <- function() {
                 citation="Fraser, AD, RA Massom, KJ Michael, BK Galton-Fenzi, and JL Lieser (2012) East Antarctic landfast sea ice distribution and variability, 2000-08. Journal of Climate, 25(4):1137-1156",
                 source_url="https://data.aad.gov.au/eds/file/3656",
                 license="CC-BY",
-                comment="",
                 method=aadc_eds,
                 method_flags="",
                 postprocess=pp_unzip,
-                access_function="",
                 data_group="Sea ice")
         )
 }
