@@ -134,6 +134,22 @@ wget_test <- function(wget_path) {
     try({system(paste0(wget_path," --help"),intern=TRUE);return(TRUE)},silent=TRUE)
     FALSE
 }
-                
+
+
+resolve_wget_clobber_flags <- function(primary_flags,secondary_flags) {
+    wgf <- str_split(primary_flags,"[ ]+")[[1]]
+    secondary_flags <- str_split(secondary_flags,"[ ]+")[[1]]
+    for (thisflag in setdiff(secondary_flags,wgf)) {
+        switch(thisflag,
+               "-N"=,
+               "--timestamping"={ if (! any(c("--no-clobber","-nc") %in% wgf)) wgf <- c(wgf,thisflag) },
+               "-nc"=,
+               "--no-clobber"={ if (! any(c("--timestamping","-N") %in% wgf)) wgf <- c(wgf,thisflag) },
+               wgf <- c(wgf,thisflag))
+    }
+    paste(wgf,sep="",collapse=" ")
+}
+
+
 ##dir_exists <- function(z) utils::file_test("-d",z)
 ##file_exists <- function(x) utils::file_test('-f', x)
