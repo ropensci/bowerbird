@@ -60,11 +60,14 @@ oceandata_get <- function(data_source) {
         }
         if (download_this) {
             dummy <- data_source
+            ## note that if skip_downloads is TRUE, it will be passed through to bb_wget here
             dummy$method_flags <- paste("--progress=dot:giga","--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
             dummy$source_url <- this_url
             bb_wget(dummy)
             ## recalculate checksum so that cache gets updated
-            blah <- calculate_sha1(this_fullfile)
+            ## but not if skip_downloads
+            if (is.null(data_source$skip_downloads) || !data_source$skip_downloads)
+                blah <- calculate_sha1(this_fullfile)
         } else {
             if (this_exists) {
                 cat(sprintf("not downloading %s, local copy exists with identical checksum\n",this$filename))
