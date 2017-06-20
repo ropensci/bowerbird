@@ -4,7 +4,7 @@
 \alias{bb_sync}
 \title{Run a bowerbird data repository synchronisation}
 \usage{
-bb_sync(config, create_root = FALSE, verbose = TRUE)
+bb_sync(config, create_root = FALSE, verbose = TRUE, catch_errors = TRUE)
 }
 \arguments{
 \item{config}{tibble: configuration as returned by \code{\link{bb_config}}}
@@ -12,6 +12,8 @@ bb_sync(config, create_root = FALSE, verbose = TRUE)
 \item{create_root}{logical: should the data root directory be created if it does not exist?}
 
 \item{verbose}{logical: if TRUE, provide additional progress output}
+
+\item{catch_errors}{logical: if TRUE, catch errors and continue the synchronisation process}
 }
 \value{
 vector of logical values indicating success of each data source in config

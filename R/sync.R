@@ -3,11 +3,12 @@
 #' @param config tibble: configuration as returned by \code{\link{bb_config}}
 #' @param create_root logical: should the data root directory be created if it does not exist?
 #' @param verbose logical: if TRUE, provide additional progress output
+#' @param catch_errors logical: if TRUE, catch errors and continue the synchronisation process
 #'
 #' @return vector of logical values indicating success of each data source in config
 #'
 #' @export
-bb_sync <- function(config,create_root=FALSE,verbose=TRUE) {
+bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     ## general synchronization handler
     assert_that(is.data.frame(config))
     assert_that(is.flag(create_root))
@@ -17,15 +18,19 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE) {
     ## save some current settings: path and proxy env values
     settings <- save_current_settings()
     ## iterate through each dataset in turn
-    sync_wrapper <- function(di) {
-        tryCatch({
-            do_sync_repo(config %>% bb_slice(di),create_root,verbose,settings)},
-            error=function(e) {
-                cat("\nThere was a problem synchronizing the dataset:",config$name[di],".\nThe error message was:",e$message,"\n")
-            }
-        )
+    if (catch_errors) {
+        sync_wrapper <- function(di) {
+            tryCatch({
+                do_sync_repo(config %>% bb_slice(di),create_root,verbose,settings)},
+                error=function(e) {
+                    cat("\nThere was a problem synchronizing the dataset:",config$name[di],".\nThe error message was:",e$message,"\n")
+                }
+                )
+        }
+        sync_ok <- sapply(1:nrow(config),sync_wrapper)
+    } else {
+        sync_ok <- sapply(1:nrow(config),function(di) do_sync_repo(config %>% bb_slice(di),create_root,verbose,settings))
     }
-    sync_ok <- sapply(1:nrow(config),sync_wrapper)
     restore_settings(settings)
     sync_ok
 }
