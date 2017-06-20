@@ -25,7 +25,7 @@ test_that("config operations preserve attributes", {
     temp_root <- tempdir()
     ocf <- add(bb_config(local_file_root="irrelevant_here"),ods)
     ## check we have the expected bb attributes and that bb_attributes finds them
-    bbae <- c("wget_global_flags","local_file_root","clobber")
+    bbae <- c("wget_global_flags","local_file_root","clobber","skip_downloads")
     expect_true(setequal(names(bb_attributes(ocf)),bbae))
     expect_identical(bb_attributes(ocf %>% bb_slice(1)),bb_attributes(ocf))
 
