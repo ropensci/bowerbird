@@ -17,10 +17,10 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE) {
     ## save some current settings: path and proxy env values
     settings <- save_current_settings()
     ## iterate through each dataset in turn
-    sync_ok <- rep(FALSE,nrow(config))
     sync_wrapper <- function(di) {
-        tryCatch(
-            do_sync_repo(config[di,],create_root,verbose,settings),
+        tryCatch({
+            this_dataset <- config %>% bb_slice(di)
+            do_sync_repo(this_dataset,create_root,verbose,settings)},
             error=function(e) {
                 cat("\nThere was a problem synchronizing the dataset:",config$name[di],".\nThe error message was:",e$message,"\n")
             }
@@ -36,10 +36,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     on.exit({ restore_settings(settings) })
     if (nrow(this_dataset)>1) stop("unexpected: multiple rows in dataset")
     ## copy attrs into this_dataset, and convert to list
-    for (nm in bb_global_atts()) {
-        if (!is.null(attr(this_dataset,nm))) this_dataset[1,nm] <- attr(this_dataset,nm)
-    }
-    this_dataset <- as.list(this_dataset)
+    this_dataset <- as.list(bb_attributes_to_cols(this_dataset))
     ## check that the root directory exists
     if (!dir_exists(this_dataset$local_file_root)) {
         ## no, it does not exist
