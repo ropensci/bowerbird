@@ -1,3 +1,5 @@
+# Bowerbird
+
 An R package for maintaining a local collection of sparkly data sets.
 
 See [RAADTools](https://github.com/AustralianAntarcticDivision/raadtools) for reading, plotting, and manipulating these data.
