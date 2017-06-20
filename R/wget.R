@@ -30,11 +30,10 @@ webget <- function(data_source) {
             this_flags <- resolve_wget_clobber_flags(this_flags,"--timestamping")
         }
     }
-    ## skip the user and password flags until/if implemented in bb_config
-    ##if (nchar(data_source$user)>0) this_flags <- paste0(this_flags," --user=",data_source$user)
-    ##if (nchar(data_source$password)>0) this_flags <- paste0(this_flags," --password=",data_source$password)
+    ## add user, password flags
+    if (!is.na(data_source$user) && nchar(data_source$user)>0) this_flags <- paste0(this_flags," --user=",data_source$user)
+    if (!is.na(data_source$password) && nchar(data_source$password)>0) this_flags <- paste0(this_flags," --password=",data_source$password)
     ##if (data_source$wait>0) this_flags <- paste0(this_flags," --wait=",data_source$wait)
-    
 
     ##if (data_source$skip_downloads) {
     ##    cat(sprintf(" skip_downloads is TRUE, not executing: %s\n",wget_call))
