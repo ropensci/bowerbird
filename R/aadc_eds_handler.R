@@ -6,7 +6,7 @@
 #' @return TRUE on success
 #'
 #' @export
-aadc_eds <- function(data_source) {
+aadc_eds_handler <- function(data_source) {
     assert_that(is.data.frame(data_source))
     assert_that(nrow(data_source)==1)
     ## clumsy way to get around AADC EDS file naming issues

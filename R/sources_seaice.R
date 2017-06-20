@@ -158,7 +158,7 @@ sources_seaice <- function() {
                 citation="Fraser, AD, RA Massom, KJ Michael, BK Galton-Fenzi, and JL Lieser (2012) East Antarctic landfast sea ice distribution and variability, 2000-08. Journal of Climate, 25(4):1137-1156",
                 source_url="https://data.aad.gov.au/eds/file/3656",
                 license="CC-BY",
-                method=aadc_eds,
+                method=aadc_eds_handler,
                 method_flags="",
                 postprocess=pp_unzip,
                 data_group="Sea ice")
