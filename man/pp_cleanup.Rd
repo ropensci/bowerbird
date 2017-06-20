@@ -27,7 +27,7 @@ Postprocessing: remove unwanted files
 \examples{
 \dontrun{
   ## remove .asc files after synchronisation
-  my_source <- bb_source(...,postprocess=list(quote(pp_cleanup,pattern="\\\\.asc$")))
+  my_source <- bb_source(...,postprocess=quote(pp_cleanup,pattern="\\\\.asc$"))
 }
 
 }

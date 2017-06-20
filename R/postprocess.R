@@ -10,8 +10,14 @@
 #' @return TRUE on success
 #'
 #' @seealso \code{\link{bb_source}} \code{\link{bb_config}} \code{\link{pp_cleanup}}
-#'
 #' @examples
+#' \dontrun{
+#'   ## decompress .zip files after synchronisation but keep zip files intact
+#'   my_source <- bb_source(...,postprocess=pp_unzip)
+#' 
+#'   ## decompress .zip files after synchronisation and delete zip files
+#'   my_source <- bb_source(...,postprocess=quote(pp_unzip,delete=TRUE))
+#' }
 #'
 #' @export
 pp_decompress <- function(data_source,delete=FALSE,method,...){##file_list_before,file_list_after,method) {
@@ -105,7 +111,7 @@ pp_uncompress <- function(...) pp_decompress(...,method="uncompress")
 #' @examples
 #' \dontrun{
 #'   ## remove .asc files after synchronisation
-#'   my_source <- bb_source(...,postprocess=list(quote(pp_cleanup,pattern="\\.asc$")))
+#'   my_source <- bb_source(...,postprocess=quote(pp_cleanup,pattern="\\.asc$"))
 #' }
 #'
 #' @export

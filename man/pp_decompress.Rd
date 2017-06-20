@@ -38,6 +38,13 @@ Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compr
 The dots argument indicates additional arguments that are passed to \code{pp_decompress}. Some may be passed by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
 }
 \examples{
+\dontrun{
+  ## decompress .zip files after synchronisation but keep zip files intact
+  my_source <- bb_source(...,postprocess=pp_unzip)
+
+  ## decompress .zip files after synchronisation and delete zip files
+  my_source <- bb_source(...,postprocess=quote(pp_unzip,delete=TRUE))
+}
 
 }
 \seealso{
