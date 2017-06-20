@@ -1,6 +1,14 @@
 context("sync")
 
-test_that("bb_sync works",{
+test_that("bb_sync works with dry run on bb_wget",{
+    temp_root <- tempdir()
+    cf <- bb_config(local_file_root=temp_root,skip_downloads=TRUE) %>%
+        add(bb_sources(data_group="Sea surface temperature"))
+    cf$method_flags[grepl("Oceandata",cf$name)] <- "search=T20000322000060.L3m_MO_SST_sst_9km.nc" ## restrict to one file
+    bb_sync(cf,catch_errors=FALSE)
+})
+
+test_that("bb_sync works on oceandata",{
     skip("skipping bb_sync test temporarily") ## during dev
     ods <- bb_source(
         name="Oceandata test",
@@ -16,8 +24,8 @@ test_that("bb_sync works",{
         access_function="",
         data_group="Sea surface temperature")
     temp_root <- tempdir()
-    ocf <- add(bb_config(local_file_root=temp_root),ods)
-    bb_sync(ocf)
+    cf <- add(bb_config(local_file_root=temp_root),ods)
+    bb_sync(cf)
     
     fnm <- file.path(temp_root,"oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc")
     expect_true(file.exists(fnm))
