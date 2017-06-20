@@ -1,17 +1,3 @@
----
-output: github_document
----
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
-```{r, echo = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "README-"
-)
-```
-
 An R package for maintaining a local collection of sparkly data sets.
 
 See [RAADTools](https://github.com/AustralianAntarcticDivision/raadtools) for reading, plotting, and manipulating these data.
