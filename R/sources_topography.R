@@ -196,5 +196,18 @@ sources_topography <- function() {
                 method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
                 postprocess=pp_unzip,
                 data_group="Topography"            )
-        )
+        ) %>%
+        bind_rows(
+            bb_source(
+                name="Shuttle Radar Topography Mission Elevation Data",
+                description="High-resolution topographic data generated from NASA's Shuttle Radar Topography Mission (SRTM) in 2000, in GeoTIFF format.",
+                reference="http://www2.jpl.nasa.gov/srtm/",
+                source_url="http://gis-lab.info/data/srtm-tif/",
+                citation="Farr, T. G., et al. (2007), The Shuttle Radar Topography Mission, Rev. Geophys., 45, RG2004, doi:10.1029/2005RG000183",
+                license="Please cite",
+                method=bb_wget,
+                method_flags=" --recursive --level=1 --no-parent",
+                postprocess=pp_unzip,
+                access_function="raster::raster",
+                data_group="Topography"))
 }
