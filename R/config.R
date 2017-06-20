@@ -71,7 +71,7 @@ add <- function(cf,source) {
 #' @seealso \code{\link{bb_config}}
 #'
 #' @examples
-#' cf <- bb_config()
+#' cf <- bb_config(local_file_root="/your/data/directory")
 #' bb_attributes(cf)
 #'
 #' @export
