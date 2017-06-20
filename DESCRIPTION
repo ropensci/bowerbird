@@ -15,7 +15,9 @@ Imports:
     dplyr,
     R.cache,
     R.utils,
-    stringr
+    rvest,
+    stringr,
+    xml2
 LazyLoad: yes
 RoxygenNote: 6.0.1
 Suggests:
