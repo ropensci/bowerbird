@@ -15,7 +15,6 @@ test_that("bb_sync works on oceandata",{
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
         reference= "http://oceancolor.gsfc.nasa.gov/",
         citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
-        source_url="",
         license="Please cite",
         comment="",
         method=oceandata_get,

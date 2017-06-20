@@ -44,7 +44,6 @@ sources_sst <- function() {
                 description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
                 reference= "http://oceancolor.gsfc.nasa.gov/",
                 citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
-                source_url="",
                 license="Please cite",
                 method=oceandata_get,
                 method_flags="search=T*L3m_MO_SST_sst_9km.nc",
