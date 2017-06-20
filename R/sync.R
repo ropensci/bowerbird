@@ -19,8 +19,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE) {
     ## iterate through each dataset in turn
     sync_wrapper <- function(di) {
         tryCatch({
-            this_dataset <- config %>% bb_slice(di)
-            do_sync_repo(this_dataset,create_root,verbose,settings)},
+            do_sync_repo(config %>% bb_slice(di),create_root,verbose,settings)},
             error=function(e) {
                 cat("\nThere was a problem synchronizing the dataset:",config$name[di],".\nThe error message was:",e$message,"\n")
             }
@@ -35,7 +34,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE) {
 do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     on.exit({ restore_settings(settings) })
     if (nrow(this_dataset)>1) stop("unexpected: multiple rows in dataset")
-    ## copy attrs into this_dataset, and convert to list
+    ## copy bb attrs into this_dataset, and convert to list
     this_dataset <- as.list(bb_attributes_to_cols(this_dataset))
     ## check that the root directory exists
     if (!dir_exists(this_dataset$local_file_root)) {
