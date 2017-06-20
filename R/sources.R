@@ -30,7 +30,7 @@
 #'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
 #'    license="",
 #'    comment="",
-#'    method=webget,
+#'    method=bb_wget,
 #'    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
 #'    postprocess=pp_unzip)
 #'
@@ -38,7 +38,7 @@
 #' cf <- add(cf,my_source)
 #'
 #' @export
-bb_source <- function(name,description=as.character(NA),reference,source_url,citation,license,comment=as.character(NA),method=webget,method_flags=as.character(NA),postprocess,user=as.character(NA),password=as.character(NA),access_function=as.character(NA),data_group=as.character(NA)) {
+bb_source <- function(name,description=as.character(NA),reference,source_url,citation,license,comment=as.character(NA),method=bb_wget,method_flags=as.character(NA),postprocess,user=as.character(NA),password=as.character(NA),access_function=as.character(NA),data_group=as.character(NA)) {
     assert_that(is.function(method))
     if (missing(name))
         stop("Each data source requires a name")
@@ -47,7 +47,7 @@ bb_source <- function(name,description=as.character(NA),reference,source_url,cit
     if (missing(reference))
         stop("Please provide a reference (a URL to the data source's metadata record or home page")
     if (missing(source_url)) {
-        if (identical(method,webget)) stop("method 'webget' requires at least one source URL")
+        if (identical(method,bb_wget)) stop("method 'bb_wget' requires at least one source URL")
         ##warning("no source_url provided")
         source_url <- as.character(NA)
     }

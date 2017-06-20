@@ -47,7 +47,7 @@ ghrsst_get <- function(data_source) {
         for (thisday in daylist) {
             dummy <- data_source
             dummy$source_url <- paste0("ftp://podaac-ftp.jpl.nasa.gov/allData/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/",thisyear,"/",sprintf("%03d",thisday),"/")
-            webget(dummy)
+            bb_wget(dummy)
         }
     }
 }

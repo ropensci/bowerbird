@@ -31,7 +31,7 @@ aadc_eds_get <- function(data_source) {
         data_source$method_flags <- str_trim(sub("--recursive$","",data_source$method_flags))
     }
     ##do_wget(build_wget_call(data_source),data_source)
-    ok <- webget(data_source)
+    ok <- bb_wget(data_source)
     setwd(data_source$local_file_root)
     ok
 }

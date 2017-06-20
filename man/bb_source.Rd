@@ -5,7 +5,7 @@
 \title{Define an external data source}
 \usage{
 bb_source(name, description = as.character(NA), reference, source_url,
-  citation, license, comment = as.character(NA), method = webget,
+  citation, license, comment = as.character(NA), method = bb_wget,
   method_flags = as.character(NA), postprocess, user = as.character(NA),
   password = as.character(NA), access_function = as.character(NA),
   data_group = as.character(NA))
@@ -56,7 +56,7 @@ my_source <- bb_source(
    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
    license="",
    comment="",
-   method=webget,
+   method=bb_wget,
    method_flags="--recursive --level=1 --accept=\\"*bin*.zip,README.TXT\\"",
    postprocess=pp_unzip)
 

@@ -7,7 +7,7 @@
 #' @seealso \code{\link{wget}}
 #'
 #' @export
-webget <- function(data_source) {
+bb_wget <- function(data_source) {
     assert_that(is.data.frame(data_source))
     assert_that(nrow(data_source)==1)
 

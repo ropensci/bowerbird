@@ -62,7 +62,7 @@ oceandata_get <- function(data_source) {
             dummy <- data_source
             dummy$method_flags <- paste("--progress=dot:giga","--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
             dummy$source_url <- this_url
-            webget(dummy)
+            bb_wget(dummy)
             ## recalculate checksum so that cache gets updated
             blah <- calculate_sha1(this_fullfile)
         } else {
