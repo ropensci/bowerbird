@@ -30,7 +30,7 @@ bb_source(name, description = as.character(NA), reference, source_url,
 
 \item{method_flags}{string:}
 
-\item{postprocess}{function, call, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied}
+\item{postprocess}{function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied}
 
 \item{authentication_note}{string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)}
 

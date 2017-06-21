@@ -9,7 +9,7 @@
 #' @param comment string:
 #' @param method function, call, or symbol: the function that handles the synchronisation process for this data source
 #' @param method_flags string:
-#' @param postprocess function, call, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
+#' @param postprocess function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
 #' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
 #' @param user string: username, if required
 #' @param password string: password, if required
@@ -40,7 +40,7 @@
 #'
 #' @export
 bb_source <- function(name,description=as.character(NA),reference,source_url,citation,license,comment=as.character(NA),method=bb_wget,method_flags=as.character(NA),postprocess,authentication_note=as.character(NA),user=as.character(NA),password=as.character(NA),access_function=as.character(NA),data_group=as.character(NA)) {
-    assert_that(is.function(method) || (is.name(method) && exists(deparse(method),mode="function")) || is.call(method))
+    assert_that(is.function(method) || (is.symbol(method) && exists(deparse(method),mode="function")) || is.call(method))
     if (missing(name))
         stop("Each data source requires a name")
     if (!is.na(authentication_note) && (na_or_empty(user) || na_or_empty(password))) {
@@ -58,8 +58,8 @@ bb_source <- function(name,description=as.character(NA),reference,source_url,cit
     if (missing(postprocess) || is.null(postprocess)) {
         postprocess <- list()
     } else {
-        if (is.function(postprocess) || inherits(postprocess,"call")) postprocess <- list(postprocess)
-        ppchk <- is.list(postprocess) && all(sapply(postprocess,function(z)is.function(z) || inherits(z,"call")))
+        if (is.function(postprocess) || is.call(postprocess) || is.symbol(postprocess)) postprocess <- list(postprocess)
+        ppchk <- is.list(postprocess) && all(sapply(postprocess,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function"))))
         if (!ppchk) stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
     }
     tibble(
