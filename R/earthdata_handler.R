@@ -16,7 +16,7 @@ earthdata_get <- function(data_source) {
     if (!file.exists(cookies_file)) cat("",file=cookies_file)
     dummy <- data_source
     dummy$method_flags <- paste0("--http-user=\"",dummy$user,"\" --http-password=\"",dummy$password,"\" --load-cookies \"",cookies_file,"\" --save-cookies \"",cookies_file,"\" --keep-session-cookies --no-check-certificate --auth-no-challenge -r --reject \"index.html*\" -np -e robots=off ",dummy$method_flags," ",dummy$wget_global_flags)
-    dummy$user <- as.character(NA)
-    dummy$password <- as.character(NA)
+    dummy$user <- NA_character_
+    dummy$password <- NA_character_
     bb_wget(dummy)
 }
