@@ -1,7 +1,7 @@
 sources_seaice <- function() {
     bb_source(
         name="NSIDC SMMR-SSM/I Nasateam sea ice concentration",
-        description="Passive-microwave estimates of sea ice concentration at 25km spatial resolution. Daily and monthly resolution, available from 1-Oct-1978 to present.",
+        description="Passive microwave estimates of sea ice concentration at 25km spatial resolution. Daily and monthly resolution, available from 1-Oct-1978 to present.",
         reference="http://nsidc.org/data/nsidc-0051.html",
         source_url="ftp://sidads.colorado.edu/pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/",
         citation="Cavalieri, D. J., C. L. Parkinson, P. Gloersen, and H. Zwally. 1996, updated yearly. Sea Ice Concentrations from Nimbus-7 SMMR and DMSP SSM/I-SSMIS Passive Microwave Data. [indicate subset used]. Boulder, Colorado USA: NASA National Snow and Ice Data Center Distributed Active Archive Center. http://dx.doi.org/10.5067/8GQ8LZQVL0VL",
@@ -14,7 +14,7 @@ sources_seaice <- function() {
         bind_rows(
             bb_source(
                 name="NSIDC SMMR-SSM/I Nasateam near-real-time sea ice concentration",
-                description="Passive-microwave estimates of sea ice concentration at 25km, daily, near-real-time resolution.",
+                description="Passive microwave estimates of sea ice concentration at 25km, daily, near-real-time resolution.",
                 reference="http://nsidc.org/data/nsidc-0081.html",
                 citation="Maslanik, J. and J. Stroeve. 1999, updated daily. Near-Real-Time DMSP SSMIS Daily Polar Gridded Sea Ice Concentrations. [indicate subset used]. Boulder, Colorado USA: NASA National Snow and Ice Data Center Distributed Active Archive Center. http://dx.doi.org/10.5067/U8C09DWVX9LM",
                 source_url="ftp://sidads.colorado.edu/pub/DATASETS/nsidc0081_nrt_nasateam_seaice/",
@@ -28,7 +28,7 @@ sources_seaice <- function() {
         bind_rows(
             bb_source(
                 name="NSIDC passive microwave supporting files",
-                description="Grids and other support files for NSIDC passive-microwave sea ice data.",
+                description="Grids and other support files for NSIDC passive microwave sea ice data.",
                 reference="http://nsidc.org/data/nsidc-0051.html",
                 citation="See the citation details of the particular sea ice dataset used",
                 source_url="ftp://sidads.colorado.edu/pub/DATASETS/seaice/polar-stereo/",
@@ -57,8 +57,8 @@ sources_seaice <- function() {
         ) %>%
         bind_rows(
             bb_source(
-                name="Artist AMSR-E passive microwave sea ice concentration",
-                description="Passive-microwave estimates of daily sea ice concentration at 6.25km spatial resolution, from 19-Jun-2002 to 2-Oct-2011.",
+                name="Artist AMSR-E sea ice concentration",
+                description="Passive microwave estimates of daily sea ice concentration at 6.25km spatial resolution, from 19-Jun-2002 to 2-Oct-2011.",
                 reference="http://icdc.zmaw.de/1/daten/cryosphere/seaiceconcentration-asi-amsre.html",
                 citation="Include the acknowledgement: \"ASI Algorithm AMSR-E sea ice concentration were obtained for [PERIOD] from the Integrated Climate Date Center (ICDC, http://icdc.zmaw,de/), University of Hamburg, Hamburg, Germany.\" Also please cite: Spreen, G., L. Kaleschke, and G. Heygster (2008), Sea ice remote sensing using AMSR-E 89 GHz channels, J. Geophys. Res. 113, C02S03, doi:10.1029/2005JC003384",
                 source_url="ftp://ftp-projects.zmaw.de/seaice/AMSR-E_ASI_IceConc/no_landmask/hdf/s6250/*",
@@ -71,8 +71,8 @@ sources_seaice <- function() {
         ) %>%
         bind_rows(
             bb_source(
-                name="Artist AMSR-E passive microwave supporting files",
-                description="Grids and other support files for Artist AMSR-E passive-microwave sea ice data.",
+                name="Artist AMSR-E supporting files",
+                description="Grids and other support files for Artist AMSR-E passive microwave sea ice data.",
                 reference="http://icdc.zmaw.de/1/daten/cryosphere/seaiceconcentration-asi-amsre.html",
                 citation="See the citation details of the particular sea ice dataset used",
                 source_url=c("ftp://ftp-projects.zmaw.de/seaice/AMSR-E_ASI_IceConc/Landmasks/","ftp://ftp-projects.zmaw.de/seaice/AMSR-E_ASI_IceConc/LonLatGrids/"),
@@ -85,8 +85,8 @@ sources_seaice <- function() {
         ) %>%
         bind_rows(
             bb_source(
-                name="Artist AMSR2 near-real-time passive microwave sea ice concentration",
-                description="Near-real-time passive-microwave estimates of daily sea ice concentration at 6.25km spatial resolution, from 24-July-2012 to present.",
+                name="Artist AMSR2 near-real-time sea ice concentration",
+                description="Near-real-time passive microwave estimates of daily sea ice concentration at 6.25km spatial resolution, from 24-July-2012 to present.",
                 reference="http://www.iup.uni-bremen.de:8084/amsr2/",
                 citation="Spreen, G., L. Kaleschke, and G. Heygster (2008), Sea ice remote sensing using AMSR-E 89 GHz channels, J. Geophys. Res. 113, C02S03, doi:10.1029/2005JC003384",
                 source_url="http://www.iup.uni-bremen.de:8084/amsr2data/asi_daygrid_swath/s6250/",
@@ -100,8 +100,8 @@ sources_seaice <- function() {
         ) %>%
         bind_rows(
             bb_source(
-                name="Artist AMSR2 regional passive microwave sea ice concentration",
-                description="Passive-microwave estimates of daily sea ice concentration at 3.125km spatial resolution in selected regions, from 24-July-2012 to present.",
+                name="Artist AMSR2 regional sea ice concentration",
+                description="Passive microwave estimates of daily sea ice concentration at 3.125km spatial resolution in selected regions, from 24-July-2012 to present.",
                 reference="http://www.iup.uni-bremen.de:8084/amsr2/regions-amsr2.php",
                 citation="Spreen, G., L. Kaleschke, and G. Heygster (2008), Sea ice remote sensing using AMSR-E 89 GHz channels, J. Geophys. Res. 113, C02S03, doi:10.1029/2005JC003384",
                 source_url="http://www.iup.uni-bremen.de:8084/amsr2data/asi_daygrid_swath/s3125/",
@@ -115,8 +115,8 @@ sources_seaice <- function() {
         ) %>%
         bind_rows(
             bb_source(
-                name="Artist AMSR2 passive microwave supporting files",
-                description="Grids for Artist AMSR2 passive-microwave sea ice data.",
+                name="Artist AMSR2 supporting files",
+                description="Grids for Artist AMSR2 passive microwave sea ice data.",
                 reference="http://www.iup.uni-bremen.de:8084/amsr2/",
                 citation="See the citation details of the particular sea ice dataset used",
                 source_url="http://www.iup.uni-bremen.de:8084/amsredata/asi_daygrid_swath/l1a/s6250/grid_coordinates/LongitudeLatitudeGrid-s6250-Antarctic.hdf",
