@@ -1,6 +1,6 @@
 sources_sst <- function() {
     bb_source(
-        name="NOAA Optimum Interpolation 1/4 Degree Daily SST AVHRR",
+        name="NOAA OI 1/4 Degree Daily SST AVHRR",
         description="Sea surface temperature at 0.25 degree daily resolution, from 1-Sep-1981 to present",
         reference= "http://www.ngdc.noaa.gov/docucomp/page?xml=NOAA/NESDIS/NCDC/Geoportal/iso/xml/C00844.xml&view=getDataView&header=none",
         citation="Richard W. Reynolds, Viva F. Banzon, and NOAA CDR Program (2008): NOAA Optimum Interpolation 1/4 Degree Daily Sea Surface Temperature (OISST) Analysis, Version 2. [indicate subset used]. NOAA National Climatic Data Center. doi:10.7289/V5SQ8XB5 [access date]",
@@ -13,7 +13,7 @@ sources_sst <- function() {
         data_group="Sea surface temperature") %>%
         bind_rows(
             bb_source(
-                name="NOAA Optimum Interpolation SST V2",
+                name="NOAA OI SST V2",
                 description="Weekly and monthly mean and long-term monthly mean SST data, 1-degree resolution, 1981 to present. Ice concentration data are also included, which are the ice concentration values input to the SST analysis",
                 reference= "http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html",
                 citation="NOAA_OI_SST_V2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
@@ -64,7 +64,7 @@ sources_sst <- function() {
         ) %>%
         bind_rows(
             bb_source(
-                name="GHRSST Level 4 MUR Global Foundation SST Analysis (v4.1) (GDS versions 1 and 2)",
+                name="GHRSST Level 4 MUR Global Foundation SST v4.1",
                 description="A Group for High Resolution Sea Surface Temperature (GHRSST) Level 4 sea surface temperature analysis produced as a retrospective dataset (four day latency) at the JPL Physical Oceanography DAAC using wavelets as basis functions in an optimal interpolation approach on a global 0.011 degree grid. The version 4 Multiscale Ultrahigh Resolution (MUR) L4 analysis is based upon nighttime GHRSST L2P skin and subskin SST observations from several instruments including the NASA Advanced Microwave Scanning Radiometer-EOS (AMSRE), the Moderate Resolution Imaging Spectroradiometer (MODIS) on the NASA Aqua and Terra platforms, the US Navy microwave WindSat radiometer and in situ SST observations from the NOAA iQuam project. The ice concentration data are from the archives at the EUMETSAT Ocean and Sea Ice Satellite Application Facility (OSI SAF) High Latitude Processing Center and are also used for an improved SST parameterization for the high-latitudes. This data set is funded by the NASA MEaSUREs program (http://earthdata.nasa.gov/our-community/community-data-system-programs/measures-projects), and created by a team led by Dr. Toshio Chin from JPL.",
                 reference="https://podaac.jpl.nasa.gov/Multi-scale_Ultra-high_Resolution_MUR-SST",
                 citation="Cite as: US NASA; Jet Propulsion Laboratory; Physical Oceanography Distributed Active Archive Center (JPL PO.DAAC) (2002). GHRSST Level 4 MUR Global Foundation Sea Surface Temperature Analysis (v4.1) (GDS versions 1 and 2). National Oceanographic Data Center, NOAA. Dataset. [access date]",
