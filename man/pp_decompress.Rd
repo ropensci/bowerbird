@@ -40,10 +40,10 @@ The dots argument indicates additional arguments that are passed to \code{pp_dec
 \examples{
 \dontrun{
   ## decompress .zip files after synchronisation but keep zip files intact
-  my_source <- bb_source(...,postprocess=pp_unzip)
+  my_source <- bb_source(...,postprocess=quote(pp_unzip))
 
   ## decompress .zip files after synchronisation and delete zip files
-  my_source <- bb_source(...,postprocess=quote(pp_unzip,delete=TRUE))
+  my_source <- bb_source(...,postprocess=quote(pp_unzip(delete=TRUE)))
 }
 
 }

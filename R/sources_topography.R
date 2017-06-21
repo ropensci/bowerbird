@@ -6,7 +6,7 @@ sources_topography <- function() {
                 citation="Smith, W. H. F., and D. T. Sandwell, Global seafloor topography from satellite altimetry and ship depth soundings, Science, v. 277, p. 1957-1962, 26 Sept., 1997",
                 source_url="ftp://topex.ucsd.edu/pub/global_topo_1min/*",
                 license="See ftp://topex.ucsd.edu/pub/global_topo_1min/COPYRIGHT.txt",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --level=1 --no-parent",
                 postprocess=NULL,
                 access_function="readbathy",
@@ -19,9 +19,9 @@ sources_topography <- function() {
                 citation="Amante, C. and B.W. Eakins, 2009. ETOPO1 1 Arc-Minute Global Relief Model: Procedures, Data Sources and Analysis. NOAA Technical Memorandum NESDIS NGDC-24. National Geophysical Data Center, NOAA. doi:10.7289/V5C8276M [access date]",
                 license="Please cite",
                 source_url="http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/netcdf/",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent --accept=\"*gdal*,*.txt\"",
-                postprocess=pp_gunzip,
+                postprocess=quote(pp_gunzip),
                 access_function="readtopo",
                 data_group="Topography")
         ) %>%
@@ -33,9 +33,9 @@ sources_topography <- function() {
                 citation="",
                 license="Not given",
                 source_url=c("http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2/ETOPO2v2-2006/ETOPO2v2c/netCDF/ETOPO2v2c_f4_netCDF.zip","http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2/ETOPO2v2-2006/ETOPO2v2c/ETOPO2v2c_ReadMe.txt"),
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
-                postprocess=pp_unzip,
+                postprocess=quote(pp_unzip),
                 access_function="readtopo",
                 data_group="Topography")
         ) %>%
@@ -47,10 +47,10 @@ sources_topography <- function() {
                 citation="Fretwell et al. (2013) Bedmap2: improved ice bed, surface and thickness datasets for Antarctica. The Cryosphere 7:375-393. doi:10.5194/tc-7-375-2013",
                 license="Please cite",
                 source_url="https://secure.antarctica.ac.uk/data/bedmap2/",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent -e robots=off --accept=\"*bin.zip,*tiff.zip,*.txt,*.rtf\" --no-check-certificate",
                 comment="--no-check-certificate flag to wget until certificate authority issue fixed",
-                postprocess=pp_unzip,
+                postprocess=quote(pp_unzip),
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -61,9 +61,9 @@ sources_topography <- function() {
                 citation="Beaman, R.J. & O'Brien, P., 2011. Kerguelen Plateau Bathymetric Grid, November 2010. Record  2011/022. Geoscience Australia, Canberra",
                 source_url="http://ftt.jcu.edu.au/deepreef/kergdem/gmt/kerg_dem_gmt.zip",
                 license="CC-BY",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
-                postprocess=pp_unzip,
+                postprocess=quote(pp_unzip),
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -74,9 +74,9 @@ sources_topography <- function() {
                 citation="Beaman, Robin (2009, updated 2015) A bathymetric Digital Elevation Model (DEM) of the George V and Terre Adelie continental shelf and margin Australian Antarctic Data Centre - CAASM Metadata (https://data.aad.gov.au/aadc/metadata/metadata_redirect.cfm?md=/AMD/AU/GVdem_2008)",
                 license="CC-BY",
                 source_url="https://data.aad.gov.au/eds/file/4494",
-                method=aadc_eds_get,
+                method=quote(aadc_eds_get),
                 method_flags="",
-                postprocess=pp_unzip,
+                postprocess=quote(pp_unzip),
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -87,9 +87,9 @@ sources_topography <- function() {
                 citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
                 source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
                 license="CC-BY 4.0",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --level=inf --accept=zip --no-parent",
-                postprocess=pp_unzip,
+                postprocess=quote(pp_unzip),
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -100,9 +100,9 @@ sources_topography <- function() {
                 citation="Arndt, J.E., H. W. Schenke, M. Jakobsson, F. Nitsche, G. Buys, B. Goleby, M. Rebesco, F. Bohoyo, J.K. Hong, J. Black, R. Greku, G. Udintsev, F. Barrios, W. Reynoso-Peralta, T. Morishita, R. Wigley, The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 - A new bathymetric compilation covering circum-Antarctic waters, 2013, Geophysical Research Letters, Vol. 40, p. 3111-3117, doi: 10.1002/grl.50413",
                 license="CC-BY",
                 source_url=c("http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_bed_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_is_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_sid_PS71_500m_grd.zip","http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_is_PS71_500m_tif.zip","http://www.ibcso.org/data/IBCSO_background_hq.zip"),
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
-                postprocess=pp_unzip,
+                postprocess=quote(pp_unzip),
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -113,7 +113,7 @@ sources_topography <- function() {
                 citation="Arndt, J.E., H. W. Schenke, M. Jakobsson, F. Nitsche, G. Buys, B. Goleby, M. Rebesco, F. Bohoyo, J.K. Hong, J. Black, R. Greku, G. Udintsev, F. Barrios, W. Reynoso-Peralta, T. Morishita, R. Wigley, The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 - A new bathymetric compilation covering circum-Antarctic waters, 2013, Geophysical Research Letters, Vol. 40, p. 3111-3117, doi: 10.1002/grl.50413",
                 license="CC-BY",
                 source_url="http://hs.pangaea.de/Maps/bathy/IBCSO_v1/IBCSO_v1_digital_chart_pdfA.pdf",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=NULL,
                 data_group="Topography"            )
@@ -126,7 +126,7 @@ sources_topography <- function() {
                 citation="Timmermann, Ralph; Le Brocq, Anne M; Deen, Tara J; Domack, Eugene W; Dutrieux, Pierre; Galton-Fenzi, Ben; Hellmer, Hartmut H; Humbert, Angelika; Jansen, Daniela; Jenkins, Adrian; Lambrecht, Astrid; Makinson, Keith; Niederjasper, Fred; Nitsche, Frank-Oliver; N\uf8st, Ole Anders; Smedsrud, Lars Henrik; Smith, Walter (2010): A consistent dataset of Antarctic ice sheet topography, cavity geometry, and global bathymetry. Earth System Science Data, 2(2), 261-273, doi:10.5194/essd-2-261-2010",
                 license="CC-BY",
                 source_url=c("http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_data.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_aux.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105b_50S.nc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_coast.asc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_gl.asc","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_bathy.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_draft.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_height.jpg","http://store.pangaea.de/Publications/TimmermannR_et_al_2010/RTopo105_famask.jpg"),
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=NULL,
                 data_group="Topography")
@@ -139,10 +139,10 @@ sources_topography <- function() {
                 citation="Liu, H., K. Jezek, B. Li, and Z. Zhao. 2001. Radarsat Antarctic Mapping Project Digital Elevation Model Version 2. [indicate subset used]. Boulder, Colorado USA: National Snow and Ice Data Center. http://dx.doi.org/10.5067/PXKC81A7WAXD",
                 license="Please cite",
                 source_url=c("ftp://sidads.colorado.edu/pub/DATASETS/nsidc0082_radarsat_dem_v02/200M/BINARY/*","ftp://sidads.colorado.edu/pub/DATASETS/nsidc0082_radarsat_dem_v02/1KM/BINARY/*","ftp://sidads.colorado.edu/pub/DATASETS/nsidc0082_radarsat_dem_v02/00README_v2.txt"),
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent --reject=\"*.txt.gz,*.tar.gz\"",
                 comment="Only the 200m and 1km binary files are retrieved here: adjust the source_url or method_flags for others",
-                postprocess=pp_gunzip,
+                postprocess=quote(pp_gunzip),
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -153,7 +153,7 @@ sources_topography <- function() {
                 citation="Mitchell, J.S., Mackay, K.A., Neil, H.L., Mackay, E.J., Pallentin, A., Notman P., 2012. Undersea New Zealand, 1:5,000,000. NIWA Chart, Miscellaneous Series No. 92",
                 source_url="ftp://ftp.niwa.co.nz/bathymetry/NZBathy_DTM_2016_binary_grid.zip",
                 license="Please cite",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --level=inf --no-parent",
                 postprocess=NULL,
                 data_group="Topography"            )
@@ -166,7 +166,7 @@ sources_topography <- function() {
                 citation="Slater T, Shepherd A, McMillan M, Muir A, Gilbert L, Hogg A (2017) A New Digital Elevation Model of Antarctica derived from 6 years of continuous CryoSat-2 measurements: Technical Report. http://homepages.see.leeds.ac.uk/~py10ts/cpom_cryosat2_antarctic_dem/",
                 license="Please cite",
                 source_url="http://homepages.see.leeds.ac.uk/~py10ts/cpom_cryosat2_antarctic_dem/",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent --reject=\"index.html\"",
                 postprocess=NULL,
                 data_group="Topography"            )
@@ -179,9 +179,9 @@ sources_topography <- function() {
                 citation="No permission is needed to use Natural Earth. Crediting the authors is unnecessary. However, if you wish to cite the map data, simply use one of the following. Short text: Made with Natural Earth. Long text: Made with Natural Earth. Free vector and raster map data @ naturalearthdata.com.",
                 license="PD-CC",
                 source_url="http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/physical/10m_physical.zip",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
-                postprocess=pp_unzip,
+                postprocess=quote(pp_unzip),
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -192,9 +192,9 @@ sources_topography <- function() {
                 citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical, High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
                 source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
                 license="LGPL",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
-                postprocess=pp_unzip,
+                postprocess=quote(pp_unzip),
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -205,9 +205,9 @@ sources_topography <- function() {
                 source_url="http://gis-lab.info/data/srtm-tif/",
                 citation="Farr, T. G., et al. (2007), The Shuttle Radar Topography Mission, Rev. Geophys., 45, RG2004, doi:10.1029/2005RG000183",
                 license="Please cite",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags=" --recursive --level=1 --no-parent",
-                postprocess=pp_unzip,
+                postprocess=quote(pp_unzip),
                 access_function="raster::raster",
                 data_group="Topography"))
 }

@@ -46,7 +46,7 @@ my_source <- bb_source(
     comment="",
     method=quote(bb_wget),
     method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
-    postprocess=pp_unzip)
+    postprocess=quote(pp_unzip))
 
 cf <- bb_config(local_file_root="/your/data/directory") %>%
     add(my_source)

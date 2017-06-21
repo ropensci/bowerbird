@@ -13,10 +13,10 @@
 #' @examples
 #' \dontrun{
 #'   ## decompress .zip files after synchronisation but keep zip files intact
-#'   my_source <- bb_source(...,postprocess=pp_unzip)
+#'   my_source <- bb_source(...,postprocess=quote(pp_unzip))
 #' 
 #'   ## decompress .zip files after synchronisation and delete zip files
-#'   my_source <- bb_source(...,postprocess=quote(pp_unzip,delete=TRUE))
+#'   my_source <- bb_source(...,postprocess=quote(pp_unzip(delete=TRUE)))
 #' }
 #'
 #' @export
@@ -122,43 +122,3 @@ pp_cleanup <- function(data_source,pattern,recursive=FALSE,ignore_case=FALSE,...
     cat(sprintf("cleaning up files: %s\n",paste(to_delete,collapse=",")))
     unlink(to_delete)==0
 }
-
-
-# Postprocessing: unzip files, and optionally delete the .zip
-#
-# @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
-# @param delete logical: delete the zip files after extracting their contents?
-# @param file_list_before data.frame: files present in the directory before synchronising, as returned by \code{file.info}. Only required if delete=TRUE
-# @param file_list_after data.frame: files present in the directory after synchronising, as returned by \code{file.info}. Only required if delete=TRUE
-#
-# @return TRUE on success
-#
-# @seealso \code{\link{bb_source}} \code{\link{bb_config}} \code{\link{pp_cleanup}}
-#
-# @examples
-# \dontrun{
-#   my_source <- bb_source(...,postprocess=pp_unzip) ## unzip without deleting zip files
-#   my_source <- bb_source(...,postprocess=quote(pp_unzip,delete=TRUE,file_list_before,file_list_after)) ## unzip and delete zip files
-# }
-#
-# @export
-##xpp_unzip <- function(data_source,delete=FALSE,file_list_before,file_list_after) {
-##    assert_that(is.flag(delete))
-##    ##xargs <- list(...)
-##    ## need data_source passed as one of the dots
-##    ##check_xarg("data_source",xargs)
-##    if (delete) {
-##        files_to_decompress <- list.files(directory_from_url(data_source$source_url),pattern="\\.zip$",recursive=TRUE,ignore.case=TRUE)
-##        do_decompress_files("unzip_delete",files=files_to_decompress)
-##    } else {
-##        ## decompress but retain compressed file
-##        ## since the zip file will have been retained from previous runs, decompress only if the zip file has changed
-##        files_to_decompress <- find_changed_files(file_list_before,file_list_after,"\\.zip$")
-##        do_decompress_files("unzip",files=files_to_decompress)
-##        ## also decompress any files present in the zip file that don't exist in decompressed form
-##        files_to_decompress <- setdiff(rownames(file_list_after),files_to_decompress) ## those that we haven't just dealt with
-##        files_to_decompress <- files_to_decompress[str_detect(files_to_decompress,regex("\\.zip$",ignore_case=TRUE))] ## only zip files
-##        do_decompress_files("unzip",files=files_to_decompress,overwrite=FALSE)
-##    }
-##}
-

@@ -6,9 +6,9 @@ sources_sst <- function() {
         citation="Richard W. Reynolds, Viva F. Banzon, and NOAA CDR Program (2008): NOAA Optimum Interpolation 1/4 Degree Daily Sea Surface Temperature (OISST) Analysis, Version 2. [indicate subset used]. NOAA National Climatic Data Center. doi:10.7289/V5SQ8XB5 [access date]",
         source_url="ftp://eclipse.ncdc.noaa.gov/pub/OI-daily-v2/NetCDF/*",
         license="Please cite",
-        method=bb_wget,
+        method=quote(bb_wget),
         method_flags="--recursive --level=inf --accept=\"avhrr-only*\" --reject=\"*preliminary*\" --follow-ftp --no-parent",
-        postprocess=pp_gunzip,
+        postprocess=quote(pp_gunzip),
         access_function="readsst",
         data_group="Sea surface temperature") %>%
         bind_rows(
@@ -19,7 +19,7 @@ sources_sst <- function() {
                 citation="NOAA_OI_SST_V2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
                 source_url="ftp://ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/*",
                 license="Please cite",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --level=1 --no-parent",
                 postprocess=NULL,
                 access_function="readsst",
@@ -33,7 +33,7 @@ sources_sst <- function() {
                 citation="NOAA_ERSST_V3 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
                 source_url="ftp://ftp.cdc.noaa.gov/Datasets/noaa.ersst/*",
                 license="Please cite",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --level=1 --no-parent",
                 postprocess=NULL,
                 data_group="Sea surface temperature")
@@ -45,7 +45,7 @@ sources_sst <- function() {
                 reference= "http://oceancolor.gsfc.nasa.gov/",
                 citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
                 license="Please cite",
-                method=oceandata_get,
+                method=quote(oceandata_get),
                 method_flags="search=T*L3m_MO_SST_sst_9km.nc",
                 postprocess=NULL,
                 data_group="Sea surface temperature")
@@ -57,7 +57,7 @@ sources_sst <- function() {
                 reference="http://oceancolor.gsfc.nasa.gov/",
                 citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
                 license="Please cite",
-                method=oceandata_get,
+                method=quote(oceandata_get),
                 method_flags="search=A*L3m_MO_SST_sst_9km.nc",
                 postprocess=NULL,
                 data_group="Sea surface temperature")
@@ -71,9 +71,9 @@ sources_sst <- function() {
                 source_url="ftp://podaac-ftp.jpl.nasa.gov/allData/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/",
                 license="Please cite",
                 comment="Note: this collection is large! You may wish to specify one or more source_url values with only particular years, e.g. ftp://podaac-ftp.jpl.nasa.gov/allData/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/2015/",
-                method=ghrsst_get,
+                method=quote(ghrsst_get),
                 method_flags="--recursive --level=inf --no-parent",
-                postprocess=pp_bunzip2,
+                postprocess=quote(pp_bunzip2),
                 data_group="Sea surface temperature")
         )   
 }

@@ -33,7 +33,7 @@
 #'    comment="",
 #'    method=quote(bb_wget),
 #'    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
-#'    postprocess=pp_unzip)
+#'    postprocess=quote(pp_unzip))
 #'
 #' cf <- bb_config("/my/repo/root")
 #' cf <- add(cf,my_source)

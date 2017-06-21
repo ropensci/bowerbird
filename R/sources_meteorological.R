@@ -7,7 +7,7 @@ sources_meteorological <- function() {
         source_url="http://www2.mmm.ucar.edu/rt/amps/wrf_grib/",
         license="Please cite",
         comment="d1,d2 files for hours 000-027 only",
-        method=amps_get,
+        method=quote(amps_get),
         method_flags="",
         postprocess=NULL,
         data_group="Meteorological")

@@ -6,7 +6,7 @@ sources_reanalysis <- function() {
         citation="NCEP_Reanalysis 2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
         source_url="ftp://ftp.cdc.noaa.gov/Datasets/ncep.reanalysis2/",
         license="Please cite",
-        method=bb_wget,
+        method=quote(bb_wget),
         method_flags="--recursive --no-parent",
         postprocess=NULL,
         data_group="Reanalysis") %>%
@@ -18,7 +18,7 @@ sources_reanalysis <- function() {
                 citation="NCEP_Reanalysis 2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
                 source_url="ftp://ftp.cdc.noaa.gov/Datasets/ncep.reanalysis2.dailyavgs/",
                 license="Please cite",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=NULL,
                 data_group="Reanalysis")) %>%
@@ -30,7 +30,7 @@ sources_reanalysis <- function() {
                 citation="NCEP_Reanalysis 2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
                 source_url="ftp://ftp.cdc.noaa.gov/Datasets/ncep.reanalysis2.derived/",
                 license="Please cite",
-                method=bb_wget,
+                method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=NULL,
                 data_group="Reanalysis"))
