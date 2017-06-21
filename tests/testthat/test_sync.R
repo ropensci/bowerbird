@@ -1,6 +1,7 @@
 context("sync")
 
 test_that("bb_sync works with dry run on bb_wget",{
+    skip_on_cran()
     temp_root <- tempdir()
     cf <- bb_config(local_file_root=temp_root,skip_downloads=TRUE)
     cf <- cf %>% add(bb_sources(data_group="Sea surface temperature"))
@@ -10,6 +11,7 @@ test_that("bb_sync works with dry run on bb_wget",{
 
 test_that("bb_sync works on oceandata",{
     skip("skipping bb_sync test temporarily") ## during dev
+    skip_on_cran()
     ods <- bb_source(
         name="Oceandata test",
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
@@ -32,28 +34,3 @@ test_that("bb_sync works on oceandata",{
     expect_gt(fi$size,6e6)
 })
 
-##test_that("an earthdata source works",{
-##    ## earthdata test
-##    temp_root <- tempdir()
-##    cf <- bb_config(local_file_root=temp_root) %>%
-##        add(bb_sources(name="NSIDC SMMR-SSM/I Nasateam sea ice concentration") %>%
-##            mutate(user="benraymond",
-##                   password="H(~7FkC:(U9GU9ffjC.Y$@hZo",
-##                   source_url="https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/",##final-gsfc/south/daily/1978/",
-##                   method=list(quote(earthdata_get)),
-##                   method_flags="--recursive --level=inf --no-parent"))
-##    bb_sync(cf)
-##})
-
-test_that("NSIDC source still works under ftp (due to be moved to https)",{
-    temp_root <- tempdir()
-    expect_warning(cf <- bb_config(local_file_root=temp_root) %>%
-        add(bb_sources(name="NSIDC SMMR-SSM/I Nasateam sea ice concentration") %>%
-            mutate(source_url="ftp://sidads.colorado.edu/pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/south/daily/1978/nt_19781231_n07_v1.1_s.bin")))
-    bb_sync(cf)
-
-    fnm <- file.path(temp_root,"sidads.colorado.edu/pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/south/daily/1978/nt_19781231_n07_v1.1_s.bin")
-    expect_true(file.exists(fnm))
-    fi <- file.info(fnm)
-    expect_gt(fi$size,20e3)        
-})

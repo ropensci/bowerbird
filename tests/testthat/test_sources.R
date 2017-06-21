@@ -108,3 +108,45 @@ test_that("authentication checks work",{
         data_group="blah")
 })
 
+##test_that("an earthdata source works",{
+##    ## earthdata test
+##    temp_root <- tempdir()
+##    cf <- bb_config(local_file_root=temp_root) %>%
+##        add(bb_sources(name="NSIDC SMMR-SSM/I Nasateam sea ice concentration") %>%
+##            mutate(user="benraymond",
+##                   password="H(~7FkC:(U9GU9ffjC.Y$@hZo",
+##                   source_url="https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/",##final-gsfc/south/daily/1978/",
+##                   method=list(quote(earthdata_get)),
+##                   method_flags="--recursive --level=inf --no-parent"))
+##    bb_sync(cf)
+##})
+
+test_that("source nsidc0051 still works under ftp (due to be moved to https)",{
+    skip_on_cran()
+    temp_root <- tempdir()
+    expect_warning(cf <- bb_config(local_file_root=temp_root) %>%
+        add(bb_sources(name="NSIDC SMMR-SSM/I Nasateam sea ice concentration") %>%
+            mutate(source_url="ftp://sidads.colorado.edu/pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/south/daily/1978/nt_19781231_n07_v1.1_s.bin")))
+    bb_sync(cf)
+
+    fnm <- file.path(temp_root,"sidads.colorado.edu/pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/south/daily/1978/nt_19781231_n07_v1.1_s.bin")
+    expect_true(file.exists(fnm))
+    fi <- file.info(fnm)
+    expect_gt(fi$size,50e3)
+})
+
+test_that("source nsidc0081 still works under ftp (due to be moved to https)",{
+    skip_on_cran()
+    temp_root <- tempdir()
+    target_file <- format(Sys.Date()-10,"nt_%Y%m%d_f18_nrt_s.bin")
+    expect_warning(cf <- bb_config(local_file_root=temp_root) %>%
+        add(bb_sources(name="NSIDC SMMR-SSM/I Nasateam near-real-time sea ice concentration") %>%
+            mutate(source_url=paste0("ftp://sidads.colorado.edu/pub/DATASETS/nsidc0081_nrt_nasateam_seaice/south/",target_file))))
+
+    bb_sync(cf)
+    fnm <- file.path(temp_root,"sidads.colorado.edu/pub/DATASETS/nsidc0081_nrt_nasateam_seaice/south",target_file)
+    expect_true(file.exists(fnm))
+    fi <- file.info(fnm)
+    expect_gt(fi$size,50e3)
+})
+
