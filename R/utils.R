@@ -4,7 +4,29 @@
 
 ## NA or empty string
 na_or_empty <- function(z) is.na(z) | !nzchar(z)
-    
+
+## check method (which may be function, call, or symbol) matches expected function
+check_method_is <- function(method,expected) {
+    assert_that(is.function(expected))
+    assert_that(is.function(method) || is.call(method) || is.name(method) || is.string(method))
+    if (is.function(method)) {
+        identical(method,expected)
+    } else if (is.call(method)) {
+        if (all.names(method)[1]=="quote") {
+            ## call was constructed as e.g. enquote(whatever)
+            identical(eval(method),expected)
+        } else {
+            ## call was constructed as e.g. quote(whatever())
+            check_method_is(all.names(method)[1],expected) ## check using name of called function
+        }
+    } else if (is.string(method)) {
+        exists(method,mode="function") && identical(get(method),expected)
+    } else {
+        ## symbol/name, by e.g. quote(whatever)
+        exists(deparse(method),mode="function") && identical(eval(method),expected)
+    }
+}
+
 save_current_settings <- function() {
     return(list(working_dir=getwd(), ## current working directory
                 env_http_proxy=Sys.getenv("http_proxy"), ## proxy env vars
