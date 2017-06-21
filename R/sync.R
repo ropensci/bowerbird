@@ -108,7 +108,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     if (is.function(mth)) {
         ## method function was passed directly
         do.call(mth,list(data_source=this_dataset))
-    } else if (is.name(mth)) {
+    } else if (is.symbol(mth)) {
         ## method function was passed as a symbol, e.g. by quote(fun)
         do.call(eval(mth),list(data_source=this_dataset))
     } else if (is.call(mth)) {
@@ -146,7 +146,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
                 ## passed as function
                 ## evaluate with extra args
                 do.call(qq,list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
-            } else if (is.name(qq)) {
+            } else if (is.symbol(qq)) {
                 ## passed as symbol
                 do.call(eval(qq),list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))                
             } else if (is.call(qq)) {

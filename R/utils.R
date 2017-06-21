@@ -8,7 +8,7 @@ na_or_empty <- function(z) is.na(z) | !nzchar(z)
 ## check method (which may be function, call, or symbol) matches expected function
 check_method_is <- function(method,expected) {
     assert_that(is.function(expected))
-    assert_that(is.function(method) || is.call(method) || is.name(method) || is.string(method))
+    assert_that(is.function(method) || is.call(method) || is.symbol(method) || is.string(method))
     if (is.function(method)) {
         identical(method,expected)
     } else if (is.call(method)) {
