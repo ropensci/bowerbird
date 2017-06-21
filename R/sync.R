@@ -75,8 +75,8 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     } else {
         stop("expecting nested list for the postprocess argument")
     }
-    if (!(is.list(pp) && (length(pp)<1 || all(sapply(pp,function(z)is.function(z) || inherits(z,"call"))))))
-        stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
+    if (!(is.list(pp) && (length(pp)<1 || all(sapply(pp,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function")))))))
+        stop("the postprocess argument should be a list of functions, calls, or symbols of functions")
 
     ## do the main synchonization, usually directly with wget, otherwise with custom methods
     this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(this_dataset$source_url))
