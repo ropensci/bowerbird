@@ -117,9 +117,11 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             do.call(eval(mth),list(data_source=this_dataset))
         } else {
             ## call was constructed as e.g. quote(fun())
-            do.call(all.names(mth)[1],list(data_source=this_dataset))
+            ## may have provided some arguments already e.g. quote(fun(arg=var))
+            thisargs <- inject_args(mth,list(data_source=this_dataset))
+            do.call(all.names(mth)[1],thisargs)
         }
-    }        
+    }
 
     ## build file list if postprocessing required
     if (length(pp)>0) {
@@ -140,16 +142,22 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         for (i in 1:length(pp)) {
             ## postprocessing steps are passed as functions or calls
             qq <- pp[[i]]
-            if (inherits(qq,"call")) {
-                ## add extra args
-                qq$data_source <- this_dataset
-                qq$file_list_before <- file_list_before
-                qq$file_list_after <- file_list_after
-                ## evaluate
-                eval(qq)
-            } else if (is.function(qq)) {
+            if (is.function(qq)) {
+                ## passed as function
                 ## evaluate with extra args
                 do.call(qq,list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+            } else if (is.name(qq)) {
+                ## passed as symbol
+                do.call(eval(qq),list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))                
+            } else if (is.call(qq)) {
+                if (all.names(qq)[1]=="quote") {
+                    ## call was constructed as e.g. enquote(fun)
+                    do.call(eval(qq),list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                } else {
+                    ## call was constructed as e.g. quote(fun()) or quote(fun(var=arg))
+                    thisargs <- inject_args(qq,list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                    do.call(all.names(qq)[1],thisargs)
+                }
             }
         }
     }
