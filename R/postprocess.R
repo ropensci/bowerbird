@@ -20,52 +20,35 @@
 #' }
 #'
 #' @export
-pp_decompress <- function(data_source,delete=FALSE,method,...){##file_list_before,file_list_after,method) {
+pp_decompress <- function(data_source,delete=FALSE,method,...) {
     assert_that(is.data.frame(data_source))
     assert_that(nrow(data_source)==1)
     assert_that(is.flag(delete))
     assert_that(is.string(method))
     method <- match.arg(tolower(method),c("unzip","gunzip","bunzip2","uncompress"))
     xargs <- list(...)
-    if (method=="unzip") {
-        if (delete) {
-            files_to_decompress <- list.files(directory_from_url(data_source$source_url),pattern="\\.zip$",recursive=TRUE,ignore.case=TRUE)
-            do_decompress_files("unzip_delete",files=files_to_decompress)
-        } else {
-            ## decompress but retain compressed file
-            file_list_before <- extract_xarg("file_list_before",xargs)
-            file_list_after <- extract_xarg("file_list_after",xargs)
-            ## since the zip file will have been retained from previous runs, decompress only if the zip file has changed
-            files_to_decompress <- find_changed_files(file_list_before,file_list_after,"\\.zip$")
-            do_decompress_files("unzip",files=files_to_decompress)
-            ## also decompress any files present in the zip file that don't exist in decompressed form
-            files_to_decompress <- setdiff(rownames(file_list_after),files_to_decompress) ## those that we haven't just dealt with
-            files_to_decompress <- files_to_decompress[str_detect(files_to_decompress,regex("\\.zip$",ignore_case=TRUE))] ## only zip files
-            do_decompress_files("unzip",files=files_to_decompress,overwrite=FALSE)
-        }
+    ignore_case <- method=="unzip"
+    file_pattern <- switch(method,
+                           "unzip"="\\.zip$",
+                           "gunzip"="\\.gz$",
+                           "bunzip2"="\\.bz2$",
+                           "uncompress"="\\.Z$",
+                           stop("unrecognized decompression")
+                           )
+    if (delete) {
+        files_to_decompress <- list.files(directory_from_url(data_source$source_url),pattern=file_pattern,recursive=TRUE,ignore.case=ignore_case)
+        do_decompress_files(paste0(method,"_delete"),files=files_to_decompress)
     } else {
-        file_pattern <- switch(method,
-                               "gunzip"="\\.gz$",
-                               "bunzip2"="\\.bz2$",
-                               "uncompress"="\\.Z$",
-                               stop("unrecognized decompression")
-                               )
-        if (delete) {
-            ## unconditionally unzip then delete
-            files_to_decompress <- list.files(directory_from_url(data_source$source_url),pattern=file_pattern,recursive=TRUE)
-            do_decompress_files(paste0(method,"_delete"),files=files_to_decompress)
-        } else {
-            file_list_before <- extract_xarg("file_list_before",xargs)
-            file_list_after <- extract_xarg("file_list_after",xargs)
-            ## decompress but retain compressed file. decompress only if .gz/.bz2/.Z file has changed
-            files_to_decompress <- find_changed_files(file_list_before,file_list_after,file_pattern)
-            do_decompress_files(method,files=files_to_decompress)
-            ## also decompress if uncompressed file does not exist
-            files_to_decompress <- setdiff(rownames(file_list_after),files_to_decompress) ## those that we haven't just dealt with
-            files_to_decompress <- files_to_decompress[str_detect(files_to_decompress,file_pattern)] ## only .gz/.bz2/.Z files
-            do_decompress_files(method,files=files_to_decompress,overwrite=FALSE)
-            ## nb this may be slow, so might be worth explicitly checking for the existence of uncompressed files
-        }
+        file_list_before <- extract_xarg("file_list_before",xargs)
+        file_list_after <- extract_xarg("file_list_after",xargs)
+        ## decompress but retain compressed file. decompress only if .zip/.gz/.bz2/.Z file has changed
+        files_to_decompress <- find_changed_files(file_list_before,file_list_after,file_pattern)
+        do_decompress_files(method,files=files_to_decompress)
+        ## also decompress if uncompressed file does not exist
+        files_to_decompress <- setdiff(rownames(file_list_after),files_to_decompress) ## those that we haven't just dealt with
+        files_to_decompress <- files_to_decompress[str_detect(files_to_decompress,regex(file_pattern,ignore_case=ignore_case))] ## only .zip/.gz/.bz2/.Z files
+        do_decompress_files(method,files=files_to_decompress,overwrite=FALSE)
+        ## nb this may be slow, so might be worth explicitly checking for the existence of uncompressed files
     }
 }
 # @param file_list_before data.frame: files present in the directory before synchronising, as returned by \code{file.info}. Only required if delete=TRUE
