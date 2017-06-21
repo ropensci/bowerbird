@@ -27,6 +27,23 @@ check_method_is <- function(method,expected) {
     }
 }
 
+## isn't there a better way to do this?
+## qfun is a quoted function with arguments already provided, e.g. quote(fun(var=arg))
+## we want to add some extra args (xargs, named list)
+inject_args <- function(qfun,xargs,extras_first=TRUE) {
+    assert_that(is.flag(extras_first))
+    ## xargs is the named list of extra arguments to add
+    if (extras_first) {
+        arglist <- xargs
+        if (length(qfun)>1) for (k in 2:length(qfun)) arglist <- c(arglist,qfun[[k]])
+    } else {
+        arglist=list()
+        if (length(qfun)>1) for (k in 2:length(qfun)) arglist <- c(arglist,qfun[[k]])
+        arglist=c(arglist,xargs)
+    }
+    arglist ## call this as e.g. do.call(all.names(qfun)[1],arglist)
+}
+
 save_current_settings <- function() {
     return(list(working_dir=getwd(), ## current working directory
                 env_http_proxy=Sys.getenv("http_proxy"), ## proxy env vars
