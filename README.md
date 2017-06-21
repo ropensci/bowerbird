@@ -57,3 +57,12 @@ Once the configuration has been defined, run the sync process:
 ```{r,eval=FALSE}
 bb_sync(cf)
 ```
+
+Run the sync in parallel:
+```{r,eval=FALSE}
+library(doFuture)
+registerDoFuture()
+plan(multiprocess)
+
+foreach (i=unique(cf$name),.export=c("cf")) %dopar% bb_sync(bb_slice(cf,cf$name==i))
+```
