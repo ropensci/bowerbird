@@ -1,5 +1,5 @@
 #' Define an external data source
-#'
+#' 
 #' @param name string: the name of the data source
 #' @param description string: a description of the data source
 #' @param reference string: URL to the metadata record or home page of the data source
@@ -7,7 +7,7 @@
 #' @param citation string:
 #' @param license string:
 #' @param comment string:
-#' @param method function: the function that handles the synchronisation process for this data source
+#' @param method function, call, or symbol: the function that handles the synchronisation process for this data source
 #' @param method_flags string:
 #' @param postprocess function, call, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
 #' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
@@ -31,7 +31,7 @@
 #'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
 #'    license="",
 #'    comment="",
-#'    method=bb_wget,
+#'    method=quote(bb_wget),
 #'    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
 #'    postprocess=pp_unzip)
 #'
@@ -40,7 +40,7 @@
 #'
 #' @export
 bb_source <- function(name,description=as.character(NA),reference,source_url,citation,license,comment=as.character(NA),method=bb_wget,method_flags=as.character(NA),postprocess,authentication_note=as.character(NA),user=as.character(NA),password=as.character(NA),access_function=as.character(NA),data_group=as.character(NA)) {
-    assert_that(is.function(method))
+    assert_that(is.function(method) || (is.name(method) && exists(deparse(method),mode="function")) || is.call(method))
     if (missing(name))
         stop("Each data source requires a name")
     if (!is.na(authentication_note) && (na_or_empty(user) || na_or_empty(password))) {

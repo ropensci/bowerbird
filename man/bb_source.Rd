@@ -26,7 +26,7 @@ bb_source(name, description = as.character(NA), reference, source_url,
 
 \item{comment}{string:}
 
-\item{method}{function: the function that handles the synchronisation process for this data source}
+\item{method}{function, call, or symbol: the function that handles the synchronisation process for this data source}
 
 \item{method_flags}{string:}
 
@@ -59,7 +59,7 @@ my_source <- bb_source(
    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
    license="",
    comment="",
-   method=bb_wget,
+   method=quote(bb_wget),
    method_flags="--recursive --level=1 --accept=\\"*bin*.zip,README.TXT\\"",
    postprocess=pp_unzip)
 

@@ -85,7 +85,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     }
     file_pattern <- sub(".*/","",this_dataset$source_url)
     if (is.na(file_pattern) || nchar(file_pattern)<1) file_pattern <- NULL
-    if (identical(this_dataset$method[[1]],aadc_eds_get)) file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
+    if (check_method_is(this_dataset$method[[1]],aadc_eds_get)) file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
     ## build file list if postprocessing required
     if (length(pp)>0) {
         ## take snapshot of this directory before we start syncing
@@ -103,7 +103,23 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         ##cat(str(file_list_before),"\n")
         if (verbose) cat(sprintf("done.\n"))
     }
-    this_dataset$method[[1]](this_dataset)
+    ## run the method
+    mth <- this_dataset$method[[1]]
+    if (is.function(mth)) {
+        ## method function was passed directly
+        do.call(mth,list(data_source=this_dataset))
+    } else if (is.name(mth)) {
+        ## method function was passed as a symbol, e.g. by quote(fun)
+        do.call(eval(mth),list(data_source=this_dataset))
+    } else if (is.call(mth)) {
+        if (all.names(mth)[1]=="quote") {
+            ## call was constructed as e.g. enquote(fun)
+            do.call(eval(mth),list(data_source=this_dataset))
+        } else {
+            ## call was constructed as e.g. quote(fun())
+            do.call(all.names(mth)[1],list(data_source=this_dataset))
+        }
+    }        
 
     ## build file list if postprocessing required
     if (length(pp)>0) {
