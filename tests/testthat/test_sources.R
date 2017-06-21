@@ -150,3 +150,18 @@ test_that("source nsidc0081 still works under ftp (due to be moved to https)",{
     expect_gt(fi$size,50e3)
 })
 
+test_that("source nsidc0082 still works under ftp (due to be moved to https)",{
+    skip_on_cran()
+    temp_root <- tempdir()
+    expect_warning(cf <- bb_config(local_file_root=temp_root) %>%
+        add(bb_sources(name="Radarsat Antarctic digital elevation model V2") %>%
+            mutate(source_url="ftp://sidads.colorado.edu/pub/DATASETS/nsidc0082_radarsat_dem_v02/200M/BINARY/ramp200dem_osu_v2.hdr")) %>%
+            slice(1L))
+    bb_sync(cf)
+    fnm <- file.path(temp_root,"sidads.colorado.edu/pub/DATASETS/nsidc0082_radarsat_dem_v02/200M/BINARY/ramp200dem_osu_v2.hdr")
+    expect_true(file.exists(fnm))
+    fi <- file.info(fnm)
+    expect_gt(fi$size,1e3)
+})
+
+
