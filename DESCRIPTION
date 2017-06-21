@@ -15,6 +15,7 @@ Imports:
     dplyr,
     R.cache,
     R.utils,
+    rmarkdown,
     rvest,
     stringr,
     xml2

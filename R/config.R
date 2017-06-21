@@ -97,3 +97,76 @@ bb_attributes_to_cols <- function(obj) {
     }
     obj
 }
+
+#' Produce summary of bowerbird configuration
+#'
+#' @param cf tibble: configuration, as returned by \code{bb_config}
+#' @param file string: path to file to write summary to. A temporary file is used by default
+#' @param format string: produce HTML ("html") or Rmarkdown ("Rmd") file?
+#'
+#' @return path to the summary file in HTML or Rmarkdown format
+#'
+#' @examples
+#' \dontrun{
+#'   cf <- bb_config("/my/file/root") %>%
+#'     add(bb_source("seaice_smmr_ssmi_nasateam"))
+#'   browseURL(bb_summary(cf))
+#' }
+#'
+#' @export
+bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html") {
+    assert_that(is.string(file))
+    assert_that(is.string(format))
+    format <- match.arg(tolower(format),c("html","rmd"))
+
+    ## write summary as temporary Rmd file
+    rmd_file <- tempfile(fileext=".Rmd")
+    cat("---\ntitle: \"Summary of bowerbird repository\"\ndate: \"",date(),"\"\noutput:\n  html_document:\n    toc: true\n    theme: cerulean\n    highlight: default\n---\n\n",file=rmd_file,append=FALSE)
+
+    cat("Summary of bowerbird configuration\n========\n",file=rmd_file,append=TRUE)
+    cat("\nLast updated: ",format(Sys.time()),"\n",file=rmd_file,append=TRUE)
+
+    cf <- bb_attributes_to_cols(cf)
+
+    cf <- cf %>% group_by_(~data_group,~name) %>% mutate_(source_urls=~paste(file.path(local_file_root,directory_from_url(source_url)),collapse=", ")) %>% ungroup() %>% select_(~-source_url,~-method,~-method_flags,~-postprocess) %>% unique()
+    
+    cf$data_group[cf$data_group==""] <- NA ## so that arrange puts them last
+    cf <- cf[order(cf$data_group), ]
+    cf$data_group[is.na(cf$data_group)] <- ""
+    
+    last_group <- "blah"
+    for (k in 1:nrow(cf)) {
+        if (last_group!=cf$data_group[k]) {
+            cat("\n## Data group: ",cf$data_group[k],"\n",file=rmd_file,append=TRUE)
+        }
+        last_group <- cf$data_group[k]
+        cat("\n### ",cf$name[k],"\n",file=rmd_file,append=TRUE)
+        cat("\n",cf$description[k],"\n",file=rmd_file,append=TRUE)
+        cat("\nReference: ",cf$reference[k],"\n",file=rmd_file,append=TRUE)
+        this_citation <- cf$citation[k]
+        if (is.null(this_citation) || is.na(this_citation) || this_citation=="") {
+            this_citation <- "No citation details provided; see reference"
+        }
+        cat("\nCitation: ",this_citation,"\n",file=rmd_file,append=TRUE)
+        this_license <- cf$license[k]
+        if (is.null(this_license) || is.na(this_license) || this_license=="") {
+            this_license <- "No formal license details provided; see reference"
+        }
+        cat("\nLicense: ",this_license,"\n",file=rmd_file,append=TRUE)
+        thisfun <- cf$access_function[k]
+        if (is.null(thisfun) || is.na(thisfun) || thisfun=="") { thisfun <- "none registered" }
+        temp <- cf$source_urls[[k]]
+        temp <- gsub("\\\\","/",temp)
+        temp <- unique(gsub("/+","/",temp))
+        cat("\nLocal file system path:\n",paste(paste0("- ",temp),sep="\n",collapse="\n"),"\n",file=rmd_file,append=TRUE,sep="")
+        cat("\nAssociated access functions: ",thisfun,"\n",file=rmd_file,append=TRUE)
+    }
+
+    if (format=="html") {
+        ## knit to html
+        rmarkdown::render(rmd_file,output_format="html_document",output_file=file)
+        file
+    } else {
+        rmd_file
+    }
+}
