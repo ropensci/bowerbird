@@ -109,7 +109,8 @@ bb_sources <- function(name,data_group) {
         if (missing(data_group) || (!missing(data_group) && "oceanographic" %in% tolower(data_group))) sources_oceanographic(),
         if (missing(data_group) || (!missing(data_group) && any(c("ocean colour","ocean color") %in% tolower(data_group)))) sources_ocean_colour(),
         if (missing(data_group) || (!missing(data_group) && "meteorological" %in% tolower(data_group))) sources_meteorological(),
-        if (missing(data_group) || (!missing(data_group) && "reanalysis" %in% tolower(data_group))) sources_reanalysis()
+        if (missing(data_group) || (!missing(data_group) && "reanalysis" %in% tolower(data_group))) sources_reanalysis(),
+        if (missing(data_group) || (!missing(data_group) && "satellite imagery" %in% tolower(data_group))) sources_satellite_imagery()
         )
     if (!missing(name)) out <- out[tolower(out$name) %in% tolower(name),]
     out
