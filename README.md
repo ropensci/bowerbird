@@ -17,6 +17,8 @@ On Windows you can use the `install_wget()` function to install it. Otherwise do
 
 ## Usage
 
+### Configuration
+
 Bowerbird must be configured to tell it which data sets to synchronise and where to save them on the local file system.
 
 Build up a configuration by first defining global options such as the destination on your local file system:
@@ -52,13 +54,18 @@ cf <- bb_config(local_file_root="/your/data/directory") %>%
     add(my_source)
 ```
 
+### Synchronisation
+
 Once the configuration has been defined, run the sync process:
 
 ```{r,eval=FALSE}
 bb_sync(cf)
 ```
 
-Run the sync in parallel:
+Running the sync in parallel is likely to speed the process up considerably (unless your bandwidth is the limiting factor).
+
+Note that a given data source may have several `source_url` values, each of which will have their own row in the configuration table (with the same data source `name` value). It is probably a good idea to avoid running these in within-data-source replicates in parallel, because they may overlap in terms of the parts of the remote site that they are mirroring. Thus, it's probably best to split the configuration up by data source `name` and run those subsets in parallel (untested code):
+
 ```{r,eval=FALSE}
 library(doFuture)
 registerDoFuture()
