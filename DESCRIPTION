@@ -23,6 +23,7 @@ LazyLoad: yes
 RoxygenNote: 6.0.1
 Suggests:
     archive,
+    knitr,
     testthat,
     covr
 Remotes: jimhester/archive

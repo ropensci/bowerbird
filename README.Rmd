@@ -1,3 +1,17 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
 # Bowerbird
 
 An R package for maintaining a local collection of sparkly data sets.
@@ -72,4 +86,20 @@ registerDoFuture()
 plan(multiprocess)
 
 foreach (i=unique(cf$name),.export=c("cf")) %dopar% {bb_sync(cf[cf$name==i,])}
+```
+
+## Data sources
+
+Bowerbird comes with configurations for a range of data sources, mostly marine and Antarctic in nature. A summary of these is given below.
+
+```{r echo=FALSE,message=FALSE,warning=FALSE,results="asis"}
+library(bowerbird)
+library(dplyr)
+library(knitr)
+src <- bb_sources() %>% arrange(data_group,name) %>%
+    group_by(data_group,name) %>%
+    slice(1) %>%
+    mutate(authentication_note=replace(authentication_note,is.na(authentication_note),"")) %>%
+    select("Data group"=data_group,Name=name,Description=description,"Authentication note"=authentication_note,Reference=reference)
+kable(src)
 ```
