@@ -28,9 +28,10 @@ test_that("config operations preserve attributes", {
     ## check we have the expected bb attributes and that bb_attributes finds them
     bbae <- c("wget_global_flags","local_file_root","clobber","skip_downloads")
     expect_true(setequal(names(bb_attributes(ocf)),bbae))
-    expect_identical(bb_attributes(ocf %>% bb_slice(1)),bb_attributes(ocf))
+    expect_identical(bb_attributes(ocf %>% slice(1)),bb_attributes(ocf))
+    expect_identical(bb_attributes(ocf[1,]),bb_attributes(ocf))
 
-    temp <- bb_attributes_to_cols(ocf %>% bb_slice(1))
+    temp <- bb_attributes_to_cols(ocf[1,])
     expect_equal(ncol(temp),length(names(ocf))+length(bbae))
     expect_named(temp,c(names(ocf),bbae))##,ignore.order=TRUE)
 })

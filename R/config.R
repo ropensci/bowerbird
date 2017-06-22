@@ -5,6 +5,8 @@ bb_global_atts <- function() c("wget_default_flags","wget_global_flags","http_pr
 
 #' Initialize a bowerbird configuration
 #'
+#' The parameters provided here are repository-wide settings, and will be applied to all data sources that are subsequently added to the configuration.
+#' 
 #' @param local_file_root string: location of data repository on local file system
 #' @param wget_default_flags string: default flags to be passed to wget. These are overridden on a per-data source basis if the data source defines its own wget_flags
 #' @param wget_global_flags string: wget flags that will be applied to all data sources. These will be appended to either the data source wget flags (if specified), or the wget_default_flags
@@ -19,7 +21,7 @@ bb_global_atts <- function() c("wget_default_flags","wget_global_flags","http_pr
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_source("seaice_smmr_ssmi_nasateam"))
+#'     add(bb_source("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
 #' 
 #'   ## save to file
 #'   saveRDS(cf,file="my_config.rds")
@@ -40,9 +42,47 @@ bb_config <- function(local_file_root,wget_default_flags=NULL,wget_global_flags=
     attr(cf,"local_file_root") <- local_file_root
     attr(cf,"clobber") <- clobber
     attr(cf,"skip_downloads") <- skip_downloads
+    class(cf) <- c("bb_cf",class(cf))
     cf
 }
 
+#' Select a subset of data sources within a bowerbird configuration
+#'
+#' @param .data list: configuration, as returned by \code{bb_config}
+#' @param x list: configuration, as returned by \code{bb_config}
+#' @param i numeric: integer row values
+#' @param j numeric: ignored
+#' @param ... : integer row values
+#'
+#' @return configuration
+#'
+#' @examples
+#' \dontrun{
+#'   cf <- bb_config("/my/file/root") %>%
+#'     add(bb_sources()) %>%
+#'     slice(1:5)
+#' }
+#'
+#' @method slice bb_cf
+#' @export
+slice.bb_cf <- function(.data,...) {
+    ##re_add_class <- function(z) {class(z) <- c("bb_cf",class(z)); z}
+    ##class(.data) <- setdiff(class(.data),"bb_cf")
+    ##re_add_class(copy_bb_attributes(do.call(slice_,list(.data,...)),.data))
+
+    ## hmm, that doesn't work, so do this for now
+    .data[...,]
+}
+
+#' @rdname slice.bb_cf
+#' @method [ bb_cf
+#' @export
+`[.bb_cf` <- function(x,i,j,...) {
+    re_add_class <- function(z) {class(z) <- c("bb_cf",class(z)); z}
+    re_add_class(copy_bb_attributes(NextMethod("["),x))
+}
+    
+    
 #' Add a new data source to a bowerbird configuration
 #' 
 #' @param cf tibble: configuration, as returned by \code{bb_config}
@@ -54,7 +94,7 @@ bb_config <- function(local_file_root,wget_default_flags=NULL,wget_global_flags=
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_source("seaice_smmr_ssmi_nasateam"))
+#'     add(bb_source("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
 #' }
 #' @export
 add <- function(cf,source) {
@@ -88,7 +128,7 @@ copy_bb_attributes <- function(to,from) {
 }
 
 ## subset one or more rows
-bb_slice <- function(obj,rows) copy_bb_attributes(obj[rows,],obj)
+##bb_slice <- function(obj,rows) copy_bb_attributes(obj[rows,],obj)
 
 ## copy each bb attribute into column
 bb_attributes_to_cols <- function(obj) {
@@ -109,7 +149,7 @@ bb_attributes_to_cols <- function(obj) {
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_source("seaice_smmr_ssmi_nasateam"))
+#'     add(bb_source("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
 #'   browseURL(bb_summary(cf))
 #' }
 #'

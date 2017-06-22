@@ -28,12 +28,12 @@ bb_config(local_file_root, wget_default_flags = NULL,
 configuration tibble
 }
 \description{
-Initialize a bowerbird configuration
+The parameters provided here are repository-wide settings, and will be applied to all data sources that are subsequently added to the configuration.
 }
 \examples{
 \dontrun{
   cf <- bb_config("/my/file/root") \%>\%
-    add(bb_source("seaice_smmr_ssmi_nasateam"))
+    add(bb_source("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
 
   ## save to file
   saveRDS(cf,file="my_config.rds")

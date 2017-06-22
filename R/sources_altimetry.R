@@ -14,6 +14,22 @@ sources_altimetry <- function() {
         password="",
         access_function="readssh",
         data_group="Altimetry") %>%
+##        bind_rows(
+##            bb_source(
+##                name="CMEMS global gridded absolute dynamic topography",
+##                description="",
+##                reference="",
+##                citation="",
+##                source_url=c("",""),
+##                license="See ",
+##                method=quote(bb_wget),
+##                method_flags="--recursive --level=inf --follow-ftp --no-parent",
+##                postprocess=,
+##                authentication_note="",
+##                user="",
+##                password="",
+##                access_function="readssh",
+##                data_group="Altimetry")) %>%
         bind_rows(
             bb_source(
                 name="Ssalto/Duacs gridded absolute geostrophic velocities",

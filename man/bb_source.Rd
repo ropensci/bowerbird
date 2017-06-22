@@ -4,12 +4,12 @@
 \alias{bb_source}
 \title{Define an external data source}
 \usage{
-bb_source(name, description = as.character(NA), reference, source_url,
-  citation, license, comment = as.character(NA), method = bb_wget,
-  method_flags = as.character(NA), postprocess,
-  authentication_note = as.character(NA), user = as.character(NA),
-  password = as.character(NA), access_function = as.character(NA),
-  data_group = as.character(NA))
+bb_source(name, description = NA_character_, reference, source_url, citation,
+  license, comment = NA_character_, method = bb_wget,
+  method_flags = NA_character_, postprocess,
+  authentication_note = NA_character_, user = NA_character_,
+  password = NA_character_, access_function = NA_character_,
+  data_group = NA_character_)
 }
 \arguments{
 \item{name}{string: the name of the data source}

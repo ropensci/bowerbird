@@ -20,8 +20,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     ## iterate through each dataset in turn
     if (catch_errors) {
         sync_wrapper <- function(di) {
-            tryCatch({
-                do_sync_repo(config %>% bb_slice(di),create_root,verbose,settings)},
+            tryCatch(do_sync_repo(config[di,],create_root,verbose,settings),
                 error=function(e) {
                     cat("\nThere was a problem synchronizing the dataset:",config$name[di],".\nThe error message was:",e$message,"\n")
                 }
@@ -29,7 +28,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
         }
         sync_ok <- sapply(1:nrow(config),sync_wrapper)
     } else {
-        sync_ok <- sapply(1:nrow(config),function(di) do_sync_repo(config %>% bb_slice(di),create_root,verbose,settings))
+        sync_ok <- sapply(1:nrow(config),function(di) do_sync_repo(config[di,],create_root,verbose,settings))
     }
     restore_settings(settings)
     sync_ok

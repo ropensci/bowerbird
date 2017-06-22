@@ -20,7 +20,7 @@ Add a new data source to a bowerbird configuration
 \examples{
 \dontrun{
   cf <- bb_config("/my/file/root") \%>\%
-    add(bb_source("seaice_smmr_ssmi_nasateam"))
+    add(bb_source("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
 }
 }
 \seealso{
