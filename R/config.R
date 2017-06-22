@@ -210,3 +210,20 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html") {
         rmd_file
     }
 }
+
+
+# Validate a bowerbird configuration
+#
+# @param cf tibble: configuration, as returned by \code{bb_config}
+#
+# @return TRUE (invisibly) or throw error
+#
+# @seealso \code{\link{bb_config}}
+#
+# @export
+bb_validate_config <- function(cf) {
+    idx <- !is.na(cf$authentication_note) & (na_or_empty(cf$user) || na_or_empty(cf$password))
+    if (any(idx))
+        stop(paste(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s\n",cf$name[idx],cf$authentication_note[idx]),collapse="\n"))
+    invisible(TRUE)
+}

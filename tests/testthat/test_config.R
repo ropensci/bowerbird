@@ -1,7 +1,7 @@
 context("data config")
 
 test_that("config save/load works", {
-    suppressWarnings(src <- bb_sources())
+    src <- bb_sources()
     cf <- add(bb_config("/dummy/file/root"),src)
     expect_s3_class(cf,"data.frame")
     tmpfile <- tempfile()

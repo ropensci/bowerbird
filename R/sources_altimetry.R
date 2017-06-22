@@ -13,7 +13,7 @@ sources_altimetry <- function() {
         user="",
         password="",
         access_function="readssh",
-        data_group="Altimetry") %>%
+        data_group="Altimetry",warn_empty_auth=FALSE) %>%
 ##        bind_rows(
 ##            bb_source(
 ##                name="CMEMS global gridded absolute dynamic topography",
@@ -45,7 +45,7 @@ sources_altimetry <- function() {
                 user="",
                 password="",
                 access_function="readcurr",
-                data_group="Altimetry")
+                data_group="Altimetry",warn_empty_auth=FALSE)
         ) %>%
         bind_rows(
             bb_source(
@@ -62,7 +62,7 @@ sources_altimetry <- function() {
                 user="",
                 password="",
                 access_function="readssh",
-                data_group="Altimetry")
+                data_group="Altimetry",warn_empty_auth=FALSE)
         ) %>%
         bind_rows(
             bb_source(
@@ -79,7 +79,7 @@ sources_altimetry <- function() {
                 user="",
                 password="",
                 access_function="readssh",
-                data_group="Altimetry")
+                data_group="Altimetry",warn_empty_auth=FALSE)
         ) %>%
         bind_rows(
             bb_source(
@@ -96,5 +96,5 @@ sources_altimetry <- function() {
                 user="",
                 password="",
                 access_function="raster",
-                data_group="Altimetry"))
+                data_group="Altimetry",warn_empty_auth=FALSE))
 }

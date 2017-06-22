@@ -4,7 +4,7 @@ sources_seaice <- function() {
         description="Passive microwave estimates of sea ice concentration at 25km spatial resolution. Daily and monthly resolution, available from 1-Oct-1978 to present.",
         reference="http://nsidc.org/data/nsidc-0051.html",
         source_url="ftp://sidads.colorado.edu/pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/",
-        comment="This data source may migrate to https access in the future, requiring an Erthdata login",
+        comment="This data source may migrate to https access in the future, requiring an Earthdata login",
         citation="Cavalieri, D. J., C. L. Parkinson, P. Gloersen, and H. Zwally. 1996, updated yearly. Sea Ice Concentrations from Nimbus-7 SMMR and DMSP SSM/I-SSMIS Passive Microwave Data. [indicate subset used]. Boulder, Colorado USA: NASA National Snow and Ice Data Center Distributed Active Archive Center. http://dx.doi.org/10.5067/8GQ8LZQVL0VL",
         license="Please cite, see http://nsidc.org/about/use_copyright.html",
         method=quote(bb_wget),
@@ -19,7 +19,7 @@ sources_seaice <- function() {
                 reference="http://nsidc.org/data/nsidc-0081.html",
                 citation="Maslanik, J. and J. Stroeve. 1999, updated daily. Near-Real-Time DMSP SSMIS Daily Polar Gridded Sea Ice Concentrations. [indicate subset used]. Boulder, Colorado USA: NASA National Snow and Ice Data Center Distributed Active Archive Center. http://dx.doi.org/10.5067/U8C09DWVX9LM",
                 source_url="ftp://sidads.colorado.edu/pub/DATASETS/nsidc0081_nrt_nasateam_seaice/",
-                comment="This data source may migrate to https access in the future, requiring an Erthdata login",
+                comment="This data source may migrate to https access in the future, requiring an Earthdata login",
                 license="Please cite, see http://nsidc.org/about/use_copyright.html",
                 method=quote(bb_wget),
                 method_flags="--exclude-directories=pub/DATASETS/nsidc0081_nrt_nasateam_seaice/browse,pub/DATASETS/nsidc0081_nrt_nasateam_seaice/north --recursive --level=inf",
@@ -55,7 +55,7 @@ sources_seaice <- function() {
                 user="",
                 password="",
                 postprocess=NULL,
-                data_group="Sea ice")
+                data_group="Sea ice",warn_empty_auth=FALSE)
         ) %>%
         bind_rows(
             bb_source(

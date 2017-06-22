@@ -9,7 +9,7 @@ bb_source(name, description = NA_character_, reference, source_url, citation,
   method_flags = NA_character_, postprocess,
   authentication_note = NA_character_, user = NA_character_,
   password = NA_character_, access_function = NA_character_,
-  data_group = NA_character_)
+  data_group = NA_character_, warn_empty_auth = TRUE)
 }
 \arguments{
 \item{name}{string: the name of the data source}
@@ -41,6 +41,8 @@ bb_source(name, description = NA_character_, reference, source_url, citation,
 \item{access_function}{string:}
 
 \item{data_group}{string:}
+
+\item{warn_empty_auth}{logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided}
 }
 \value{
 tibble

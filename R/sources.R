@@ -15,6 +15,7 @@
 #' @param password string: password, if required
 #' @param access_function string:
 #' @param data_group string:
+#' @param warn_empty_auth logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided
 #'
 #' @return tibble
 #'
@@ -39,11 +40,11 @@
 #' cf <- add(cf,my_source)
 #'
 #' @export
-bb_source <- function(name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method=bb_wget,method_flags=NA_character_,postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_) {
+bb_source <- function(name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method=bb_wget,method_flags=NA_character_,postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,warn_empty_auth=TRUE) {
     assert_that(is.function(method) || (is.symbol(method) && exists(deparse(method),mode="function")) || is.call(method))
     if (missing(name))
         stop("Each data source requires a name")
-    if (!is.na(authentication_note) && (na_or_empty(user) || na_or_empty(password))) {
+    if (warn_empty_auth && (!is.na(authentication_note) && (na_or_empty(user) || na_or_empty(password)))) {
         warning(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s",name,authentication_note))
     }
     if (missing(license) || missing(citation))
