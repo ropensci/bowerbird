@@ -25,7 +25,6 @@ oceandata_get <- function(data_source) {
     while (tries<3) {
         ## sometimes this takes a couple of attempts!
         myfiles <- wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",paste0("-q --post-data=\"cksum=1&",data_source$method_flags,"\" -O -"),stdout=TRUE)
-        myfiles <- system2("wget",paste0("-q --post-data=\"cksum=1&",data_source$method_flags,"\" -O - https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi"),stdout=TRUE)
         if (is.null(attr(myfiles,"status")) || length(myfiles)>0) break
         tries <- tries+1
     }
