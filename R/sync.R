@@ -83,16 +83,13 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     if (verbose) {
         cat(sprintf(" this dataset path is: %s\n",this_path_no_trailing_sep))
     }
-    file_pattern <- sub(".*/","",this_dataset$source_url)
-    if (is.na(file_pattern) || nchar(file_pattern)<1) file_pattern <- NULL
-    if (check_method_is(this_dataset$method[[1]],aadc_eds_get)) file_pattern <- NULL ## set to null so that file_list_* (below) searches the data directory
     ## build file list if postprocessing required
     if (length(pp)>0) {
         ## take snapshot of this directory before we start syncing
         if (verbose) {
             cat(sprintf(" building file list ... "))
         }
-        file_list_before <- file.info(list.files(path=this_path_no_trailing_sep,pattern=file_pattern,recursive=TRUE,full.names=TRUE)) ## full.names TRUE so that names are relative to current working directory
+        file_list_before <- file.info(list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE)) ## full.names TRUE so that names are relative to current working directory
         if (file.exists(this_path_no_trailing_sep)) {
             ## in some cases this points directly to a file
             temp <- file.info(this_path_no_trailing_sep)
@@ -126,7 +123,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     ## build file list if postprocessing required
     if (length(pp)>0) {
         if (verbose) { cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep)) }
-        file_list_after <- file.info(list.files(path=this_path_no_trailing_sep,pattern=file_pattern,recursive=TRUE,full.names=TRUE))
+        file_list_after <- file.info(list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE))
         if (file.exists(this_path_no_trailing_sep)) {
             ## in some cases this points directly to a file
             temp <- file.info(this_path_no_trailing_sep)
