@@ -31,7 +31,8 @@ sources_oceanographic <- function() {
                 license="Please cite",
                 source_url="https://data.nodc.noaa.gov/woa/WOA13/DATAv2/",
                 method=quote(bb_wget),
-                method_flags="--recursive --no-parent -e robots=off --reject=\"/ascii/*,/csv/*,/shape/*\"",
+                method_flags="--recursive --no-parent -e robots=off --reject-regex=\"/(ascii|csv|shape)/\"",
+                comment="Only the netcdf files are retrieved here: adjust the method_flags --reject-regex parameter if you want ascii, csv, or shapefiles",
                 postprocess=NULL,
                 data_group="Oceanographic"))
 }
