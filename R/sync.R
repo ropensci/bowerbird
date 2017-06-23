@@ -13,6 +13,10 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     assert_that(is.data.frame(config))
     assert_that(is.flag(create_root))
     assert_that(is.flag(verbose))
+    if (nrow(config)<1) {
+        warning("config has no data sources: nothing for bb_sync to do")
+        return(invisible(NULL))
+    }
     bb_validate_config(config)
     ## check that wget can be found (this will also set it in the options)
     blah <- wget_exe()
