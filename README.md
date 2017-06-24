@@ -5,9 +5,7 @@
 Bowerbird
 =========
 
-An R package for maintaining a local collection of sparkly data sets.
-
-See [RAADTools](https://github.com/AustralianAntarcticDivision/raadtools) for reading, plotting, and manipulating these data.
+Sometimes it's desirable to have local copies of third-party data sets. This is common in ecology and the environmental sciences. Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
 
 Installing
 ----------
@@ -36,7 +34,6 @@ cf <- bb_config(local_file_root="/your/data/directory")
 Add data sources by choosing from those already defined in bowerbird:
 
 ``` r
-library(magrittr)
 cf <- cf %>% add(bb_sources("CERSAT SSM/I sea ice concentration"))
 ```
 
@@ -83,7 +80,7 @@ foreach (i=unique(cf$name),.export=c("cf")) %dopar% {bb_sync(cf[cf$name==i,])}
 Data sources
 ------------
 
-Bowerbird comes with configurations for a range of data sources, mostly marine and Antarctic in nature. A summary of these is given below.
+Bowerbird comes with configurations for a range of data sources, mostly marine and Antarctic in nature (see [RAADTools](https://github.com/AustralianAntarcticDivision/raadtools) for reading, plotting, and manipulating these data). A summary of the pre-configured sources is given below.
 
 Some data providers require users to log in. These are indicated by the `authentication_note` column in the configuration table. For these sources, you will need to provide your user name and password, e.g.:
 
