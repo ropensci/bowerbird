@@ -77,7 +77,8 @@ oceandata_get <- function(data_source) {
 }
 
 ## actual function to calculate SHA1 checksums
-do_calculate_sha1 <- function(file) {
+##do_calculate_sha1 <- function(file) {
+calculate_sha1 <- function(file) {
     checksum <- NULL
     if (.Platform$OS.type=="unix") {
         ## try using openssl, since it's faster than digest for these files
@@ -92,7 +93,9 @@ do_calculate_sha1 <- function(file) {
 }
 
 ## and a memoized version, that will use a cached result if available (which will be much faster for large files)
-calculate_sha1 <- addMemoization(do_calculate_sha1)
+## avoid memoization: may cause issues if this sync handler is run multiple times per session, or indeed
+## if the user chooses to use a persistent cache
+##calculate_sha1 <- addMemoization(do_calculate_sha1)
 
 
 #' Satellite platform names and abbreviations used in Oceancolor URLs and file names

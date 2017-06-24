@@ -13,7 +13,6 @@ Imports:
     assertthat,
     digest,
     dplyr,
-    R.cache,
     R.utils,
     rmarkdown,
     rvest,

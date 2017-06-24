@@ -7,7 +7,6 @@
 #' @importFrom digest digest
 #' @importFrom dplyr bind_rows group_by_ mutate_ select_ slice tbl_df tibble ungroup %>%
 #' @importFrom stringr regex str_detect str_match str_split str_trim
-#' @importFrom R.cache addMemoization
 #' @importFrom R.utils bunzip2 gunzip
 #' @importFrom rmarkdown render
 #' @importFrom rvest html_session jump_to html_attr html_nodes
@@ -17,3 +16,4 @@
 NULL
 
 ## @importFrom utils file_test
+# @importFrom R.cache addMemoization
