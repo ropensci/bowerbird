@@ -5,7 +5,7 @@
 Bowerbird
 =========
 
-Sometimes it's desirable to have local copies of third-party data sets. This is common in ecology and the environmental sciences. Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
+Often it's desirable to have local copies of third-party data sets. This is particularly common in ecology and the environmental sciences. Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
 
 Installing
 ----------
