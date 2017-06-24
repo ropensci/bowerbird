@@ -2,6 +2,7 @@
 
 S3method("[",bb_cf)
 S3method(slice,bb_cf)
+export("%>%")
 export(aadc_eds_get)
 export(add)
 export(amps_get)
