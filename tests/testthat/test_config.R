@@ -35,3 +35,11 @@ test_that("config operations preserve attributes", {
     expect_equal(ncol(temp),length(names(ocf))+length(bbae))
     expect_named(temp,c(names(ocf),bbae))##,ignore.order=TRUE)
 })
+
+test_that("config summary appears to work", {
+    skip_if_not(rmarkdown::pandoc_available("1.12.3"),"skipping config summary test because pandoc is not available or is not a recent enough version")
+    temp_root <- tempdir()    
+    cf <- add(bb_config(temp_root),bb_sources())
+    summary_filename <- bb_summary(cf)
+    expect_true(file.exists(summary_filename))
+})
