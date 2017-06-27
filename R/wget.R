@@ -31,8 +31,8 @@ bb_wget <- function(data_source) {
         }
     }
     ## add user, password flags
-    if (!is.na(data_source$user) && nchar(data_source$user)>0) this_flags <- paste0(this_flags," --user=\"",data_source$user,"\"")
-    if (!is.na(data_source$password) && nchar(data_source$password)>0) this_flags <- paste0(this_flags," --password=\"",data_source$password,"\"")
+    if (!is.na(data_source$user) && nchar(data_source$user)>0) this_flags <- paste0(this_flags," --user='",data_source$user,"'")
+    if (!is.na(data_source$password) && nchar(data_source$password)>0) this_flags <- paste0(this_flags," --password='",data_source$password,"'")
     ##if (data_source$wait>0) this_flags <- paste0(this_flags," --wait=",data_source$wait)
 
     if (!is.null(data_source$skip_downloads) && data_source$skip_downloads) {
