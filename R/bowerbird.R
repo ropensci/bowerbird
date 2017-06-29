@@ -4,8 +4,8 @@
 #' @docType package
 #' @references \url{http://data.aad.gov.au}
 #' @import assertthat
-#' @importFrom digest digest
 #' @importFrom dplyr arrange_ bind_rows group_by_ mutate_ select_ slice tbl_df tibble ungroup %>%
+#' @importFrom openssl sha1
 #' @importFrom stringr regex str_detect str_match str_split str_trim
 #' @importFrom R.utils bunzip2 gunzip
 #' @importFrom rmarkdown render
