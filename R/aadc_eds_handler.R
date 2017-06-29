@@ -1,5 +1,7 @@
 #' Handler for files downloaded from the Australian Antarctic Data Centre EDS system
 #'
+#' AADC EDS files have a URL of the form https://data.aad.gov.au/eds/file/wxyz/ where wxyz is a numeric file identifier. Note that the trailing slash is necessary.
+#' 
 #' @references http://data.aad.gov.au
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
 #'

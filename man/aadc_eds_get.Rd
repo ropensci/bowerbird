@@ -13,7 +13,7 @@ aadc_eds_get(data_source)
 TRUE on success
 }
 \description{
-Handler for files downloaded from the Australian Antarctic Data Centre EDS system
+AADC EDS files have a URL of the form https://data.aad.gov.au/eds/file/wxyz/ where wxyz is a numeric file identifier. Note that the trailing slash is necessary.
 }
 \references{
 http://data.aad.gov.au
