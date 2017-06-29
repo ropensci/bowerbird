@@ -63,11 +63,19 @@ bb_source <- function(name,description=NA_character_,reference,source_url,citati
         ppchk <- is.list(postprocess) && all(sapply(postprocess,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function"))))
         if (!ppchk) stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
     }
+    assert_that(is.character(source_url))
+    if (identical(method,aadc_eds_get)) {
+        slidx <- grepl("/$",source_url) 
+        if (!all(slidx)) {
+            warning("each source_url for data sources using the aadc_eds_get method should have a trailing /. These will be added now")
+            source_url[!slidx] <- paste0(source_url[!slidx],"/")
+        }
+    }
     tibble(
         name=if (assert_that(is.string(name))) name,
         description=if (assert_that(is.string(description))) description,
         reference=if (assert_that(is.string(reference))) reference,
-        source_url=if (assert_that(is.character(source_url))) source_url,
+        source_url=source_url,
         citation=if (assert_that(is.string(citation))) citation,
         license=if (assert_that(is.string(license))) license,
         comment=if (assert_that(is.string(comment))) comment,

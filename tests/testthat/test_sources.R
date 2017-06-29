@@ -165,3 +165,17 @@ test_that("source nsidc0082 still works under ftp (due to be moved to https)",{
 })
 
 
+test_that("trailing slash check for AADC EDS method URLs works",{
+    expect_warning(temp <- bb_source(
+        name="AADC test",
+        description="blah",
+        reference= "blah",
+        citation="blah",
+        source_url=c("first","second/","third"),
+        license="blah",
+        method=aadc_eds_get,
+        method_flags=""),
+        regexp="trailing /")
+
+    expect_true(all(grepl("/$",temp$source_url)))
+})
