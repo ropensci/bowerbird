@@ -32,12 +32,12 @@ oceandata_get <- function(data_source) {
     ## catch "Sorry No Files Matched Your Query"
     if (any(grepl("no files matched your query",myfiles,ignore.case=TRUE))) stop("No files matched the supplied oceancolour data file search query (",data_source$method_flags,")")
     myfiles <- myfiles[-c(1,2)] ## get rid of header line and blank line that follows it
-    myfiles <- tbl_df(do.call(rbind,lapply(myfiles,function(z)strsplit(z,"[[:space:]]+")[[1]]))) ##myfiles <- ldply(str_split(myfiles,"[[:space:]]+")) ## split checksum and file name from each line
+    myfiles <- tbl_df(do.call(rbind,lapply(myfiles,function(z)strsplit(z,"[[:space:]]+")[[1]]))) ## split checksum and file name from each line
     colnames(myfiles) <- c("checksum","filename")
+    myfiles <- myfiles %>% dplyr::arrange_(~filename)
     ## for each file, download if needed and store in appropriate directory
     for(idx in 1:nrow(myfiles)) {
-        this <- myfiles[idx,]
-        this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/",this$filename) ## full URL
+        this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/",myfiles$filename[idx]) ## full URL
         this_fullfile <- oceandata_url_mapper(this_url) ## where local copy will go
         if (is.null(this_fullfile)) {
             warning(sprintf("skipping oceandata URL (%s): cannot determine the local path to store the file",this_url))
@@ -52,7 +52,7 @@ oceandata_get <- function(data_source) {
             ## use checksum rather than dates for this
             if (this_exists) {
                 existing_checksum <- calculate_sha1(this_fullfile)
-                download_this <- existing_checksum!=this$checksum
+                download_this <- existing_checksum!=myfiles$checksum[idx]
             }
         } else {
             download_this <- TRUE
@@ -69,15 +69,14 @@ oceandata_get <- function(data_source) {
                 blah <- calculate_sha1(this_fullfile)
         } else {
             if (this_exists) {
-                cat(sprintf("not downloading %s, local copy exists with identical checksum\n",this$filename))
+                cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))
             }
         }
     }
 
 }
 
-## actual function to calculate SHA1 checksums
-##do_calculate_sha1 <- function(file) {
+## function to calculate SHA1 checksums
 calculate_sha1 <- function(file) {
     checksum <- NULL
     if (.Platform$OS.type=="unix") {
@@ -91,11 +90,6 @@ calculate_sha1 <- function(file) {
     }
     checksum
 }
-
-## and a memoized version, that will use a cached result if available (which will be much faster for large files)
-## avoid memoization: may cause issues if this sync handler is run multiple times per session, or indeed
-## if the user chooses to use a persistent cache
-##calculate_sha1 <- addMemoization(do_calculate_sha1)
 
 
 #' Satellite platform names and abbreviations used in Oceancolor URLs and file names
