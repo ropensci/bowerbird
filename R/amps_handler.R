@@ -41,7 +41,7 @@ amps_get <- function(data_source) {
             file_url <- xml2::url_absolute(f,x2$url)
             dummy <- data_source
             dummy$source_url <- file_url
-            bb_wget(data_source)
+            bb_wget(dummy)
         }
         setwd(cwd)
     }
