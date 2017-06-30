@@ -167,7 +167,7 @@ sources_topography <- function() {
                 license="Please cite",
                 source_url="http://homepages.see.leeds.ac.uk/~py10ts/cpom_cryosat2_antarctic_dem/",
                 method=quote(bb_wget),
-                method_flags="--recursive --no-parent --reject=\"index.html\"",
+                method_flags="--recursive --no-parent --reject=\"index.html*\"",
                 postprocess=NULL,
                 data_group="Topography"            )
         ) %>%
