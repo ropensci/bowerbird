@@ -199,15 +199,17 @@ sources_topography <- function() {
         ) %>%
         bind_rows(
             bb_source(
-                name="Shuttle Radar Topography Mission elevation data",
-                description="High-resolution topographic data generated from NASA's Shuttle Radar Topography Mission (SRTM) in 2000, in GeoTIFF format.",
-                reference="http://www2.jpl.nasa.gov/srtm/",
-                source_url="http://gis-lab.info/data/srtm-tif/",
-                citation="Farr, T. G., et al. (2007), The Shuttle Radar Topography Mission, Rev. Geophys., 45, RG2004, doi:10.1029/2005RG000183",
-                license="Please cite",
-                method=quote(bb_wget),
+                name="Shuttle Radar Topography Mission elevation data SRTMGL1 V3",
+                description="Global 1-arc-second topographic data generated from NASA's Shuttle Radar Topography Mission. Version 3.0 (aka SRTM Plus or Void Filled) removes all of the void areas by incorporating data from other sources such as the ASTER GDEM.",
+                reference="https://lpdaac.usgs.gov/dataset_discovery/measures/measures_products_table/srtmgl1_v003",
+                source_url="https://e4ftl01.cr.usgs.gov/SRTM/SRTMGL1.003/2000.02.11/",
+                citation="NASA JPL. (2013). NASA Shuttle Radar Topography Mission Global 1 arc second [Data set]. NASA LP DAAC. https://doi.org/10.5067/measures/srtm/srtmgl1.003",
+                license="Please cite, see https://lpdaac.usgs.gov/node/51",
+                authentication_note="Requires Earthdata login, see https://urs.earthdata.nasa.gov/",
+                method=quote(earthdata_get),
                 method_flags=" --recursive --level=1 --no-parent",
+                user="",
+                password="",
                 postprocess=quote(pp_unzip),
-                access_function="raster::raster",
                 data_group="Topography"))
 }
