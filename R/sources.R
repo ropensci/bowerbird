@@ -4,17 +4,18 @@
 #' @param description string: a description of the data source
 #' @param reference string: URL to the metadata record or home page of the data source
 #' @param source_url character vector: one or more source URLs
-#' @param citation string:
-#' @param license string:
-#' @param comment string:
+#' @param citation string: details of the citation for the data source
+#' @param license string: description of the license. For standard licenses (e.g. creative commons) include the license descriptor ("CC-BY", etc)
+#' @param comment string: comments about the data source. If only part of the original data collection is mirrored, mention that here
 #' @param method function, call, or symbol: the function that handles the synchronisation process for this data source
-#' @param method_flags string:
+#' @param method_flags string: flags to pass to the method. If method is \code{bb_wget}, these are wget flags. Run \code{wget("--help")} to get help on these flags
 #' @param postprocess function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
 #' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
 #' @param user string: username, if required
 #' @param password string: password, if required
-#' @param access_function string:
-#' @param data_group string:
+#' @param access_function string: name of the R function that can be used to read these data
+#' @param data_group string: the name of the group to which this data source belongs. Useful for arranging sources in terms of thematic areas
+#' @param collection_size numeric: approximate size (in MB) of the data collection, if known
 #' @param warn_empty_auth logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided
 #'
 #' @return tibble
@@ -34,13 +35,14 @@
 #'    comment="",
 #'    method=quote(bb_wget),
 #'    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
-#'    postprocess=quote(pp_unzip))
+#'    postprocess=quote(pp_unzip),
+#'    collection_size=620)
 #'
 #' cf <- bb_config("/my/repo/root")
 #' cf <- add(cf,my_source)
 #'
 #' @export
-bb_source <- function(name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method=bb_wget,method_flags=NA_character_,postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,warn_empty_auth=TRUE) {
+bb_source <- function(name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method=bb_wget,method_flags=NA_character_,postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,collection_size=NA,warn_empty_auth=TRUE) {
     assert_that(is.function(method) || (is.symbol(method) && exists(deparse(method),mode="function")) || is.call(method))
     if (missing(name))
         stop("Each data source requires a name")
@@ -86,7 +88,8 @@ bb_source <- function(name,description=NA_character_,reference,source_url,citati
         user=if (assert_that(is.string(user))) user,
         password=if (assert_that(is.string(password))) password,
         access_function=if (assert_that(is.string(access_function))) access_function,
-        data_group=if (assert_that(is.string(data_group))) data_group)
+        data_group=if (assert_that(is.string(data_group))) data_group,
+        collecton_size=if (assert_that(is.numeric(collection_size))) collection_size)
 }
 
 

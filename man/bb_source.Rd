@@ -9,7 +9,8 @@ bb_source(name, description = NA_character_, reference, source_url, citation,
   method_flags = NA_character_, postprocess,
   authentication_note = NA_character_, user = NA_character_,
   password = NA_character_, access_function = NA_character_,
-  data_group = NA_character_, warn_empty_auth = TRUE)
+  data_group = NA_character_, collection_size = NA,
+  warn_empty_auth = TRUE)
 }
 \arguments{
 \item{name}{string: the name of the data source}
@@ -20,15 +21,15 @@ bb_source(name, description = NA_character_, reference, source_url, citation,
 
 \item{source_url}{character vector: one or more source URLs}
 
-\item{citation}{string:}
+\item{citation}{string: details of the citation for the data source}
 
-\item{license}{string:}
+\item{license}{string: description of the license. For standard licenses (e.g. creative commons) include the license descriptor ("CC-BY", etc)}
 
-\item{comment}{string:}
+\item{comment}{string: comments about the data source. If only part of the original data collection is mirrored, mention that here}
 
 \item{method}{function, call, or symbol: the function that handles the synchronisation process for this data source}
 
-\item{method_flags}{string:}
+\item{method_flags}{string: flags to pass to the method. If method is \code{bb_wget}, these are wget flags. Run \code{wget("--help")} to get help on these flags}
 
 \item{postprocess}{function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied}
 
@@ -38,9 +39,11 @@ bb_source(name, description = NA_character_, reference, source_url, citation,
 
 \item{password}{string: password, if required}
 
-\item{access_function}{string:}
+\item{access_function}{string: name of the R function that can be used to read these data}
 
-\item{data_group}{string:}
+\item{data_group}{string: the name of the group to which this data source belongs. Useful for arranging sources in terms of thematic areas}
+
+\item{collection_size}{numeric: approximate size (in MB) of the data collection, if known}
 
 \item{warn_empty_auth}{logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided}
 }
@@ -63,7 +66,8 @@ my_source <- bb_source(
    comment="",
    method=quote(bb_wget),
    method_flags="--recursive --level=1 --accept=\\"*bin*.zip,README.TXT\\"",
-   postprocess=quote(pp_unzip))
+   postprocess=quote(pp_unzip),
+   collection_size=620)
 
 cf <- bb_config("/my/repo/root")
 cf <- add(cf,my_source)
