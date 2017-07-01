@@ -9,6 +9,7 @@ sources_oceanographic <- function() {
         method=quote(bb_wget),
         method_flags="--recursive --level=1 --accept-regex=\".*2009.*.nc.gz\"",
         postprocess=quote(pp_gunzip),
+        collection_size=2.8,        
         data_group="Oceanographic") %>%
         bind_rows(
             bb_source(
@@ -21,6 +22,7 @@ sources_oceanographic <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent -e robots=off --reject=\"index.html*\"",
                 postprocess=NULL,
+                collection_size=6.0,                
                 data_group="Oceanographic")) %>%
         bind_rows(
             bb_source(
@@ -34,5 +36,6 @@ sources_oceanographic <- function() {
                 method_flags="--recursive --no-parent -e robots=off --reject=\"index.html*\" --reject-regex=\"/(ascii|csv|shape|5564|6574|7584|8594|95A4|A5B2)/\"",
                 comment="Only the long-term (not per-decade) netcdf files are retrieved here: adjust the method_flags --reject-regex parameter if you want ascii, csv, or shapefiles, or per-decade files.",
                 postprocess=NULL,
+                collection_size=57,                
                 data_group="Oceanographic"))
 }

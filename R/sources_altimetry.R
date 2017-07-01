@@ -13,6 +13,7 @@ sources_altimetry <- function() {
         user="",
         password="",
         access_function="readssh",
+        collection_size=310,        
         data_group="Altimetry",warn_empty_auth=FALSE) %>%
         bind_rows(
             bb_source(
@@ -29,6 +30,7 @@ sources_altimetry <- function() {
                 user="",
                 password="",
                 access_function="readssh",
+                collection_size=3,                
                 data_group="Altimetry",warn_empty_auth=FALSE)) %>%
 ##        bind_rows(
 ##            bb_source(
@@ -62,5 +64,6 @@ sources_altimetry <- function() {
                 user="",
                 password="",
                 access_function="raster",
+                collection_size=0.1,                
                 data_group="Altimetry",warn_empty_auth=FALSE))
 }

@@ -11,6 +11,7 @@ sources_seaice <- function() {
         method_flags="--exclude-directories=pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/browse,pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/final-gsfc/north --recursive --level=inf",
         postprocess=NULL,
         access_function="readice",
+        collection_size=10,
         data_group="Sea ice") %>%
         bind_rows(
             bb_source(
@@ -25,6 +26,7 @@ sources_seaice <- function() {
                 method_flags="--exclude-directories=pub/DATASETS/nsidc0081_nrt_nasateam_seaice/browse,pub/DATASETS/nsidc0081_nrt_nasateam_seaice/north --recursive --level=inf",
                 postprocess=NULL,
                 access_function="readice",
+                collection_size=0.6,
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -39,6 +41,7 @@ sources_seaice <- function() {
                 method_flags="--recursive --level=inf",
                 postprocess=NULL,
                 access_function="readice",
+                collection_size=0.1,                
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -55,6 +58,7 @@ sources_seaice <- function() {
                 user="",
                 password="",
                 postprocess=NULL,
+                collection_size=0.1,
                 data_group="Sea ice",warn_empty_auth=FALSE)
         ) %>%
         bind_rows(
@@ -69,6 +73,7 @@ sources_seaice <- function() {
                 method_flags="--recursive --level=inf --follow-ftp",
                 postprocess=quote(pp_gunzip),
                 access_function="readice",
+                collection_size=25,
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -83,6 +88,7 @@ sources_seaice <- function() {
                 method_flags="--recursive --level=inf --follow-ftp",
                 postprocess=NULL,
                 access_function="readice",
+                collection_size=0.01,
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -98,6 +104,7 @@ sources_seaice <- function() {
                 method_flags="--recursive --level=inf --accept=\"asi*.hdf\" --accept=\"asi*.png\" --accept=\"asi*.tif\" --reject-regex=\"^/amsr2data/\" --no-parent",
                 postprocess=NULL,
                 access_function="readice",
+                collection_size=11,
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -113,6 +120,7 @@ sources_seaice <- function() {
                 method_flags="--recursive --level=inf --accept=\"asi*.hdf\" --accept=\"asi*.tif\" --accept=\"asi*.png\" --reject-regex=\"^/amsr2data/\" --no-parent",
                 postprocess=NULL,
                 access_function="readice",
+                collection_size=NA, ## not fully downloaded, so not sure of size
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -126,6 +134,7 @@ sources_seaice <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --level=inf --accept=hdf --no-parent",
                 postprocess=NULL,
+                collection_size=0.02,
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -134,12 +143,13 @@ sources_seaice <- function() {
                 description="Passive microwave sea ice concentration data at 12.5km resolution, 3-Dec-1991 to present",
                 reference= "http://cersat.ifremer.fr/data/tools-and-services/quicklooks/sea-ice/ssm-i-sea-ice-concentration-maps",
                 citation="",
-                source_url="ftp://ftp.ifremer.fr//ifremer/cersat/products/gridded/psi-concentration/data/antarctic/daily/netcdf/*",
+                source_url="ftp://ftp.ifremer.fr/ifremer/cersat/products/gridded/psi-concentration/data/antarctic/daily/netcdf/*",
                 license="Unknown",
                 method=quote(bb_wget),
                 method_flags="--recursive --level=inf --no-parent",
                 postprocess=quote(pp_uncompress),
                 access_function="readice",
+                collection_size=2.5,
                 data_group="Sea ice")
         ) %>%
         bind_rows(
@@ -153,6 +163,7 @@ sources_seaice <- function() {
                 method=quote(aadc_eds_get),
                 method_flags="",
                 postprocess=quote(pp_unzip),
+                collection_size=0.4,
                 data_group="Sea ice")
         )
 }

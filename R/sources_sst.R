@@ -10,6 +10,7 @@ sources_sst <- function() {
         method_flags="--recursive --level=inf --accept=\"avhrr-only*\" --reject=\"*preliminary*\" --follow-ftp --no-parent",
         postprocess=quote(pp_gunzip),
         access_function="readsst",
+        collection_size=140,
         data_group="Sea surface temperature") %>%
         bind_rows(
             bb_source(
@@ -23,6 +24,7 @@ sources_sst <- function() {
                 method_flags="--recursive --level=1 --no-parent",
                 postprocess=NULL,
                 access_function="readsst",
+                collection_size=0.9,
                 data_group="Sea surface temperature")
         ) %>%
         bind_rows(
@@ -36,6 +38,7 @@ sources_sst <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --level=1 --no-parent",
                 postprocess=NULL,
+                collection_size=0.3,
                 data_group="Sea surface temperature")
         ) %>%
         bind_rows(
@@ -48,6 +51,7 @@ sources_sst <- function() {
                 method=quote(oceandata_get),
                 method_flags="search=T*L3m_MO_SST_sst_9km.nc",
                 postprocess=NULL,
+                collection_size=7,
                 data_group="Sea surface temperature")
         ) %>%
         bind_rows(
@@ -60,6 +64,7 @@ sources_sst <- function() {
                 method=quote(oceandata_get),
                 method_flags="search=A*L3m_MO_SST_sst_9km.nc",
                 postprocess=NULL,
+                collection_size=7,
                 data_group="Sea surface temperature")
         ) %>%
         bind_rows(
@@ -74,6 +79,7 @@ sources_sst <- function() {
                 method=quote(ghrsst_get),
                 method_flags="--recursive --level=inf --no-parent",
                 postprocess=quote(pp_bunzip2),
+                collection_size=2000,
                 data_group="Sea surface temperature")
         )   
 }

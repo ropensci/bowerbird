@@ -1,16 +1,17 @@
 sources_topography <- function() {
     bb_source(
-                name="Smith and Sandwell bathymetry",
-                description="Global seafloor topography from satellite altimetry and ship depth soundings",
-                reference= "http://topex.ucsd.edu/WWW_html/mar_topo.html",
-                citation="Smith, W. H. F., and D. T. Sandwell, Global seafloor topography from satellite altimetry and ship depth soundings, Science, v. 277, p. 1957-1962, 26 Sept., 1997",
-                source_url="ftp://topex.ucsd.edu/pub/global_topo_1min/*",
-                license="See ftp://topex.ucsd.edu/pub/global_topo_1min/COPYRIGHT.txt",
-                method=quote(bb_wget),
-                method_flags="--recursive --level=1 --no-parent",
-                postprocess=NULL,
-                access_function="readbathy",
-                data_group="Topography") %>%
+        name="Smith and Sandwell bathymetry",
+        description="Global seafloor topography from satellite altimetry and ship depth soundings",
+        reference= "http://topex.ucsd.edu/WWW_html/mar_topo.html",
+        citation="Smith, W. H. F., and D. T. Sandwell, Global seafloor topography from satellite altimetry and ship depth soundings, Science, v. 277, p. 1957-1962, 26 Sept., 1997",
+        source_url="ftp://topex.ucsd.edu/pub/global_topo_1min/*",
+        license="See ftp://topex.ucsd.edu/pub/global_topo_1min/COPYRIGHT.txt",
+        method=quote(bb_wget),
+        method_flags="--recursive --level=1 --no-parent",
+        postprocess=NULL,
+        access_function="readbathy",
+        collection_size=1.4,
+        data_group="Topography") %>%
         bind_rows(
             bb_source(
                 name="ETOPO1 bathymetry",
@@ -23,6 +24,7 @@ sources_topography <- function() {
                 method_flags="--recursive --no-parent --accept=\"*gdal*,*.txt\"",
                 postprocess=quote(pp_gunzip),
                 access_function="readtopo",
+                collection_size=1.3,
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -37,6 +39,7 @@ sources_topography <- function() {
                 method_flags="--recursive --no-parent",
                 postprocess=quote(pp_unzip),
                 access_function="readtopo",
+                collection_size=0.3,
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -51,6 +54,7 @@ sources_topography <- function() {
                 method_flags="--recursive --no-parent -e robots=off --accept=\"*bin.zip,*tiff.zip,*.txt,*.rtf\" --no-check-certificate",
                 comment="--no-check-certificate flag to wget until certificate authority issue fixed",
                 postprocess=quote(pp_unzip),
+                collection_size=3.3,
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -64,6 +68,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=quote(pp_unzip),
+                collection_size=0.7,                
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -77,6 +82,7 @@ sources_topography <- function() {
                 method=quote(aadc_eds_get),
                 method_flags="",
                 postprocess=quote(pp_unzip),
+                collection_size=0.2,                
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -90,6 +96,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --level=inf --accept=zip --no-parent",
                 postprocess=quote(pp_unzip),
+                collection_size=0.4,
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -103,6 +110,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=quote(pp_unzip),
+                collection_size=4.1,                
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -116,6 +124,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=NULL,
+                collection_size=0.2,
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -129,6 +138,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=NULL,
+                collection_size=4.1,                
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -143,6 +153,7 @@ sources_topography <- function() {
                 method_flags="--recursive --no-parent --reject=\"*.txt.gz,*.tar.gz\"",
                 comment="Only the 200m and 1km binary files are retrieved here: adjust the source_url or method_flags for others",
                 postprocess=quote(pp_gunzip),
+                collection_size=3.3,                
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -156,6 +167,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --level=inf --no-parent",
                 postprocess=NULL,
+                collection_size=0.5,
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -169,6 +181,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent --reject=\"index.html*\"",
                 postprocess=NULL,
+                collection_size=0.6,                
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -182,6 +195,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=quote(pp_unzip),
+                collection_size=0.2,                
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -195,6 +209,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
                 postprocess=quote(pp_unzip),
+                collection_size=0.6,
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -211,5 +226,6 @@ sources_topography <- function() {
                 user="",
                 password="",
                 postprocess=quote(pp_unzip),
+                collection_size=NA,                
                 data_group="Topography"))
 }

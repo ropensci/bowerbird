@@ -8,6 +8,7 @@ sources_ocean_colour <- function() {
         method=quote(oceandata_get),
         method_flags="search=S*L3m_MO_CHL_chlor_a_9km.nc",
         postprocess=NULL,
+        collection_size=7.2,
         data_group="Ocean colour") %>%
         bind_rows(
             bb_source(
@@ -19,6 +20,7 @@ sources_ocean_colour <- function() {
                 method=quote(oceandata_get),
                 method_flags="search=A*L3m_DAY_CHL_chlor_a_4km.nc",
                 postprocess=NULL,
+                collection_size=40,                
                 data_group="Ocean colour")) %>%
         bind_rows(
             bb_source(
@@ -30,6 +32,7 @@ sources_ocean_colour <- function() {
                 method=quote(oceandata_get),
                 method_flags="search=A*L3m_MO_CHL_chlor_a_9km.nc",
                 postprocess=NULL,
+                collection_size=8,                
                 data_group="Ocean colour")) %>%
         bind_rows(
             bb_source(
@@ -41,6 +44,7 @@ sources_ocean_colour <- function() {
                 method=quote(oceandata_get),
                 method_flags="search=V2016*L3m_DAY_NPP_CHL_chlor_a_4km.nc",
                 postprocess=NULL,
+                collection_size=1,                
                 data_group="Ocean colour")) %>%
         bind_rows(
             bb_source(
@@ -52,6 +56,7 @@ sources_ocean_colour <- function() {
                 method=quote(oceandata_get),
                 method_flags="search=V*L3m_MO_SNPP_CHL_chlor_a_9km.nc",
                 postprocess=NULL,
+                collection_size=1,                
                 data_group="Ocean colour")) %>%
         bind_rows(
             bb_source(
@@ -63,6 +68,7 @@ sources_ocean_colour <- function() {
                 method=quote(oceandata_get),
                 method_flags="search=V*3m_SN*_SNPP_CHL_chlor_a_9km.nc",
                 postprocess=NULL,
+                collection_size=0.5,                
                 data_group="Ocean colour")) %>%
         bind_rows(
             bb_source(
@@ -75,6 +81,7 @@ sources_ocean_colour <- function() {
                 method_flags="search=V*L3b_DAY_SNPP_RRS.nc",
                 postprocess=NULL,
                 access_function="roc::readL3",
+                collection_size=180,                
                 data_group="Ocean colour")) %>%
         bind_rows(
             bb_source(
@@ -87,6 +94,7 @@ sources_ocean_colour <- function() {
                 method_flags="search=A*L3b_DAY_RRS.nc",
                 postprocess=NULL,
                 access_function="roc::readL3",
+                collection_size=800,
                 data_group="Ocean colour")) %>%
         bind_rows(
             bb_source(
@@ -99,6 +107,7 @@ sources_ocean_colour <- function() {
                 method_flags="search=S*L3b_DAY_RRS.nc",
                 postprocess=NULL,
                 access_function="roc::readL3",
+                collection_size=130,
                 data_group="Ocean colour")) %>%
         bind_rows(
             bb_source(
@@ -110,6 +119,7 @@ sources_ocean_colour <- function() {
                 method=quote(oceandata_get),
                 method_flags="search=V*L3m_R32_SNPP_CHL_chlor_a_9km.nc",
                 postprocess=NULL,
+                collection_size=4,
                 data_group="Ocean colour"))
 }
 

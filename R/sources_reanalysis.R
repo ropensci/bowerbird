@@ -9,6 +9,7 @@ sources_reanalysis <- function() {
         method=quote(bb_wget),
         method_flags="--recursive --no-parent",
         postprocess=NULL,
+        collection_size=NA, ## haven't downloaded full collection yet, so don't have a figure for this
         data_group="Reanalysis") %>%
         bind_rows(
             bb_source(
@@ -21,6 +22,7 @@ sources_reanalysis <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=NULL,
+                collection_size=50,                
                 data_group="Reanalysis")) %>%
         bind_rows(
             bb_source(
@@ -33,6 +35,7 @@ sources_reanalysis <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=NULL,
+                collection_size=2,                
                 data_group="Reanalysis"))
 }
 

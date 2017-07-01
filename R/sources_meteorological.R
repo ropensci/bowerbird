@@ -6,9 +6,10 @@ sources_meteorological <- function() {
         citation="See http://www2.mmm.ucar.edu/rt/amps/",
         source_url="http://www2.mmm.ucar.edu/rt/amps/wrf_grib/",
         license="Please cite",
-        comment="d1,d2 files for hours 000-027 only",
+        comment="d1,d2 files for hours 000-027 only. Note that this web site provides only the last few days of files.",
         method=quote(amps_get),
         method_flags="",
         postprocess=NULL,
+        collection_size=NA, ## depends on how long the sync has been running, since only the last few days worth are exposed at any one time
         data_group="Meteorological")
 }
