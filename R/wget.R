@@ -66,11 +66,21 @@ bb_wget <- function(data_source) {
 #' @return the result of the system2 call
 #'
 #' @seealso \code{\link{install_wget}} \code{\link{system2}}
+#' @examples
+#' \dontrun{
+#' ## get help about wget command line parameters
+#' wget("--help")
+#' }
 #'
 # @export
 wget <- function(url,flags,verbose=TRUE,...) {
-    if (verbose) cat(sprintf(" executing wget %s %s\n",flags,url))
-    system2(wget_exe(),paste(flags,url,sep=" "),...)
+    assert_that(is.string(url))
+    if (tolower(url) %in% c("-h","--help") || tolower(flags) %in% c("-h","--help")) {
+        system2(wget_exe(),"--help",...)
+    } else {
+        if (verbose) cat(sprintf(" executing wget %s %s\n",flags,url))
+        system2(wget_exe(),paste(flags,url,sep=" "),...)
+    }
 }
 
 #' Helper function to install wget on Windows

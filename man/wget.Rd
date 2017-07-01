@@ -21,6 +21,13 @@ the result of the system2 call
 \description{
 Make a wget call
 }
+\examples{
+\dontrun{
+## get help about wget command line parameters
+wget("--help")
+}
+
+}
 \seealso{
 \code{\link{install_wget}} \code{\link{system2}}
 }
