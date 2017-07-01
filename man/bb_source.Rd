@@ -43,7 +43,7 @@ bb_source(name, description = NA_character_, reference, source_url, citation,
 
 \item{data_group}{string: the name of the group to which this data source belongs. Useful for arranging sources in terms of thematic areas}
 
-\item{collection_size}{numeric: approximate disk space (in GB) used by the data collection, if known. If the data are supplied as compressed files, this size should reflect the disk space used after decompression}
+\item{collection_size}{numeric: approximate disk space (in GB) used by the data collection, if known. If the data are supplied as compressed files, this size should reflect the disk space used after decompression. If the data_source definition contains multiple source_url entries, this size should reflect the overall disk space used by all combined.}
 
 \item{warn_empty_auth}{logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided}
 }
