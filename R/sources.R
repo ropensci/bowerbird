@@ -89,7 +89,7 @@ bb_source <- function(name,description=NA_character_,reference,source_url,citati
         password=if (assert_that(is.string(password))) password,
         access_function=if (assert_that(is.string(access_function))) access_function,
         data_group=if (assert_that(is.string(data_group))) data_group,
-        collecton_size=if (assert_that(is.numeric(collection_size))) collection_size)
+        collecton_size=if (assert_that(is.numeric(collection_size) || is.na(collection_size))) collection_size)
 }
 
 
