@@ -15,7 +15,7 @@
 #' @param password string: password, if required
 #' @param access_function string: name of the R function that can be used to read these data
 #' @param data_group string: the name of the group to which this data source belongs. Useful for arranging sources in terms of thematic areas
-#' @param collection_size numeric: approximate size (in MB) of the data collection, if known
+#' @param collection_size numeric: approximate disk space (in GB) used by the data collection, if known. If the data are supplied as compressed files, this size should reflect the disk space used after decompression
 #' @param warn_empty_auth logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided
 #'
 #' @return tibble
