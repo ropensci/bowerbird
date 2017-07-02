@@ -227,5 +227,20 @@ sources_topography <- function() {
                 password="",
                 postprocess=quote(pp_unzip),
                 collection_size=NA,                
-                data_group="Topography",warn_empty_auth=FALSE))
+                data_group="Topography",warn_empty_auth=FALSE)) %>% 
+    bind_rows(
+      bb_source(
+        name = "Bathymetry of Lake Superior",
+        description = "A draft version of the Lake Superior Bathymetry was compiled as a component of a NOAA project to rescue Great Lakes lake floor geological and geophysical data, and make it more accessible to the public. No time frame has been set for completing bathymetric contours of Lake Superior, though a 3 arc-second (~90 meter cell size) grid is available.",
+        reference = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html",
+        source_url = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior/data", 
+        citation = "Publisher: DOC/NOAA/NESDIS/NCEI > National Centers for Environmental Information, NESDIS, NOAA, U.S. Department of Commerce", 
+        license = "https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright", 
+        method=quote(bb_wget),
+        method_flags = "--recursive --level=1 --accept=\"*netcdf/superior_lld.grd.gz\"",
+        postprocess=quote(pp_gunzip), 
+        collection_size = 0.01, 
+        data_group = "Topography"
+      )
+    )
 }

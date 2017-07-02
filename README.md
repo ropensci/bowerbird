@@ -617,3 +617,11 @@ Authentication note: Requires Earthdata login, see <https://urs.earthdata.nasa.g
 Approximate size: not specified
 
 Reference: <https://lpdaac.usgs.gov/dataset_discovery/measures/measures_products_table/srtmgl1_v003>
+
+#### Bathymetry of Lake Superior
+
+A draft version of the Lake Superior Bathymetry was compiled as a component of a NOAA project to rescue Great Lakes lake floor geological and geophysical data, and make it more accessible to the public. No time frame has been set for completing bathymetric contours of Lake Superior, though a 3 arc-second (~90 meter cell size) grid is available.
+
+Approximate size: not specified
+
+Reference: <https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html>
