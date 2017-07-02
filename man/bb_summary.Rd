@@ -4,7 +4,9 @@
 \alias{bb_summary}
 \title{Produce summary of bowerbird configuration}
 \usage{
-bb_summary(cf, file = tempfile(fileext = ".html"), format = "html")
+bb_summary(cf, file = tempfile(fileext = ".html"), format = "html",
+  inc_license = TRUE, inc_size = TRUE, inc_access_function = TRUE,
+  inc_path = TRUE)
 }
 \arguments{
 \item{cf}{tibble: configuration, as returned by \code{bb_config}}
@@ -12,6 +14,14 @@ bb_summary(cf, file = tempfile(fileext = ".html"), format = "html")
 \item{file}{string: path to file to write summary to. A temporary file is used by default}
 
 \item{format}{string: produce HTML ("html") or Rmarkdown ("Rmd") file?}
+
+\item{inc_license}{logical: include each source's license and citation details?}
+
+\item{inc_size}{logical: include each source's size (disk space) information?}
+
+\item{inc_access_function}{logical: include each source's access function?}
+
+\item{inc_path}{logical: include each source's local file path?}
 }
 \value{
 path to the summary file in HTML or Rmarkdown format

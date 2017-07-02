@@ -143,6 +143,10 @@ bb_attributes_to_cols <- function(obj) {
 #' @param cf tibble: configuration, as returned by \code{bb_config}
 #' @param file string: path to file to write summary to. A temporary file is used by default
 #' @param format string: produce HTML ("html") or Rmarkdown ("Rmd") file?
+#' @param inc_license logical: include each source's license and citation details?
+#' @param inc_size logical: include each source's size (disk space) information?
+#' @param inc_access_function logical: include each source's access function?
+#' @param inc_path logical: include each source's local file path?
 #'
 #' @return path to the summary file in HTML or Rmarkdown format
 #'
@@ -154,7 +158,7 @@ bb_attributes_to_cols <- function(obj) {
 #' }
 #'
 #' @export
-bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html") {
+bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_license=TRUE,inc_size=TRUE,inc_access_function=TRUE,inc_path=TRUE) {
     assert_that(is.string(file))
     assert_that(is.string(format))
     format <- match.arg(tolower(format),c("html","rmd"))
@@ -182,24 +186,30 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html") {
         last_group <- cf$data_group[k]
         cat("\n### ",cf$name[k],"\n",file=rmd_file,append=TRUE)
         cat("\n",cf$description[k],"\n",file=rmd_file,append=TRUE)
+        if (inc_size)
+            cat("\nApproximate size:", if (is.na(cf$collection_size[k])) "not specified" else paste0(cf$collection_size[k], " GB"),"\n",file=rmd_file,append=TRUE)
         cat("\nReference: ",cf$reference[k],"\n",file=rmd_file,append=TRUE)
-        this_citation <- cf$citation[k]
-        if (is.null(this_citation) || is.na(this_citation) || this_citation=="") {
-            this_citation <- "No citation details provided; see reference"
+        if (inc_license) {
+            this_citation <- cf$citation[k]
+            if (is.null(this_citation) || is.na(this_citation) || this_citation=="") {
+                this_citation <- "No citation details provided; see reference"
+            }
+            cat("\nCitation: ",this_citation,"\n",file=rmd_file,append=TRUE)
+            this_license <- cf$license[k]
+            if (is.null(this_license) || is.na(this_license) || this_license=="") {
+                this_license <- "No formal license details provided; see reference"
+            }
+            cat("\nLicense: ",this_license,"\n",file=rmd_file,append=TRUE)
         }
-        cat("\nCitation: ",this_citation,"\n",file=rmd_file,append=TRUE)
-        this_license <- cf$license[k]
-        if (is.null(this_license) || is.na(this_license) || this_license=="") {
-            this_license <- "No formal license details provided; see reference"
-        }
-        cat("\nLicense: ",this_license,"\n",file=rmd_file,append=TRUE)
-        thisfun <- cf$access_function[k]
-        if (is.null(thisfun) || is.na(thisfun) || thisfun=="") { thisfun <- "none registered" }
         temp <- cf$source_urls[[k]]
         temp <- gsub("\\\\","/",temp)
         temp <- unique(gsub("/+","/",temp))
-        cat("\nLocal file system path:\n",paste(paste0("- ",temp),sep="\n",collapse="\n"),"\n",file=rmd_file,append=TRUE,sep="")
-        cat("\nAssociated access functions: ",thisfun,"\n",file=rmd_file,append=TRUE)
+        if (inc_path) cat("\nLocal file system path:\n",paste(paste0("- ",temp),sep="\n",collapse="\n"),"\n",file=rmd_file,append=TRUE,sep="")
+        if (inc_access_function) {
+            thisfun <- cf$access_function[k]
+            if (is.null(thisfun) || is.na(thisfun) || thisfun=="") { thisfun <- "none registered" }
+            cat("\nAssociated access functions: ",thisfun,"\n",file=rmd_file,append=TRUE)
+        }
     }
 
     if (format=="html") {
