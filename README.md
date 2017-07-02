@@ -622,6 +622,6 @@ Reference: <https://lpdaac.usgs.gov/dataset_discovery/measures/measures_products
 
 A draft version of the Lake Superior Bathymetry was compiled as a component of a NOAA project to rescue Great Lakes lake floor geological and geophysical data, and make it more accessible to the public. No time frame has been set for completing bathymetric contours of Lake Superior, though a 3 arc-second (~90 meter cell size) grid is available.
 
-Approximate size: not specified
+Approximate size: 0.01 GB
 
 Reference: <https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html>
