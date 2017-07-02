@@ -144,6 +144,7 @@ bb_attributes_to_cols <- function(obj) {
 #' @param file string: path to file to write summary to. A temporary file is used by default
 #' @param format string: produce HTML ("html") or Rmarkdown ("Rmd") file?
 #' @param inc_license logical: include each source's license and citation details?
+#' @param inc_auth logical: include information about authentication for each data source (if applicable)?
 #' @param inc_size logical: include each source's size (disk space) information?
 #' @param inc_access_function logical: include each source's access function?
 #' @param inc_path logical: include each source's local file path?
@@ -158,9 +159,14 @@ bb_attributes_to_cols <- function(obj) {
 #' }
 #'
 #' @export
-bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_license=TRUE,inc_size=TRUE,inc_access_function=TRUE,inc_path=TRUE) {
+bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_license=TRUE,inc_auth=TRUE,inc_size=TRUE,inc_access_function=TRUE,inc_path=TRUE) {
     assert_that(is.string(file))
     assert_that(is.string(format))
+    assert_that(is.flag(inc_license))
+    assert_that(is.flag(inc_auth))
+    assert_that(is.flag(inc_size))
+    assert_that(is.flag(inc_access_function))
+    assert_that(is.flag(inc_path))    
     format <- match.arg(tolower(format),c("html","rmd"))
 
     ## write summary as temporary Rmd file
@@ -186,6 +192,8 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_licen
         last_group <- cf$data_group[k]
         cat("\n### ",cf$name[k],"\n",file=rmd_file,append=TRUE)
         cat("\n",cf$description[k],"\n",file=rmd_file,append=TRUE)
+        if (inc_auth && !is.na(cf$authentication_note[k]))
+            cat("\nAuthentication note:", cf$authentication_note[k],"\n",file=rmd_file,append=TRUE)
         if (inc_size)
             cat("\nApproximate size:", if (is.na(cf$collection_size[k])) "not specified" else paste0(cf$collection_size[k], " GB"),"\n",file=rmd_file,append=TRUE)
         cat("\nReference: ",cf$reference[k],"\n",file=rmd_file,append=TRUE)

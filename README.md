@@ -152,6 +152,8 @@ CMEMS PRODUCT IDENTIFIER: SEALEVEL\_GLO\_PHY\_L4\_REP\_OBSERVATIONS\_008\_047. F
 
 -   surface\_geostrophic\_northward\_sea\_water\_velocity (UVG)
 
+Authentication note: Copernicus Marine login required, see <http://marine.copernicus.eu/services-portfolio/register-now/>
+
 Approximate size: 310 GB
 
 Reference: <http://cmems-resources.cls.fr/?option=com_csw&view=details&tab=info&product_id=SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047>
@@ -172,6 +174,8 @@ CMEMS PRODUCT IDENTIFIER: SEALEVEL\_GLO\_PHY\_L4\_NRT\_OBSERVATIONS\_008\_046. F
 
 -   surface\_geostrophic\_northward\_sea\_water\_velocity (UVG)
 
+Authentication note: Copernicus Marine login required, see <http://marine.copernicus.eu/services-portfolio/register-now/>
+
 Approximate size: 3 GB
 
 Reference: <http://cmems-resources.cls.fr/?option=com_csw&view=details&tab=info&product_id=SEALEVEL_GLO_PHY_L4_NRT_OBSERVATIONS_008_046>
@@ -179,6 +183,8 @@ Reference: <http://cmems-resources.cls.fr/?option=com_csw&view=details&tab=info&
 #### CNES-CLS09 Mean Dynamic Topography
 
 CNES-CLS09 Mean Dynamic Topography (v1.1 release)
+
+Authentication note: AVISO login required, see <https://www.aviso.altimetry.fr/en/data/data-access/endatadata-accessregistration-form.html>
 
 Approximate size: 0.1 GB
 
@@ -367,6 +373,8 @@ Reference: <http://nsidc.org/data/nsidc-0051.html>
 #### Nimbus Ice Edge Points from Nimbus Visible Imagery
 
 This data set (NmIcEdg2) estimates the location of the North and South Pole sea ice edges at various times during the mid to late 1960s, based on recovered Nimbus 1 (1964), Nimbus 2 (1966), and Nimbus 3 (1969) visible imagery.
+
+Authentication note: Requires Earthdata login, see <https://urs.earthdata.nasa.gov/>
 
 Approximate size: 0.1 GB
 
@@ -603,6 +611,8 @@ Reference: <http://www.soest.hawaii.edu/pwessel/gshhg>
 #### Shuttle Radar Topography Mission elevation data SRTMGL1 V3
 
 Global 1-arc-second topographic data generated from NASA's Shuttle Radar Topography Mission. Version 3.0 (aka SRTM Plus or Void Filled) removes all of the void areas by incorporating data from other sources such as the ASTER GDEM.
+
+Authentication note: Requires Earthdata login, see <https://urs.earthdata.nasa.gov/>
 
 Approximate size: not specified
 
