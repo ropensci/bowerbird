@@ -1,8 +1,8 @@
 Package: bowerbird
 Type: Package
 Title: Keep a Collection of Sparkly Data Resources
-Version: 0.1.9
-Authors@R: c(person("Ben","Raymond",email="ben.raymond@aad.gov.au", 
+Version: 0.1.10
+Authors@R: c(person("Ben","Raymond",email="ben.raymond@aad.gov.au",
   	   role=c("aut","cre")),
 	   person("Michael","Sumner",role="aut"))
 Description: Tools to get and maintain a data repository from third-party data

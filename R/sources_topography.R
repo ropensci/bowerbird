@@ -68,7 +68,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=quote(pp_unzip),
-                collection_size=0.7,                
+                collection_size=0.7,
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -82,7 +82,7 @@ sources_topography <- function() {
                 method=quote(aadc_eds_get),
                 method_flags="",
                 postprocess=quote(pp_unzip),
-                collection_size=0.2,                
+                collection_size=0.2,
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -110,7 +110,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=quote(pp_unzip),
-                collection_size=4.1,                
+                collection_size=4.1,
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -138,7 +138,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=NULL,
-                collection_size=4.1,                
+                collection_size=4.1,
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -153,7 +153,7 @@ sources_topography <- function() {
                 method_flags="--recursive --no-parent --reject=\"*.txt.gz,*.tar.gz\"",
                 comment="Only the 200m and 1km binary files are retrieved here: adjust the source_url or method_flags for others",
                 postprocess=quote(pp_gunzip),
-                collection_size=3.3,                
+                collection_size=3.3,
                 data_group="Topography")
         ) %>%
         bind_rows(
@@ -181,7 +181,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent --reject=\"index.html*\"",
                 postprocess=NULL,
-                collection_size=0.6,                
+                collection_size=0.6,
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -195,7 +195,7 @@ sources_topography <- function() {
                 method=quote(bb_wget),
                 method_flags="--recursive --no-parent",
                 postprocess=quote(pp_unzip),
-                collection_size=0.2,                
+                collection_size=0.2,
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -226,20 +226,21 @@ sources_topography <- function() {
                 user="",
                 password="",
                 postprocess=quote(pp_unzip),
-                collection_size=NA,                
-                data_group="Topography",warn_empty_auth=FALSE)) %>% 
+                collection_size=NA,
+                data_group="Topography",warn_empty_auth=FALSE)) %>%
     bind_rows(
       bb_source(
         name = "Bathymetry of Lake Superior",
         description = "A draft version of the Lake Superior Bathymetry was compiled as a component of a NOAA project to rescue Great Lakes lake floor geological and geophysical data, and make it more accessible to the public. No time frame has been set for completing bathymetric contours of Lake Superior, though a 3 arc-second (~90 meter cell size) grid is available.",
         reference = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html",
-        source_url = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior/data", 
-        citation = "Publisher: DOC/NOAA/NESDIS/NCEI > National Centers for Environmental Information, NESDIS, NOAA, U.S. Department of Commerce", 
-        license = "https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright", 
+        source_url = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior/data/",
+        citation = "Publisher: DOC/NOAA/NESDIS/NCEI > National Centers for Environmental Information, NESDIS, NOAA, U.S. Department of Commerce",
+        license = "https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright",
         method=quote(bb_wget),
-        method_flags = "--recursive --level=1 --accept=\"*netcdf/superior_lld.grd.gz\"",
-        postprocess=quote(pp_gunzip), 
-        collection_size = 0.01, 
+        method_flags = "--recursive --level=2 --accept-regex=\"/netcdf/\" --reject=\"index.html*\"",
+        comment="Only the netcdf format data are retrieved here - adjust the accept parameter in the method_flags to get other formats",
+        postprocess=quote(pp_gunzip),
+        collection_size = 0.03,
         data_group = "Topography"
       )
     )
