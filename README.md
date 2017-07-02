@@ -1,6 +1,5 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-<style>td{vertical-align:top;}</style>
 [![Travis-CI Build Status](https://travis-ci.org/AustralianAntarcticDivision/bowerbird.svg?branch=master)](https://travis-ci.org/AustralianAntarcticDivision/bowerbird) [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/5idrimyx0uuv6liu?svg=true)](https://ci.appveyor.com/project/raymondben/bowerbird) [![codecov](https://codecov.io/gh/AustralianAntarcticDivision/bowerbird/branch/master/graph/badge.svg)](https://codecov.io/gh/AustralianAntarcticDivision/bowerbird)
 
 Bowerbird
@@ -46,7 +45,7 @@ Once the configuration has been defined, run the sync process:
 bb_sync(cf)
 ```
 
-Congratulations! You now have your own copy of your chosen data sets.
+Congratulations! You now have your own local copy of your chosen data sets.
 
 The pre-packaged environmental data sources can be read, manipulated, and plotted using a range of other R packages, including [RAADTools](https://github.com/AustralianAntarcticDivision/raadtools) and [raster](https://cran.r-project.org/package=raster).
 
@@ -74,11 +73,11 @@ cf <- cf %>% add(bb_sources(name="CMEMS global gridded SSH reprocessed (1993-ong
 
 Sometimes you might only want part of a pre-configured data source. If the data source uses the `bb_wget` method, you can restrict what is downloaded by modifying the data source's `method_flags`, particularly the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` options. Be sure to leave the original method flags in place, unless you know what you are doing.
 
-For example, the CERSAT SSM/I sea ice concentration data are arranged in yearly directories, so it is fairly easy to download, say, only the 2017 data:
+For example, the CERSAT SSM/I sea ice concentration data are arranged in yearly directories, so it is fairly easy to restrict ourselves to, say, only the 2017 data:
 
 ``` r
 cf <- cf %>% add(bb_sources("CERSAT SSM/I sea ice concentration") %>%
-                 mutate(method_flags=paste("--accept-regex=\"/2017/\"")))
+                 mutate(method_flags=paste(method_flags,"--accept-regex=\"/2017/\"")))
 ```
 
 See the notes below for further guidances on the accept/reject flags.
