@@ -226,7 +226,7 @@ sources_topography <- function() {
                 user="",
                 password="",
                 postprocess=quote(pp_unzip),
-                collection_size=NA,
+                collection_size=620,
                 data_group="Topography",warn_empty_auth=FALSE)) %>%
     bind_rows(
       bb_source(

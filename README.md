@@ -614,7 +614,7 @@ Global 1-arc-second topographic data generated from NASA's Shuttle Radar Topogra
 
 Authentication note: Requires Earthdata login, see <https://urs.earthdata.nasa.gov/>
 
-Approximate size: not specified
+Approximate size: 620 GB
 
 Reference: <https://lpdaac.usgs.gov/dataset_discovery/measures/measures_products_table/srtmgl1_v003>
 
