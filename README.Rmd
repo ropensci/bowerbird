@@ -4,31 +4,31 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, echo = FALSE}
+```{r echo = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
+  ##comment = "#>",
   fig.path = "README-"
 )
 ```
-
+<style>td{vertical-align:top;}</style>
 [![Travis-CI Build Status](https://travis-ci.org/AustralianAntarcticDivision/bowerbird.svg?branch=master)](https://travis-ci.org/AustralianAntarcticDivision/bowerbird)
 [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/5idrimyx0uuv6liu?svg=true)](https://ci.appveyor.com/project/raymondben/bowerbird)
 [![codecov](https://codecov.io/gh/AustralianAntarcticDivision/bowerbird/branch/master/graph/badge.svg)](https://codecov.io/gh/AustralianAntarcticDivision/bowerbird)
 
 # Bowerbird
 
-Often it's desirable to have local copies of third-party data sets. This is particularly common in ecology and the environmental sciences. Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
+Often it's desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be necessary to have local copies. This is particularly common in ecology and the environmental sciences. Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
 
 ## Installing
 
-```{r,eval=FALSE}
+```{r eval=FALSE}
 install.packages("devtools")
 library(devtools)
 install_github("AustralianAntarcticDivision/bowerbird")
 ```
 
-Bowerbird requires the third-party utility `wget` to recursively download files from data providers. `wget` is typically installed by default on Linux.
+Bowerbird uses the third-party utility `wget` to do the heavy lifting of recursively downloading files from data providers. `wget` is typically installed by default on Linux.
 On Windows you can use the `install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from https://eternallybored.org/misc/wget/current/wget.exe) and make sure it is on your path.
 
 ## Usage
@@ -39,63 +39,38 @@ Bowerbird must be configured to tell it which data sets to synchronise and where
 
 Build up a configuration by first defining global options such as the destination on your local file system:
 
-```{r,eval=FALSE}
-cf <- bb_config(local_file_root="/your/data/directory")
+```{r eval=FALSE}
+cf <- bb_config(local_file_root="~/your/data/directory")
 ```
 
-Add data sources by choosing from those already defined in bowerbird:
+Add data sources by choosing from those already defined in Bowerbird, or define your own (see below for guidance). Bowerbird comes with configurations for a range of data sources, mostly environmental (marine and Antarctic) in nature. A summary of the pre-configured sources is given at the end of this document.
 
-```{r,eval=FALSE}
+```{r eval=FALSE}
 cf <- cf %>% add(bb_sources("CERSAT SSM/I sea ice concentration"))
-```
-
-Or define your own data source:
-
-```{r,eval=FALSE}
-my_source <- bb_source(
-    name="GSHHG coastline data",
-    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
-    reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
-    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
-      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
-    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
-    license="LGPL",
-    comment="",
-    method=quote(bb_wget),
-    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
-    postprocess=quote(pp_unzip))
-
-cf <- bb_config(local_file_root="/your/data/directory") %>%
-    add(my_source)
 ```
 
 ### Synchronisation
 
 Once the configuration has been defined, run the sync process:
 
-```{r,eval=FALSE}
+```{r eval=FALSE}
 bb_sync(cf)
 ```
 
-Running the sync in parallel is likely to speed the process up considerably (unless your bandwidth is the limiting factor).
+Congratulations! You now have your own local copy of your chosen data sets.
 
-Note that a given data source may have several `source_url` values, each of which will have their own row in the configuration table (with the same data source `name` value). It is probably a good idea to avoid running these in within-data-source replicates in parallel, because they may overlap in terms of the parts of the remote site that they are mirroring. Thus, it's probably best to split the configuration up by data source `name` and run those subsets in parallel (untested code):
+The pre-packaged environmental data sources can be read, manipulated, and plotted using a range of other R packages, including [RAADTools](https://github.com/AustralianAntarcticDivision/raadtools) and [raster](https://cran.r-project.org/package=raster).
 
-```{r,eval=FALSE}
-library(doFuture)
-registerDoFuture()
-plan(multiprocess)
 
-foreach (i=unique(cf$name),.export=c("cf")) %dopar% {bb_sync(cf[cf$name==i,])}
-```
+## Nuances
 
-## Data sources
+### Modifying data sources
 
-Bowerbird comes with configurations for a range of data sources, mostly marine and Antarctic in nature (see [RAADTools](https://github.com/AustralianAntarcticDivision/raadtools) for reading, plotting, and manipulating these data). A summary of the pre-configured sources is given below.
+#### Authentication
 
 Some data providers require users to log in. These are indicated by the `authentication_note` column in the configuration table. For these sources, you will need to provide your user name and password, e.g.:
 
-```{r,eval=FALSE}
+```{r eval=FALSE}
 src <- bb_sources(name="CMEMS global gridded SSH reprocessed (1993-ongoing)")
 src$user <- "yourusername"
 src$password <- "yourpassword"
@@ -106,17 +81,79 @@ cf <- cf %>% add(bb_sources(name="CMEMS global gridded SSH reprocessed (1993-ong
                  mutate(user="yourusername",password="yourpassword"))
 ```
 
-### Data source summary
+#### Reducing download sizes
+
+Sometimes you might only want part of a pre-configured data source. If the data source uses the `bb_wget` method, you can restrict what is downloaded by modifying the data source's `method_flags`, particularly the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` options. Be sure to leave the original method flags in place, unless you know what you are doing.
+
+For example, the CERSAT SSM/I sea ice concentration data are arranged in yearly directories, so it is fairly easy to restrict ourselves to, say, only the 2017 data:
+
+```{r eval=FALSE}
+cf <- cf %>% add(bb_sources("CERSAT SSM/I sea ice concentration") %>%
+                 mutate(method_flags=paste(method_flags,"--accept-regex=\"/2017/\"")))
+```
+
+See the notes below for further guidances on the accept/reject flags.
+
+### Defining new data sources
+
+If the pre-packages data sources don't cover your needs, you can define your own using the `bb_source` function:
+
+```{r eval=FALSE}
+my_source <- bb_source(
+    name="GSHHG coastline data",
+    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
+    reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
+    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
+      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
+    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
+    license="LGPL",
+    method=quote(bb_wget),
+    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
+    postprocess=quote(pp_unzip))
+
+cf <- bb_config(local_file_root="/your/data/directory") %>%
+    add(my_source)
+```
+
+Most sources will use the `bb_wget` method, which is a wrapper around the wget utility. If you are unfamiliar with wget, consult one of the many online tutorials. You can also see the in-built wget help by running `wget("--help")`.
+
+Some subtleties to bear in mind:
+
+1. If the data source delivers compressed files, you will most likely want to decompress them after downloading. The postprocess options `pp_decompress`, `pp_unzip`, etc will do this for you. By default, these *do not* delete the compressed files after decompressing. The reason for this is so that on the next synchronisation run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronisation run.
+
+1. You will almost certainly want to specify `--recursive` as part of the `method_flags`. The synchronisation process saves files relative to the `local_file_root` directory specified in the call to `bb_config()`. If `--recursive` is specified, then wget creates a directory structure that follows the URL structure. For example, calling `wget --recursive http://www.somewhere.org/monkey/banana/dataset.zip` will save the local file `www.somewhere.org/monkey/banana/dataset.zip`. Thus, calling `--recursive` will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your `local_file_e_root`.
+
+1. If you want to include/exclude certain files from being downloaded, use the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` flags. Note that `--accept` and `--reject` apply to file names (not the full path), and can be comma-separated lists of file name suffixes or patterns. The `--accept-regex` and `--reject-regex` flags apply to the full path but can only be a single regular expression each.
+
+1. Remember that any `wget_global_flags` defined via `bb_config` will be applied to every data source in addition to their specific `method_flags`. Any data source using `bb_wget` but without `method_flags` (i.e. NA) will use the `wget_default_flags` if any were defined via `bb_config`. Sources needing no flags should specify an empty string for `method_flags`.
+
+1. Several wget flags are set by the `bb_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flags is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
+
+
+### Parallelized sync
+
+Running the sync in parallel is likely to speed the process up considerably (unless your bandwidth is the limiting factor).
+
+Note that a given data source may have several `source_url` values, in which case that data source will be expanded to multiple rows in the configuration object with one `source_url` per row (but all with the same data source `name` value). It is probably prudent to avoid running these in within-data-source replicates in parallel, because they might overlap in terms of the parts of the remote site that they are mirroring. Thus, it's probably best to split the configuration up by data source `name` and run those subsets in parallel, perhaps with (untested code):
+
+```{r eval=FALSE}
+library(doFuture)
+registerDoFuture()
+plan(multiprocess)
+
+foreach (i=unique(cf$name),.export=c("cf")) %dopar% {bb_sync(cf[cf$name==i,])}
+```
+
+
+## Data source summary
 
 ```{r echo=FALSE,message=FALSE,warning=FALSE,results="asis"}
 devtools::load_all()##library(bowerbird)
-library(dplyr)
-library(knitr)
-src <- bb_sources() %>% arrange(data_group,name) %>%
-    group_by(data_group,name) %>%
-    slice(1) %>%
-    mutate(authentication_note=replace(authentication_note,is.na(authentication_note),"")) %>%
-    mutate(description=gsub("\n","<br />",description)) %>%
-    select("Data group"=data_group,Name=name,Description=description,"Authentication note"=authentication_note,Reference=reference)
-kable(src)
+cf <- bb_config("/your/data/root/") %>% add(bb_sources())
+sf <- bb_summary(cf,format="rmd",inc_license=FALSE,inc_access_function=FALSE,inc_path=FALSE)    
+stxt <- readLines(sf)
+stxt <- stxt[(grep("Last updated:",stxt)+1):length(stxt)]
+stxt <- gsub("^#","##",stxt) ## push each header level down one
+stxt <- gsub("^\\-","\n-",stxt)
+for (k in stxt) cat(k,"\n")
 ```
