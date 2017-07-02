@@ -227,5 +227,5 @@ sources_topography <- function() {
                 password="",
                 postprocess=quote(pp_unzip),
                 collection_size=NA,                
-                data_group="Topography"))
+                data_group="Topography",warn_empty_auth=FALSE))
 }
