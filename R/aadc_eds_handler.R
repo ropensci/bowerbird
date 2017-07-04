@@ -1,6 +1,6 @@
 #' Handler for files downloaded from the Australian Antarctic Data Centre EDS system
 #'
-#' AADC EDS files have a URL of the form https://data.aad.gov.au/eds/file/wxyz/ where wxyz is a numeric file identifier. Note that the trailing slash is necessary.
+#' AADC EDS files have a URL of the form https://data.aad.gov.au/eds/wxyz/download where wxyz is a numeric file identifier. Files will be stored in a local directory named with the data source id (if one is provided) or the file id (if not)
 #' 
 #' @references http://data.aad.gov.au
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
@@ -17,15 +17,16 @@ aadc_eds_get <- function(data_source) {
     ## if we unzip this here, we get this zip's files mixed with others
     ## change into subdirectory named by file_id of file, so that we don't get files mixed together in data.aad.gov.au/eds/file/
     ## note that this requires the "--recursive" flag NOT TO BE USED
-    this_file_id <- str_match(data_source$source_url,"/file/(\\d+)/?$")[2]
+    this_file_id <- str_match(data_source$source_url,"/eds/(\\d+)/download$")[2]
     if (is.na(this_file_id)) {
         stop("could not determine AADC EDS file_id")
     }
+    this_dir_name <- if (!is.null(data_source$id)) data_source$id else this_file_id
     if (!grepl("/$",data_source$source_url)) data_source$source_url <- paste0(data_source$source_url,"/")
-    if (!file.exists(file.path(data_source$local_file_root,"data.aad.gov.au","eds","file",this_file_id))) {
-        dir.create(file.path(data_source$local_file_root,"data.aad.gov.au","eds","file",this_file_id),recursive=TRUE)
+    if (!file.exists(file.path(data_source$local_file_root,"data.aad.gov.au","eds","file",this_dir_name))) {
+        dir.create(file.path(data_source$local_file_root,"data.aad.gov.au","eds",this_dir_name),recursive=TRUE)
     }
-    setwd(file.path(data_source$local_file_root,"data.aad.gov.au","eds","file",this_file_id))
+    setwd(file.path(data_source$local_file_root,"data.aad.gov.au","eds",this_dir_name))
     if (!grepl("--content-disposition",data_source$method_flags,ignore.case=TRUE)) {
         data_source$method_flags <- paste(data_source$method_flags,"--content-disposition",sep=" ")
     }

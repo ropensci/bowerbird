@@ -13,7 +13,7 @@ aadc_eds_get(data_source)
 TRUE on success
 }
 \description{
-AADC EDS files have a URL of the form https://data.aad.gov.au/eds/file/wxyz/ where wxyz is a numeric file identifier. Note that the trailing slash is necessary.
+AADC EDS files have a URL of the form https://data.aad.gov.au/eds/wxyz/download where wxyz is a numeric file identifier. Files will be stored in a local directory named with the data source id (if one is provided) or the file id (if not)
 }
 \references{
 http://data.aad.gov.au
