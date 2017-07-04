@@ -21,8 +21,8 @@ aadc_eds_get <- function(data_source) {
     if (is.na(this_file_id)) {
         stop("could not determine AADC EDS file_id")
     }
-    this_dir_name <- if (!is.null(data_source$id)) data_source$id else this_file_id
-    if (!grepl("/$",data_source$source_url)) data_source$source_url <- paste0(data_source$source_url,"/")
+    this_dir_name <- if ("id" %in% names(data_source) && !is.na(data_source$id)) data_source$id else this_file_id
+    
     if (!file.exists(file.path(data_source$local_file_root,"data.aad.gov.au","eds","file",this_dir_name))) {
         dir.create(file.path(data_source$local_file_root,"data.aad.gov.au","eds",this_dir_name),recursive=TRUE)
     }
