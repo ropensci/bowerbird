@@ -1,6 +1,6 @@
 #' Handler for files downloaded from the Australian Antarctic Data Centre EDS system
 #'
-#' AADC EDS files have a URL of the form https://data.aad.gov.au/eds/file/wxyz/ or https://data.aad.gov.au/eds/wxyz/download where wxyz is a numeric file identifier.
+#' AADC EDS files have a URL of the form https://data.aad.gov.au/eds/file/wxyz/ or https://data.aad.gov.au/eds/wxyz/download where wxyz is a numeric file identifier. Note that clobber=1 does not currently work with AADC sources (server error, being investigated).
 #' 
 #' @references http://data.aad.gov.au
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
@@ -42,7 +42,11 @@ aadc_eds_get <- function(data_source) {
     if (grepl("--recursive$",data_source$method_flags,ignore.case=TRUE)) {
         data_source$method_flags <- str_trim(sub("--recursive$","",data_source$method_flags))
     }
-    ##do_wget(build_wget_call(data_source),data_source)
+    ## TEMPORARY WORKAROUND
+    ## AADC does not issue last-modified headers, so --timestamping does not work
+    ## and if you ask for it on a /download URL form, it hangs
+    ## so just do --no-clobber for time being
+    if (bb_attributes(data_source)$clobber==1) attr(data_source,"clobber") <- 2
     ok <- bb_wget(data_source)
     setwd(data_source$local_file_root)
     ok
