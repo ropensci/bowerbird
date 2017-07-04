@@ -1,6 +1,7 @@
 #' Define an external data source
-#' 
-#' @param name string: the name of the data source
+#'
+#' @param name string: a unique name for the data source. This should be a human-readable but still concise name
+#' @param id string: a secondary unique identifier of the data source (optional). If the original data provider has an identifier for this dataset, that is probably a good choice here
 #' @param description string: a description of the data source
 #' @param reference string: URL to the metadata record or home page of the data source
 #' @param source_url character vector: one or more source URLs
@@ -26,6 +27,7 @@
 #'
 #' my_source <- bb_source(
 #'    name="GSHHG coastline data",
+#'    id="gshhg_coastline",
 #'    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
 #'    reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
 #'    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
@@ -42,10 +44,10 @@
 #' cf <- add(cf,my_source)
 #'
 #' @export
-bb_source <- function(name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method=bb_wget,method_flags=NA_character_,postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,collection_size=NA,warn_empty_auth=TRUE) {
+bb_source <- function(name,id=NA_character_,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method=bb_wget,method_flags=NA_character_,postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,collection_size=NA,warn_empty_auth=TRUE) {
     assert_that(is.function(method) || (is.symbol(method) && exists(deparse(method),mode="function")) || is.call(method))
-    if (missing(name))
-        stop("Each data source requires a name")
+    if (missing(name) || !is_nonempty_string(name))
+        stop("Each data source requires a non-empty name")
     if (warn_empty_auth && (!is.na(authentication_note) && (na_or_empty(user) || na_or_empty(password)))) {
         warning(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s",name,authentication_note))
     }
@@ -67,14 +69,15 @@ bb_source <- function(name,description=NA_character_,reference,source_url,citati
     }
     assert_that(is.character(source_url))
     if (identical(method,aadc_eds_get)) {
-        slidx <- grepl("/$",source_url) 
-        if (!all(slidx)) {
+        slidx <- !grepl("/download$",source_url) & !grepl("/$",source_url) 
+        if (any(slidx)) {
             warning("each source_url for data sources using the aadc_eds_get method should have a trailing /. These will be added now")
-            source_url[!slidx] <- paste0(source_url[!slidx],"/")
+            source_url[slidx] <- paste0(source_url[slidx],"/")
         }
     }
     tibble(
-        name=if (assert_that(is.string(name))) name,
+        id=if (assert_that(is_nonempty_string(id))) id,
+        name=if (assert_that(is_nonempty_string(name))) name,
         description=if (assert_that(is.string(description))) description,
         reference=if (assert_that(is.string(reference))) reference,
         source_url=source_url,
@@ -96,7 +99,7 @@ bb_source <- function(name,description=NA_character_,reference,source_url,citati
 
 #' Bowerbird configurations for various data sources
 #'
-#' @param name character vector: only return data sources with name matching these values
+#' @param name character vector: only return data sources with name or id matching these values
 #' @param data_group character vector: only return data sources belonging to these data groups
 #'
 #' @references See \code{reference} and \code{citation} field in each row of the returned tibble
@@ -123,6 +126,6 @@ bb_sources <- function(name,data_group) {
         if (missing(data_group) || (!missing(data_group) && "reanalysis" %in% tolower(data_group))) sources_reanalysis(),
         if (missing(data_group) || (!missing(data_group) && "satellite imagery" %in% tolower(data_group))) sources_satellite_imagery()
         )
-    if (!missing(name)) out <- out[tolower(out$name) %in% tolower(name),]
+    if (!missing(name)) out <- out[tolower(out$name) %in% tolower(name) | tolower(out$id) %in% tolower(name),]
     out
 }

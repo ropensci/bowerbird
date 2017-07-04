@@ -171,11 +171,19 @@ test_that("trailing slash check for AADC EDS method URLs works",{
         description="blah",
         reference= "blah",
         citation="blah",
-        source_url=c("first","second/","third"),
+        source_url=c("first","second/","third","this_one_ok/download"),
         license="blah",
         method=aadc_eds_get,
         method_flags=""),
         regexp="trailing /")
 
-    expect_true(all(grepl("/$",temp$source_url)))
+    expect_equal(sum(grepl("/$",temp$source_url)),3)
 })
+
+test_that("selection by name or ID works",{
+    temp1 <- bb_sources("CNES-CLS09 MDT")
+    temp2 <- bb_sources("CNES-CLS09 Mean Dynamic Topography")
+    expect_identical(temp1,temp2)
+})
+
+    

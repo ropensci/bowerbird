@@ -1,6 +1,7 @@
 sources_meteorological <- function() {
     bb_source(
         name="Antarctic Mesoscale Prediction System grib files",
+        id="AMPS_grib",
         description="The Antarctic Mesoscale Prediction System - AMPS - is an experimental, real-time numerical weather prediction capability that provides support for the United States Antarctic Program, Antarctic science, and international Antarctic efforts.",
         reference="http://www2.mmm.ucar.edu/rt/amps/",
         citation="See http://www2.mmm.ucar.edu/rt/amps/",

@@ -4,8 +4,8 @@
 \alias{bb_source}
 \title{Define an external data source}
 \usage{
-bb_source(name, description = NA_character_, reference, source_url, citation,
-  license, comment = NA_character_, method = bb_wget,
+bb_source(name, id = NA_character_, description = NA_character_, reference,
+  source_url, citation, license, comment = NA_character_, method = bb_wget,
   method_flags = NA_character_, postprocess,
   authentication_note = NA_character_, user = NA_character_,
   password = NA_character_, access_function = NA_character_,
@@ -13,7 +13,9 @@ bb_source(name, description = NA_character_, reference, source_url, citation,
   warn_empty_auth = TRUE)
 }
 \arguments{
-\item{name}{string: the name of the data source}
+\item{name}{string: a unique name for the data source. This should be a human-readable but still concise name}
+
+\item{id}{string: a secondary unique identifier of the data source (optional). If the original data provider has an identifier for this dataset, that is probably a good choice here}
 
 \item{description}{string: a description of the data source}
 
@@ -57,6 +59,7 @@ Define an external data source
 
 my_source <- bb_source(
    name="GSHHG coastline data",
+   id="gshhg_coastline",
    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
    reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
