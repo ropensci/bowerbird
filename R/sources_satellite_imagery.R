@@ -10,6 +10,6 @@ sources_satellite_imagery <- function() {
         postprocess=NULL,
         access_function="readrapid_response",
         collection_size=14,        
-        data_group="Satellite Imagery")
+        data_group="Satellite imagery")
 }
     
