@@ -156,9 +156,9 @@ sources_seaice <- function() {
             bb_source(
                 name="MODIS Composite Based Maps of East Antarctic Fast Ice Coverage",
                 description="Maps of East Antarctic landfast sea-ice extent, generated from approx. 250,000 1 km visible/thermal infrared cloud-free MODIS composite imagery (augmented with AMSR-E 6.25-km sea-ice concentration composite imagery when required). Coverage from 2000-03-01 to 2008-12-31",
-                reference= "http://data.aad.gov.au/aadc/metadata/metadata.cfm?entry_id=modis_20day_fast_ice",
+                reference="https://data.aad.gov.au/metadata/records/modis_20day_fast_ice",
                 citation="Fraser, AD, RA Massom, KJ Michael, BK Galton-Fenzi, and JL Lieser (2012) East Antarctic landfast sea ice distribution and variability, 2000-08. Journal of Climate, 25(4):1137-1156",
-                source_url="https://data.aad.gov.au/eds/file/3656/",
+                source_url="https://data.aad.gov.au/eds/file/3656/", ## migrate to https://data.aad.gov.au/eds/3403/download if we prefer that form
                 license="CC-BY",
                 method=quote(aadc_eds_get),
                 method_flags="",

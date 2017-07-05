@@ -75,10 +75,10 @@ sources_topography <- function() {
             bb_source(
                 name="George V bathymetry",
                 description="This dataset comprises Digital Elevation Models (DEMs) of varying resolutions for the George V and Terre Adelie continental margin, derived by incorporating all available singlebeam and multibeam point depth data.",
-                reference="http://data.aad.gov.au/aadc/metadata/metadata.cfm?entry_id=GVdem_2008",
+                reference="https://data.aad.gov.au/metadata/records/GVdem_2008",
                 citation="Beaman, Robin (2009, updated 2015) A bathymetric Digital Elevation Model (DEM) of the George V and Terre Adelie continental shelf and margin Australian Antarctic Data Centre - CAASM Metadata (https://data.aad.gov.au/aadc/metadata/metadata_redirect.cfm?md=/AMD/AU/GVdem_2008)",
                 license="CC-BY",
-                source_url="https://data.aad.gov.au/eds/file/4494/",
+                source_url="https://data.aad.gov.au/eds/file/4494/", ## migrate to https://data.aad.gov.au/eds/3403/download if we prefer that form
                 method=quote(aadc_eds_get),
                 method_flags="",
                 postprocess=quote(pp_unzip),
