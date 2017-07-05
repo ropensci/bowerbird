@@ -1,6 +1,6 @@
 #' Handler for files downloaded from the Australian Antarctic Data Centre EDS system
 #'
-#' AADC EDS files have a URL of the form https://data.aad.gov.au/eds/file/wxyz/ or https://data.aad.gov.au/eds/wxyz/download where wxyz is a numeric file identifier. Note that clobber=1 does not currently work with AADC sources (server error, being investigated).
+#' AADC EDS files have a URL of the form https://data.aad.gov.au/eds/file/wxyz/ or https://data.aad.gov.au/eds/wxyz/download where wxyz is a numeric file identifier.
 #' 
 #' @references http://data.aad.gov.au
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
@@ -32,9 +32,13 @@ aadc_eds_get <- function(data_source) {
     }
     setwd(file.path(data_source$local_file_root,trailing_path))
     if (is.na(data_source$method_flags)) data_source$method_flags <- ""
-    if (!grepl("--content-disposition",data_source$method_flags,ignore.case=TRUE)) {
-        data_source$method_flags <- paste(data_source$method_flags,"--content-disposition",sep=" ")
-    }
+    ## don't set the --content-disposition flag. It seems to cause problems with used with --timestamping on large files, and
+    ##  isn't really needed anyway. Without it, we just get the downloaded file names as "download" (for the /download url form)
+    ##  or "index.html" (for the /eds/file/wxyz/ form). But these are still valid zip files
+    ##
+    ##if (!grepl("--content-disposition",data_source$method_flags,ignore.case=TRUE)) {
+    ##    data_source$method_flags <- paste(data_source$method_flags,"--content-disposition",sep=" ")
+    ##}
     ## these two should be doable in a single regex, but done separately until I can figure it out
     if (grepl("--recursive ",data_source$method_flags,ignore.case=TRUE)) {
         data_source$method_flags <- str_trim(sub("--recursive ","",data_source$method_flags))
@@ -42,11 +46,6 @@ aadc_eds_get <- function(data_source) {
     if (grepl("--recursive$",data_source$method_flags,ignore.case=TRUE)) {
         data_source$method_flags <- str_trim(sub("--recursive$","",data_source$method_flags))
     }
-    ## TEMPORARY WORKAROUND
-    ## AADC does not issue last-modified headers, so --timestamping does not work
-    ## and if you ask for it on a /download URL form, it hangs
-    ## so just do --no-clobber for time being
-    if (bb_attributes(data_source)$clobber==1) attr(data_source,"clobber") <- 2
     ok <- bb_wget(data_source)
     setwd(data_source$local_file_root)
     ok

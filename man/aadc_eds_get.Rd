@@ -13,7 +13,7 @@ aadc_eds_get(data_source)
 TRUE on success
 }
 \description{
-AADC EDS files have a URL of the form https://data.aad.gov.au/eds/file/wxyz/ or https://data.aad.gov.au/eds/wxyz/download where wxyz is a numeric file identifier. Note that clobber=1 does not currently work with AADC sources (server error, being investigated).
+AADC EDS files have a URL of the form https://data.aad.gov.au/eds/file/wxyz/ or https://data.aad.gov.au/eds/wxyz/download where wxyz is a numeric file identifier.
 }
 \references{
 http://data.aad.gov.au
