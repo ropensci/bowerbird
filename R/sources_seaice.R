@@ -1,7 +1,7 @@
 sources_seaice <- function() {
     bb_source(
         name="NSIDC SMMR-SSM/I Nasateam sea ice concentration",
-        id="nsidc0051",
+        id="10.5067/8GQ8LZQVL0VL", ##nsidc0051
         description="Passive microwave estimates of sea ice concentration at 25km spatial resolution. Daily and monthly resolution, available from 1-Oct-1978 to present.",
         reference="http://nsidc.org/data/nsidc-0051.html",
         source_url="ftp://sidads.colorado.edu/pub/DATASETS/nsidc0051_gsfc_nasateam_seaice/",
@@ -17,7 +17,7 @@ sources_seaice <- function() {
         bind_rows(
             bb_source(
                 name="NSIDC SMMR-SSM/I Nasateam near-real-time sea ice concentration",
-                id="nsidc0081",
+                id="10.5067/U8C09DWVX9LM", ##nsidc0081
                 description="Passive microwave estimates of sea ice concentration at 25km, daily, near-real-time resolution.",
                 reference="http://nsidc.org/data/nsidc-0081.html",
                 citation="Maslanik, J. and J. Stroeve. 1999, updated daily. Near-Real-Time DMSP SSMIS Daily Polar Gridded Sea Ice Concentrations. [indicate subset used]. Boulder, Colorado USA: NASA National Snow and Ice Data Center Distributed Active Archive Center. http://dx.doi.org/10.5067/U8C09DWVX9LM",
@@ -44,13 +44,13 @@ sources_seaice <- function() {
                 method_flags="--recursive --level=inf",
                 postprocess=NULL,
                 access_function="readice",
-                collection_size=0.1,                
+                collection_size=0.1,
                 data_group="Sea ice")
         ) %>%
         bind_rows(
             bb_source(
                 name="Nimbus Ice Edge Points from Nimbus Visible Imagery",
-                id="NmIcEdg2",
+                id="10.5067/NIMBUS/NmIcEdg2",
                 description="This data set (NmIcEdg2) estimates the location of the North and South Pole sea ice edges at various times during the mid to late 1960s, based on recovered Nimbus 1 (1964), Nimbus 2 (1966), and Nimbus 3 (1969) visible imagery.",
                 reference="http://nsidc.org/data/nmicedg2/",
                 citation="Gallaher, D. and G. Campbell. 2014. Nimbus Ice Edge Points from Nimbus Visible Imagery L2, CSV. [indicate subset used]. Boulder, Colorado USA: NASA National Snow and Ice Data Center Distributed Active Archive Center. http://dx.doi.org/10.5067/NIMBUS/NmIcEdg2",
@@ -165,7 +165,7 @@ sources_seaice <- function() {
         bind_rows(
             bb_source(
                 name="MODIS Composite Based Maps of East Antarctic Fast Ice Coverage",
-                id="modis_20day_fast_ice",
+                id="10.4225/15/5667AC726B224", ##modis_20day_fast_ice
                 description="Maps of East Antarctic landfast sea-ice extent, generated from approx. 250,000 1 km visible/thermal infrared cloud-free MODIS composite imagery (augmented with AMSR-E 6.25-km sea-ice concentration composite imagery when required). Coverage from 2000-03-01 to 2008-12-31",
                 reference= "http://data.aad.gov.au/aadc/metadata/metadata.cfm?entry_id=modis_20day_fast_ice",
                 citation="Fraser, AD, RA Massom, KJ Michael, BK Galton-Fenzi, and JL Lieser (2012) East Antarctic landfast sea ice distribution and variability, 2000-08. Journal of Climate, 25(4):1137-1156",

@@ -1,7 +1,7 @@
 sources_sst <- function() {
     bb_source(
         name="NOAA OI 1/4 Degree Daily SST AVHRR",
-        id="OI-daily-v2-AVHRR",
+        id="10.7289/V5SQ8XB5",
         description="Sea surface temperature at 0.25 degree daily resolution, from 1-Sep-1981 to present",
         reference= "http://www.ngdc.noaa.gov/docucomp/page?xml=NOAA/NESDIS/NCDC/Geoportal/iso/xml/C00844.xml&view=getDataView&header=none",
         citation="Richard W. Reynolds, Viva F. Banzon, and NOAA CDR Program (2008): NOAA Optimum Interpolation 1/4 Degree Daily Sea Surface Temperature (OISST) Analysis, Version 2. [indicate subset used]. NOAA National Climatic Data Center. doi:10.7289/V5SQ8XB5 [access date]",
@@ -87,5 +87,5 @@ sources_sst <- function() {
                 postprocess=quote(pp_bunzip2),
                 collection_size=2000,
                 data_group="Sea surface temperature")
-        )   
+        )
 }

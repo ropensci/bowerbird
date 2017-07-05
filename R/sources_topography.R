@@ -16,7 +16,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="ETOPO1 bathymetry",
-                id="ETOPO1",
+                id="10.7289/V5C8276M",
                 description="ETOPO1 is a 1 arc-minute global relief model of Earth's surface that integrates land topography and ocean bathymetry.",
                 reference="http://www.ngdc.noaa.gov/mgg/global/global.html",
                 citation="Amante, C. and B.W. Eakins, 2009. ETOPO1 1 Arc-Minute Global Relief Model: Procedures, Data Sources and Analysis. NOAA Technical Memorandum NESDIS NGDC-24. National Geophysical Data Center, NOAA. doi:10.7289/V5C8276M [access date]",
@@ -32,7 +32,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="ETOPO2 bathymetry",
-                id="ETOPO2",
+                id="ETOPO2v2c",
                 description="2-Minute Gridded Global Relief Data (ETOPO2v2c)",
                 reference="http://www.ngdc.noaa.gov/mgg/global/etopo2.html",
                 citation="",
@@ -94,7 +94,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
-                id="Macquarie_ESRI_Raster",
+                id="10.4225/25/53D9B12E0F96E",
                 description="This is a compilation of all the processed multibeam bathymetry data that are publicly available in Geoscience Australia's data holding for the Macquarie Ridge.",
                 reference="http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_b9224f95-a416-07f8-e044-00144fdd4fa6/XYZ+multibeam+bathymetric+grids+of+the+Macquarie+Ridge",
                 citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
@@ -109,7 +109,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="IBCSO bathymetry",
-                id="IBCSO_v1",
+                id="10.1594/PANGAEA.805734",##IBCSO_v1
                 description="The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 is a new digital bathymetric model (DBM) portraying the seafloor of the circum-Antarctic waters south of 60S. IBCSO is a regional mapping project of the General Bathymetric Chart of the Oceans (GEBCO). The IBCSO Version 1.0 DBM has been compiled from all available bathymetric data collectively gathered by more than 30 institutions from 15 countries. These data include multibeam and single-beam echo soundings, digitized depths from nautical charts, regional bathymetric gridded compilations, and predicted bathymetry. Specific gridding techniques were applied to compile the DBM from the bathymetric data of different origin, spatial distribution, resolution, and quality. The IBCSO Version 1.0 DBM has a resolution of 500 x 500 m, based on a polar stereographic projection, and is publicly available together with a digital chart for printing from the project website (www.ibcso.org) and at http://dx.doi.org/10.1594/PANGAEA.805736.",
                 reference="http://www.ibcso.org/",
                 citation="Arndt, J.E., H. W. Schenke, M. Jakobsson, F. Nitsche, G. Buys, B. Goleby, M. Rebesco, F. Bohoyo, J.K. Hong, J. Black, R. Greku, G. Udintsev, F. Barrios, W. Reynoso-Peralta, T. Morishita, R. Wigley, The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 - A new bathymetric compilation covering circum-Antarctic waters, 2013, Geophysical Research Letters, Vol. 40, p. 3111-3117, doi: 10.1002/grl.50413",
@@ -124,7 +124,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="IBCSO chart for printing",
-                id="IBCSO_v1_digital_chart",
+                id="10.1594/PANGAEA.805735",
                 description="The IBCSO Poster, 2013, is a polar stereographic view of the Southern Ocean displaying bathymetric contours south of 60S at a scale of 1:7,000,000. The poster size is 39.25 x 47.125 inches.",
                 reference="http://www.ibcso.org/",
                 citation="Arndt, J.E., H. W. Schenke, M. Jakobsson, F. Nitsche, G. Buys, B. Goleby, M. Rebesco, F. Bohoyo, J.K. Hong, J. Black, R. Greku, G. Udintsev, F. Barrios, W. Reynoso-Peralta, T. Morishita, R. Wigley, The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 - A new bathymetric compilation covering circum-Antarctic waters, 2013, Geophysical Research Letters, Vol. 40, p. 3111-3117, doi: 10.1002/grl.50413",
@@ -139,7 +139,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="RTOPO-1 Antarctic ice shelf topography",
-                id="RTopo105",
+                id="hdl:10013/epic.39674",
                 description="Sub-ice shelf circulation and freezing/melting rates in ocean general circulation models depend critically on an accurate and consistent representation of cavity geometry. The goal of this work is to compile independent regional fields into a global data set. We use the S-2004 global 1-minute bathymetry as the backbone and add an improved version of the BEDMAP topography for an area that roughly coincides with the Antarctic continental shelf. Locations of the merging line have been carefully adjusted in order to get the best out of each data set. High-resolution gridded data for upper and lower ice surface topography and cavity geometry of the Amery, Fimbul, Filchner-Ronne, Larsen C and George VI Ice Shelves, and for Pine Island Glacier have been carefully merged into the ambient ice and ocean topographies. Multibeam survey data for bathymetry in the former Larsen B cavity and the southeastern Bellingshausen Sea have been obtained from the data centers of Alfred Wegener Institute (AWI), British Antarctic Survey (BAS) and Lamont-Doherty Earth Observatory (LDEO), gridded, and again carefully merged into the existing bathymetry map.",
                 reference="http://epic.awi.de/30738/",
                 citation="Timmermann, Ralph; Le Brocq, Anne M; Deen, Tara J; Domack, Eugene W; Dutrieux, Pierre; Galton-Fenzi, Ben; Hellmer, Hartmut H; Humbert, Angelika; Jansen, Daniela; Jenkins, Adrian; Lambrecht, Astrid; Makinson, Keith; Niederjasper, Fred; Nitsche, Frank-Oliver; N\uf8st, Ole Anders; Smedsrud, Lars Henrik; Smith, Walter (2010): A consistent dataset of Antarctic ice sheet topography, cavity geometry, and global bathymetry. Earth System Science Data, 2(2), 261-273, doi:10.5194/essd-2-261-2010",
@@ -175,11 +175,11 @@ sources_topography <- function() {
                 reference="https://www.niwa.co.nz/our-science/oceans/bathymetry/further-information",
                 citation="Mitchell, J.S., Mackay, K.A., Neil, H.L., Mackay, E.J., Pallentin, A., Notman P., 2012. Undersea New Zealand, 1:5,000,000. NIWA Chart, Miscellaneous Series No. 92",
                 source_url="ftp://ftp.niwa.co.nz/bathymetry/NZBathy_DTM_2016_binary_grid.zip",
-                license="Please cite",
+                license="NIWA Open Data Licence BY-NN-NC-SA version 1, see https://www.niwa.co.nz/environmental-information/licences/niwa-open-data-licence-by-nn-nc-sa-version-1",
                 method=quote(bb_wget),
                 method_flags="--recursive --level=inf --no-parent",
-                postprocess=NULL,
-                collection_size=0.5,
+                postprocess=quote(pp_unzip),
+                collection_size=1.3,
                 data_group="Topography"            )
         ) %>%
         bind_rows(
@@ -230,7 +230,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="Shuttle Radar Topography Mission elevation data SRTMGL1 V3",
-                id="SRTMGL1.003",
+                id="10.5067/measures/srtm/srtmgl1.003",
                 description="Global 1-arc-second topographic data generated from NASA's Shuttle Radar Topography Mission. Version 3.0 (aka SRTM Plus or Void Filled) removes all of the void areas by incorporating data from other sources such as the ASTER GDEM.",
                 reference="https://lpdaac.usgs.gov/dataset_discovery/measures/measures_products_table/srtmgl1_v003",
                 source_url="https://e4ftl01.cr.usgs.gov/SRTM/SRTMGL1.003/2000.02.11/",
