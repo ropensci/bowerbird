@@ -15,6 +15,7 @@ test_that("predefined sources work", {
 
 test_that("bb_source works with multiple postprocess actions", {
     bb_source(
+        id="bilbobaggins",
         name="Oceandata test",
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
         reference= "http://oceancolor.gsfc.nasa.gov/",
@@ -27,8 +28,9 @@ test_that("bb_source works with multiple postprocess actions", {
         postprocess=list(quote(pp_unzip(delete=TRUE)),pp_gunzip),
         access_function="",
         data_group="Sea surface temperature")
-    
+
     bb_source(
+        id="bilbobaggins",
         name="Oceandata test",
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
         reference= "http://oceancolor.gsfc.nasa.gov/",
@@ -51,6 +53,7 @@ test_that("sources with authentication have an authentication_note entry", {
 
 test_that("authentication checks work",{
     expect_warning(bb_source(
+        id="bilbobaggins",
         name="Test",
         description="blah",
         reference="blah",
@@ -62,8 +65,9 @@ test_that("authentication checks work",{
         method_flags="",
         postprocess=NULL,
         data_group="blah"))
-    
+
     expect_warning(bb_source(
+        id="bilbobaggins",
         name="Test",
         description="blah",
         reference="blah",
@@ -78,6 +82,7 @@ test_that("authentication checks work",{
         data_group="blah"))
 
     expect_warning(bb_source(
+        id="bilbobaggins",
         name="Test",
         description="blah",
         reference="blah",
@@ -93,6 +98,7 @@ test_that("authentication checks work",{
 
     ## no warning
     bb_source(
+        id="bilbobaggins",
         name="Test",
         description="blah",
         reference="blah",
@@ -167,15 +173,24 @@ test_that("source nsidc0082 still works under ftp (due to be moved to https)",{
 
 test_that("trailing slash check for AADC EDS method URLs works",{
     expect_warning(temp <- bb_source(
+        id="bilbobaggins",
         name="AADC test",
         description="blah",
         reference= "blah",
         citation="blah",
-        source_url=c("first","second/","third"),
+        source_url=c("first","second/","third","this_one_ok/download"),
         license="blah",
         method=aadc_eds_get,
         method_flags=""),
         regexp="trailing /")
 
-    expect_true(all(grepl("/$",temp$source_url)))
+    expect_equal(sum(grepl("/$",temp$source_url)),3)
 })
+
+test_that("selection by name or ID works",{
+    temp1 <- bb_sources("CNES-CLS09 MDT")
+    temp2 <- bb_sources("CNES-CLS09 Mean Dynamic Topography")
+    expect_identical(temp1,temp2)
+})
+
+

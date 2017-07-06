@@ -1,6 +1,7 @@
 sources_topography <- function() {
     bb_source(
         name="Smith and Sandwell bathymetry",
+        id="global_topo_1min",
         description="Global seafloor topography from satellite altimetry and ship depth soundings",
         reference= "http://topex.ucsd.edu/WWW_html/mar_topo.html",
         citation="Smith, W. H. F., and D. T. Sandwell, Global seafloor topography from satellite altimetry and ship depth soundings, Science, v. 277, p. 1957-1962, 26 Sept., 1997",
@@ -15,6 +16,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="ETOPO1 bathymetry",
+                id="10.7289/V5C8276M",
                 description="ETOPO1 is a 1 arc-minute global relief model of Earth's surface that integrates land topography and ocean bathymetry.",
                 reference="http://www.ngdc.noaa.gov/mgg/global/global.html",
                 citation="Amante, C. and B.W. Eakins, 2009. ETOPO1 1 Arc-Minute Global Relief Model: Procedures, Data Sources and Analysis. NOAA Technical Memorandum NESDIS NGDC-24. National Geophysical Data Center, NOAA. doi:10.7289/V5C8276M [access date]",
@@ -30,6 +32,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="ETOPO2 bathymetry",
+                id="ETOPO2v2c",
                 description="2-Minute Gridded Global Relief Data (ETOPO2v2c)",
                 reference="http://www.ngdc.noaa.gov/mgg/global/etopo2.html",
                 citation="",
@@ -45,6 +48,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="Bedmap2",
+                id="Bedmap2",
                 description="Bedmap2 is a suite of gridded products describing surface elevation, ice-thickness and the sea floor and subglacial bed elevation of the Antarctic south of 60S.",
                 reference="http://www.antarctica.ac.uk/bas_research/our_research/az/bedmap2/",
                 citation="Fretwell et al. (2013) Bedmap2: improved ice bed, surface and thickness datasets for Antarctica. The Cryosphere 7:375-393. doi:10.5194/tc-7-375-2013",
@@ -60,6 +64,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="Kerguelen Plateau bathymetric grid 2010",
+                id="gcat_71552",
                 description="This data replaces the digital elevation model (DEM) for the Kerguelen Plateau region produced in 2005 (Sexton 2005). The revised grid has been gridded at a grid pixel resolution of 0.001-arc degree (about 100 m). The new grid utilised the latest data sourced from ship-based multibeam and singlebeam echosounder surveys, and satellite remotely-sensed data. Report Reference: Beaman, R.J. and O'Brien, P.E., 2011. Kerguelen Plateau bathymetric grid, November 2010. Geoscience Australia, Record, 2011/22, 18 pages.",
                 reference="http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_71552",
                 citation="Beaman, R.J. & O'Brien, P., 2011. Kerguelen Plateau Bathymetric Grid, November 2010. Record  2011/022. Geoscience Australia, Canberra",
@@ -74,6 +79,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="George V bathymetry",
+                id="GVdem_2008",
                 description="This dataset comprises Digital Elevation Models (DEMs) of varying resolutions for the George V and Terre Adelie continental margin, derived by incorporating all available singlebeam and multibeam point depth data.",
                 reference="https://data.aad.gov.au/metadata/records/GVdem_2008",
                 citation="Beaman, Robin (2009, updated 2015) A bathymetric Digital Elevation Model (DEM) of the George V and Terre Adelie continental shelf and margin Australian Antarctic Data Centre - CAASM Metadata (https://data.aad.gov.au/aadc/metadata/metadata_redirect.cfm?md=/AMD/AU/GVdem_2008)",
@@ -88,6 +94,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
+                id="10.4225/25/53D9B12E0F96E",
                 description="This is a compilation of all the processed multibeam bathymetry data that are publicly available in Geoscience Australia's data holding for the Macquarie Ridge.",
                 reference="http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_b9224f95-a416-07f8-e044-00144fdd4fa6/XYZ+multibeam+bathymetric+grids+of+the+Macquarie+Ridge",
                 citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
@@ -102,6 +109,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="IBCSO bathymetry",
+                id="10.1594/PANGAEA.805734",##IBCSO_v1
                 description="The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 is a new digital bathymetric model (DBM) portraying the seafloor of the circum-Antarctic waters south of 60S. IBCSO is a regional mapping project of the General Bathymetric Chart of the Oceans (GEBCO). The IBCSO Version 1.0 DBM has been compiled from all available bathymetric data collectively gathered by more than 30 institutions from 15 countries. These data include multibeam and single-beam echo soundings, digitized depths from nautical charts, regional bathymetric gridded compilations, and predicted bathymetry. Specific gridding techniques were applied to compile the DBM from the bathymetric data of different origin, spatial distribution, resolution, and quality. The IBCSO Version 1.0 DBM has a resolution of 500 x 500 m, based on a polar stereographic projection, and is publicly available together with a digital chart for printing from the project website (www.ibcso.org) and at http://dx.doi.org/10.1594/PANGAEA.805736.",
                 reference="http://www.ibcso.org/",
                 citation="Arndt, J.E., H. W. Schenke, M. Jakobsson, F. Nitsche, G. Buys, B. Goleby, M. Rebesco, F. Bohoyo, J.K. Hong, J. Black, R. Greku, G. Udintsev, F. Barrios, W. Reynoso-Peralta, T. Morishita, R. Wigley, The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 - A new bathymetric compilation covering circum-Antarctic waters, 2013, Geophysical Research Letters, Vol. 40, p. 3111-3117, doi: 10.1002/grl.50413",
@@ -116,6 +124,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="IBCSO chart for printing",
+                id="10.1594/PANGAEA.805735",
                 description="The IBCSO Poster, 2013, is a polar stereographic view of the Southern Ocean displaying bathymetric contours south of 60S at a scale of 1:7,000,000. The poster size is 39.25 x 47.125 inches.",
                 reference="http://www.ibcso.org/",
                 citation="Arndt, J.E., H. W. Schenke, M. Jakobsson, F. Nitsche, G. Buys, B. Goleby, M. Rebesco, F. Bohoyo, J.K. Hong, J. Black, R. Greku, G. Udintsev, F. Barrios, W. Reynoso-Peralta, T. Morishita, R. Wigley, The International Bathymetric Chart of the Southern Ocean (IBCSO) Version 1.0 - A new bathymetric compilation covering circum-Antarctic waters, 2013, Geophysical Research Letters, Vol. 40, p. 3111-3117, doi: 10.1002/grl.50413",
@@ -130,6 +139,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="RTOPO-1 Antarctic ice shelf topography",
+                id="hdl:10013/epic.39674",
                 description="Sub-ice shelf circulation and freezing/melting rates in ocean general circulation models depend critically on an accurate and consistent representation of cavity geometry. The goal of this work is to compile independent regional fields into a global data set. We use the S-2004 global 1-minute bathymetry as the backbone and add an improved version of the BEDMAP topography for an area that roughly coincides with the Antarctic continental shelf. Locations of the merging line have been carefully adjusted in order to get the best out of each data set. High-resolution gridded data for upper and lower ice surface topography and cavity geometry of the Amery, Fimbul, Filchner-Ronne, Larsen C and George VI Ice Shelves, and for Pine Island Glacier have been carefully merged into the ambient ice and ocean topographies. Multibeam survey data for bathymetry in the former Larsen B cavity and the southeastern Bellingshausen Sea have been obtained from the data centers of Alfred Wegener Institute (AWI), British Antarctic Survey (BAS) and Lamont-Doherty Earth Observatory (LDEO), gridded, and again carefully merged into the existing bathymetry map.",
                 reference="http://epic.awi.de/30738/",
                 citation="Timmermann, Ralph; Le Brocq, Anne M; Deen, Tara J; Domack, Eugene W; Dutrieux, Pierre; Galton-Fenzi, Ben; Hellmer, Hartmut H; Humbert, Angelika; Jansen, Daniela; Jenkins, Adrian; Lambrecht, Astrid; Makinson, Keith; Niederjasper, Fred; Nitsche, Frank-Oliver; N\uf8st, Ole Anders; Smedsrud, Lars Henrik; Smith, Walter (2010): A consistent dataset of Antarctic ice sheet topography, cavity geometry, and global bathymetry. Earth System Science Data, 2(2), 261-273, doi:10.5194/essd-2-261-2010",
@@ -144,6 +154,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="Radarsat Antarctic digital elevation model V2",
+                id="nsidc0082",
                 description="The high-resolution Radarsat Antarctic Mapping Project (RAMP) digital elevation model (DEM) combines topographic data from a variety of sources to provide consistent coverage of all of Antarctica. Version 2 improves upon the original version by incorporating new topographic data, error corrections, extended coverage, and other modifications.",
                 reference="http://nsidc.org/data/nsidc-0082",
                 citation="Liu, H., K. Jezek, B. Li, and Z. Zhao. 2001. Radarsat Antarctic Mapping Project Digital Elevation Model Version 2. [indicate subset used]. Boulder, Colorado USA: National Snow and Ice Data Center. http://dx.doi.org/10.5067/PXKC81A7WAXD",
@@ -159,20 +170,22 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="New Zealand Regional Bathymetry 2016",
+                id="NZBathy_DTM_2016_binary_grid",
                 description="The NZ 250m gridded bathymetric data set and imagery, Mitchell et al. 2012, released 2016.",
                 reference="https://www.niwa.co.nz/our-science/oceans/bathymetry/further-information",
                 citation="Mitchell, J.S., Mackay, K.A., Neil, H.L., Mackay, E.J., Pallentin, A., Notman P., 2012. Undersea New Zealand, 1:5,000,000. NIWA Chart, Miscellaneous Series No. 92",
                 source_url="ftp://ftp.niwa.co.nz/bathymetry/NZBathy_DTM_2016_binary_grid.zip",
-                license="Please cite",
+                license="NIWA Open Data Licence BY-NN-NC-SA version 1, see https://www.niwa.co.nz/environmental-information/licences/niwa-open-data-licence-by-nn-nc-sa-version-1",
                 method=quote(bb_wget),
                 method_flags="--recursive --level=inf --no-parent",
-                postprocess=NULL,
-                collection_size=0.5,
+                postprocess=quote(pp_unzip),
+                collection_size=1.3,
                 data_group="Topography"            )
         ) %>%
         bind_rows(
             bb_source(
                 name="Cryosat-2 digital elevation model",
+                id="cpom_cryosat2_antarctic_dem",
                 description="A New Digital Elevation Model of Antarctica derived from 6 years of continuous CryoSat-2 measurements",
                 reference="http://homepages.see.leeds.ac.uk/~py10ts/cpom_cryosat2_antarctic_dem/",
                 citation="Slater T, Shepherd A, McMillan M, Muir A, Gilbert L, Hogg A (2017) A New Digital Elevation Model of Antarctica derived from 6 years of continuous CryoSat-2 measurements: Technical Report. http://homepages.see.leeds.ac.uk/~py10ts/cpom_cryosat2_antarctic_dem/",
@@ -187,6 +200,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="Natural Earth 10m physical vector data",
+                id="NE-10m-physical-vectors",
                 description="Natural Earth is a public domain map dataset available at 1:10m, 1:50m, and 1:110 million scales.",
                 reference="http://www.naturalearthdata.com/downloads/10m-physical-vectors/",
                 citation="No permission is needed to use Natural Earth. Crediting the authors is unnecessary. However, if you wish to cite the map data, simply use one of the following. Short text: Made with Natural Earth. Long text: Made with Natural Earth. Free vector and raster map data @ naturalearthdata.com.",
@@ -201,6 +215,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="GSHHG coastline data",
+                id="gshhg_coastline",
                 description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
                 reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
                 citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical, High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
@@ -215,6 +230,7 @@ sources_topography <- function() {
         bind_rows(
             bb_source(
                 name="Shuttle Radar Topography Mission elevation data SRTMGL1 V3",
+                id="10.5067/measures/srtm/srtmgl1.003",
                 description="Global 1-arc-second topographic data generated from NASA's Shuttle Radar Topography Mission. Version 3.0 (aka SRTM Plus or Void Filled) removes all of the void areas by incorporating data from other sources such as the ASTER GDEM.",
                 reference="https://lpdaac.usgs.gov/dataset_discovery/measures/measures_products_table/srtmgl1_v003",
                 source_url="https://e4ftl01.cr.usgs.gov/SRTM/SRTMGL1.003/2000.02.11/",
@@ -230,7 +246,8 @@ sources_topography <- function() {
                 data_group="Topography",warn_empty_auth=FALSE)) %>%
     bind_rows(
       bb_source(
-        name = "Bathymetry of Lake Superior",
+          name = "Bathymetry of Lake Superior",
+          id="greatlakes-superior-bathymetry",
         description = "A draft version of the Lake Superior Bathymetry was compiled as a component of a NOAA project to rescue Great Lakes lake floor geological and geophysical data, and make it more accessible to the public. No time frame has been set for completing bathymetric contours of Lake Superior, though a 3 arc-second (~90 meter cell size) grid is available.",
         reference = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html",
         source_url = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior/data/",

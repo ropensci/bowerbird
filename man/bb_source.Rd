@@ -4,8 +4,8 @@
 \alias{bb_source}
 \title{Define an external data source}
 \usage{
-bb_source(name, description = NA_character_, reference, source_url, citation,
-  license, comment = NA_character_, method = bb_wget,
+bb_source(id, name, description = NA_character_, reference, source_url,
+  citation, license, comment = NA_character_, method = bb_wget,
   method_flags = NA_character_, postprocess,
   authentication_note = NA_character_, user = NA_character_,
   password = NA_character_, access_function = NA_character_,
@@ -13,7 +13,9 @@ bb_source(name, description = NA_character_, reference, source_url, citation,
   warn_empty_auth = TRUE)
 }
 \arguments{
-\item{name}{string: the name of the data source}
+\item{id}{string: a unique identifier of the data source. If the data source has a DOI, use that. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one). The ID should be something that changes when the data set changes (is updated). A DOI is ideal for this}
+
+\item{name}{string: a unique name for the data source. This should be a human-readable but still concise name}
 
 \item{description}{string: a description of the data source}
 
@@ -43,7 +45,7 @@ bb_source(name, description = NA_character_, reference, source_url, citation,
 
 \item{data_group}{string: the name of the group to which this data source belongs. Useful for arranging sources in terms of thematic areas}
 
-\item{collection_size}{numeric: approximate disk space (in GB) used by the data collection, if known. If the data are supplied as compressed files, this size should reflect the disk space used after decompression. If the data_source definition contains multiple source_url entries, this size should reflect the overall disk space used by all combined.}
+\item{collection_size}{numeric: approximate disk space (in GB) used by the data collection, if known. If the data are supplied as compressed files, this size should reflect the disk space used after decompression. If the data_source definition contains multiple source_url entries, this size should reflect the overall disk space used by all combined}
 
 \item{warn_empty_auth}{logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided}
 }
@@ -56,6 +58,7 @@ Define an external data source
 \examples{
 
 my_source <- bb_source(
+   id="gshhg_coastline",
    name="GSHHG coastline data",
    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
    reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
