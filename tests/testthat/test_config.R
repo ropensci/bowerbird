@@ -11,6 +11,7 @@ test_that("config save/load works", {
 
 test_that("config operations preserve attributes", {
     ods <- bb_source(
+        id="bilbobaggins",
         name="Oceandata test",
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
         reference= "http://oceancolor.gsfc.nasa.gov/",
@@ -38,7 +39,7 @@ test_that("config operations preserve attributes", {
 
 test_that("config summary appears to work", {
     skip_if_not(rmarkdown::pandoc_available("1.12.3"),"skipping config summary test because pandoc is not available or is not a recent enough version")
-    temp_root <- tempdir()    
+    temp_root <- tempdir()
     cf <- add(bb_config(temp_root),bb_sources())
     summary_filename <- bb_summary(cf)
     expect_true(file.exists(summary_filename))

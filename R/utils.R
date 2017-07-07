@@ -5,6 +5,8 @@
 ## NA or empty string
 na_or_empty <- function(z) is.na(z) | !nzchar(z)
 
+is_nonempty_string <- function(z) is.string(z) && nzchar(z)
+
 ## check method (which may be function, call, or symbol) matches expected function
 check_method_is <- function(method,expected) {
     assert_that(is.function(expected))
