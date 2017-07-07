@@ -24,5 +24,7 @@ Suggests:
     archive,
     knitr,
     testthat,
-    covr
+    covr,
+    rmarkdown
 Remotes: jimhester/archive
+VignetteBuilder: knitr
