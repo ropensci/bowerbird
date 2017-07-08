@@ -76,6 +76,30 @@ restore_settings <- function(settings) {
 
 dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is.na(file.info(z)$isdir))
 
+
+#' Return the local directory of a data source
+#'
+#' Files from that data source are stored locally in this directory.
+#'
+#' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#'
+#' @return string: the directory
+#'
+#' @examples
+#' \dontrun{
+#'   cf <- bb_config("/my/file/root") %>%
+#'     add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+#'   data_source_dir(cf)
+#' }
+#'
+#' @export
+data_source_dir <- function(data_source) {
+    assert_that(is.data.frame(data_source))
+    assert_that(nrow(data_source)==1)
+    file.path(bb_attributes(data_source)$local_file_root,directory_from_url(data_source$source_url))
+}
+
+
 directory_from_url <- function(this_url) {
     this_url <- sub("^(http|https|ftp)://","",this_url)
     this_url <- sub(":","+",this_url) ## port
