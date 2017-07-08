@@ -76,8 +76,6 @@ oceandata_get <- function(data_source) {
 
 }
 
-## function to calculate SHA1 checksums
-calculate_sha1 <- function(filename) as.character(openssl::sha1(file(filename)))
 
 #' Satellite platform names and abbreviations used in Oceancolor URLs and file names
 #' Oceancolor data file URLs need to be mapped to a file system hierarchy that mirrors the one used on the Oceancolor web site.

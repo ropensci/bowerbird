@@ -2,6 +2,11 @@
 ## various helper functions
 ## not exported for user
 
+## file checksums
+calculate_sha1 <- function(filename) as.character(openssl::sha1(file(filename)))
+calculate_md5 <- function(filename) as.character(openssl::md5(file(filename)))
+
+
 ## NA or empty string
 na_or_empty <- function(z) is.na(z) | !nzchar(z)
 
