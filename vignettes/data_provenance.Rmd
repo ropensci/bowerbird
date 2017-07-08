@@ -1,0 +1,36 @@
+---
+title: "Data provenance and bowerbird"
+author: "Ben Raymond, Michael Sumner"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Data provenance and bowerbird}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+When one does an analysis using synced files, how is the original origin, date, and version recorded and maintained? How can a version of analysis be linked to to a version of the data if data is maintained separately from analysis code?
+
+Some possible solutions would be
+
+- Being able to retrieve the source, timestamp of download and hashes, of any local stores of data.
+- Being able to maintain multiple versions or version-controlled repositories of these local stores. (possibly using git, git-lfs, AWS versioned stores, or just a directory that is "frozen" to link to an analysis)
+- Copying over relevant portions of data into version controlled repositories as needed
+- Relying on the data source when the provider does versioning (e.g., different versions of files may be available to sync, such as via versioned DOIs or URIs), and allowing the user to change the version of the source.
+
+
+## Digital object identifiers
+
+MODIS Composite Based Maps of East Antarctic Fast Ice Coverage http://doi.org/10.4225/15/5667AC726B224
+NSIDC SMMR-SSM/I Nasateam near-real-time sea ice concentration http://doi.org/10.5067/U8C09DWVX9LM
+
+
+## Bits
+
+At a fundamental level, bowerbird knows very little about a data source. It knows the URL and flags to pass to `wget`, and some basic metadata (primarily intended to be read by the user).
+- by design: heavy lifting involved in mirroring a remote data source is handled by `wget`, making bb code much simpler. Also means that defining a new data source is in most cases straightforward.
+
+## Solutions
+
+- bb_fingerprint(cf) - given config, return timestamp of download and hashes of all files associated with those sources
+
