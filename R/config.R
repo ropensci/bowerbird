@@ -21,7 +21,7 @@ bb_global_atts <- function() c("wget_default_flags","wget_global_flags","http_pr
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_source("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+#'     add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
 #' 
 #'   ## save to file
 #'   saveRDS(cf,file="my_config.rds")
@@ -94,7 +94,7 @@ slice.bb_cf <- function(.data,...) {
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_source("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+#'     add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
 #' }
 #' @export
 add <- function(cf,source) {
@@ -154,7 +154,7 @@ bb_attributes_to_cols <- function(obj) {
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_source("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+#'     add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
 #'   browseURL(bb_summary(cf))
 #' }
 #'

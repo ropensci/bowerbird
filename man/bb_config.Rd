@@ -33,7 +33,7 @@ The parameters provided here are repository-wide settings, and will be applied t
 \examples{
 \dontrun{
   cf <- bb_config("/my/file/root") \%>\%
-    add(bb_source("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+    add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
 
   ## save to file
   saveRDS(cf,file="my_config.rds")
