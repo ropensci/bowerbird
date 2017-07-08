@@ -43,9 +43,9 @@ do_fingerprint <- function(this_dataset,hash,verbose,settings) {
         stop("local_file_root: ",this_dataset$local_file_root," does not exist")
     }
     if (verbose) {
-        cat(sprintf("\n%s\nDataset: %s\n",base::date(),this_dataset$name))
-        if (!is.na(this_dataset$source_url)) cat(sprintf("Source URL %s\n",this_dataset$source_url))
-        cat("--------------------------------------------------------------------------------------------\n\n")
+        cat(sprintf("Data source: %s",this_dataset$name))
+        if (!is.na(this_dataset$source_url)) cat(sprintf(", source URL %s",this_dataset$source_url))
+        cat("\n")
     }
     setwd(this_dataset$local_file_root)
 
@@ -53,7 +53,7 @@ do_fingerprint <- function(this_dataset,hash,verbose,settings) {
     if (verbose) cat(sprintf(" building file list ... "))
     myfiles <- list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE) ## full.names TRUE so that names are relative to current working directory
     file_list <- file.info(myfiles) 
-    file_list <- file_list %>% mutate(filename=myfiles) %>% select_(~filename,~size,~mtime) %>% rename_(last_modified=~mtime)
+    file_list <- file_list %>% mutate(filename=myfiles,data_source_id=this_dataset$id) %>% select_(~filename,~data_source_id,~size,~mtime) %>% rename_(last_modified=~mtime)
     if (hash!="none") {
         if (verbose) cat(sprintf(" calculating file hashes ... "))
         file_list$hash <- sapply(myfiles,file_hash,hash)
