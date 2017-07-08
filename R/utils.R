@@ -3,8 +3,15 @@
 ## not exported for user
 
 ## file checksums
-calculate_sha1 <- function(filename) as.character(openssl::sha1(file(filename)))
-calculate_md5 <- function(filename) as.character(openssl::md5(file(filename)))
+file_hash <- function(filename,hash="sha1") {
+    assert_that(is.string(hash))
+    hash <- match.arg(tolower(hash),c("md5","sha1"))
+    switch(hash,
+           md5=as.character(openssl::md5(file(filename))),
+           sha1=as.character(openssl::sha1(file(filename))),
+           stop("unexpected hash type",hash)
+           )
+}
 
 
 ## NA or empty string

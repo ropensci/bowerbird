@@ -51,7 +51,7 @@ oceandata_get <- function(data_source) {
             ## replace existing if server copy newer than local copy
             ## use checksum rather than dates for this
             if (this_exists) {
-                existing_checksum <- calculate_sha1(this_fullfile)
+                existing_checksum <- file_hash(this_fullfile,"sha1")
                 download_this <- existing_checksum!=myfiles$checksum[idx]
             }
         } else {
@@ -66,7 +66,7 @@ oceandata_get <- function(data_source) {
             ## recalculate checksum so that cache gets updated
             ## but not if skip_downloads
             if (is.null(data_source$skip_downloads) || !data_source$skip_downloads)
-                blah <- calculate_sha1(this_fullfile)
+                blah <- file_hash(this_fullfile,"sha1")
         } else {
             if (this_exists) {
                 cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))
