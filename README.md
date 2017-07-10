@@ -117,6 +117,10 @@ Some subtleties to bear in mind:
 
 5.  Several wget flags are set by the `bb_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flags is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
 
+#### Defining new data source methods
+
+Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something other than `bb_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `aadc_eds_get`, `oceandata_get`, or `earthdata_get`.
+
 ### Parallelized sync
 
 Running the sync in parallel is likely to speed the process up considerably (unless your bandwidth is the limiting factor).
@@ -138,7 +142,7 @@ Data source summary
 
 #### CMEMS global gridded SSH reprocessed (1993-ongoing)
 
-CMEMS PRODUCT IDENTIFIER: SEALEVEL\_GLO\_PHY\_L4\_REP\_OBSERVATIONS\_008\_047. For the Global Ocean - Multimission altimeter satellite gridded sea surface heights and derived variables computed with respect to a twenty-year mean. Previously distributed by Aviso+, no change in the scientific content. All the missions are homogenized with respect to a reference mission which is currently OSTM/Jason-2. VARIABLES
+For the Global Ocean - Multimission altimeter satellite gridded sea surface heights and derived variables computed with respect to a twenty-year mean. Previously distributed by Aviso+, no change in the scientific content. All the missions are homogenized with respect to a reference mission which is currently OSTM/Jason-2. VARIABLES
 
 -   sea\_surface\_height\_above\_sea\_level (SSH)
 
@@ -160,7 +164,7 @@ Reference: <http://cmems-resources.cls.fr/?option=com_csw&view=details&tab=info&
 
 #### CMEMS global gridded SSH near-real-time
 
-CMEMS PRODUCT IDENTIFIER: SEALEVEL\_GLO\_PHY\_L4\_NRT\_OBSERVATIONS\_008\_046. For the Global Ocean - Multimission altimeter satellite gridded sea surface heights and derived variables computed with respect to a twenty-year mean. Previously distributed by Aviso+, no change in the scientific content. All the missions are homogenized with respect to a reference mission which is currently Jason-3. The acquisition of various altimeter data is a few days at most. VARIABLES
+For the Global Ocean - Multimission altimeter satellite gridded sea surface heights and derived variables computed with respect to a twenty-year mean. Previously distributed by Aviso+, no change in the scientific content. All the missions are homogenized with respect to a reference mission which is currently Jason-3. The acquisition of various altimeter data is a few days at most. VARIABLES
 
 -   sea\_surface\_height\_above\_sea\_level (SSH)
 
@@ -334,7 +338,7 @@ Approximate size: 2 GB
 
 Reference: <http://www.esrl.noaa.gov/psd/data/gridded/data.ncep.reanalysis2.html>
 
-### Data group: Satellite Imagery
+### Data group: Satellite imagery
 
 #### NASA MODIS Rapid Response Antarctic Mosaic
 
@@ -434,7 +438,7 @@ Maps of East Antarctic landfast sea-ice extent, generated from approx. 250,000 1
 
 Approximate size: 0.4 GB
 
-Reference: <http://data.aad.gov.au/aadc/metadata/metadata.cfm?entry_id=modis_20day_fast_ice>
+Reference: <https://data.aad.gov.au/metadata/records/modis_20day_fast_ice>
 
 ### Data group: Sea surface temperature
 
@@ -534,7 +538,7 @@ This dataset comprises Digital Elevation Models (DEMs) of varying resolutions fo
 
 Approximate size: 0.2 GB
 
-Reference: <http://data.aad.gov.au/aadc/metadata/metadata.cfm?entry_id=GVdem_2008>
+Reference: <https://data.aad.gov.au/metadata/records/GVdem_2008>
 
 #### Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge
 
@@ -580,7 +584,7 @@ Reference: <http://nsidc.org/data/nsidc-0082>
 
 The NZ 250m gridded bathymetric data set and imagery, Mitchell et al. 2012, released 2016.
 
-Approximate size: 0.5 GB
+Approximate size: 1.3 GB
 
 Reference: <https://www.niwa.co.nz/our-science/oceans/bathymetry/further-information>
 
