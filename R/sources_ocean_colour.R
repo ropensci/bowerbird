@@ -72,7 +72,7 @@ sources_ocean_colour <- function() {
                 citation="See https://oceancolor.gsfc.nasa.gov/citations",
                 license="Please cite",
                 method=quote(oceandata_get),
-                method_flags="search=V*3m_SN*_SNPP_CHL_chlor_a_9km.nc",
+                method_flags="search=V*L3m_SN*_SNPP_CHL_chlor_a_9km.nc",
                 postprocess=NULL,
                 collection_size=0.5,                
                 data_group="Ocean colour")) %>%
