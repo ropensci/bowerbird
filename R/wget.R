@@ -1,16 +1,21 @@
 #' Mirror an external data source using the wget utility
 #'
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
 #' @return TRUE on success
 #'
 #' @seealso \code{\link{wget}}
 #'
 #' @export
-bb_wget <- function(data_source) {
+bb_wget <- function(data_source,local_dir_only=FALSE) {
     assert_that(is.data.frame(data_source))
     assert_that(nrow(data_source)==1)
+    assert_that(is.flag(local_dir_only))
 
+    if (local_dir_only)
+        return(file.path(bb_attributes(data_source)$local_file_root,directory_from_url(data_source$source_url)))
+    
     this_flags <- if (is.na(data_source$method_flags)) data_source$wget_default_flags else data_source$method_flags
     ## add wget_global_flags
     if (!is.null(data_source$wget_global_flags)) this_flags <- paste(this_flags,data_source$wget_global_flags,sep=" ")

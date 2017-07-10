@@ -2,11 +2,12 @@
 #'
 #' @references https://oceandata.sci.gsfc.nasa.gov/
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
 #' @return TRUE on success
 #'
 #' @export
-oceandata_get <- function(data_source) {
+oceandata_get <- function(data_source,local_dir_only=FALSE) {
     ## oceandata synchronisation handler
 
     ## oceandata provides a file search interface, e.g.:
@@ -21,6 +22,22 @@ oceandata_get <- function(data_source) {
     ##  or just include the data type in the search pattern e.g. "search=A2002*L3m_DAY_CHL_chlor*9km*
 
     assert_that(is.string(data_source$method_flags))
+    assert_that(is.flag(local_dir_only))
+
+    if (local_dir_only) {
+        ## highest-level dir
+        out <- "oceandata.sci.gsfc.nasa.gov"
+        ## refine by platform
+        this_search_spec <- sub("search=","",data_source$method_flags)
+        this_platform <- oceandata_platform_map(substr(this_search_spec,1,1))
+        if (nchar(this_platform)>0) out <- file.path(out,this_platform)
+        if (grepl("L3m",this_search_spec)) {
+            out <- file.path(out,"Mapped")
+        } else if (grepl("L3",this_search_spec)) {
+            out <- file.path(out,"L3BIN")
+        }
+        return(out)
+    }
     tries <- 0
     while (tries<3) {
         ## sometimes this takes a couple of attempts!

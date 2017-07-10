@@ -4,10 +4,12 @@
 \alias{aadc_eds_get}
 \title{Handler for files downloaded from the Australian Antarctic Data Centre EDS system}
 \usage{
-aadc_eds_get(data_source)
+aadc_eds_get(data_source, local_dir_only = FALSE)
 }
 \arguments{
 \item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}
+
+\item{local_dir_only}{logical: if TRUE, just return the local directory into which files from this data source would be saved}
 }
 \value{
 TRUE on success

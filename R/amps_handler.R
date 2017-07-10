@@ -2,11 +2,13 @@
 #'
 #' @references http://www2.mmm.ucar.edu/rt/amps/
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
 #' @return TRUE on success
 #'
 #' @export
-amps_get <- function(data_source) {
+amps_get <- function(data_source,local_dir_only=TRUE) {
+    assert_that(is.flag(local_dir_only))
     ## shouldn't need any specific method_flags for this
     ## could potentially set e.g. --progress=dot:giga
     ## --timestamping not needed (handled through clobber config setting)
@@ -15,6 +17,7 @@ amps_get <- function(data_source) {
         cat(sprintf("source_url (%s) not as expected, not processing.\n",data_source$source_url))
         return()
     }
+    if (local_dir_only) return(bb_wget(data_source,local_dir_only=TRUE))
     x <- html_session(data_source$source_url)
     n <- html_attr(html_nodes(x,"a"),"href")
     idx <- which(sapply(n,function(z)grepl("[[:digit:]]+",z,ignore.case=TRUE))) ## links that are all digits
