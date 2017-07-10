@@ -96,7 +96,20 @@ dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is
 data_source_dir <- function(data_source) {
     assert_that(is.data.frame(data_source))
     assert_that(nrow(data_source)==1)
-    file.path(bb_attributes(data_source)$local_file_root,directory_from_url(data_source$source_url))
+
+    mth <- data_source$method[[1]]
+    if (is.symbol(mth) && identical(all.names(mth),"oceandata_get")) {
+        ## note, this won't catch all forms of specifying handler functions. needs work!
+        ## highest-level dir
+        out <- "oceandata.sci.gsfc.nasa.gov"
+        ## refine by platform
+        this_search_spec <- sub("search=","",data_source$method_flags)
+        this_platform <- oceandata_platform_map(substr(this_search_spec,1,1))
+        if (nchar(this_platform)>0) out <- file.path(out,this_platform)
+        out
+    } else {
+        file.path(bb_attributes(data_source)$local_file_root,directory_from_url(data_source$source_url))
+    }
 }
 
 
