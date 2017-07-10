@@ -9,8 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Bowerbird will maintain a local collection of data files, sourced from external data providers. When one does an analysis using such files,
-it is useful to know *which* files were used, and the *provenance* of those files. This information will assist in making analyses reproducible.
+Bowerbird will maintain a local collection of data files, sourced from external data providers. When one does an analysis using such files, it is useful to know *which* files were used, and the *provenance* of those files. This information will assist in making analyses reproducible.
 
 It is necessary to understand that bowerbird knows very little about the data files that it maintains. For a give data source, it knows the URL and flags to pass to `wget`, and some basic metadata (primarily intended to be read by the user). This is by design: the heavy lifting involved in mirroring a remote data source is (for most data sources) taken care of by `wget`. This makes the bowerbird code simpler, and importantly, means that it is generally straightforward for a user to define a new data source.
 
@@ -44,14 +43,19 @@ recordr (https://github.com/NCEAS/recordr) will collect info about which files w
 
 ## The provenance of files used in an analysis
 
+Provenance: where the files came from, when they were downloaded, their version, etc.
 
-- bb_fingerprint(cf) - given config, return timestamp of download and hashes of all files associated with those sources
+- `bb_fingerprint` function - given config, return timestamp of download and hashes of all files associated with those sources. Thus, for all of these files, we have established where they came from, when they were downloaded, and a hash so that later versions of those files can be compared to detect changes.
 
 
 ## A word on digital object identifiers
 
+The nature of DOIs means that a data set that has a DOI should be peristent (accessible for long term use). The DOI should uniuqyely identify the data resource that it is assigned to. When a data set changes in a substantial manner, and/or it is necessary to identify both the original and the changed material, a new DOI should be assigned.
+
+
 MODIS Composite Based Maps of East Antarctic Fast Ice Coverage http://doi.org/10.4225/15/5667AC726B224
 NSIDC SMMR-SSM/I Nasateam near-real-time sea ice concentration http://doi.org/10.5067/U8C09DWVX9LM
+
 
 ## Context (to be removed)
 
@@ -59,7 +63,5 @@ how is the original origin, date, and version recorded and maintained? How can a
 
 Some possible solutions would be
 
-- Being able to retrieve the source, timestamp of download and hashes, of any local stores of data.
 - Being able to maintain multiple versions or version-controlled repositories of these local stores. (possibly using git, git-lfs, AWS versioned stores, or just a directory that is "frozen" to link to an analysis)
-- Copying over relevant portions of data into version controlled repositories as needed
 - Relying on the data source when the provider does versioning (e.g., different versions of files may be available to sync, such as via versioned DOIs or URIs), and allowing the user to change the version of the source.
