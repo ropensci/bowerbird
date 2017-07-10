@@ -4,7 +4,7 @@
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
-#' @return TRUE on success
+#' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
 amps_get <- function(data_source,local_dir_only=TRUE) {

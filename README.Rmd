@@ -131,7 +131,7 @@ Some subtleties to bear in mind:
 
 #### Defining new data source methods
 
-Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something other than `bb_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `aadc_eds_get`, `oceandata_get`, or `earthdata_get`.
+Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `aadc_eds_get`, `oceandata_get`, or `earthdata_get`.
 
 ### Parallelized sync
 

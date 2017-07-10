@@ -12,7 +12,7 @@ oceandata_get(data_source, local_dir_only = FALSE)
 \item{local_dir_only}{logical: if TRUE, just return the local directory into which files from this data source would be saved}
 }
 \value{
-TRUE on success
+the directory if local_dir_only is TRUE, otherwise TRUE on success
 }
 \description{
 Handler for oceandata data sources
