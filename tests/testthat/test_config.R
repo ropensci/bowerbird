@@ -58,6 +58,8 @@ test_that("local directory looks right",{
         method_flags="",
         data_group="blah")
     cf <- bb_config("/some/local/path") %>% add(src)
-    expect_identical(data_source_dir(cf[1,]),"/some/local/path/some.place.com/some/path/")
+    temp <- data_source_dir(cf[1,])
+    temp <- gsub("\\+","/",temp) ## make sure are unix-style path seps
+    expect_identical(sub("/$","",temp),"/some/local/path/some.place.com/some/path")
 })
 
