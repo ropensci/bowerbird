@@ -98,14 +98,18 @@ data_source_dir <- function(data_source) {
     assert_that(nrow(data_source)==1)
 
     mth <- data_source$method[[1]]
-    if (is.symbol(mth) && identical(all.names(mth),"oceandata_get")) {
-        ## note, this won't catch all forms of specifying handler functions. needs work!
+    if (check_method_is(mth,oceandata_get)) {
         ## highest-level dir
         out <- "oceandata.sci.gsfc.nasa.gov"
         ## refine by platform
         this_search_spec <- sub("search=","",data_source$method_flags)
         this_platform <- oceandata_platform_map(substr(this_search_spec,1,1))
         if (nchar(this_platform)>0) out <- file.path(out,this_platform)
+        if (grepl("L3m",this_search_spec)) {
+            out <- file.path(out,"Mapped")
+        } else if (grepl("L3",this_search_spec)) {
+            out <- file.path(out,"L3BIN")
+        }
         out
     } else {
         file.path(bb_attributes(data_source)$local_file_root,directory_from_url(data_source$source_url))

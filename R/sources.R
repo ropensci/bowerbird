@@ -58,7 +58,7 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
     if (missing(reference))
         stop("Please provide a reference (a URL to the data source's metadata record or home page")
     if (missing(source_url)) {
-        if (identical(method,bb_wget)) stop("method 'bb_wget' requires at least one source URL")
+        if (check_method_is(method,bb_wget)) stop("method 'bb_wget' requires at least one source URL")
         ##warning("no source_url provided")
         source_url <- NA_character_
     }
@@ -70,7 +70,7 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
         if (!ppchk) stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
     }
     assert_that(is.character(source_url))
-    if (identical(method,aadc_eds_get)) {
+    if (check_method_is(method,aadc_eds_get)) {
         slidx <- !grepl("/download$",source_url) & !grepl("/$",source_url)
         if (any(slidx)) {
             warning("each source_url for data sources using the aadc_eds_get method should have a trailing /. These will be added now")
