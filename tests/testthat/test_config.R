@@ -44,3 +44,22 @@ test_that("config summary appears to work", {
     summary_filename <- bb_summary(cf)
     expect_true(file.exists(summary_filename))
 })
+
+test_that("local directory looks right",{
+    src <- bb_source(
+        id="bilbobaggins",
+        name="Test",
+        description="blah",
+        reference="blah",
+        citation="blah",
+        source_url="http://some.place.com/some/path/",
+        license="blah",
+        method=bb_wget,
+        method_flags="",
+        data_group="blah")
+    cf <- bb_config("/some/local/path") %>% add(src)
+    temp <- data_source_dir(cf[1,])
+    temp <- gsub("\\+","/",temp) ## make sure are unix-style path seps
+    expect_identical(sub("/$","",temp),"/some/local/path/some.place.com/some/path")
+})
+

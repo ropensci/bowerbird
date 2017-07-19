@@ -133,6 +133,9 @@ Some subtleties to bear in mind:
 
 1. Several wget flags are set by the `bb_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flags is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
 
+#### Defining new data source methods
+
+Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `aadc_eds_get`, `oceandata_get`, or `earthdata_get`.
 
 ### Parallelized sync
 

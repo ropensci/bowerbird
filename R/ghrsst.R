@@ -2,11 +2,12 @@
 #'
 #' @references https://podaac.jpl.nasa.gov/Multi-scale_Ultra-high_Resolution_MUR-SST
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
-#' @return TRUE on success
+#' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
-ghrsst_get <- function(data_source) {
+ghrsst_get <- function(data_source,local_dir_only=TRUE) {
 
     ## The data source is ftp://podaac-ftp.jpl.nasa.gov/allData/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/
     ## with yearly subdirectories
@@ -26,10 +27,20 @@ ghrsst_get <- function(data_source) {
     ## for the former, we will loop from 2002 to present here
     ## for the latter, just hit that specific yearly directory
 
+    assert_that(is.flag(local_dir_only))
+    
     if (!grepl("\\d\\d\\d\\d/?$",data_source$source_url)) {
         ## pointing to root
         yearlist <- seq(from=2002,to=as.numeric(format(Sys.Date(),"%Y")),by=1)
+        if (local_dir_only) {
+            ## all years, so return the root dir
+            dummy <- data_source
+            dummy$source_url <- "ftp://podaac-ftp.jpl.nasa.gov/allData/ghrsst/data/GDS2/L4/GLOB/JPL/MUR/v4.1/"
+            return(bb_wget(dummy,local_dir_only=TRUE))
+        }
     } else {
+        ## a specific year
+        if (local_dir_only) return(bb_wget(data_source,local_dir_only=TRUE))
         yearlist <- as.numeric(basename(data_source$source_url))
     }
     yearlist <- na.omit(yearlist)

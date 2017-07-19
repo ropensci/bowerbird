@@ -2,6 +2,18 @@
 ## various helper functions
 ## not exported for user
 
+## file checksums
+file_hash <- function(filename,hash="sha1") {
+    assert_that(is.string(hash))
+    hash <- match.arg(tolower(hash),c("md5","sha1"))
+    switch(hash,
+           md5=as.character(openssl::md5(file(filename))),
+           sha1=as.character(openssl::sha1(file(filename))),
+           stop("unexpected hash type",hash)
+           )
+}
+
+
 ## NA or empty string
 na_or_empty <- function(z) is.na(z) | !nzchar(z)
 
@@ -63,6 +75,51 @@ restore_settings <- function(settings) {
 }
 
 dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is.na(file.info(z)$isdir))
+
+
+#' Return the local directory of a data source
+#'
+#' Files from that data source are stored locally in this directory.
+#'
+#' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#'
+#' @return string: the directory
+#'
+#' @examples
+#' \dontrun{
+#'   cf <- bb_config("/my/file/root") %>%
+#'     add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+#'   data_source_dir(cf)
+#' }
+#'
+#' @export
+data_source_dir <- function(data_source) {
+    assert_that(is.data.frame(data_source))
+    assert_that(nrow(data_source)==1)
+
+    ## copy bb attrs into data_source, in case handler relies on them
+    data_source <- bb_attributes_to_cols(data_source)
+    
+    mth <- data_source$method[[1]]
+    if (is.function(mth)) {
+        ## method function was passed directly
+        do.call(mth,list(data_source=data_source,local_dir_only=TRUE))
+    } else if (is.symbol(mth)) {
+        ## method function was passed as a symbol, e.g. by quote(fun)
+        do.call(eval(mth),list(data_source=data_source,local_dir_only=TRUE))
+    } else if (is.call(mth)) {
+        if (all.names(mth)[1]=="quote") {
+            ## call was constructed as e.g. enquote(fun)
+            do.call(eval(mth),list(data_source=data_source,local_dir_only=TRUE))
+        } else {
+            ## call was constructed as e.g. quote(fun())
+            ## may have provided some arguments already e.g. quote(fun(arg=var))
+            thisargs <- inject_args(mth,list(data_source=data_source,local_dir_only=TRUE))
+            do.call(all.names(mth)[1],thisargs)
+        }
+    }
+}
+
 
 directory_from_url <- function(this_url) {
     this_url <- sub("^(http|https|ftp)://","",this_url)

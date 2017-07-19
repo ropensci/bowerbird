@@ -4,13 +4,16 @@
 #' 
 #' @references http://data.aad.gov.au
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
 #' @return TRUE on success
 #'
 #' @export
-aadc_eds_get <- function(data_source) {
+aadc_eds_get <- function(data_source,local_dir_only=FALSE) {
     assert_that(is.data.frame(data_source))
     assert_that(nrow(data_source)==1)
+    assert_that(is.flag(local_dir_only))
+    
     ## clumsy way to get around AADC EDS file naming issues
     ## e.g. if we ask for http://data.aad.gov.au/eds/file/4494
     ## then we get local file named data.aad.gov.au/eds/file/4494 (which is most likely a zipped file)
@@ -27,6 +30,7 @@ aadc_eds_get <- function(data_source) {
         trailing_path <- file.path("data.aad.gov.au","eds","file",this_file_id)
         if (!grepl("/$",data_source$source_url)) data_source$source_url <- paste0(data_source$source_url,"/") ## this form needs trailing /
     }
+    if (local_dir_only) return(file.path(data_source$local_file_root,trailing_path))
     if (!file.exists(file.path(data_source$local_file_root,trailing_path))) {
         dir.create(file.path(data_source$local_file_root,trailing_path),recursive=TRUE)
     }

@@ -2,11 +2,18 @@
 #'
 #' @references https://earthdata.nasa.gov/earth-observation-data/near-real-time/rapid-response
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
-#' @return TRUE on success
+#' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
-rapid_response_get <- function(data_source) {
+rapid_response_get <- function(data_source,local_dir_only=TRUE) {
+    assert_that(is.flag(local_dir_only))
+    if (local_dir_only) {
+        dummy <- data_source
+        dummy$source_url <- "http://lance-modis.eosdis.nasa.gov/imagery/subsets/"
+        return(bb_wget(dummy,local_dir_only=TRUE))
+    }
     ## NASA MODIS rapid response synchronisation handler
 
     ## URLs of the form:  http://lance-modis.eosdis.nasa.gov/imagery/subsets/?mosaic=Antarctica.2014342.terra.4km.tif

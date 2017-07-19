@@ -4,13 +4,15 @@
 \alias{oceandata_get}
 \title{Handler for oceandata data sources}
 \usage{
-oceandata_get(data_source)
+oceandata_get(data_source, local_dir_only = FALSE)
 }
 \arguments{
 \item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}
+
+\item{local_dir_only}{logical: if TRUE, just return the local directory into which files from this data source would be saved}
 }
 \value{
-TRUE on success
+the directory if local_dir_only is TRUE, otherwise TRUE on success
 }
 \description{
 Handler for oceandata data sources

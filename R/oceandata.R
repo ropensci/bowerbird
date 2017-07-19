@@ -2,11 +2,12 @@
 #'
 #' @references https://oceandata.sci.gsfc.nasa.gov/
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
-#' @return TRUE on success
+#' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
-oceandata_get <- function(data_source) {
+oceandata_get <- function(data_source,local_dir_only=FALSE) {
     ## oceandata synchronisation handler
 
     ## oceandata provides a file search interface, e.g.:
@@ -21,6 +22,22 @@ oceandata_get <- function(data_source) {
     ##  or just include the data type in the search pattern e.g. "search=A2002*L3m_DAY_CHL_chlor*9km*
 
     assert_that(is.string(data_source$method_flags))
+    assert_that(is.flag(local_dir_only))
+
+    if (local_dir_only) {
+        ## highest-level dir
+        out <- "oceandata.sci.gsfc.nasa.gov"
+        ## refine by platform
+        this_search_spec <- sub("search=","",data_source$method_flags)
+        this_platform <- oceandata_platform_map(substr(this_search_spec,1,1))
+        if (nchar(this_platform)>0) out <- file.path(out,this_platform)
+        if (grepl("L3m",this_search_spec)) {
+            out <- file.path(out,"Mapped")
+        } else if (grepl("L3",this_search_spec)) {
+            out <- file.path(out,"L3BIN")
+        }
+        return(out)
+    }
     tries <- 0
     while (tries<3) {
         ## sometimes this takes a couple of attempts!
@@ -51,7 +68,7 @@ oceandata_get <- function(data_source) {
             ## replace existing if server copy newer than local copy
             ## use checksum rather than dates for this
             if (this_exists) {
-                existing_checksum <- calculate_sha1(this_fullfile)
+                existing_checksum <- file_hash(this_fullfile,"sha1")
                 download_this <- existing_checksum!=myfiles$checksum[idx]
             }
         } else {
@@ -66,7 +83,7 @@ oceandata_get <- function(data_source) {
             ## recalculate checksum so that cache gets updated
             ## but not if skip_downloads
             if (is.null(data_source$skip_downloads) || !data_source$skip_downloads)
-                blah <- calculate_sha1(this_fullfile)
+                blah <- file_hash(this_fullfile,"sha1")
         } else {
             if (this_exists) {
                 cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))
@@ -76,8 +93,6 @@ oceandata_get <- function(data_source) {
 
 }
 
-## function to calculate SHA1 checksums
-calculate_sha1 <- function(filename) as.character(openssl::sha1(file(filename)))
 
 #' Satellite platform names and abbreviations used in Oceancolor URLs and file names
 #' Oceancolor data file URLs need to be mapped to a file system hierarchy that mirrors the one used on the Oceancolor web site.
