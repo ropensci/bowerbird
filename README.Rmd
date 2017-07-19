@@ -64,6 +64,10 @@ The pre-packaged environmental data sources can be read, manipulated, and plotte
 
 ## Nuances
 
+### Choosing a data directory
+
+It's up to you where you want your data collection kept, and to provide that location to bowerbird. A common use case for bowerbird is maintaining a central data collection for multiple users, in which case that location is likely to be some sort of networked file share. However, if you are keeping a collection for your own use, you might like to look at https://github.com/r-lib/rappdirs to help find a suitable directory location.
+
 ### Modifying data sources
 
 #### Authentication
@@ -150,7 +154,7 @@ foreach (i=unique(cf$name),.export=c("cf")) %dopar% {bb_sync(cf[cf$name==i,])}
 ```{r echo=FALSE,message=FALSE,warning=FALSE,results="asis"}
 devtools::load_all()##library(bowerbird)
 cf <- bb_config("/your/data/root/") %>% add(bb_sources())
-sf <- bb_summary(cf,format="rmd",inc_license=FALSE,inc_access_function=FALSE,inc_path=FALSE)    
+sf <- bb_summary(cf,format="rmd",inc_license=FALSE,inc_access_function=FALSE,inc_path=FALSE)
 stxt <- readLines(sf)
 stxt <- stxt[(grep("Last updated:",stxt)+1):length(stxt)]
 stxt <- gsub("^#","##",stxt) ## push each header level down one
