@@ -7,7 +7,7 @@
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
-rapid_response_get <- function(data_source,local_dir_only=TRUE) {
+rapid_response_get <- function(data_source,local_dir_only=FALSE) {
     assert_that(is.flag(local_dir_only))
     if (local_dir_only) {
         dummy <- data_source

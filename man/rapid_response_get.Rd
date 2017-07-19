@@ -4,7 +4,7 @@
 \alias{rapid_response_get}
 \title{Handler for NASA MODIS Rapid Response files}
 \usage{
-rapid_response_get(data_source, local_dir_only = TRUE)
+rapid_response_get(data_source, local_dir_only = FALSE)
 }
 \arguments{
 \item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}

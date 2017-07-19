@@ -4,7 +4,7 @@
 \alias{earthdata_get}
 \title{Handler for files files served up through Earthdata providers}
 \usage{
-earthdata_get(data_source, local_dir_only = TRUE)
+earthdata_get(data_source, local_dir_only = FALSE)
 }
 \arguments{
 \item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}

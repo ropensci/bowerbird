@@ -7,7 +7,7 @@
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
-earthdata_get <- function(data_source,local_dir_only=TRUE) {
+earthdata_get <- function(data_source,local_dir_only=FALSE) {
     assert_that(is.data.frame(data_source))
     assert_that(nrow(data_source)==1)
     assert_that(is.flag(local_dir_only))

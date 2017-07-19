@@ -7,7 +7,7 @@
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
-amps_get <- function(data_source,local_dir_only=TRUE) {
+amps_get <- function(data_source,local_dir_only=FALSE) {
     assert_that(is.flag(local_dir_only))
     ## shouldn't need any specific method_flags for this
     ## could potentially set e.g. --progress=dot:giga

@@ -4,7 +4,7 @@
 \alias{ghrsst_get}
 \title{Handler for GHRSST data sources}
 \usage{
-ghrsst_get(data_source, local_dir_only = TRUE)
+ghrsst_get(data_source, local_dir_only = FALSE)
 }
 \arguments{
 \item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}

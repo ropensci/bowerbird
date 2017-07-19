@@ -4,7 +4,7 @@
 \alias{amps_get}
 \title{Handler for AMPS data (Antarctic mesoscale prediction system)}
 \usage{
-amps_get(data_source, local_dir_only = TRUE)
+amps_get(data_source, local_dir_only = FALSE)
 }
 \arguments{
 \item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}
