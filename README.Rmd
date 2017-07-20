@@ -104,22 +104,31 @@ If the pre-packages data sources don't cover your needs, you can define your own
 
 ```{r eval=FALSE}
 my_source <- bb_source(
-    name="GSHHG coastline data",
-    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
-    reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
-    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
-      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
-    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
-    license="LGPL",
+    name="Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
+    id="10.4225/25/53D9B12E0F96E",
+    description="This is a compilation of all the processed multibeam bathymetry data that are publicly available in Geoscience Australia's data holding for the Macquarie Ridge.",
+    reference="http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_b9224f95-a416-07f8-e044-00144fdd4fa6/XYZ+multibeam+bathymetric+grids+of+the+Macquarie+Ridge",
+    citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
+    source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
+    license="CC-BY 4.0",
     method=quote(bb_wget),
-    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
-    postprocess=quote(pp_unzip))
+    method_flags="--recursive --level=inf --accept=zip --no-parent",
+    postprocess=quote(pp_unzip),
+    collection_size=0.4,
+    data_group="Topography")
 
 cf <- bb_config(local_file_root="/your/data/directory") %>%
     add(my_source)
 ```
 
-Most sources will use the `bb_wget` method, which is a wrapper around the wget utility. If you are unfamiliar with wget, consult one of the many online tutorials. You can also see the in-built wget help by running `wget("--help")`.
+Some particularly important components of this definition are:
+
+1. The `id` uniquely identifies the data source. If the data source has a DOI, use that. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one). The `id` should be something that changes when the data set is updated. A DOI is ideal for this. The `name` entry should be a human-readable but still concise name for the data set.
+
+1. The `license` and `citation` are important so that users know what conditions govern the usage of the data, and the appropriate citation to use to acknowledge the data providers. The `reference` entry should refer to a metadata or documentation page that describes the data in detail.
+
+1. The `method`, `method_flags`, and `source_url` define how this data will be retrieved. Most sources will use the `bb_wget` method, which is a wrapper around the wget utility. If you are unfamiliar with wget, consult one of the many online tutorials. You can also see the in-built wget help by running `wget("--help")`.
+
 
 Some subtleties to bear in mind:
 
@@ -150,6 +159,10 @@ plan(multiprocess)
 
 foreach (i=unique(cf$name),.export=c("cf")) %dopar% {bb_sync(cf[cf$name==i,])}
 ```
+
+### Data provenance and reproducible research
+
+An aspect of reproducible research is knowing which data were used to perform an analysis, and potentially archiving those data to an appropriate repository. Bowerbird can assist with this: see the "Data provenance" vignette.
 
 
 ## Data source summary
