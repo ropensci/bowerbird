@@ -30,27 +30,30 @@ We can ask bowerbird where these files are stored locally:
 data_source_dir(cf[1,])
 ```
 
-This directory will contain all of the files associated with that data source, not just the files used in a particular analysis. Indeed this directory might, in extreme cases, contain files from other data sources, although this should only happen if multiple data sources have overlapping `source_url`s, which ought not to be a common occurrence.
+This directory will contain all of the files associated with that data source, not just the files used in a particular analysis. (In extreme cases this directory might even contain files from other data sources, although this should only happen if multiple data sources have overlapping `source_url`s, which ought not to be a common occurrence.)
 
-So while this directory is not a minimal set of files needed to reproduce an analysis, it does at least contain that set, and could be used to store those files in an online repository that assigns DOIs (such as figshare, see https://cran.r-project.org/package=rfigshare, or zenodo), or bundle into a docker image, using e.g containerit https://github.com/o2r-project/containerit.
+So while this directory is not a minimal set of files needed to reproduce an analysis, it does at least contain that set, and could be used to store those files in an online repository that assigns DOIs (such as figshare, see https://cran.r-project.org/package=rfigshare, or zenodo), or bundle into a docker image (see e.g containerit https://github.com/o2r-project/containerit).
 
 ### Refining the list of files
 
-Ascertaining exactly which files were used is probably better handled by the analysis code, not the data repository (bowerbird) code.
+Ascertaining exactly which files were used is better handled by the code being used to do the file-reading and analysis, not by the repository-management (bowerbird) code.
 
-recordr (https://github.com/NCEAS/recordr) will collect info about which files were read or written, but this information is limited to files that are opened with functions registered with recordr. At the time of writing, this does not cover netcdf files or other files typically used for environmental data, and so its application in that domain is likely of limited value.
 
+... unaware of general solutions
+
+The recordr package (https://github.com/NCEAS/recordr) will collect info about which files were read or written. However, this only works for file types that have read functions implemented in recordr. At the time of writing, this does not cover netcdf files or other files typically used for environmental data, and so its application in that domain is likely to be of limited value.
+
+... other package-specific solutions, e.g. raadtools
 
 ## The provenance of files used in an analysis
 
 Provenance: where the files came from, when they were downloaded, their version, etc.
 
-- `bb_fingerprint` function - given config, return timestamp of download and hashes of all files associated with those sources. Thus, for all of these files, we have established where they came from, when they were downloaded, and a hash so that later versions of those files can be compared to detect changes.
+The `bb_fingerprint` function, given a data repository configuration, will return the timestamp of download and hashes of all files associated with its data sources. Thus, for all of these files, we have established where they came from (the data source ID), when they were downloaded, and a hash so that later versions of those files can be compared to detect changes.
 
+The data source ID should be its DOI (if it has one, or some other unique identifier if not). A data set that has a DOI should be peristent (accessible for long term use), and the DOI should uniquely identify the data resource that it is assigned to. When a data set changes in a substantial manner, and/or it is necessary to identify both the original and the changed material, a new DOI should be assigned. Thus, knowing the DOI gives some indication of the data provenance. However,
 
-## A word on digital object identifiers
-
-The nature of DOIs means that a data set that has a DOI should be peristent (accessible for long term use). The DOI should uniuqyely identify the data resource that it is assigned to. When a data set changes in a substantial manner, and/or it is necessary to identify both the original and the changed material, a new DOI should be assigned.
+... distinct state of data set might/not follow DOI uniqueness
 
 
 MODIS Composite Based Maps of East Antarctic Fast Ice Coverage http://doi.org/10.4225/15/5667AC726B224
