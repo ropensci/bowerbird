@@ -36,7 +36,7 @@ oceandata_get <- function(data_source,local_dir_only=FALSE) {
         } else if (grepl("L3",this_search_spec)) {
             out <- file.path(out,"L3BIN")
         }
-        return(out)
+        return(file.path(bb_attributes(data_source)$local_file_root,out))
     }
     tries <- 0
     while (tries<3) {
