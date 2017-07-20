@@ -88,7 +88,7 @@ dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_sources(data_group="Sea ice"))
+#'     add(bb_sources(data_group="Sea surface temperature"))
 #'   data_source_dir(cf)
 #' }
 #'
