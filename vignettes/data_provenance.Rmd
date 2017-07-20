@@ -1,10 +1,10 @@
 ---
-title: "Data provenance and bowerbird"
+title: "Data provenance"
 author: "Ben Raymond, Michael Sumner"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Data provenance and bowerbird}
+  %\VignetteIndexEntry{Data provenance}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
