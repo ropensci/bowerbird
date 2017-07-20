@@ -167,6 +167,8 @@ An aspect of reproducible research is knowing which data were used to perform an
 
 ## Data source summary
 
+These are the data source definitions that are provided as part of the bowerbird package.
+
 ```{r echo=FALSE,message=FALSE,warning=FALSE,results="asis"}
 devtools::load_all()##library(bowerbird)
 cf <- bb_config("/your/data/root/") %>% add(bb_sources())

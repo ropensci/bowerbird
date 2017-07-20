@@ -154,6 +154,8 @@ An aspect of reproducible research is knowing which data were used to perform an
 Data source summary
 -------------------
 
+These are the data source definitions that are provided as part of the bowerbird package.
+
 ### Data group: Altimetry
 
 #### CMEMS global gridded SSH reprocessed (1993-ongoing)
