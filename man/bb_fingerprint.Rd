@@ -15,15 +15,15 @@ bb_fingerprint(config, hash = "sha1", verbose = TRUE)
 }
 \value{
 data.frame
-\dontrun{
-  cf <- bb_config("/my/file/root") %>%
-    add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
-  bb_fingerprint(cf)
-}
 }
 \description{
 Fingerprint the files associated with a data source
 }
 \examples{
+\dontrun{
+  cf <- bb_config("/my/file/root") \%>\%
+    add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+  bb_fingerprint(cf)
+}
 
 }

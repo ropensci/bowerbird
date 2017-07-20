@@ -5,12 +5,12 @@
 #' @param verbose logical: if TRUE, provide additional progress output
 #'
 #' @return data.frame
+#' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
 #'     add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
 #'   bb_fingerprint(cf)
 #' }
-#' @examples
 #'
 #' @export
 bb_fingerprint <- function(config,hash="sha1",verbose=TRUE) {
