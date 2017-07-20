@@ -18,7 +18,7 @@ Files from each data source are stored locally in the associated directory.
 \examples{
 \dontrun{
   cf <- bb_config("/my/file/root") \%>\%
-    add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+    add(bb_sources(data_group="Sea ice"))
   data_source_dir(cf)
 }
 
