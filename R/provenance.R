@@ -12,7 +12,7 @@
 #' }
 #' @examples
 #'
-# @export
+#' @export
 bb_fingerprint <- function(config,hash="sha1",verbose=TRUE) {
     assert_that(is.data.frame(config))
     assert_that(is.string(hash))
