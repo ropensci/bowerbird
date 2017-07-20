@@ -77,13 +77,13 @@ restore_settings <- function(settings) {
 dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is.na(file.info(z)$isdir))
 
 
-#' Return the local directory of a data source
+#' Return the local directory of each data source in a configuration
 #'
-#' Files from that data source are stored locally in this directory.
+#' Files from each data source are stored locally in the associated directory.
 #'
-#' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param config tibble: configuration as returned by \code{\link{bb_config}}
 #'
-#' @return string: the directory
+#' @return character vector of directories
 #'
 #' @examples
 #' \dontrun{
@@ -93,33 +93,32 @@ dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is
 #' }
 #'
 #' @export
-data_source_dir <- function(data_source) {
-    assert_that(is.data.frame(data_source))
-    assert_that(nrow(data_source)==1)
-
-    ## copy bb attrs into data_source, in case handler relies on them
-    data_source <- bb_attributes_to_cols(data_source)
-    
-    mth <- data_source$method[[1]]
-    if (is.function(mth)) {
-        ## method function was passed directly
-        do.call(mth,list(data_source=data_source,local_dir_only=TRUE))
-    } else if (is.symbol(mth)) {
-        ## method function was passed as a symbol, e.g. by quote(fun)
-        do.call(eval(mth),list(data_source=data_source,local_dir_only=TRUE))
-    } else if (is.call(mth)) {
-        if (all.names(mth)[1]=="quote") {
-            ## call was constructed as e.g. enquote(fun)
+data_source_dir <- function(config) {
+    assert_that(is.data.frame(config))
+    single_source_dir <- function(data_source) {
+        ## copy bb attrs into data_source, in case handler relies on them
+        data_source <- bb_attributes_to_cols(data_source)
+        mth <- data_source$method[[1]]
+        if (is.function(mth)) {
+            ## method function was passed directly
+            do.call(mth,list(data_source=data_source,local_dir_only=TRUE))
+        } else if (is.symbol(mth)) {
+            ## method function was passed as a symbol, e.g. by quote(fun)
             do.call(eval(mth),list(data_source=data_source,local_dir_only=TRUE))
-        } else {
-            ## call was constructed as e.g. quote(fun())
-            ## may have provided some arguments already e.g. quote(fun(arg=var))
-            thisargs <- inject_args(mth,list(data_source=data_source,local_dir_only=TRUE))
-            do.call(all.names(mth)[1],thisargs)
+        } else if (is.call(mth)) {
+            if (all.names(mth)[1]=="quote") {
+                ## call was constructed as e.g. enquote(fun)
+                do.call(eval(mth),list(data_source=data_source,local_dir_only=TRUE))
+            } else {
+                ## call was constructed as e.g. quote(fun())
+                ## may have provided some arguments already e.g. quote(fun(arg=var))
+                thisargs <- inject_args(mth,list(data_source=data_source,local_dir_only=TRUE))
+                do.call(all.names(mth)[1],thisargs)
+            }
         }
     }
+    sapply(1:nrow(config),function(z)single_source_dir(config[z,]))
 }
-
 
 directory_from_url <- function(this_url) {
     this_url <- sub("^(http|https|ftp)://","",this_url)

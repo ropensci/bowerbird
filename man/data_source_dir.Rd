@@ -2,18 +2,18 @@
 % Please edit documentation in R/utils.R
 \name{data_source_dir}
 \alias{data_source_dir}
-\title{Return the local directory of a data source}
+\title{Return the local directory of each data source in a configuration}
 \usage{
-data_source_dir(data_source)
+data_source_dir(config)
 }
 \arguments{
-\item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}
+\item{config}{tibble: configuration as returned by \code{\link{bb_config}}}
 }
 \value{
-string: the directory
+character vector of directories
 }
 \description{
-Files from that data source are stored locally in this directory.
+Files from each data source are stored locally in the associated directory.
 }
 \examples{
 \dontrun{
