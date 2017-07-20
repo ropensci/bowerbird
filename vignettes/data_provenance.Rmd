@@ -24,14 +24,16 @@ Say we have a bowerbird config:
 library(bowerbird)
 cf <- bb_config("/some/local/path") %>% add(bb_sources(data_group="Sea surface temperature"))
 ```
+
 We can ask bowerbird where these files are stored locally:
 ```{r}
-data_source_dir(cf)
+source_dirs <- data_source_dir(cf)
+knitr::kable(data.frame(name=cf$name,source_dir=source_dirs))
 ```
 
-The directory for each data source will contain *all* of the files associated with that data source, not just the files used in a particular analysis. (In extreme cases this directory might even contain files from other data sources, although this should only happen if multiple data sources have overlapping `source_url`s, which ought not to be a common occurrence.)
+The directory for each data source will contain *all* of the files associated with that data source, not just the files used in a particular analysis. (In extreme cases this directory might even contain files from other data sources, although this should only happen if multiple data sources have overlapping `source_url` paths, which ought not to be a common occurrence.)
 
-So while this directory is not the *minimal* set of files needed to reproduce an analysis, it does at least contain that set, and could be used to store those files in an online repository that assigns DOIs (such as figshare, see https://cran.r-project.org/package=rfigshare, or zenodo), or bundle into a docker image (see e.g containerit https://github.com/o2r-project/containerit).
+So while this directory is not the *minimal* set of files needed to reproduce an analysis, it does at least contain that set, and could be used to store those files in an online repository that assigns DOIs (such as figshare, see https://cran.r-project.org/package=rfigshare, or zenodo), or bundle into a docker image (see e.g https://github.com/o2r-project/containerit).
 
 ### Refining the list of files
 
@@ -39,7 +41,7 @@ Ascertaining exactly which files were used in a particular analysis is a task th
 
 We are unaware of any general solutions that will keep track of the files used by an arbitrary chunk of R code. 
 
-The recordr package (https://github.com/NCEAS/recordr) will collect info about which files were read or written. However, this only works for file types that have read functions implemented in recordr. At the time of writing, this does not cover netcdf files or other files typically used for environmental data, and so its application in that domain is likely to be of limited value.
+The recordr package (https://github.com/NCEAS/recordr) comes close: it will collect info about which files were read or written. However, this only works for file types that have read functions implemented in recordr. At the time of writing, this does not cover netcdf files or other files typically used for environmental data, and so its application in that domain is likely to be of limited value.
 
 Packages that provide specific data access functionality (e.g. https://github.com/AustralianAntarcticDivision/raadtools) might provide mechanisms for tracking which data files are needed in order to fulfil particular data queries.
 
@@ -49,9 +51,11 @@ Provenance: where the files came from, when they were downloaded, their version,
 
 The `bb_fingerprint` function, given a data repository configuration, will return the timestamp of download and hashes of all files associated with its data sources. Thus, for all of these files, we have established where they came from (the data source ID), when they were downloaded, and a hash so that later versions of those files can be compared to detect changes.
 
+### A word on digital object identifiers
+
 When a data source is defined, it should have used its DOI as its data source ID (if it has a DOI, otherwise some other unique identifier). The idea of a DOI is that a data set that has a DOI should be peristent (accessible for long term use), and the DOI should uniquely identify the data resource that it is assigned to. When a data set changes in a substantial manner, and/or it is necessary to identify both the original and the changed material, a new DOI should be assigned. Thus, knowing the DOI gives some indication of the data provenance.
 
 However, it is worth noting that the DOI might not uniquely identify the state of the data source. For example, the NSIDC SMMR-SSM/I Nasateam near-real-time sea ice concentration data set (DOI http://doi.org/10.5067/U8C09DWVX9LM) is updated each day (new files are added) as new data is acquired by the satellites. At periodic intervals, these files are subjected to more rigorous quality control and post-processing, and then moved into a different data set (http://doi.org/10.5067/8GQ8LZQVL0VL). Thus, knowing the DOI of the near-real-time data set does not uniquely identify the files that were included in that data set at a given point in time.
 
-Similar ambiguity can arise for other reasons, including data corrections. Say that one data file within a large collection was found to have errors and was corrected: it is at the discretion of the data provider whether a new DOI is assigned to the data set as a whole.
+Similar ambiguity can arise for other reasons, including data corrections. Say that one data file within a large collection was found to have errors and was corrected: it is at the discretion of the data provider whether the data set as a whole receives a new DOI because of this change.
 
