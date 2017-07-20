@@ -13,7 +13,7 @@ Installing
 ``` r
 install.packages("devtools")
 library(devtools)
-install_github("AustralianAntarcticDivision/bowerbird")
+install_github("AustralianAntarcticDivision/bowerbird",build_vignettes=TRUE)
 ```
 
 Bowerbird uses the third-party utility `wget` to do the heavy lifting of recursively downloading files from data providers. `wget` is typically installed by default on Linux. On Windows you can use the `install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from <https://eternallybored.org/misc/wget/current/wget.exe>) and make sure it is on your path.
@@ -149,7 +149,7 @@ foreach (i=unique(cf$name),.export=c("cf")) %dopar% {bb_sync(cf[cf$name==i,])}
 
 ### Data provenance and reproducible research
 
-An aspect of reproducible research is knowing which data were used to perform an analysis, and potentially archiving those data to an appropriate repository. Bowerbird can assist with this: see the "Data provenance" vignette.
+An aspect of reproducible research is knowing which data were used to perform an analysis, and potentially archiving those data to an appropriate repository. Bowerbird can assist with this: see `vignette("data_provenance")`.
 
 Data source summary
 -------------------
