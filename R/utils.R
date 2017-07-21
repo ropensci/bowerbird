@@ -22,22 +22,28 @@ is_nonempty_string <- function(z) is.string(z) && nzchar(z)
 ## check method (which may be function, call, or symbol) matches expected function
 check_method_is <- function(method,expected) {
     assert_that(is.function(expected))
+    identical(get_function_from_method(method),expected)
+}
+
+## get actual function from method (which may be function, call, or symbol)
+get_function_from_method <- function(method) {
     assert_that(is.function(method) || is.call(method) || is.symbol(method) || is.string(method))
     if (is.function(method)) {
-        identical(method,expected)
+        method
     } else if (is.call(method)) {
         if (all.names(method)[1]=="quote") {
             ## call was constructed as e.g. enquote(whatever)
-            identical(eval(method),expected)
+            eval(method)
         } else {
             ## call was constructed as e.g. quote(whatever())
-            check_method_is(all.names(method)[1],expected) ## check using name of called function
+            get_function_from_method(all.names(method)[1]) ## check using name of called function
         }
     } else if (is.string(method)) {
-        exists(method,mode="function") && identical(get(method),expected)
+        ## passed as function name
+        if (exists(method,mode="function")) get(method) else NULL
     } else {
         ## symbol/name, by e.g. quote(whatever)
-        exists(deparse(method),mode="function") && identical(eval(method),expected)
+        if (exists(deparse(method),mode="function")) eval(method) else NULL
     }
 }
 
@@ -98,23 +104,11 @@ data_source_dir <- function(config) {
     single_source_dir <- function(data_source) {
         ## copy bb attrs into data_source, in case handler relies on them
         data_source <- bb_attributes_to_cols(data_source)
-        mth <- data_source$method[[1]]
+        mth <- get_function_from_method(data_source$method[[1]])
         if (is.function(mth)) {
-            ## method function was passed directly
             do.call(mth,list(data_source=data_source,local_dir_only=TRUE))
-        } else if (is.symbol(mth)) {
-            ## method function was passed as a symbol, e.g. by quote(fun)
-            do.call(eval(mth),list(data_source=data_source,local_dir_only=TRUE))
-        } else if (is.call(mth)) {
-            if (all.names(mth)[1]=="quote") {
-                ## call was constructed as e.g. enquote(fun)
-                do.call(eval(mth),list(data_source=data_source,local_dir_only=TRUE))
-            } else {
-                ## call was constructed as e.g. quote(fun())
-                ## may have provided some arguments already e.g. quote(fun(arg=var))
-                thisargs <- inject_args(mth,list(data_source=data_source,local_dir_only=TRUE))
-                do.call(all.names(mth)[1],thisargs)
-            }
+        } else {
+            as.character(NA)
         }
     }
     sapply(1:nrow(config),function(z)single_source_dir(config[z,]))
