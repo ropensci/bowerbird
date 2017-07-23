@@ -22,7 +22,7 @@ bb_fingerprint <- function(config,hash="sha1",verbose=TRUE) {
         warning("config has no data sources: nothing for bb_fingerprint to do")
         return(invisible(NULL))
     }
-    bb_validate_config(config)
+    bb_validate(config)
     settings <- save_current_settings()
     fp <- tbl_df(do.call(rbind,lapply(1:nrow(config),function(di) do_fingerprint(config[di,],hash,verbose,settings))))
     ## fp <- config %>% rowwise() %>% do(do_fingerprint,verbose=verbose,settings=settings) ??

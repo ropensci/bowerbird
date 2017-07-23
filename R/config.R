@@ -102,7 +102,7 @@ add <- function(cf,source) {
 }
 
 
-#' Returns a configuration object's bowerbird attributes
+#' Returns a configuration object's bowerbird-specific attributes
 #'
 #' @param cf tibble: configuration, as returned by \code{bb_config}
 #'
@@ -120,15 +120,12 @@ bb_attributes <- function(cf) {
     out[names(out) %in% bb_global_atts()]
 }
 
-## helper functions to manage attributes
+## helper functions to manage attributes, not exported to user
 ## copy attributes
 copy_bb_attributes <- function(to,from) {
     attributes(to) <- c(attributes(to),bb_attributes(from))
     to
 }
-
-## subset one or more rows
-##bb_slice <- function(obj,rows) copy_bb_attributes(obj[rows,],obj)
 
 ## copy each bb attribute into column
 bb_attributes_to_cols <- function(obj) {
@@ -230,16 +227,19 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_licen
 }
 
 
-# Validate a bowerbird configuration
-#
-# @param cf tibble: configuration, as returned by \code{bb_config}
-#
-# @return TRUE (invisibly) or throw error
-#
-# @seealso \code{\link{bb_config}}
-#
-# @export
-bb_validate_config <- function(cf) {
+
+#' Validate a bowerbird configuration
+#'
+#' Runs some basic sanity checks on a bowerbird configuration.
+#'
+#' @param cf tibble: configuration, as returned by \code{bb_config}
+#'
+#' @return TRUE (invisibly) or throw error
+#'
+#' @seealso \code{\link{bb_config}}
+#'
+#' @export
+bb_validate <- function(cf) {
     idx <- !is.na(cf$authentication_note) & (na_or_empty(cf$user) || na_or_empty(cf$password))
     if (any(idx))
         stop(paste(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s\n",cf$name[idx],cf$authentication_note[idx]),collapse="\n"))

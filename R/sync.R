@@ -17,7 +17,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
         warning("config has no data sources: nothing for bb_sync to do")
         return(invisible(NULL))
     }
-    bb_validate_config(config)
+    bb_validate(config)
     ## check that wget can be found (this will also set it in the options)
     blah <- wget_exe()
     ## save some current settings: path and proxy env values

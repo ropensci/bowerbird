@@ -2,7 +2,7 @@
 % Please edit documentation in R/config.R
 \name{bb_attributes}
 \alias{bb_attributes}
-\title{Returns a configuration object's bowerbird attributes}
+\title{Returns a configuration object's bowerbird-specific attributes}
 \usage{
 bb_attributes(cf)
 }
@@ -13,7 +13,7 @@ bb_attributes(cf)
 named list
 }
 \description{
-Returns a configuration object's bowerbird attributes
+Returns a configuration object's bowerbird-specific attributes
 }
 \examples{
 cf <- bb_config(local_file_root="/your/data/directory")
