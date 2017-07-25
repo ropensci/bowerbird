@@ -86,6 +86,14 @@ cf <- cf %>% add(bb_sources("CERSAT SSM/I sea ice concentration") %>%
 
 See the notes below for further guidances on the accept/reject flags.
 
+Alternatively, for data sources that are divided into subdirectories, one could replace the whole-data-source `source_url` with one or more that point to specific yearly (or other) subdirectories. For example, the default `source_url` for the CERSAT sea ice data above is "<ftp://ftp.ifremer.fr/ifremer/cersat/products/gridded/psi-concentration/data/antarctic/daily/netcdf/*>" (with yearly subdirectories). So e.g. for 2016 and 2017 data we could do:
+
+``` r
+cf <- cf %>% add(bb_sources("CERSAT SSM/I sea ice concentration") %>%
+    mutate(source_url=c("ftp://ftp.ifremer.fr/ifremer/cersat/products/gridded/psi-concentration/data/antarctic/daily/netcdf/2016/*",
+                        "ftp://ftp.ifremer.fr/ifremer/cersat/products/gridded/psi-concentration/data/antarctic/daily/netcdf/2017/*")))
+```
+
 ### Defining new data sources
 
 If the pre-packages data sources don't cover your needs, you can define your own using the `bb_source` function:
