@@ -176,5 +176,18 @@ sources_seaice <- function() {
                 postprocess=quote(pp_unzip),
                 collection_size=0.4,
                 data_group="Sea ice")
+        ) %>%
+        bind_rows(
+            bb_source(
+                name="National Ice Center Antarctic daily sea ice charts",
+                id="NIC_daily_chart",
+                description="The USNIC Daily Ice Edge product depicts the daily sea ice pack in red (8-10/10ths or greater of sea ice), and the Marginal Ice Zone (MIZ) in yellow. The marginal ice zone is the transition between the open ocean (ice free) and pack ice. The MIZ is very dynamic and affects the air-ocean heat transport, as well as being a significant factor in navigational safety. The daily ice edge is analyzed by sea ice experts using multiple sources of near real time satellite data, derived satellite products, buoy data, weather, and analyst interpretation of current sea ice conditions. The product is a current depiction of the location of the ice edge vice a satellite derived ice edge product.",
+                reference="http://www.natice.noaa.gov/Main_Products.htm",
+                citation="Not known",
+                source_url=paste0("http://www.natice.noaa.gov/pub/special/kml_archive/antarctic/",2010:as.numeric(format(Sys.Date(),"%Y")),"/"),
+                license="Not known",
+                method=quote(bb_wget),
+                method_flags="--accept=\"*.kmz\" --recursive --level=1",
+                data_group="Sea ice")
         )
 }
