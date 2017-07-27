@@ -29,22 +29,23 @@ check_method_is <- function(method,expected) {
 get_function_from_method <- function(method) {
     assert_that(is.function(method) || is.call(method) || is.symbol(method) || is.string(method))
     if (is.function(method)) {
-        method
+        return(method)
     } else if (is.call(method)) {
         if (all.names(method)[1]=="quote") {
             ## call was constructed as e.g. enquote(whatever)
-            eval(method)
+            return(eval(method))
         } else {
             ## call was constructed as e.g. quote(whatever())
-            get_function_from_method(all.names(method)[1]) ## check using name of called function
+            return(get_function_from_method(all.names(method)[1])) ## check using name of called function
         }
     } else if (is.string(method)) {
         ## passed as function name
-        if (exists(method,mode="function")) get(method) else NULL
+        if (exists(method,mode="function")) return(get(method))
     } else {
         ## symbol/name, by e.g. quote(whatever)
-        if (exists(deparse(method),mode="function")) eval(method) else NULL
+        if (exists(deparse(method),mode="function")) return(eval(method))
     }
+    stop("could not extract the underlying method function")
 }
 
 ## isn't there a better way to do this?
@@ -104,7 +105,8 @@ data_source_dir <- function(config) {
     single_source_dir <- function(data_source) {
         ## copy bb attrs into data_source, in case handler relies on them
         data_source <- bb_attributes_to_cols(data_source)
-        mth <- get_function_from_method(data_source$method[[1]])
+        mth <- NULL
+        try(mth <- get_function_from_method(data_source$method[[1]]),silent=TRUE)
         if (is.function(mth)) {
             do.call(mth,list(data_source=data_source,local_dir_only=TRUE))
         } else {
