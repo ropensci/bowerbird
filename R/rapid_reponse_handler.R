@@ -2,17 +2,21 @@
 #'
 #' @references https://earthdata.nasa.gov/earth-observation-data/near-real-time/rapid-response
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param verbose logical: if TRUE, provide additional progress output
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
-rapid_response_get <- function(data_source,local_dir_only=FALSE) {
+rapid_response_get <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
+    assert_that(is.data.frame(data_source))
+    assert_that(nrow(data_source)==1)
+    assert_that(is.flag(local_dir_only))
     assert_that(is.flag(local_dir_only))
     if (local_dir_only) {
         dummy <- data_source
         dummy$source_url <- "http://lance-modis.eosdis.nasa.gov/imagery/subsets/"
-        return(bb_wget(dummy,local_dir_only=TRUE))
+        return(bb_wget(dummy,verbose=verbose,local_dir_only=TRUE))
     }
     ## NASA MODIS rapid response synchronisation handler
 
@@ -34,14 +38,14 @@ rapid_response_get <- function(data_source,local_dir_only=FALSE) {
     this_resolution <- "4km"
     d <- Sys.Date()
     while (d>=format.Date("2013-12-11")) {
-        rapid_response_do_download(d,"terra",this_resolution,data_source)
-        rapid_response_do_download(d,"aqua",this_resolution,data_source)
+        rapid_response_do_download(d,"terra",this_resolution,data_source,verbose=verbose)
+        rapid_response_do_download(d,"aqua",this_resolution,data_source,verbose=verbose)
         d <- d-1
     }
     TRUE
 }
 
-rapid_response_do_download <- function(d,platform,resolution,data_source) {
+rapid_response_do_download <- function(d,platform,resolution,data_source,verbose) {
     this_url <- sprintf("http://lance-modis.eosdis.nasa.gov/imagery/subsets/?mosaic=Antarctica.%s%s.%s.%s.tif",format(d,"%Y"),format(d,"%j"),platform,resolution)
     dummy <- data_source
     ##dummy$method_flags=paste("--progress=dot:giga","--recursive",sep=" ")
@@ -49,9 +53,9 @@ rapid_response_do_download <- function(d,platform,resolution,data_source) {
     ## note that we can't use --output_document option with --timestamping, but since the server doesn't support timestamping anyway
     dummy$method_flags <- paste0("--output-document=lance-modis.eosdis.nasa.gov/imagery/subsets/",sub("^http.*mosaic=","",this_url))
     if (file.exists(paste0("lance-modis.eosdis.nasa.gov/imagery/subsets/",sub("^http.*mosaic=","",this_url))) & (data_source$clobber<2)) {
-        cat(sprintf("not downloading %s, local file exists and clobber setting is <2\n",this_url))
+        if (verbose) cat(sprintf("not downloading %s, local file exists and clobber setting is <2\n",this_url))
     } else {
         dummy$source_url <- this_url
-        bb_wget(dummy)
+        bb_wget(dummy,verbose=verbose)
     }
 }

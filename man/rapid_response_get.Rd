@@ -4,10 +4,12 @@
 \alias{rapid_response_get}
 \title{Handler for NASA MODIS Rapid Response files}
 \usage{
-rapid_response_get(data_source, local_dir_only = FALSE)
+rapid_response_get(data_source, verbose = FALSE, local_dir_only = FALSE)
 }
 \arguments{
 \item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}
+
+\item{verbose}{logical: if TRUE, provide additional progress output}
 
 \item{local_dir_only}{logical: if TRUE, just return the local directory into which files from this data source would be saved}
 }

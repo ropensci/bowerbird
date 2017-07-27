@@ -1,6 +1,7 @@
 #' Mirror an external data source using the wget utility
 #'
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param verbose logical: if TRUE, provide additional progress output
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
@@ -8,14 +9,15 @@
 #' @seealso \code{\link{wget}}
 #'
 #' @export
-bb_wget <- function(data_source,local_dir_only=FALSE) {
+bb_wget <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is.data.frame(data_source))
     assert_that(nrow(data_source)==1)
+    assert_that(is.flag(verbose))
     assert_that(is.flag(local_dir_only))
 
     if (local_dir_only)
         return(file.path(bb_attributes(data_source)$local_file_root,directory_from_url(data_source$source_url)))
-    
+
     this_flags <- if (is.na(data_source$method_flags)) data_source$wget_default_flags else data_source$method_flags
     ## add wget_global_flags
     if (!is.null(data_source$wget_global_flags)) this_flags <- paste(this_flags,data_source$wget_global_flags,sep=" ")
@@ -41,7 +43,7 @@ bb_wget <- function(data_source,local_dir_only=FALSE) {
     ##if (data_source$wait>0) this_flags <- paste0(this_flags," --wait=",data_source$wait)
 
     if (!is.null(data_source$skip_downloads) && data_source$skip_downloads) {
-        cat(sprintf(" skip_downloads is TRUE, not executing: wget %s %s\n",this_flags,data_source$source_url))
+        if (verbose) cat(sprintf(" skip_downloads is TRUE, not executing: wget %s %s\n",this_flags,data_source$source_url))
         ok <- TRUE
     } else {
         if (sink.number()>0) {
@@ -52,18 +54,18 @@ bb_wget <- function(data_source,local_dir_only=FALSE) {
             this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
             ok <- wget(data_source$source_url,this_flags)
             ## now echo the contents of output_file to console, so that sink() captures it
-            cat(readLines(output_file),sep="\n")
+            if (verbose) cat(readLines(output_file),sep="\n")
         } else {
             ok <- wget(data_source$source_url,this_flags)
         }
     }
-    ok==0    
+    ok==0
 }
 
 
 #' Make a wget call
 #'
-#' @param url string: the URL to retrieve 
+#' @param url string: the URL to retrieve
 #' @param flags string: command-line flags to pass to wget
 #' @param verbose logical: print trace output?
 #' @param ... : additional paramaters passed to \code{system2}
@@ -78,7 +80,7 @@ bb_wget <- function(data_source,local_dir_only=FALSE) {
 #' }
 #'
 # @export
-wget <- function(url,flags,verbose=TRUE,...) {
+wget <- function(url,flags,verbose=FALSE,...) {
     assert_that(is.string(url))
     if (tolower(url) %in% c("-h","--help") || tolower(flags) %in% c("-h","--help")) {
         system2(wget_exe(),"--help",...)
@@ -91,7 +93,7 @@ wget <- function(url,flags,verbose=TRUE,...) {
 #' Helper function to install wget on Windows
 #'
 #' The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
-#' 
+#'
 #' @references https://eternallybored.org/misc/wget/current/wget.exe
 #'
 #' @return TRUE (invisibly) on success

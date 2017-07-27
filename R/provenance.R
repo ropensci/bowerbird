@@ -16,6 +16,7 @@
 bb_fingerprint <- function(config,hash="sha1",verbose=TRUE) {
     assert_that(is.data.frame(config))
     assert_that(is.string(hash))
+    assert_that(is.flag(verbose))
     hash <- match.arg(tolower(hash),c("none","md5","sha1"))
     assert_that(is.flag(verbose))
     if (nrow(config)<1) {
@@ -51,7 +52,7 @@ do_fingerprint <- function(this_dataset,hash,verbose,settings) {
     this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(this_dataset$source_url))
     if (verbose) cat(sprintf(" building file list ... "))
     myfiles <- list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE) ## full.names TRUE so that names are relative to current working directory
-    file_list <- file.info(myfiles) 
+    file_list <- file.info(myfiles)
     file_list <- file_list %>% mutate_(filename=~myfiles,data_source_id=~this_dataset$id) %>% select_(~filename,~data_source_id,~size,~mtime) %>% rename_(last_modified=~mtime)
     if (hash!="none") {
         if (verbose) cat(sprintf(" calculating file hashes ... "))

@@ -2,12 +2,13 @@
 #'
 #' @references https://oceandata.sci.gsfc.nasa.gov/
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param verbose logical: if TRUE, provide additional progress output
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
-oceandata_get <- function(data_source,local_dir_only=FALSE) {
+oceandata_get <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
     ## oceandata synchronisation handler
 
     ## oceandata provides a file search interface, e.g.:
@@ -21,7 +22,10 @@ oceandata_get <- function(data_source,local_dir_only=FALSE) {
     ##  i.e. "search=...&dtype=..." in "dtype=L3m&addurl=1&results_as_file=1&search=A2002*DAY_CHL_chlor*9km*"
     ##  or just include the data type in the search pattern e.g. "search=A2002*L3m_DAY_CHL_chlor*9km*
 
+    assert_that(is.data.frame(data_source))
+    assert_that(nrow(data_source)==1)
     assert_that(is.string(data_source$method_flags))
+    assert_that(is.flag(verbose))
     assert_that(is.flag(local_dir_only))
 
     if (local_dir_only) {
@@ -79,14 +83,14 @@ oceandata_get <- function(data_source,local_dir_only=FALSE) {
             ## note that if skip_downloads is TRUE, it will be passed through to bb_wget here
             dummy$method_flags <- paste("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
             dummy$source_url <- this_url
-            bb_wget(dummy)
+            bb_wget(dummy,verbose=verbose)
             ## recalculate checksum so that cache gets updated
             ## but not if skip_downloads
             if (is.null(data_source$skip_downloads) || !data_source$skip_downloads)
                 blah <- file_hash(this_fullfile,"sha1")
         } else {
             if (this_exists) {
-                cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))
+                if (verbose) cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))
             }
         }
     }

@@ -1,19 +1,21 @@
 #' Handler for files downloaded from the Australian Antarctic Data Centre EDS system
 #'
 #' AADC EDS files have a URL of the form https://data.aad.gov.au/eds/file/wxyz/ or https://data.aad.gov.au/eds/wxyz/download where wxyz is a numeric file identifier.
-#' 
+#'
 #' @references http://data.aad.gov.au
 #' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param verbose logical: if TRUE, provide additional progress output
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
 #' @return TRUE on success
 #'
 #' @export
-aadc_eds_get <- function(data_source,local_dir_only=FALSE) {
+aadc_eds_get <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is.data.frame(data_source))
     assert_that(nrow(data_source)==1)
+    assert_that(is.flag(verbose))
     assert_that(is.flag(local_dir_only))
-    
+
     ## clumsy way to get around AADC EDS file naming issues
     ## e.g. if we ask for http://data.aad.gov.au/eds/file/4494
     ## then we get local file named data.aad.gov.au/eds/file/4494 (which is most likely a zipped file)
@@ -50,7 +52,7 @@ aadc_eds_get <- function(data_source,local_dir_only=FALSE) {
     if (grepl("--recursive$",data_source$method_flags,ignore.case=TRUE)) {
         data_source$method_flags <- str_trim(sub("--recursive$","",data_source$method_flags))
     }
-    ok <- bb_wget(data_source)
+    ok <- bb_wget(data_source,verbose=verbose)
     setwd(data_source$local_file_root)
     ok
 }

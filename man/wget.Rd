@@ -4,7 +4,7 @@
 \alias{wget}
 \title{Make a wget call}
 \usage{
-wget(url, flags, verbose = TRUE, ...)
+wget(url, flags, verbose = FALSE, ...)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
