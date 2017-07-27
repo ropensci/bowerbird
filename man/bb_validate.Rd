@@ -7,7 +7,7 @@
 bb_validate(cf)
 }
 \arguments{
-\item{cf}{tibble: configuration, as returned by \code{bb_config}}
+\item{cf}{data.frame: configuration, as returned by \code{bb_config}}
 }
 \value{
 TRUE (invisibly) or throw error

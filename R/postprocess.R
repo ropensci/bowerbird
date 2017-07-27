@@ -2,7 +2,7 @@
 #' \code{pp_unzip}, \code{pp_gunzip}, \code{pp_bunzip2}, and \code{pp_uncompress} are convenience wrappers around \code{pp_decompress} that specify the method.
 #' The dots argument indicates additional arguments that are passed to \code{pp_decompress}. Some may be passed by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
 #'
-#' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param data_source data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}
 #' @param delete logical: delete the zip files after extracting their contents?
 #' @param method string: one of "unzip","gunzip","bunzip2","decompress"
 #' @param ... : additional arguments passed to \code{pp_decompress}
@@ -14,7 +14,7 @@
 #' \dontrun{
 #'   ## decompress .zip files after synchronisation but keep zip files intact
 #'   my_source <- bb_source(...,postprocess=quote(pp_unzip))
-#' 
+#'
 #'   ## decompress .zip files after synchronisation and delete zip files
 #'   my_source <- bb_source(...,postprocess=quote(pp_unzip(delete=TRUE)))
 #' }
@@ -81,7 +81,7 @@ pp_uncompress <- function(...) pp_decompress(...,method="uncompress")
 
 #' Postprocessing: remove unwanted files
 #'
-#' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param data_source data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}
 #' @param pattern string: regular expression, passed to \code{file.info}
 #' @param recursive logical: should the cleanup recurse into subdirectories?
 #' @param ignore_case logical: should pattern matching be case-insensitive?

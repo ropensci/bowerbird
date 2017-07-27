@@ -7,9 +7,9 @@
 add(cf, source)
 }
 \arguments{
-\item{cf}{tibble: configuration, as returned by \code{bb_config}}
+\item{cf}{data.frame: configuration, as returned by \code{bb_config}}
 
-\item{source}{tibble: data source definition to add to the configuration, as returned by \code{bb_source}}
+\item{source}{data.frame: data source definition to add to the configuration, as returned by \code{bb_source}}
 }
 \value{
 configuration tibble

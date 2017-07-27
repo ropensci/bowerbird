@@ -6,7 +6,7 @@ bb_global_atts <- function() c("wget_default_flags","wget_global_flags","http_pr
 #' Initialize a bowerbird configuration
 #'
 #' The parameters provided here are repository-wide settings, and will be applied to all data sources that are subsequently added to the configuration.
-#' 
+#'
 #' @param local_file_root string: location of data repository on local file system
 #' @param wget_default_flags string: default flags to be passed to wget. These are overridden on a per-data source basis if the data source defines its own wget_flags
 #' @param wget_global_flags string: wget flags that will be applied to all data sources. These will be appended to either the data source wget flags (if specified), or the wget_default_flags
@@ -22,7 +22,7 @@ bb_global_atts <- function() c("wget_default_flags","wget_global_flags","http_pr
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
 #'     add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
-#' 
+#'
 #'   ## save to file
 #'   saveRDS(cf,file="my_config.rds")
 #'   ## load previously saved config
@@ -81,12 +81,12 @@ slice.bb_cf <- function(.data,...) {
     re_add_class <- function(z) {class(z) <- c("bb_cf",class(z)); z}
     re_add_class(copy_bb_attributes(NextMethod("["),x))
 }
-    
-    
+
+
 #' Add a new data source to a bowerbird configuration
-#' 
-#' @param cf tibble: configuration, as returned by \code{bb_config}
-#' @param source tibble: data source definition to add to the configuration, as returned by \code{bb_source}
+#'
+#' @param cf data.frame: configuration, as returned by \code{bb_config}
+#' @param source data.frame: data source definition to add to the configuration, as returned by \code{bb_source}
 #'
 #' @return configuration tibble
 #'
@@ -104,7 +104,7 @@ add <- function(cf,source) {
 
 #' Returns a configuration object's bowerbird-specific attributes
 #'
-#' @param cf tibble: configuration, as returned by \code{bb_config}
+#' @param cf data.frame: configuration, as returned by \code{bb_config}
 #'
 #' @return named list
 #'
@@ -137,7 +137,7 @@ bb_attributes_to_cols <- function(obj) {
 
 #' Produce summary of bowerbird configuration
 #'
-#' @param cf tibble: configuration, as returned by \code{bb_config}
+#' @param cf data.frame: configuration, as returned by \code{bb_config}
 #' @param file string: path to file to write summary to. A temporary file is used by default
 #' @param format string: produce HTML ("html") or Rmarkdown ("Rmd") file?
 #' @param inc_license logical: include each source's license and citation details?
@@ -163,7 +163,7 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_licen
     assert_that(is.flag(inc_auth))
     assert_that(is.flag(inc_size))
     assert_that(is.flag(inc_access_function))
-    assert_that(is.flag(inc_path))    
+    assert_that(is.flag(inc_path))
     format <- match.arg(tolower(format),c("html","rmd"))
 
     ## write summary as temporary Rmd file
@@ -176,11 +176,11 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_licen
     cf <- bb_attributes_to_cols(cf)
 
     cf <- cf %>% group_by_(~data_group,~name) %>% mutate_(source_urls=~paste(file.path(local_file_root,directory_from_url(source_url)),collapse=", ")) %>% ungroup() %>% select_(~-source_url,~-method,~-method_flags,~-postprocess) %>% unique()
-    
+
     cf$data_group[cf$data_group==""] <- NA ## so that arrange puts them last
     cf <- cf[order(cf$data_group), ]
     cf$data_group[is.na(cf$data_group)] <- ""
-    
+
     last_group <- "blah"
     for (k in 1:nrow(cf)) {
         if (last_group!=cf$data_group[k]) {
@@ -232,7 +232,7 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_licen
 #'
 #' Runs some basic sanity checks on a bowerbird configuration.
 #'
-#' @param cf tibble: configuration, as returned by \code{bb_config}
+#' @param cf data.frame: configuration, as returned by \code{bb_config}
 #'
 #' @return TRUE (invisibly) or throw error
 #'

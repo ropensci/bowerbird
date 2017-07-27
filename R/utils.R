@@ -88,7 +88,7 @@ dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is
 #'
 #' Files from each data source are stored locally in the associated directory.
 #'
-#' @param config tibble: configuration as returned by \code{\link{bb_config}}
+#' @param config data.frame: configuration as returned by \code{\link{bb_config}}
 #'
 #' @return character vector of directories
 #'

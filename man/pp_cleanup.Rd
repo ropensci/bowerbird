@@ -8,7 +8,7 @@ pp_cleanup(data_source, pattern, recursive = FALSE, ignore_case = FALSE,
   ...)
 }
 \arguments{
-\item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}
+\item{data_source}{data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}}
 
 \item{pattern}{string: regular expression, passed to \code{file.info}}
 

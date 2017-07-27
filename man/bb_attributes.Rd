@@ -7,7 +7,7 @@
 bb_attributes(cf)
 }
 \arguments{
-\item{cf}{tibble: configuration, as returned by \code{bb_config}}
+\item{cf}{data.frame: configuration, as returned by \code{bb_config}}
 }
 \value{
 named list

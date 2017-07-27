@@ -7,7 +7,7 @@
 earthdata_get(data_source, verbose = FALSE, local_dir_only = FALSE)
 }
 \arguments{
-\item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}
+\item{data_source}{data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}}
 
 \item{verbose}{logical: if TRUE, provide additional progress output}
 

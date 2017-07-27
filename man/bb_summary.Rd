@@ -9,7 +9,7 @@ bb_summary(cf, file = tempfile(fileext = ".html"), format = "html",
   inc_access_function = TRUE, inc_path = TRUE)
 }
 \arguments{
-\item{cf}{tibble: configuration, as returned by \code{bb_config}}
+\item{cf}{data.frame: configuration, as returned by \code{bb_config}}
 
 \item{file}{string: path to file to write summary to. A temporary file is used by default}
 

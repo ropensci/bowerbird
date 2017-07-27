@@ -1,6 +1,6 @@
 #' Fingerprint the files associated with a data source
 #'
-#' @param config tibble: configuration as returned by \code{\link{bb_config}}
+#' @param config data.frame: configuration as returned by \code{\link{bb_config}}
 #' @param hash string: algorithm to use to calculate file hashes: "md5", "sha1", or "none". Note that file hashing can be slow for large file collections
 #' @param verbose logical: if TRUE, provide additional progress output
 #'

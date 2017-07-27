@@ -1,7 +1,7 @@
 #' Handler for oceandata data sources
 #'
 #' @references https://oceandata.sci.gsfc.nasa.gov/
-#' @param data_source tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}
+#' @param data_source data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}
 #' @param verbose logical: if TRUE, provide additional progress output
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'

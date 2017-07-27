@@ -7,7 +7,7 @@
 data_source_dir(config)
 }
 \arguments{
-\item{config}{tibble: configuration as returned by \code{\link{bb_config}}}
+\item{config}{data.frame: configuration as returned by \code{\link{bb_config}}}
 }
 \value{
 character vector of directories

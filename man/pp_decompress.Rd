@@ -21,7 +21,7 @@ pp_bunzip2(...)
 pp_uncompress(...)
 }
 \arguments{
-\item{data_source}{tibble: single-row tibble defining a data source, e.g. as returned by \code{bb_source}}
+\item{data_source}{data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}}
 
 \item{delete}{logical: delete the zip files after extracting their contents?}
 
