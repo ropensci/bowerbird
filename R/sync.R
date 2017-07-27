@@ -27,7 +27,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
         sync_wrapper <- function(di) {
             tryCatch(do_sync_repo(config[di,],create_root,verbose,settings),
                 error=function(e) {
-                    cat("\nThere was a problem synchronizing the dataset:",config$name[di],".\nThe error message was:",e$message,"\n")
+                    message("There was a problem synchronizing the dataset:",config$name[di],".\nThe error message was:",e$message)
                 }
                 )
         }
@@ -55,9 +55,11 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             stop("local_file_root: ",this_dataset$local_file_root," does not exist. Either create it or run bb_sync with create_root=TRUE")
         }
     }
-    cat(sprintf("\n%s\nSynchronizing dataset: %s\n",base::date(),this_dataset$name))
-    if (!is.na(this_dataset$source_url)) cat(sprintf("Source URL %s\n",this_dataset$source_url))
-    cat("--------------------------------------------------------------------------------------------\n\n")
+    if (verbose) {
+        cat(sprintf("\n%s\nSynchronizing dataset: %s\n",base::date(),this_dataset$name))
+        if (!is.na(this_dataset$source_url)) cat(sprintf("Source URL %s\n",this_dataset$source_url))
+        cat("--------------------------------------------------------------------------------------------\n\n")
+    }
     setwd(this_dataset$local_file_root)
 
     ## set proxy env vars
@@ -84,15 +86,11 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
 
     ## do the main synchonization, usually directly with wget, otherwise with custom methods
     this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(this_dataset$source_url))
-    if (verbose) {
-        cat(sprintf(" this dataset path is: %s\n",this_path_no_trailing_sep))
-    }
+    if (verbose) cat(sprintf(" this dataset path is: %s\n",this_path_no_trailing_sep))
     ## build file list if postprocessing required
     if (length(pp)>0) {
         ## take snapshot of this directory before we start syncing
-        if (verbose) {
-            cat(sprintf(" building file list ... "))
-        }
+        if (verbose) cat(sprintf(" building file list ... "))
         file_list_before <- file.info(list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE)) ## full.names TRUE so that names are relative to current working directory
         if (file.exists(this_path_no_trailing_sep)) {
             ## in some cases this points directly to a file
@@ -100,16 +98,14 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             temp <- temp[!temp$isdir,]
             if (nrow(temp)>0) { file_list_before <- rbind(file_list_before,temp) }
         }
-        ##cat("file list before:\n")
-        ##cat(str(file_list_before),"\n")
         if (verbose) cat(sprintf("done.\n"))
     }
     ## run the method
     mth <- get_function_from_method(this_dataset$method[[1]])
-    do.call(mth,list(data_source=this_dataset))
+    do.call(mth,list(data_source=this_dataset,verbose=verbose))
     ## build file list if postprocessing required
     if (length(pp)>0) {
-        if (verbose) { cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep)) }
+        if (verbose) cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep))
         file_list_after <- file.info(list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE))
         if (file.exists(this_path_no_trailing_sep)) {
             ## in some cases this points directly to a file
@@ -117,8 +113,6 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             temp <- temp[!temp$isdir,]
             if (nrow(temp)>0) { file_list_after <- rbind(file_list_after,temp) }
         }
-        ##cat("file list after:\n")
-        ##cat(str(file_list_after),"\n")
         if (verbose) cat(sprintf("done.\n"))
     }
 
@@ -145,6 +139,6 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             }
         }
     }
-    cat(sprintf("\n%s dataset synchronization complete: %s\n",base::date(),this_dataset$name))
+    if (verbose) cat(sprintf("\n%s dataset synchronization complete: %s\n",base::date(),this_dataset$name))
     TRUE
 }
