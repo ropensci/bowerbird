@@ -105,25 +105,8 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         if (verbose) cat(sprintf("done.\n"))
     }
     ## run the method
-    mth <- this_dataset$method[[1]]
-    if (is.function(mth)) {
-        ## method function was passed directly
-        do.call(mth,list(data_source=this_dataset))
-    } else if (is.symbol(mth)) {
-        ## method function was passed as a symbol, e.g. by quote(fun)
-        do.call(eval(mth),list(data_source=this_dataset))
-    } else if (is.call(mth)) {
-        if (all.names(mth)[1]=="quote") {
-            ## call was constructed as e.g. enquote(fun)
-            do.call(eval(mth),list(data_source=this_dataset))
-        } else {
-            ## call was constructed as e.g. quote(fun())
-            ## may have provided some arguments already e.g. quote(fun(arg=var))
-            thisargs <- inject_args(mth,list(data_source=this_dataset))
-            do.call(all.names(mth)[1],thisargs)
-        }
-    }
-
+    mth <- get_function_from_method(this_dataset$method[[1]])
+    do.call(mth,list(data_source=this_dataset))
     ## build file list if postprocessing required
     if (length(pp)>0) {
         if (verbose) { cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep)) }
@@ -149,7 +132,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
                 do.call(qq,list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
             } else if (is.symbol(qq)) {
                 ## passed as symbol
-                do.call(eval(qq),list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))                
+                do.call(eval(qq),list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
             } else if (is.call(qq)) {
                 if (all.names(qq)[1]=="quote") {
                     ## call was constructed as e.g. enquote(fun)
