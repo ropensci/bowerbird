@@ -7,7 +7,7 @@
 oceandata_parameters(platform)
 }
 \arguments{
-\item{platform}{V for VIIRs, S for SeaWiFS, etc.}
+\item{platform}{V for VIIRS, S for SeaWiFS, etc.}
 }
 \description{
 rdname oceandata_parameter_map
