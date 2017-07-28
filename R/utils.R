@@ -58,9 +58,9 @@ inject_args <- function(qfun,xargs,extras_first=TRUE) {
         arglist <- xargs
         if (length(qfun)>1) for (k in 2:length(qfun)) arglist <- c(arglist,qfun[[k]])
     } else {
-        arglist=list()
+        arglist <- list()
         if (length(qfun)>1) for (k in 2:length(qfun)) arglist <- c(arglist,qfun[[k]])
-        arglist=c(arglist,xargs)
+        arglist <- c(arglist,xargs)
     }
     arglist ## call this as e.g. do.call(all.names(qfun)[1],arglist)
 }
