@@ -56,7 +56,7 @@ do_fingerprint <- function(this_dataset,hash,verbose,settings) {
     file_list <- file_list %>% mutate_(filename=~myfiles,data_source_id=~this_dataset$id) %>% select_(~filename,~data_source_id,~size,~mtime) %>% rename_(last_modified=~mtime)
     if (hash!="none") {
         if (verbose) cat(sprintf(" calculating file hashes ... "))
-        file_list$hash <- sapply(myfiles,file_hash,hash)
+        file_list$hash <- vapply(myfiles,file_hash,FUN.VALUE="",hash)
     }
     if (verbose) cat(sprintf("done.\n"))
     file_list

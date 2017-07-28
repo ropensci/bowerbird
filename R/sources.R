@@ -66,7 +66,7 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
         postprocess <- list()
     } else {
         if (is.function(postprocess) || is.call(postprocess) || is.symbol(postprocess)) postprocess <- list(postprocess)
-        ppchk <- is.list(postprocess) && all(sapply(postprocess,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function"))))
+        ppchk <- is.list(postprocess) && all(vapply(postprocess,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function")),FUN.VALUE=TRUE))
         if (!ppchk) stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
     }
     assert_that(is.character(source_url))

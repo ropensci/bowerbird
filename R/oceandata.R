@@ -236,7 +236,7 @@ oceandata_parameter_map <- function(platform,urlparm,error_no_match=FALSE) {
     parm_map <- parm_map[grepl(platform,parm_map$platform),]
     if (!missing(urlparm)) {
         if (nrow(parm_map)>0) {
-            this_parm_folder <- sapply(parm_map$pattern,function(z){ grepl(paste0("^",z,"$"),urlparm) })
+            this_parm_folder <- vapply(parm_map$pattern,function(z)grepl(paste0("^",z,"$"),urlparm),FUN.VALUE=TRUE)
             out <- unlist(parm_map$parameter[this_parm_folder])
         } else {
             out <- as.character(NULL)

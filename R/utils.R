@@ -113,7 +113,7 @@ data_source_dir <- function(config) {
             as.character(NA)
         }
     }
-    sapply(seq_len(nrow(config)),function(z)single_source_dir(config[z,]))
+    vapply(seq_len(nrow(config)),function(z)single_source_dir(config[z,]),FUN.VALUE="")
 }
 
 directory_from_url <- function(this_url) {

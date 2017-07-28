@@ -32,9 +32,9 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
                 }
                 )
         }
-        sync_ok <- sapply(seq_len(nrow(config)),sync_wrapper)
+        sync_ok <- vapply(seq_len(nrow(config)),sync_wrapper,FUN.VALUE=TRUE)
     } else {
-        sync_ok <- sapply(seq_len(nrow(config)),function(di) do_sync_repo(config[di,],create_root,verbose,settings))
+        sync_ok <- vapply(seq_len(nrow(config)),function(di) do_sync_repo(config[di,],create_root,verbose,settings),FUN.VALUE=TRUE)
     }
     sync_ok
 }
@@ -81,7 +81,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     } else {
         stop("expecting nested list for the postprocess argument")
     }
-    if (!(is.list(pp) && (length(pp)<1 || all(sapply(pp,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function")))))))
+    if (!(is.list(pp) && (length(pp)<1 || all(vapply(pp,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function")),FUN.VALUE=TRUE)))))
         stop("the postprocess argument should be a list of functions, calls, or symbols of functions")
 
     ## do the main synchonization, usually directly with wget, otherwise with custom methods
