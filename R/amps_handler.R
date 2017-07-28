@@ -39,7 +39,8 @@ amps_get <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
         x2 <- jump_to(x,n[i])
         files <- html_attr(Filter(accept,html_nodes(x2,"a")),"href")
         ## change into target directory, with no recursive fetch, to allow --timestamping on retrievals
-        cwd <- getwd()
+        settings <- save_current_settings()
+        on.exit({ restore_settings(settings) })
         setwd(target_dir)
         for (f in files) {
             ## loop through files to download
@@ -48,6 +49,5 @@ amps_get <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
             dummy$source_url <- file_url
             bb_wget(dummy,verbose=verbose)
         }
-        setwd(cwd)
     }
 }

@@ -18,9 +18,11 @@ aadc_eds_get <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
 
     ## clumsy way to get around AADC EDS file naming issues
     ## e.g. if we ask for http://data.aad.gov.au/eds/file/4494
-    ## then we get local file named data.aad.gov.au/eds/file/4494 (which is most likely a zipped file)
+    ## then we get local file named data.aad.gov.au/eds/file/4494
+    ## (which is most likely a zipped file)
     ## if we unzip this here, we get this zip's files mixed with others
-    ## change into subdirectory named by file_id of file, so that we don't get files mixed together in data.aad.gov.au/eds/file/
+    ## change into subdirectory named by file_id of file,
+    ## so that we don't get files mixed together in data.aad.gov.au/eds/file/
     ## note that this requires the "--recursive" flag NOT TO BE USED
     if (grepl("/download",data_source$source_url)) {
         this_file_id <- str_match(data_source$source_url,"/eds/(\\d+)/download$")[2]
@@ -30,12 +32,15 @@ aadc_eds_get <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
         this_file_id <- str_match(data_source$source_url,"/eds/file/(\\d+)/?$")[2]
         if (is.na(this_file_id)) stop("could not determine AADC EDS file_id")
         trailing_path <- file.path("data.aad.gov.au","eds","file",this_file_id)
-        if (!grepl("/$",data_source$source_url)) data_source$source_url <- paste0(data_source$source_url,"/") ## this form needs trailing /
+        if (!grepl("/$",data_source$source_url))
+            data_source$source_url <- paste0(data_source$source_url,"/") ## this form needs trailing /
     }
     if (local_dir_only) return(file.path(data_source$local_file_root,trailing_path))
     if (!file.exists(file.path(data_source$local_file_root,trailing_path))) {
         dir.create(file.path(data_source$local_file_root,trailing_path),recursive=TRUE)
     }
+    settings <- save_current_settings()
+    on.exit({ restore_settings(settings) })
     setwd(file.path(data_source$local_file_root,trailing_path))
     if (is.na(data_source$method_flags)) data_source$method_flags <- ""
     ## don't set the --content-disposition flag. It seems to cause problems with used with --timestamping on large files, and
@@ -52,7 +57,5 @@ aadc_eds_get <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
     if (grepl("--recursive$",data_source$method_flags,ignore.case=TRUE)) {
         data_source$method_flags <- str_trim(sub("--recursive$","",data_source$method_flags))
     }
-    ok <- bb_wget(data_source,verbose=verbose)
-    setwd(data_source$local_file_root)
-    ok
+    bb_wget(data_source,verbose=verbose)
 }

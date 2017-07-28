@@ -22,6 +22,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     blah <- wget_exe()
     ## save some current settings: path and proxy env values
     settings <- save_current_settings()
+    on.exit({ restore_settings(settings) })
     ## iterate through each dataset in turn
     if (catch_errors) {
         sync_wrapper <- function(di) {
@@ -35,7 +36,6 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     } else {
         sync_ok <- sapply(1:nrow(config),function(di) do_sync_repo(config[di,],create_root,verbose,settings))
     }
-    restore_settings(settings)
     sync_ok
 }
 
