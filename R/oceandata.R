@@ -110,7 +110,7 @@ oceandata_get <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
 #' @seealso \code{\link{oceandata_timeperiod_map}} \code{\link{oceandata_parameter_map}}
 #' @export
 oceandata_platform_map <- function(abbrev,error_no_match=FALSE) {
-    rawtext="abbrev,platform
+    rawtext <- "abbrev,platform
 Q,Aquarius
 C,CZCS
 H,HICO
@@ -121,7 +121,6 @@ O,OCTS
 S,SeaWiFS
 V,VIIRS"
     allp <- read.table(text=rawtext,stringsAsFactors=FALSE,sep=",",header=TRUE)
-    ##allp=list(Q="Aquarius",C="CZCS",H="HICO",M="MERIS",A="MODISA",T="MODIST",O="OCTS",S="SeaWiFS",V="VIIRS")
     if (missing(abbrev)) {
         allp
     } else {
