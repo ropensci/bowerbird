@@ -32,9 +32,9 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
                 }
                 )
         }
-        sync_ok <- sapply(1:nrow(config),sync_wrapper)
+        sync_ok <- sapply(seq_len(nrow(config)),sync_wrapper)
     } else {
-        sync_ok <- sapply(1:nrow(config),function(di) do_sync_repo(config[di,],create_root,verbose,settings))
+        sync_ok <- sapply(seq_len(nrow(config)),function(di) do_sync_repo(config[di,],create_root,verbose,settings))
     }
     sync_ok
 }
@@ -117,7 +117,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     }
 
     if (length(pp)>0) {
-        for (i in 1:length(pp)) {
+        for (i in seq_len(length(pp))) {
             ## postprocessing steps are passed as functions or calls
             qq <- pp[[i]]
             if (is.function(qq)) {

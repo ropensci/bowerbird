@@ -57,7 +57,7 @@ oceandata_get <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
     colnames(myfiles) <- c("checksum","filename")
     myfiles <- myfiles %>% dplyr::arrange_(~filename)
     ## for each file, download if needed and store in appropriate directory
-    for(idx in 1:nrow(myfiles)) {
+    for (idx in seq_len(nrow(myfiles))) {
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/",myfiles$filename[idx]) ## full URL
         this_fullfile <- oceandata_url_mapper(this_url) ## where local copy will go
         if (is.null(this_fullfile)) {

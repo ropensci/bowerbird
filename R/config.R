@@ -182,7 +182,7 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_licen
     cf$data_group[is.na(cf$data_group)] <- ""
 
     last_group <- "blah"
-    for (k in 1:nrow(cf)) {
+    for (k in seq_len(nrow(cf))) {
         if (last_group!=cf$data_group[k]) {
             cat("\n## Data group: ",cf$data_group[k],"\n",file=rmd_file,append=TRUE)
         }
