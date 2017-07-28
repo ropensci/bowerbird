@@ -23,7 +23,7 @@ amps_get <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
     if (local_dir_only) return(bb_wget(data_source,verbose=verbose,local_dir_only=TRUE))
     x <- html_session(data_source$source_url)
     n <- html_attr(html_nodes(x,"a"),"href")
-    idx <- which(sapply(n,function(z)grepl("[[:digit:]]+",z,ignore.case=TRUE))) ## links that are all digits
+    idx <- grepl("[[:digit:]]+",n,ignore.case=TRUE) ## links that are all digits
     accept <- function(z) grepl("\\.txt$",html_attr(z,"href"),ignore.case=TRUE) || grepl("d[12]_f(000|003|006|009|012|015|018|021|024|027)\\.grb$",html_attr(z,"href"),ignore.case=TRUE) ## which files to accept
     this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(data_source$source_url))
     for (i in idx) { ## loop through directories
