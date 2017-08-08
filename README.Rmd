@@ -18,6 +18,8 @@ knitr::opts_chunk$set(
 
 # Bowerbird
 
+<img align="right" src="https://rawgit.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/bowerbird.svg" />
+
 Often it's desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be necessary to have local copies. This is particularly common in ecology and the environmental sciences. Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
 
 ## Installing
