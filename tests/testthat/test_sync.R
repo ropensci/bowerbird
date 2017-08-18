@@ -4,8 +4,7 @@ test_that("bb_sync works with dry run on bb_wget",{
     skip_on_cran()
     temp_root <- tempdir()
     cf <- bb_config(local_file_root=temp_root,skip_downloads=TRUE)
-    cf <- cf %>% add(bb_sources(data_group="Sea surface temperature"))
-    cf$method_flags[grepl("Oceandata",cf$name)] <- "search=T20000322000060.L3m_MO_SST_sst_9km.nc" ## restrict to one file
+    cf <- cf %>% add(bb_example_sources())
     bb_sync(cf,catch_errors=FALSE)
 })
 

@@ -1,7 +1,7 @@
 context("data config")
 
 test_that("config save/load works", {
-    src <- bb_sources()
+    src <- bb_example_sources()
     cf <- add(bb_config("/dummy/file/root"),src)
     expect_s3_class(cf,"data.frame")
     tmpfile <- tempfile()
@@ -40,7 +40,7 @@ test_that("config operations preserve attributes", {
 test_that("config summary appears to work", {
     skip_if_not(rmarkdown::pandoc_available("1.12.3"),"skipping config summary test because pandoc is not available or is not a recent enough version")
     temp_root <- tempdir()
-    cf <- add(bb_config(temp_root),bb_sources())
+    cf <- add(bb_config(temp_root),bb_example_sources())
     summary_filename <- bb_summary(cf)
     expect_true(file.exists(summary_filename))
 })
