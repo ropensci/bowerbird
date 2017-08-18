@@ -4,7 +4,7 @@ test_that("bb_sync works with dry run on bb_wget",{
     skip_on_cran()
     temp_root <- tempdir()
     cf <- bb_config(local_file_root=temp_root,skip_downloads=TRUE)
-    cf <- cf %>% add(bb_example_sources())
+    cf <- cf %>% add(bb_example_sources()[1,])
     bb_sync(cf,catch_errors=FALSE)
 })
 

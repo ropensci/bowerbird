@@ -175,7 +175,7 @@ These are the data source definitions that are provided as part of the bowerbird
 
 ```{r echo=FALSE,message=FALSE,warning=FALSE,results="asis"}
 library(bowerbird)
-cf <- bb_config("/your/data/root/") %>% add(bb_sources())
+cf <- bb_config("/your/data/root/") %>% add(bb_example_sources())
 sf <- bb_summary(cf,format="rmd",inc_license=FALSE,inc_access_function=FALSE,inc_path=FALSE)
 stxt <- readLines(sf)
 stxt <- stxt[(grep("Last updated:",stxt)+1):length(stxt)]

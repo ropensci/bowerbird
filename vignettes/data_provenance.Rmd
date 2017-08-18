@@ -22,7 +22,7 @@ Despite this, bowerbird can provide some general information to assist with data
 Say we have a bowerbird config:
 ```{r}
 library(bowerbird)
-cf <- bb_config("/some/local/path") %>% add(bb_sources(data_group="Sea surface temperature"))
+cf <- bb_config("/some/local/path") %>% add(bb_example_sources()[1,])
 ```
 
 We can ask bowerbird where these files are stored locally:
@@ -39,7 +39,7 @@ So while this directory is not the *minimal* set of files needed to reproduce an
 
 Ascertaining exactly which files were used in a particular analysis is a task that is better handled by the code being used to do the file-reading and analysis, not by the repository-management (bowerbird) code.
 
-We are unaware of any general solutions that will keep track of the files used by an arbitrary chunk of R code. 
+We are unaware of any general solutions that will keep track of the files used by an arbitrary chunk of R code.
 
 The recordr package (https://github.com/NCEAS/recordr) comes close: it will collect info about which files were read or written. However, this only works for file types that have read functions implemented in recordr. At the time of writing, this does not cover netcdf files or other files typically used for environmental data, and so its application in that domain is likely to be of limited value.
 
