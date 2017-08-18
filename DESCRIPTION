@@ -16,9 +16,7 @@ Imports:
     openssl,
     R.utils,
     rmarkdown,
-    rvest,
-    stringr,
-    xml2
+    stringr
 LazyLoad: yes
 RoxygenNote: 6.0.1
 Suggests:
