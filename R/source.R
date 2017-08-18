@@ -1,14 +1,14 @@
-#' Define an external data source
+#' Define a data source
 #'
-#' @param id string: a unique identifier of the data source. If the data source has a DOI, use that. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one). The ID should be something that changes when the data set changes (is updated). A DOI is ideal for this
-#' @param name string: a unique name for the data source. This should be a human-readable but still concise name
+#' @param id string: (required) a unique identifier of the data source. If the data source has a DOI, use that. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one). The ID should be something that changes when the data set changes (is updated). A DOI is ideal for this
+#' @param name string: (required) a unique name for the data source. This should be a human-readable but still concise name
 #' @param description string: a description of the data source
-#' @param reference string: URL to the metadata record or home page of the data source
-#' @param source_url character vector: one or more source URLs
-#' @param citation string: details of the citation for the data source
-#' @param license string: description of the license. For standard licenses (e.g. creative commons) include the license descriptor ("CC-BY", etc)
+#' @param reference string: (required) URL to the metadata record or home page of the data source
+#' @param source_url character vector: one or more source URLs. Generally required, although some \code{method} functions might not require one
+#' @param citation string: (required) details of the citation for the data source
+#' @param license string: (required) description of the license. For standard licenses (e.g. creative commons) include the license descriptor ("CC-BY", etc)
 #' @param comment string: comments about the data source. If only part of the original data collection is mirrored, mention that here
-#' @param method function, call, or symbol: the function that handles the synchronisation process for this data source
+#' @param method function, call, or symbol: (required) the function that handles the synchronisation process for this data source
 #' @param method_flags string: flags to pass to the method. If method is \code{bb_wget}, these are wget flags. Run \code{wget("--help")} to get help on these flags
 #' @param postprocess function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
 #' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
@@ -19,7 +19,7 @@
 #' @param collection_size numeric: approximate disk space (in GB) used by the data collection, if known. If the data are supplied as compressed files, this size should reflect the disk space used after decompression. If the data_source definition contains multiple source_url entries, this size should reflect the overall disk space used by all combined
 #' @param warn_empty_auth logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided
 #'
-#' @return tibble
+#' @return data.frame
 #'
 #' @seealso \code{\link{bb_config}}
 #'
@@ -38,7 +38,7 @@
 #'    method=quote(bb_wget),
 #'    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
 #'    postprocess=quote(pp_unzip),
-#'    collection_size=620)
+#'    collection_size=0.6)
 #'
 #' cf <- bb_config("/my/repo/root")
 #' cf <- add(cf,my_source)
@@ -70,13 +70,6 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
         if (!ppchk) stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
     }
     assert_that(is.character(source_url))
-    if (check_method_is(method,aadc_eds_get)) {
-        slidx <- !grepl("/download$",source_url) & !grepl("/$",source_url)
-        if (any(slidx)) {
-            warning("each source_url for data sources using the aadc_eds_get method should have a trailing /. These will be added now")
-            source_url[slidx] <- paste0(source_url[slidx],"/")
-        }
-    }
     tibble(
         id=id,
         name=name,
@@ -97,37 +90,3 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
         collection_size=if (assert_that(is.numeric(collection_size) || is.na(collection_size))) collection_size)
 }
 
-
-
-#' Bowerbird configurations for various data sources
-#'
-#' @param name character vector: only return data sources with name or id matching these values
-#' @param data_group character vector: only return data sources belonging to these data groups
-#'
-#' @references See \code{reference} and \code{citation} field in each row of the returned tibble
-#'
-#' @return tibble
-#'
-#' @seealso \code{\link{bb_config}}
-#'
-#' @examples
-#' bb_sources()
-#'
-#' @export
-bb_sources <- function(name,data_group) {
-    if (!missing(name)) assert_that(is.character(name))
-    if (!missing(data_group)) assert_that(is.character(data_group))
-    out <- bind_rows(
-        if (missing(data_group) || (!missing(data_group) && "sea ice" %in% tolower(data_group))) sources_seaice(),
-        if (missing(data_group) || (!missing(data_group) && "topography" %in% tolower(data_group))) sources_topography(),
-        if (missing(data_group) || (!missing(data_group) && "sea surface temperature" %in% tolower(data_group))) sources_sst(),
-        if (missing(data_group) || (!missing(data_group) && "altimetry" %in% tolower(data_group))) sources_altimetry(),
-        if (missing(data_group) || (!missing(data_group) && "oceanographic" %in% tolower(data_group))) sources_oceanographic(),
-        if (missing(data_group) || (!missing(data_group) && any(c("ocean colour","ocean color") %in% tolower(data_group)))) sources_ocean_colour(),
-        if (missing(data_group) || (!missing(data_group) && "meteorological" %in% tolower(data_group))) sources_meteorological(),
-        if (missing(data_group) || (!missing(data_group) && "reanalysis" %in% tolower(data_group))) sources_reanalysis(),
-        if (missing(data_group) || (!missing(data_group) && "satellite imagery" %in% tolower(data_group))) sources_satellite_imagery()
-        )
-    if (!missing(name)) out <- out[tolower(out$name) %in% tolower(name) | tolower(out$id) %in% tolower(name),]
-    out
-}
