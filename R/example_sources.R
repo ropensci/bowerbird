@@ -83,18 +83,18 @@ bb_example_sources <- function() {
             collection_size=0.1,
             data_group="Sea ice",warn_empty_auth=FALSE),
         bb_source(
-            name = "Bathymetry of Lake Superior",
+            name="Bathymetry of Lake Superior",
             id="greatlakes-superior-bathymetry",
-            description = "A draft version of the Lake Superior Bathymetry was compiled as a component of a NOAA project to rescue Great Lakes lake floor geological and geophysical data, and make it more accessible to the public. No time frame has been set for completing bathymetric contours of Lake Superior, though a 3 arc-second (~90 meter cell size) grid is available.",
-            reference = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html",
-            source_url = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior/data/",
-            citation = "Publisher: DOC/NOAA/NESDIS/NCEI > National Centers for Environmental Information, NESDIS, NOAA, U.S. Department of Commerce",
-            license = "https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright",
+            description="A draft version of the Lake Superior Bathymetry was compiled as a component of a NOAA project to rescue Great Lakes lake floor geological and geophysical data, and make it more accessible to the public. No time frame has been set for completing bathymetric contours of Lake Superior, though a 3 arc-second (~90 meter cell size) grid is available.",
+            reference="https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html",
+            source_url="https://www.ngdc.noaa.gov/mgg/greatlakes/superior/data/",
+            citation="Publisher: DOC/NOAA/NESDIS/NCEI > National Centers for Environmental Information, NESDIS, NOAA, U.S. Department of Commerce",
+            license="https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright",
             method=quote(bb_wget),
-            method_flags = "--recursive --level=2 --accept-regex=\"/netcdf/\" --reject=\"index.html*\"",
+            method_flags="--recursive --level=2 --accept-regex=\"/netcdf/\" --reject=\"index.html*\"",
             comment="Only the netcdf format data are retrieved here - adjust the accept parameter in the method_flags to get other formats",
             postprocess=quote(pp_gunzip),
-            collection_size = 0.03,
-            data_group = "Topography")
+            collection_size=0.03,
+            data_group="Topography")
     )
 }
