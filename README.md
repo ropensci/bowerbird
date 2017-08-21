@@ -23,80 +23,13 @@ Usage
 
 ### Configuration
 
-Bowerbird must be configured to tell it which data sets to synchronise and where to save them on the local file system.
-
 Build up a configuration by first defining global options such as the destination on your local file system:
 
 ``` r
 cf <- bb_config(local_file_root="~/your/data/directory")
 ```
 
-Add data sources by choosing from those already defined in Bowerbird, or define your own (see below for guidance). Bowerbird comes with configurations for a range of data sources, mostly environmental (marine and Antarctic) in nature. A summary of the pre-configured sources is given at the end of this document.
-
-``` r
-cf <- cf %>% add(bb_sources("CERSAT SSM/I sea ice concentration"))
-```
-
-### Synchronisation
-
-Once the configuration has been defined, run the sync process:
-
-``` r
-bb_sync(cf)
-```
-
-Congratulations! You now have your own local copy of your chosen data sets.
-
-The pre-packaged environmental data sources can be read, manipulated, and plotted using a range of other R packages, including [RAADTools](https://github.com/AustralianAntarcticDivision/raadtools) and [raster](https://cran.r-project.org/package=raster).
-
-Nuances
--------
-
-### Choosing a data directory
-
-It's up to you where you want your data collection kept, and to provide that location to bowerbird. A common use case for bowerbird is maintaining a central data collection for multiple users, in which case that location is likely to be some sort of networked file share. However, if you are keeping a collection for your own use, you might like to look at <https://github.com/r-lib/rappdirs> to help find a suitable directory location.
-
-### Modifying data sources
-
-#### Authentication
-
-Some data providers require users to log in. These are indicated by the `authentication_note` column in the configuration table. For these sources, you will need to provide your user name and password, e.g.:
-
-``` r
-src <- bb_sources(name="CMEMS global gridded SSH reprocessed (1993-ongoing)")
-src$user <- "yourusername"
-src$password <- "yourpassword"
-cf <- add(cf,src)
-
-## or, using dplyr
-cf <- cf %>% add(bb_sources(name="CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
-                 mutate(user="yourusername",password="yourpassword"))
-```
-
-#### Reducing download sizes
-
-Sometimes you might only want part of a pre-configured data source. If the data source uses the `bb_wget` method, you can restrict what is downloaded by modifying the data source's `method_flags`, particularly the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` options. Be sure to leave the original method flags in place, unless you know what you are doing.
-
-For example, the CERSAT SSM/I sea ice concentration data are arranged in yearly directories, so it is fairly easy to restrict ourselves to, say, only the 2017 data:
-
-``` r
-cf <- cf %>% add(bb_sources("CERSAT SSM/I sea ice concentration") %>%
-                 mutate(method_flags=paste(method_flags,"--accept-regex=\"/2017/\"")))
-```
-
-See the notes below for further guidances on the accept/reject flags.
-
-Alternatively, for data sources that are divided into subdirectories, one could replace the whole-data-source `source_url` with one or more that point to specific yearly (or other) subdirectories. For example, the default `source_url` for the CERSAT sea ice data above is "<ftp://ftp.ifremer.fr/ifremer/cersat/products/gridded/psi-concentration/data/antarctic/daily/netcdf/*>" (with yearly subdirectories). So e.g. for 2016 and 2017 data we could do:
-
-``` r
-cf <- cf %>% add(bb_sources("CERSAT SSM/I sea ice concentration") %>%
-    mutate(source_url=c("ftp://ftp.ifremer.fr/ifremer/cersat/products/gridded/psi-concentration/data/antarctic/daily/netcdf/2016/*",
-                        "ftp://ftp.ifremer.fr/ifremer/cersat/products/gridded/psi-concentration/data/antarctic/daily/netcdf/2017/*")))
-```
-
-### Defining new data sources
-
-If the pre-packages data sources don't cover your needs, you can define your own using the `bb_source` function:
+Bowerbird must then be told which data sources to synchronize. Use the `bb_source()` function to define a data source:
 
 ``` r
 my_source <- bb_source(
@@ -108,13 +41,56 @@ my_source <- bb_source(
     source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
     license="CC-BY 4.0",
     method=quote(bb_wget),
-    method_flags="--recursive --level=inf --accept=zip --no-parent",
+    method_flags="--recursive",
     postprocess=quote(pp_unzip),
     collection_size=0.4,
     data_group="Topography")
 
-cf <- bb_config(local_file_root="/your/data/directory") %>%
+cf <- bb_config(local_file_root="/temp/data/bbtest") %>%
     add(my_source)
+```
+
+A few example data source definitions are provided as part of the bowerbird package --- see the list at the bottom of this document. Other packages (package names to be provided here) provide themed sets of data sources that can be used with bowerbird.
+
+### First-time synchronization
+
+Once the configuration has been defined, run the sync process:
+
+``` r
+bb_sync(cf)
+```
+
+Congratulations! You now have your own local copy of your chosen data sets.
+
+### Ongoing updates
+
+At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the `clobber` parameter set to 0 (do not overwrite existing files) or 1 (overwrite only if the remote file is newer than the local copy) then the sync process will run quite quickly because it will not need to re-download any data files.
+
+Nuances
+-------
+
+### Choosing a data directory
+
+It's up to you where you want your data collection kept, and to provide that location to bowerbird. A common use case for bowerbird is maintaining a central data collection for multiple users, in which case that location is likely to be some sort of networked file share. However, if you are keeping a collection for your own use, you might like to look at <https://github.com/r-lib/rappdirs> to help find a suitable directory location.
+
+### Defining data sources
+
+Data sources are defined using the `bb_source()` function:
+
+``` r
+my_source <- bb_source(
+    name="Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
+    id="10.4225/25/53D9B12E0F96E",
+    description="This is a compilation of all the processed multibeam bathymetry data that are publicly available in Geoscience Australia's data holding for the Macquarie Ridge.",
+    reference="http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_b9224f95-a416-07f8-e044-00144fdd4fa6/XYZ+multibeam+bathymetric+grids+of+the+Macquarie+Ridge",
+    citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
+    source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
+    license="CC-BY 4.0",
+    method=quote(bb_wget),
+    method_flags="--recursive",
+    postprocess=quote(pp_unzip),
+    collection_size=0.4,
+    data_group="Topography")
 ```
 
 Some particularly important components of this definition are:
@@ -127,9 +103,9 @@ Some particularly important components of this definition are:
 
 Some subtleties to bear in mind:
 
-1.  If the data source delivers compressed files, you will most likely want to decompress them after downloading. The postprocess options `pp_decompress`, `pp_unzip`, etc will do this for you. By default, these *do not* delete the compressed files after decompressing. The reason for this is so that on the next synchronisation run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronisation run.
+1.  If the data source delivers compressed files, you will most likely want to decompress them after downloading. The postprocess options `pp_decompress`, `pp_unzip`, etc will do this for you. By default, these *do not* delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.
 
-2.  You will almost certainly want to specify `--recursive` as part of the `method_flags`. The synchronisation process saves files relative to the `local_file_root` directory specified in the call to `bb_config`. If `--recursive` is specified, then wget creates a directory structure that follows the URL structure. For example, calling `wget --recursive http://www.somewhere.org/monkey/banana/dataset.zip` will save the local file `www.somewhere.org/monkey/banana/dataset.zip`. Thus, specifying `--recursive` will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your `local_file_root`.
+2.  You will almost certainly want to specify `--recursive` as part of the `method_flags`. The synchronization process saves files relative to the `local_file_root` directory specified in the call to `bb_config`. If `--recursive` is specified, then wget creates a directory structure that follows the URL structure. For example, calling `wget --recursive http://www.somewhere.org/monkey/banana/dataset.zip` will save the local file `www.somewhere.org/monkey/banana/dataset.zip`. Thus, specifying `--recursive` will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your `local_file_root`.
 
 3.  If you want to include/exclude certain files from being downloaded, use the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` flags. Note that `--accept` and `--reject` apply to file names (not the full path), and can be comma-separated lists of file name suffixes or patterns. The `--accept-regex` and `--reject-regex` flags apply to the full path but can only be a single regular expression each.
 
@@ -137,15 +113,51 @@ Some subtleties to bear in mind:
 
 5.  Several wget flags are set by the `bb_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flags is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
 
-#### Defining new data source methods
+### Modifying data sources
 
-Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `aadc_eds_get`, `oceandata_get`, or `earthdata_get`.
+#### Authentication
+
+Some data providers require users to log in. These are indicated by the `authentication_note` column in the configuration table. For these sources, you will need to provide your user name and password, e.g.:
+
+``` r
+mysrc <- subset(bb_example_sources(),name=="CMEMS global gridded SSH reprocessed (1993-ongoing)")
+mysrc$user <- "yourusername"
+mysrc$password <- "yourpassword"
+cf <- add(cf,mysrc)
+
+## or, using dplyr
+library(dplyr)
+mysrc <- bb_example_sources() %>%
+  filter(name=="CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
+  mutate(user="yourusername",password="yourpassword")
+cf <- cf %>% add(mysrc)
+```
+
+#### Reducing download sizes
+
+Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the `bb_wget` method, you can restrict what is downloaded by modifying the data source's `method_flags`, particularly the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.
+
+Say a particular data provider arranges their files in yearly directories. It would be fairly easy to restrict ourselves to, say, only the 2017 data:
+
+``` r
+mysrc <- mysrc %>%
+  mutate(method_flags=paste(method_flags,"--accept-regex=\"/2017/\""))
+cf <- cf %>% add(mysrc)
+```
+
+See the notes above for further guidances on the accept/reject flags.
+
+Alternatively, for data sources that are divided into subdirectories, one could replace the whole-data-source `source_url` with one or more that point to the specific subdirectories that are wanted.
+
+### Defining new data source methods
+
+Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `oceandata_get` or `earthdata_get`.
 
 ### Parallelized sync
 
-Running the sync in parallel is likely to speed the process up considerably (unless your bandwidth is the limiting factor).
+If you have many data sources in your configuration, running the sync in parallel is likely to speed the process up considerably (unless your bandwidth is the limiting factor).
 
-Note that a given data source may have several `source_url` values, in which case that data source will be expanded to multiple rows in the configuration object with one `source_url` per row (but all with the same data source `name` value). It is probably prudent to avoid running these in within-data-source replicates in parallel, because they might overlap in terms of the parts of the remote site that they are mirroring. Thus, it's probably best to split the configuration up by data source `name` and run those subsets in parallel, perhaps with (untested code):
+Note that a given data source may have several `source_url` values, in which case that data source will be expanded to multiple rows in the configuration object with one `source_url` per row (but all with the same data source `name` value). It is probably prudent to avoid running these in within-data-source replicates in parallel, because they might overlap in terms of the parts of the remote site that they are mirroring. Thus, it's probably best to split the configuration up by data source `name` or `id` and run those subsets in parallel, perhaps with (untested code):
 
 ``` r
 library(doFuture)
@@ -162,7 +174,7 @@ An aspect of reproducible research is knowing which data were used to perform an
 Data source summary
 -------------------
 
-These are the data source definitions that are provided as part of the bowerbird package.
+These are the example data source definitions that are provided as part of the bowerbird package.
 
 ### Data group: Altimetry
 
