@@ -4,11 +4,10 @@
 \alias{pp_cleanup}
 \title{Postprocessing: remove unwanted files}
 \usage{
-pp_cleanup(data_source, pattern, recursive = FALSE, ignore_case = FALSE,
-  ...)
+pp_cleanup(cfrow, pattern, recursive = FALSE, ignore_case = FALSE, ...)
 }
 \arguments{
-\item{data_source}{data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}}
+\item{cfrow}{data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})}
 
 \item{pattern}{string: regular expression, passed to \code{file.info}}
 

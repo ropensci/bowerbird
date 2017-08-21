@@ -1,6 +1,6 @@
 #' Mirror an external data source using the wget utility
 #'
-#' @param data_source data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}
+#' @param cfrow data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})
 #' @param verbose logical: if TRUE, provide additional progress output
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
@@ -9,41 +9,41 @@
 #' @seealso \code{\link{wget}}
 #'
 #' @export
-bb_wget <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
-    assert_that(is.data.frame(data_source))
-    assert_that(nrow(data_source)==1)
+bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
+    assert_that(is.data.frame(cfrow))
+    assert_that(nrow(cfrow)==1)
     assert_that(is.flag(verbose))
     assert_that(is.flag(local_dir_only))
 
     if (local_dir_only)
-        return(file.path(bb_attributes(data_source)$local_file_root,directory_from_url(data_source$source_url)))
+        return(file.path(bb_attributes(cfrow)$local_file_root,directory_from_url(cfrow$source_url)))
 
-    this_flags <- if (is.na(data_source$method_flags)) data_source$wget_default_flags else data_source$method_flags
+    this_flags <- if (is.na(cfrow$method_flags)) cfrow$wget_default_flags else cfrow$method_flags
     ## add wget_global_flags
-    if (!is.null(data_source$wget_global_flags)) this_flags <- paste(this_flags,data_source$wget_global_flags,sep=" ")
+    if (!is.null(cfrow$wget_global_flags)) this_flags <- paste(this_flags,cfrow$wget_global_flags,sep=" ")
     ## proxy-user and proxy-password flags
     ## this needs to decide whether it should use http_proxy_user or ftp_proxy_user info - exclude for now
-    #if (!grepl("proxy-user=",data_source$wget_flags)) {
-    #    data_source$wget_flags=paste(data_source$wget_flags,paste0("--proxy-user=",data_source$http_proxy_user),sep=" ")
+    #if (!grepl("proxy-user=",cfrow$wget_flags)) {
+    #    cfrow$wget_flags=paste(cfrow$wget_flags,paste0("--proxy-user=",cfrow$http_proxy_user),sep=" ")
     #}
-    #if (!grepl("proxy-password=",data_source$wget_flags)) {
-    #    data_source$wget_flags=paste(data_source$wget_flags,paste0("--proxy-password=",data_source$http_proxy_password),sep=" ")
+    #if (!grepl("proxy-password=",cfrow$wget_flags)) {
+    #    cfrow$wget_flags=paste(cfrow$wget_flags,paste0("--proxy-password=",cfrow$http_proxy_password),sep=" ")
                                         #}
     ## add flags for clobber behaviour
-    if (!is.null(data_source$clobber) && !is.na(data_source$clobber) && data_source$clobber %in% c(0,1)) {
-        if (data_source$clobber==0) {
+    if (!is.null(cfrow$clobber) && !is.na(cfrow$clobber) && cfrow$clobber %in% c(0,1)) {
+        if (cfrow$clobber==0) {
             this_flags <- resolve_wget_clobber_flags(this_flags,"--no-clobber")
         } else {
             this_flags <- resolve_wget_clobber_flags(this_flags,"--timestamping")
         }
     }
     ## add user, password flags
-    if (!is.na(data_source$user) && nchar(data_source$user)>0) this_flags <- paste0(this_flags," --user='",data_source$user,"'")
-    if (!is.na(data_source$password) && nchar(data_source$password)>0) this_flags <- paste0(this_flags," --password='",data_source$password,"'")
-    ##if (data_source$wait>0) this_flags <- paste0(this_flags," --wait=",data_source$wait)
+    if (!is.na(cfrow$user) && nchar(cfrow$user)>0) this_flags <- paste0(this_flags," --user='",cfrow$user,"'")
+    if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- paste0(this_flags," --password='",cfrow$password,"'")
+    ##if (cfrow$wait>0) this_flags <- paste0(this_flags," --wait=",cfrow$wait)
 
-    if (!is.null(data_source$skip_downloads) && data_source$skip_downloads) {
-        if (verbose) cat(sprintf(" skip_downloads is TRUE, not executing: wget %s %s\n",this_flags,data_source$source_url))
+    if (!is.null(cfrow$skip_downloads) && cfrow$skip_downloads) {
+        if (verbose) cat(sprintf(" skip_downloads is TRUE, not executing: wget %s %s\n",this_flags,cfrow$source_url))
         ok <- TRUE
     } else {
         if (sink.number()>0) {
@@ -52,11 +52,11 @@ bb_wget <- function(data_source,verbose=FALSE,local_dir_only=FALSE) {
             ## workaround: send output to temporary file so that we can capture it
             output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
             this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
-            ok <- wget(data_source$source_url,this_flags)
+            ok <- wget(cfrow$source_url,this_flags)
             ## now echo the contents of output_file to console, so that sink() captures it
             if (verbose) cat(readLines(output_file),sep="\n")
         } else {
-            ok <- wget(data_source$source_url,this_flags)
+            ok <- wget(cfrow$source_url,this_flags)
         }
     }
     ok==0

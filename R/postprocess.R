@@ -2,7 +2,7 @@
 #' \code{pp_unzip}, \code{pp_gunzip}, \code{pp_bunzip2}, and \code{pp_uncompress} are convenience wrappers around \code{pp_decompress} that specify the method.
 #' The dots argument indicates additional arguments that are passed to \code{pp_decompress}. Some may be passed by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
 #'
-#' @param data_source data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}
+#' @param cfrow data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})
 #' @param delete logical: delete the zip files after extracting their contents?
 #' @param method string: one of "unzip","gunzip","bunzip2","decompress"
 #' @param ... : additional arguments passed to \code{pp_decompress}
@@ -20,9 +20,9 @@
 #' }
 #'
 #' @export
-pp_decompress <- function(data_source,delete=FALSE,method,...) {
-    assert_that(is.data.frame(data_source))
-    assert_that(nrow(data_source)==1)
+pp_decompress <- function(cfrow,delete=FALSE,method,...) {
+    assert_that(is.data.frame(cfrow))
+    assert_that(nrow(cfrow)==1)
     assert_that(is.flag(delete))
     assert_that(is.string(method))
     method <- match.arg(tolower(method),c("unzip","gunzip","bunzip2","uncompress"))
@@ -36,7 +36,7 @@ pp_decompress <- function(data_source,delete=FALSE,method,...) {
                            stop("unrecognized decompression")
                            )
     if (delete) {
-        files_to_decompress <- list.files(directory_from_url(data_source$source_url),pattern=file_pattern,recursive=TRUE,ignore.case=ignore_case)
+        files_to_decompress <- list.files(directory_from_url(cfrow$source_url),pattern=file_pattern,recursive=TRUE,ignore.case=ignore_case)
         do_decompress_files(paste0(method,"_delete"),files=files_to_decompress)
     } else {
         file_list_before <- extract_xarg("file_list_before",xargs)
@@ -81,7 +81,7 @@ pp_uncompress <- function(...) pp_decompress(...,method="uncompress")
 
 #' Postprocessing: remove unwanted files
 #'
-#' @param data_source data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}
+#' @param cfrow data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})
 #' @param pattern string: regular expression, passed to \code{file.info}
 #' @param recursive logical: should the cleanup recurse into subdirectories?
 #' @param ignore_case logical: should pattern matching be case-insensitive?
@@ -98,9 +98,9 @@ pp_uncompress <- function(...) pp_decompress(...,method="uncompress")
 #' }
 #'
 #' @export
-pp_cleanup <- function(data_source,pattern,recursive=FALSE,ignore_case=FALSE,...) {
-    assert_that(is.data.frame(data_source))
-    assert_that(nrow(data_source)==1)
+pp_cleanup <- function(cfrow,pattern,recursive=FALSE,ignore_case=FALSE,...) {
+    assert_that(is.data.frame(cfrow))
+    assert_that(nrow(cfrow)==1)
     to_delete <- list.files(pattern=pattern,recursive=recursive,ignore.case=ignore_case)
     cat(sprintf("cleaning up files: %s\n",paste(to_delete,collapse=",")))
     unlink(to_delete)==0

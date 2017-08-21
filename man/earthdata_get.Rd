@@ -4,10 +4,10 @@
 \alias{earthdata_get}
 \title{Handler for files files served up through Earthdata providers}
 \usage{
-earthdata_get(data_source, verbose = FALSE, local_dir_only = FALSE)
+earthdata_get(cfrow, verbose = FALSE, local_dir_only = FALSE)
 }
 \arguments{
-\item{data_source}{data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}}
+\item{cfrow}{data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})}
 
 \item{verbose}{logical: if TRUE, provide additional progress output}
 

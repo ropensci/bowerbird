@@ -10,7 +10,7 @@
 \code{pp_unzip}, \code{pp_gunzip}, \code{pp_bunzip2}, and \code{pp_uncompress} are convenience wrappers around \code{pp_decompress} that specify the method.
 The dots argument indicates additional arguments that are passed to \code{pp_decompress}. Some may be passed by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.}
 \usage{
-pp_decompress(data_source, delete = FALSE, method, ...)
+pp_decompress(cfrow, delete = FALSE, method, ...)
 
 pp_unzip(...)
 
@@ -21,7 +21,7 @@ pp_bunzip2(...)
 pp_uncompress(...)
 }
 \arguments{
-\item{data_source}{data.frame: single-row data.frame defining a data source, e.g. as returned by \code{bb_source}}
+\item{cfrow}{data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})}
 
 \item{delete}{logical: delete the zip files after extracting their contents?}
 
