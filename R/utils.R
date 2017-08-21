@@ -102,13 +102,13 @@ dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is
 #' @export
 data_source_dir <- function(config) {
     assert_that(is.data.frame(config))
-    single_source_dir <- function(data_source) {
-        ## copy bb attrs into data_source, in case handler relies on them
-        data_source <- bb_attributes_to_cols(data_source)
+    single_source_dir <- function(cfrow) {
+        ## copy bb attrs into cfrow, in case handler relies on them
+        cfrow <- bb_attributes_to_cols(cfrow)
         mth <- NULL
-        try(mth <- get_function_from_method(data_source$method[[1]]),silent=TRUE)
+        try(mth <- get_function_from_method(cfrow$method[[1]]),silent=TRUE)
         if (is.function(mth)) {
-            do.call(mth,list(data_source=data_source,local_dir_only=TRUE))
+            do.call(mth,list(cfrow=cfrow,local_dir_only=TRUE))
         } else {
             as.character(NA)
         }

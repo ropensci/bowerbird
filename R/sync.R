@@ -102,7 +102,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     }
     ## run the method
     mth <- get_function_from_method(this_dataset$method[[1]])
-    do.call(mth,list(data_source=this_dataset,verbose=verbose))
+    do.call(mth,list(cfrow=this_dataset,verbose=verbose))
     ## build file list if postprocessing required
     if (length(pp)>0) {
         if (verbose) cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep))
@@ -123,17 +123,17 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             if (is.function(qq)) {
                 ## passed as function
                 ## evaluate with extra args
-                do.call(qq,list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                do.call(qq,list(cfrow=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
             } else if (is.symbol(qq)) {
                 ## passed as symbol
-                do.call(eval(qq),list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                do.call(eval(qq),list(cfrow=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
             } else if (is.call(qq)) {
                 if (all.names(qq)[1]=="quote") {
                     ## call was constructed as e.g. enquote(fun)
-                    do.call(eval(qq),list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                    do.call(eval(qq),list(cfrow=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
                 } else {
                     ## call was constructed as e.g. quote(fun()) or quote(fun(var=arg))
-                    thisargs <- inject_args(qq,list(data_source=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                    thisargs <- inject_args(qq,list(cfrow=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
                     do.call(all.names(qq)[1],thisargs)
                 }
             }
