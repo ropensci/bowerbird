@@ -52,7 +52,7 @@ cf <- bb_config(local_file_root="/temp/data/bbtest") %>%
     add(my_source)
 ```
 
-A few example data source definitions are provided as part of the bowerbird package --- see the list at the bottom of this document. Other packages (package names to be provided here) provide themed sets of data sources that can be used with bowerbird.
+A few example data source definitions are provided as part of the bowerbird package --- see the list at the bottom of this document. Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
 
 ### First-time synchronization
 
