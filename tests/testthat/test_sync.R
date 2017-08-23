@@ -8,6 +8,25 @@ test_that("bb_sync works with dry run on bb_wget",{
     bb_sync(cf,catch_errors=FALSE)
 })
 
+
+test_that("bb_sync is quiet when asked",{
+    skip_on_cran()
+    temp_root <- tempdir()
+    cf <- bb_config(local_file_root=temp_root)
+    myds <- bb_source(
+        id="bilbobaggins",
+        name="test",
+        description="blah",
+        reference= "http://some.where.org/",
+        citation="blah",
+        license="blah",
+        method=bb_wget,
+        source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd", ## just some file to download
+        method_flags="--recursive")
+    cf <- cf %>% add(myds)
+    expect_silent(bb_sync(cf,verbose=FALSE))
+})
+
 test_that("bb_sync works on oceandata",{
     skip("skipping bb_sync test temporarily") ## during dev
     skip_on_cran()

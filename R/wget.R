@@ -42,6 +42,11 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
     if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- paste0(this_flags," --password='",cfrow$password,"'")
     ##if (cfrow$wait>0) this_flags <- paste0(this_flags," --wait=",cfrow$wait)
 
+    if (!verbose) {
+        ## suppress wget's own output
+        if (!grepl("quiet",tolower(this_flags))) this_flags <- paste0(this_flags," --quiet")
+    }
+
     if (!is.null(cfrow$skip_downloads) && cfrow$skip_downloads) {
         if (verbose) cat(sprintf(" skip_downloads is TRUE, not executing: wget %s %s\n",this_flags,cfrow$source_url))
         ok <- TRUE
