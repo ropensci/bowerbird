@@ -97,7 +97,8 @@ wget <- function(url,flags,verbose=FALSE,stop_on_error=FALSE) {
         if (verbose) cat(sprintf(" executing wget %s %s\n",flags,url))
         ##system2(wget_exe(),args=paste(flags,url,sep=" "),...)
         ## sys expects flags as a char vector, not a string
-        flags <- strsplit(flags,"[[:space:]]+")[[1]]
+        if (is.string(flags))
+            flags <- strsplit(flags,"[[:space:]]+")[[1]]
         sys::exec_internal(wget_exe(),args=c(flags,url),error=stop_on_error)
     }
 }
