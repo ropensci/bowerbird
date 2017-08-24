@@ -94,12 +94,12 @@ wget <- function(url,flags,verbose=FALSE,stop_on_error=FALSE) {
     if (tolower(url) %in% c("-h","--help") || tolower(flags) %in% c("-h","--help")) {
         sys::exec_internal(wget_exe(),args="--help",error=stop_on_error)
     } else {
-        if (verbose) cat(sprintf(" executing wget %s %s\n",flags,url))
-        ##system2(wget_exe(),args=paste(flags,url,sep=" "),...)
         ## sys expects flags as a char vector, not a string
         if (is.string(flags))
             flags <- strsplit(flags,"[[:space:]]+")[[1]]
+        if (verbose) cat(sprintf(" executing wget %s %s\n",paste(flags,collapse=" "),url))
         sys::exec_internal(wget_exe(),args=c(flags,url),error=stop_on_error)
+        ##system2(wget_exe(),args=paste(flags,url,sep=" "),...)
     }
 }
 
