@@ -45,11 +45,20 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
     tries <- 0
     while (tries<3) {
         ## sometimes this takes a couple of attempts!
-        myfiles <- wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",paste0("-q --post-data=\"cksum=1&",cfrow$method_flags,"\" -O -"),stdout=TRUE)
-        if (is.null(attr(myfiles,"status")) || length(myfiles)>0) break
+        if (FALSE) {
+            ## system2 code
+            myfiles <- wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",paste0("-q --post-data=\"cksum=1&",cfrow$method_flags,"\" -O -"),stdout=TRUE)
+            if (is.null(attr(myfiles,"status")) || length(myfiles)>0) break
+        } else {
+            ## sys code
+            myfiles <- wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",paste0("-q --post-data=\"cksum=1&",cfrow$method_flags,"\" -O -"))
+            if (myfiles$status==0) break
+        }
         tries <- tries+1
     }
-    if (!is.null(attr(myfiles,"status")) && attr(myfiles,"status")!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",cfrow$method_flags,")")
+    ##if (!is.null(attr(myfiles,"status")) && attr(myfiles,"status")!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",cfrow$method_flags,")")
+    if (myfiles$status!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",cfrow$method_flags,")")
+    myfiles <- strsplit(rawToChar(myfiles$stdout),"\n")[[1]]
     ## catch "Sorry No Files Matched Your Query"
     if (any(grepl("no files matched your query",myfiles,ignore.case=TRUE))) stop("No files matched the supplied oceancolour data file search query (",cfrow$method_flags,")")
     myfiles <- myfiles[-c(1,2)] ## get rid of header line and blank line that follows it
@@ -57,6 +66,7 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
     colnames(myfiles) <- c("checksum","filename")
     myfiles <- myfiles %>% dplyr::arrange_(~filename)
     ## for each file, download if needed and store in appropriate directory
+    out <- TRUE
     for (idx in seq_len(nrow(myfiles))) {
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/",myfiles$filename[idx]) ## full URL
         this_fullfile <- oceandata_url_mapper(this_url) ## where local copy will go
@@ -83,9 +93,10 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
             ## note that if skip_downloads is TRUE, it will be passed through to bb_wget here
             dummy$method_flags <- paste("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
             dummy$source_url <- this_url
-            bb_wget(dummy,verbose=verbose)
+            out <- out && bb_wget(dummy,verbose=verbose)
             ## recalculate checksum so that cache gets updated
             ## but not if skip_downloads
+            ## TODO CHECK THIS CODE IS NEEDED - was this left over from memoized hashing?
             if (is.null(cfrow$skip_downloads) || !cfrow$skip_downloads)
                 blah <- file_hash(this_fullfile,"sha1")
         } else {
@@ -94,7 +105,7 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
             }
         }
     }
-
+    out
 }
 
 
