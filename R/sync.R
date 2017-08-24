@@ -28,7 +28,8 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
         sync_wrapper <- function(di) {
             tryCatch(do_sync_repo(config[di,],create_root,verbose,settings),
                 error=function(e) {
-                    message("There was a problem synchronizing the dataset:",config$name[di],".\nThe error message was:",e$message)
+                    message("There was a problem synchronizing the dataset: ",config$name[di],".\nThe error message was: ",e$message)
+                    FALSE
                 }
                 )
         }
