@@ -22,7 +22,7 @@ test_that("bb_sync is quiet when asked",{
         license="blah",
         method=bb_wget,
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd", ## just some file to download
-        method_flags="--recursive")
+        method_flags="--recursive --level=1")
     cf <- cf %>% add(myds)
     expect_silent(bb_sync(cf,verbose=FALSE))
 })
