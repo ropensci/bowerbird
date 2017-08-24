@@ -57,14 +57,14 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
             ## workaround: send output to temporary file so that we can capture it
             output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
             this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
-            ok <- wget(cfrow$source_url,this_flags)
+            ok <- wget(cfrow$source_url,this_flags)$status==0
             ## now echo the contents of output_file to console, so that sink() captures it
             if (verbose) cat(readLines(output_file),sep="\n")
         } else {
-            ok <- wget(cfrow$source_url,this_flags)
+            ok <- wget(cfrow$source_url,this_flags)$status==0
         }
     }
-    ok==0
+    ok
 }
 
 
@@ -128,6 +128,24 @@ install_wget <- function() {
         stop("Sorry, could not find the user APPDATA directory to install wget into")
     }
 }
+
+## #' Find the path to the wget executable, and optionally install it if necessary
+## #'
+## #' The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+## #'
+## #' @references https://eternallybored.org/misc/wget/current/wget.exe
+## #'
+## #' @return TRUE (invisibly) on success
+## #'
+## #' @examples
+## #' \dontrun{
+## #'   install_wget()
+## #' }
+## #'
+## #' @export
+## find_wget <- function(install=FALSE) {
+##
+## }
 
 ## internal function to return the wget executable name (possibly with path)
 ## if successfully identified, set the bowerbird$wget_exe option (and use this on subsequent calls)
