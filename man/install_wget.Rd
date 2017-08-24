@@ -7,7 +7,7 @@
 install_wget()
 }
 \value{
-TRUE (invisibly) on success
+TRUE on success
 }
 \description{
 The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)

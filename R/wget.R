@@ -57,11 +57,11 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
             ## workaround: send output to temporary file so that we can capture it
             output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
             this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
-            ok <- wget(cfrow$source_url,this_flags)$status==0
+            ok <- wget(cfrow$source_url,this_flags,verbose=verbose)$status==0
             ## now echo the contents of output_file to console, so that sink() captures it
             if (verbose) cat(readLines(output_file),sep="\n")
         } else {
-            ok <- wget(cfrow$source_url,this_flags)$status==0
+            ok <- wget(cfrow$source_url,this_flags,verbose=verbose)$status==0
         }
     }
     ok
@@ -75,7 +75,7 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
 #' @param url string: the URL to retrieve
 #' @param flags string: command-line flags to pass to wget
 #' @param verbose logical: print trace output?
-#' @param ... : additional paramaters passed to \code{exec_internal}
+#' @param stop_on_error logical: throw an error if the exit status is non-zero?
 #'
 #' @return the result of the system call
 #'
@@ -87,13 +87,18 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
 #' }
 #'
 # @export
-wget <- function(url,flags,verbose=FALSE,...) {
+wget <- function(url,flags,verbose=FALSE,stop_on_error=FALSE) {
     assert_that(is.string(url))
+    assert_that(is.flag(verbose))
+    assert_that(is.flag(stop_on_error))
     if (tolower(url) %in% c("-h","--help") || tolower(flags) %in% c("-h","--help")) {
-        sys::exec_internal(wget_exe(),args="--help",...)
+        sys::exec_internal(wget_exe(),args="--help",error=stop_on_error)
     } else {
         if (verbose) cat(sprintf(" executing wget %s %s\n",flags,url))
-        sys::exec_internal(wget_exe(),args=paste(flags,url,sep=" "),...)
+        ##system2(wget_exe(),args=paste(flags,url,sep=" "),...)
+        ## sys expects flags as a char vector, not a string
+        flags <- strsplit(flags,"[[:space:]]+")[[1]]
+        sys::exec_internal(wget_exe(),args=c(flags,url),error=stop_on_error)
     }
 }
 
@@ -103,7 +108,7 @@ wget <- function(url,flags,verbose=FALSE,...) {
 #'
 #' @references https://eternallybored.org/misc/wget/current/wget.exe
 #'
-#' @return TRUE (invisibly) on success
+#' @return TRUE on success
 #'
 #' @examples
 #' \dontrun{
@@ -123,28 +128,51 @@ install_wget <- function() {
         ok <- download.file("https://eternallybored.org/misc/wget/current/wget.exe",
                       destfile=file.path(path,"wget.exe"),
                       mode="wb")
-        invisible(ok==0)
+        ok==0
     } else {
         stop("Sorry, could not find the user APPDATA directory to install wget into")
     }
 }
 
-## #' Find the path to the wget executable, and optionally install it if necessary
+## #' Check that the wget executable exists, and optionally install it if not
 ## #'
-## #' The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+## #' Installation currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
 ## #'
 ## #' @references https://eternallybored.org/misc/wget/current/wget.exe
 ## #'
-## #' @return TRUE (invisibly) on success
+## #' @return TRUE on success
 ## #'
 ## #' @examples
 ## #' \dontrun{
-## #'   install_wget()
+## #'   have_wget <- check_wget()
+## #'   if (!have_wget && .Platform$OS.type=="windows")
+## #'     install_wget()
 ## #' }
 ## #'
 ## #' @export
-## find_wget <- function(install=FALSE) {
-##
+## check_wget <- function(install=FALSE) {
+##     bb_opts <- getOption("bowerbird")
+##     if (!is.null(bb_opts)) {
+##         if (!is.null(bb_opts$wget_exe)) return(bb_opts$wget_exe)
+##     } else {
+##         bb_opts <- list()
+##     }
+##     if (wget_test("wget")) {
+##         myexe <- "wget"
+##     } else {
+##         if (.Platform$OS.type=="windows") {
+##             myexe <- file.path(Sys.getenv("APPDATA"),"bowerbird","wget.exe")
+##             if (!wget_test(myexe)) {
+##                 return(FALSE)stop("could not find the wget executable. Try the install_wget() function, or install it yourself and ensure that it is on the path")
+##             }
+##         } else {
+##             return(FALSE)
+##             stop("could not find the wget executable")
+##         }
+##     }
+##     bb_opts$wget_exe <- myexe
+##     options(bowerbird=bb_opts)
+##     TRUE
 ## }
 
 ## internal function to return the wget executable name (possibly with path)

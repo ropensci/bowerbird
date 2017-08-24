@@ -4,7 +4,7 @@
 \alias{wget}
 \title{Make a wget call}
 \usage{
-wget(url, flags, verbose = FALSE, ...)
+wget(url, flags, verbose = FALSE, stop_on_error = FALSE)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
@@ -13,7 +13,7 @@ wget(url, flags, verbose = FALSE, ...)
 
 \item{verbose}{logical: print trace output?}
 
-\item{...}{: additional paramaters passed to \code{exec_internal}}
+\item{stop_on_error}{logical: throw an error if the exit status is non-zero?}
 }
 \value{
 the result of the system call
