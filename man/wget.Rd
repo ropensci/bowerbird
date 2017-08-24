@@ -13,13 +13,13 @@ wget(url, flags, verbose = FALSE, ...)
 
 \item{verbose}{logical: print trace output?}
 
-\item{...}{: additional paramaters passed to \code{system2}}
+\item{...}{: additional paramaters passed to \code{exec_internal}}
 }
 \value{
-the result of the system2 call
+the result of the system call
 }
 \description{
-Make a wget call
+The wget system call is made using the \code{exec_internal} function from the sys package.
 }
 \examples{
 \dontrun{
@@ -29,5 +29,5 @@ wget("--help")
 
 }
 \seealso{
-\code{\link{install_wget}} \code{\link{system2}}
+\code{\link{install_wget}}
 }

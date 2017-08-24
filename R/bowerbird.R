@@ -10,5 +10,6 @@
 #' @importFrom R.utils bunzip2 gunzip
 #' @importFrom rmarkdown render
 #' @importFrom stats na.omit
+#' @importFrom sys exec_wait
 #' @importFrom utils download.file read.table str unzip
 NULL

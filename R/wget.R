@@ -70,14 +70,16 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
 
 #' Make a wget call
 #'
+#' The wget system call is made using the \code{exec_internal} function from the sys package.
+#'
 #' @param url string: the URL to retrieve
 #' @param flags string: command-line flags to pass to wget
 #' @param verbose logical: print trace output?
-#' @param ... : additional paramaters passed to \code{system2}
+#' @param ... : additional paramaters passed to \code{exec_internal}
 #'
-#' @return the result of the system2 call
+#' @return the result of the system call
 #'
-#' @seealso \code{\link{install_wget}} \code{\link{system2}}
+#' @seealso \code{\link{install_wget}}
 #' @examples
 #' \dontrun{
 #' ## get help about wget command line parameters
@@ -88,10 +90,10 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
 wget <- function(url,flags,verbose=FALSE,...) {
     assert_that(is.string(url))
     if (tolower(url) %in% c("-h","--help") || tolower(flags) %in% c("-h","--help")) {
-        system2(wget_exe(),"--help",...)
+        sys::exec_internal(wget_exe(),args="--help",...)
     } else {
         if (verbose) cat(sprintf(" executing wget %s %s\n",flags,url))
-        system2(wget_exe(),paste(flags,url,sep=" "),...)
+        sys::exec_internal(wget_exe(),args=paste(flags,url,sep=" "),...)
     }
 }
 
@@ -127,7 +129,7 @@ install_wget <- function() {
     }
 }
 
-## helper function to return the wget executable name (possibly with path)
+## internal function to return the wget executable name (possibly with path)
 ## if successfully identified, set the bowerbird$wget_exe option (and use this on subsequent calls)
 wget_exe <- function() {
     bb_opts <- getOption("bowerbird")

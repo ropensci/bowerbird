@@ -1,7 +1,7 @@
 Package: bowerbird
 Type: Package
 Title: Keep a Collection of Sparkly Data Resources
-Version: 0.4.0
+Version: 0.4.1
 Authors@R: c(person("Ben","Raymond",email="ben.raymond@aad.gov.au",
   	   role=c("aut","cre")),
 	   person("Michael","Sumner",role="aut"))
@@ -16,7 +16,8 @@ Imports:
     openssl,
     R.utils,
     rmarkdown,
-    stringr
+    stringr,
+    sys
 LazyLoad: yes
 RoxygenNote: 6.0.1
 Suggests:
