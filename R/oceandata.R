@@ -50,8 +50,8 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
             myfiles <- wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",paste0("-q --post-data=\"cksum=1&",cfrow$method_flags,"\" -O -"),stdout=TRUE)
             if (is.null(attr(myfiles,"status")) || length(myfiles)>0) break
         } else {
-            ## sys code
-            myfiles <- wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",c("-q",paste0("--post-data=\"cksum=1&",cfrow$method_flags,"\""),"-O","-"))
+            ## sys code, nb don't quote args, will break on unix
+            myfiles <- wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",c("-q",paste0("--post-data=cksum=1&",cfrow$method_flags),"-O","-"))
             if (myfiles$status==0) break
         }
         tries <- tries+1
