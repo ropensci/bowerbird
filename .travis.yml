@@ -6,7 +6,7 @@ cache: packages
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y libarchive-dev
-  
+  - sudo apt-get install -y libarchive-dev libapparmor-dev
+
 after_success:
   - Rscript -e 'covr::codecov()'
