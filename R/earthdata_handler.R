@@ -21,7 +21,9 @@ earthdata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
     ## create this file
     if (!file.exists(cookies_file)) cat("",file=cookies_file)
     dummy <- cfrow
-    dummy$method_flags <- paste0("--http-user='",dummy$user,"' --http-password='",dummy$password,"' --load-cookies \"",cookies_file,"\" --save-cookies \"",cookies_file,"\" --keep-session-cookies --no-check-certificate --auth-no-challenge -r --reject \"index.html*\" -np -e robots=off ",dummy$method_flags," ",dummy$wget_global_flags)
+    mflags <- strsplit(dummy$method_flags,"[[:space:]]+")[[1]]
+    ##dummy$method_flags <- paste0("--http-user ",dummy$user," --http-password ",dummy$password," --load-cookies ",cookies_file," --save-cookies ",cookies_file," --keep-session-cookies --no-check-certificate --auth-no-challenge -r --reject index.html* -np -e robots=off ",dummy$method_flags)
+    dummy$method_flags <- list(c("--http-user",dummy$user,"--http-password",dummy$password,"--load-cookies",cookies_file,"--save-cookies",cookies_file,"--keep-session-cookies","--no-check-certificate","--auth-no-challenge","-e","robots=off",mflags))
     dummy$user <- NA_character_
     dummy$password <- NA_character_
     bb_wget(dummy,verbose=verbose)
