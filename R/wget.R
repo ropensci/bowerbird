@@ -80,7 +80,7 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
 #' The wget system call is made using the \code{exec_internal} function from the sys package.
 #'
 #' @param url string: the URL to retrieve
-#' @param flags string: command-line flags to pass to wget
+#' @param flags character: character vector of command-line flags to pass to wget
 #' @param verbose logical: print trace output?
 #' @param stop_on_error logical: throw an error if the exit status is non-zero?
 #'
@@ -94,8 +94,10 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
 #' }
 #'
 # @export
-wget <- function(url,flags,verbose=FALSE,stop_on_error=FALSE) {
+wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
     assert_that(is.string(url))
+    assert_that(is.character(flags))
+    if (length(flags)<1) flags <- ""
     assert_that(is.flag(verbose))
     assert_that(is.flag(stop_on_error))
     if (tolower(url) %in% c("-h","--help") || tolower(flags) %in% c("-h","--help")) {

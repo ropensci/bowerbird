@@ -4,12 +4,12 @@
 \alias{wget}
 \title{Make a wget call}
 \usage{
-wget(url, flags, verbose = FALSE, stop_on_error = FALSE)
+wget(url, flags = character(), verbose = FALSE, stop_on_error = FALSE)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
 
-\item{flags}{string: command-line flags to pass to wget}
+\item{flags}{character: character vector of command-line flags to pass to wget}
 
 \item{verbose}{logical: print trace output?}
 
