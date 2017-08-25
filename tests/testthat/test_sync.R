@@ -8,7 +8,6 @@ test_that("bb_sync works with dry run on bb_wget",{
     bb_sync(cf,catch_errors=FALSE)
 })
 
-
 test_that("bb_sync is quiet when asked",{
     skip_on_cran()
     temp_root <- tempdir()
@@ -53,3 +52,27 @@ test_that("bb_sync works on oceandata",{
     expect_gt(fi$size,6e6)
 })
 
+test_that("bb_sync works with a sink() call in place",{
+    skip_on_cran()
+    sinkfile <- tempfile()
+    sink(file=sinkfile)
+    myds <- bb_source(
+        id="bilbobaggins",
+        name="test",
+        description="blah",
+        reference= "http://some.where.org/",
+        citation="blah",
+        license="blah",
+        method=bb_wget,
+        source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd", ## just some file to download
+        method_flags="--recursive --level=1")
+    temp_root <- tempdir()
+    cf <- add(bb_config(local_file_root=temp_root,clobber=2),myds)
+    bb_sync(cf)
+    sink()
+    op <- readLines(sinkfile)
+    ## sink file should contain direct cat output "Synchronizing dataset: test"
+    expect_true(any(grepl("Synchronizing dataset: test",op)))
+    ## sink file should also contain wget output, e.g. "FINISHED"
+    expect_true(any(grepl("FINISHED",op)))
+})
