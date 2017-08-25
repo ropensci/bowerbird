@@ -145,6 +145,7 @@ wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
         ##    flags <- strsplit(flags,"[[:space:]]+")[[1]]
         flags <- flags_to_charvec(flags) ## will split string, or replace NA/"" with empty character vector
         ## for reasons that are far beyond me, some requests using "--recursive" do not work, but "-r" do ?!?
+        ## TODO: this is just to do with the args total length, can be removed once that bug in sys is fixed
         flags[flags=="--recursive"] <- "-r"
         if (verbose) cat(sprintf(" executing wget %s %s\n",paste(flags,collapse=" "),url))
         sys::exec_internal(wget_exe(),args=c(flags,url),error=stop_on_error)

@@ -143,7 +143,7 @@ Say a particular data provider arranges their files in yearly directories. It wo
 
 ``` r
 mysrc <- mysrc %>%
-  mutate(method_flags=paste(method_flags,"--accept-regex=\"/2017/\""))
+  mutate(method_flags=c(method_flags,"--accept-regex=/2017/"))
 cf <- cf %>% add(mysrc)
 ```
 

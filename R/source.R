@@ -9,7 +9,7 @@
 #' @param license string: (required) description of the license. For standard licenses (e.g. creative commons) include the license descriptor ("CC-BY", etc)
 #' @param comment string: comments about the data source. If only part of the original data collection is mirrored, mention that here
 #' @param method function, call, or symbol: (required) the function that handles the synchronisation process for this data source
-#' @param method_flags string: flags to pass to the method. If method is \code{bb_wget}, these are wget flags. Run \code{wget("--help")} to get help on these flags
+#' @param method_flags character vector: flags to pass to the method. If method is \code{bb_wget}, these are wget flags. Run \code{wget("--help")} to get help on these flags
 #' @param postprocess function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
 #' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
 #' @param user string: username, if required
@@ -36,7 +36,7 @@
 #'    license="",
 #'    comment="",
 #'    method=quote(bb_wget),
-#'    method_flags="--recursive --level=1 --accept=\"*bin*.zip,README.TXT\"",
+#'    method_flags=c("--recursive","--level=1","--accept=*bin*.zip,README.TXT"),
 #'    postprocess=quote(pp_unzip),
 #'    collection_size=0.6)
 #'
@@ -44,7 +44,7 @@
 #' cf <- add(cf,my_source)
 #'
 #' @export
-bb_source <- function(id,name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method=bb_wget,method_flags=NA_character_,postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,collection_size=NA,warn_empty_auth=TRUE) {
+bb_source <- function(id,name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method=bb_wget,method_flags=character(),postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,collection_size=NA,warn_empty_auth=TRUE) {
     assert_that(is.function(method) || (is.symbol(method) && exists(deparse(method),mode="function")) || is.call(method))
     if (missing(id) || !is_nonempty_string(id))
         stop("Each data source requires a non-empty id")
@@ -80,7 +80,7 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
         license=if (assert_that(is.string(license))) license,
         comment=if (assert_that(is.string(comment))) comment,
         method=list(method),
-        method_flags=if (assert_that(is.string(method_flags))) method_flags,
+        method_flags=if (assert_that(is.character(method_flags))) list(method_flags),
         postprocess=list(postprocess),
         authentication_note=if (assert_that(is.string(authentication_note))) authentication_note,
         user=if (assert_that(is.string(user))) user,

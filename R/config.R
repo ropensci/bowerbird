@@ -8,8 +8,8 @@ bb_global_atts <- function() c("wget_default_flags","wget_global_flags","http_pr
 #' The parameters provided here are repository-wide settings, and will be applied to all data sources that are subsequently added to the configuration.
 #'
 #' @param local_file_root string: location of data repository on local file system
-#' @param wget_default_flags string: default flags to be passed to wget. These are overridden on a per-data source basis if the data source defines its own wget_flags
-#' @param wget_global_flags string: wget flags that will be applied to all data sources. These will be appended to either the data source wget flags (if specified), or the wget_default_flags
+#' @param wget_default_flags character vector: default flags to be passed to wget. These are overridden on a per-data source basis if the data source defines its own wget_flags
+#' @param wget_global_flags character vector: wget flags that will be applied to all data sources. These will be appended to either the data source wget flags (if specified), or the wget_default_flags
 #' @param http_proxy string: URL of HTTP proxy to use e.g. 'http://your.proxy:8080' (NULL for no proxy)
 #' @param ftp_proxy string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)
 #' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)
@@ -30,10 +30,12 @@ bb_global_atts <- function() c("wget_default_flags","wget_global_flags","http_pr
 #' }
 #'
 #' @export
-bb_config <- function(local_file_root,wget_default_flags=NULL,wget_global_flags="--restrict-file-names=windows --progress=dot:giga",http_proxy=NULL,ftp_proxy=NULL,clobber=1,skip_downloads=FALSE) {
+bb_config <- function(local_file_root,wget_default_flags=character(),wget_global_flags=c("--restrict-file-names=windows","--progress=dot:giga"),http_proxy=NULL,ftp_proxy=NULL,clobber=1,skip_downloads=FALSE) {
     assert_that(is.string(local_file_root))
     assert_that(clobber %in% c(0,1,2))
     assert_that(is.flag(skip_downloads))
+    assert_that(is.character(wget_default_flags))
+    assert_that(is.character(wget_global_flags))
     cf <- tibble()
     attr(cf,"wget_default_flags") <- wget_default_flags
     attr(cf,"wget_global_flags") <- wget_global_flags
@@ -129,8 +131,13 @@ copy_bb_attributes <- function(to,from) {
 
 ## copy each bb attribute into column
 bb_attributes_to_cols <- function(obj) {
-    for (nm in bb_global_atts()) {
-        if (!is.null(attr(obj,nm))) obj[,nm] <- attr(obj,nm)
+    ## flags handled as lists
+    obj$wget_global_flags <- rep(list(attr(obj,"wget_global_flags")),nrow(obj))
+    obj$wget_default_flags <- rep(list(attr(obj,"wget_default_flags")),nrow(obj))
+    for (nm in setdiff(bb_global_atts(),c("wget_default_flags","wget_global_flags"))) {
+        thisatt <- attr(obj,nm)
+        if (!is.null(thisatt))
+            obj[,nm] <- thisatt
     }
     obj
 }

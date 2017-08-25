@@ -24,15 +24,18 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
 
     assert_that(is.data.frame(cfrow))
     assert_that(nrow(cfrow)==1)
-    assert_that(is.string(cfrow$method_flags))
+    assert_that(is.list(cfrow$method_flags))
+    assert_that(is.character(cfrow$method_flags[[1]]))
     assert_that(is.flag(verbose))
     assert_that(is.flag(local_dir_only))
+
+    method_flags <- cfrow$method_flags[[1]]
 
     if (local_dir_only) {
         ## highest-level dir
         out <- "oceandata.sci.gsfc.nasa.gov"
         ## refine by platform
-        this_search_spec <- sub("search=","",cfrow$method_flags)
+        this_search_spec <- sub("search=","",method_flags)
         this_platform <- oceandata_platform_map(substr(this_search_spec,1,1))
         if (nchar(this_platform)>0) out <- file.path(out,this_platform)
         if (grepl("L3m",this_search_spec)) {
@@ -47,20 +50,20 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
         ## sometimes this takes a couple of attempts!
         if (FALSE) {
             ## system2 code
-            myfiles <- wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",paste0("-q --post-data=\"cksum=1&",cfrow$method_flags,"\" -O -"),stdout=TRUE)
+            myfiles <- wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",paste0("-q --post-data=\"cksum=1&",method_flags,"\" -O -"),stdout=TRUE)
             if (is.null(attr(myfiles,"status")) || length(myfiles)>0) break
         } else {
             ## sys code, nb don't quote args, will break on unix
-            myfiles <- wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",c("-q",paste0("--post-data=cksum=1&",cfrow$method_flags),"-O","-"))
+            myfiles <- wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",c("-q",paste0("--post-data=cksum=1&",method_flags),"-O","-"))
             if (myfiles$status==0) break
         }
         tries <- tries+1
     }
     ##if (!is.null(attr(myfiles,"status")) && attr(myfiles,"status")!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",cfrow$method_flags,")")
-    if (myfiles$status!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",cfrow$method_flags,")")
+    if (myfiles$status!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",method_flags,")")
     myfiles <- strsplit(rawToChar(myfiles$stdout),"\n")[[1]]
     ## catch "Sorry No Files Matched Your Query"
-    if (any(grepl("no files matched your query",myfiles,ignore.case=TRUE))) stop("No files matched the supplied oceancolour data file search query (",cfrow$method_flags,")")
+    if (any(grepl("no files matched your query",myfiles,ignore.case=TRUE))) stop("No files matched the supplied oceancolour data file search query (",method_flags,")")
     myfiles <- myfiles[-c(1,2)] ## get rid of header line and blank line that follows it
     myfiles <- tbl_df(do.call(rbind,lapply(myfiles,function(z)strsplit(z,"[[:space:]]+")[[1]]))) ## split checksum and file name from each line
     colnames(myfiles) <- c("checksum","filename")
@@ -91,7 +94,8 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
         if (download_this) {
             dummy <- cfrow
             ## note that if skip_downloads is TRUE, it will be passed through to bb_wget here
-            dummy$method_flags <- paste("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
+            ##dummy$method_flags <- paste("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
+            dummy$method_flags <- list(c("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories"))
             dummy$source_url <- this_url
             out <- out && bb_wget(dummy,verbose=verbose)
             ## recalculate checksum so that cache gets updated

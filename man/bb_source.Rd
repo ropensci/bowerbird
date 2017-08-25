@@ -6,7 +6,7 @@
 \usage{
 bb_source(id, name, description = NA_character_, reference, source_url,
   citation, license, comment = NA_character_, method = bb_wget,
-  method_flags = NA_character_, postprocess,
+  method_flags = character(), postprocess,
   authentication_note = NA_character_, user = NA_character_,
   password = NA_character_, access_function = NA_character_,
   data_group = NA_character_, collection_size = NA,
@@ -31,7 +31,7 @@ bb_source(id, name, description = NA_character_, reference, source_url,
 
 \item{method}{function, call, or symbol: (required) the function that handles the synchronisation process for this data source}
 
-\item{method_flags}{string: flags to pass to the method. If method is \code{bb_wget}, these are wget flags. Run \code{wget("--help")} to get help on these flags}
+\item{method_flags}{character vector: flags to pass to the method. If method is \code{bb_wget}, these are wget flags. Run \code{wget("--help")} to get help on these flags}
 
 \item{postprocess}{function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied}
 
@@ -68,7 +68,7 @@ my_source <- bb_source(
    license="",
    comment="",
    method=quote(bb_wget),
-   method_flags="--recursive --level=1 --accept=\\"*bin*.zip,README.TXT\\"",
+   method_flags=c("--recursive","--level=1","--accept=*bin*.zip,README.TXT"),
    postprocess=quote(pp_unzip),
    collection_size=0.6)
 
