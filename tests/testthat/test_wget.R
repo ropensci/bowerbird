@@ -5,7 +5,8 @@ test_that("wget_install works and wget_exe() finds something", {
         expect_error(install_wget())
         expect_true(is.string(wget_exe()))
     } else {
-        install_wget()
+        wge <- install_wget()
+        expect_true(file.exists(wge))
         expect_true(is.string(wget_exe()))
     }
 })
