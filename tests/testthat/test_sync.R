@@ -27,7 +27,6 @@ test_that("bb_sync is quiet when asked",{
 })
 
 test_that("bb_sync works on oceandata",{
-    skip("skipping bb_sync test temporarily") ## during dev
     skip_on_cran()
     ods <- bb_source(
         id="bilbobaggins",
