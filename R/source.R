@@ -70,6 +70,8 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
         if (!ppchk) stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
     }
     assert_that(is.character(source_url))
+    if (is.null(method_flags) || (!is.character(method_flags) && length(method_flags)<1) || (is.character(method_flags) && length(method_flags)==1 && !nzchar(method_flags)))
+        method_flags <- character()
     tibble(
         id=id,
         name=name,
