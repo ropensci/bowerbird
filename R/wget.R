@@ -81,7 +81,7 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
     if (!verbose) {
         ## suppress wget's own output
         ##if (!grepl("quiet",tolower(this_flags))) this_flags <- paste0(this_flags," --quiet")
-        if (!grepl("quiet",tolower(this_flags))) this_flags <- c(this_flags,"--quiet")
+        if (!any(grepl("quiet",tolower(this_flags)))) this_flags <- c(this_flags,"--quiet")
     }
 
     if (!is.null(cfrow$skip_downloads) && cfrow$skip_downloads) {
