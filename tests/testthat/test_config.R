@@ -55,7 +55,7 @@ test_that("local directory looks right",{
         source_url="http://some.place.com/some/path/",
         license="blah",
         method=bb_wget,
-        method_flags=c(),
+        method_flags=character(),
         data_group="blah")
     cf <- bb_config("/some/local/path") %>% add(src)
     temp <- data_source_dir(cf[1,])
