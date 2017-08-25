@@ -19,7 +19,7 @@ test_that("oceandata_get works",{
     temp_root <- tempdir()
     ocf <- add(bb_config(local_file_root="irrelevant_here"),ods)
     ## will be calling oceandata_get directly, not via bb_sync, so do some extra steps
-    for (nm in bb_global_atts()) { if (!is.null(attr(ocf,nm))) ocf[1,nm] <- attr(ocf,nm) }
+    ocf <- bowerbird:::bb_attributes_to_cols(ocf)
     cwd <- getwd()
     setwd(temp_root)
     oceandata_get(ocf)
