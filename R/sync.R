@@ -103,7 +103,10 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     }
     ## run the method
     mth <- get_function_from_method(this_dataset$method[[1]])
-    do.call(mth,list(cfrow=this_dataset,verbose=verbose))
+    ok <- do.call(mth,list(cfrow=this_dataset,verbose=verbose))
+    if (is.na(ok)) {
+        warning("TODO: should postprocess run if process was interrupted by user?")
+    }
     ## build file list if postprocessing required
     if (length(pp)>0) {
         if (verbose) cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep))
@@ -141,5 +144,5 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         }
     }
     if (verbose) cat(sprintf("\n%s dataset synchronization complete: %s\n",base::date(),this_dataset$name))
-    TRUE
+    ok
 }
