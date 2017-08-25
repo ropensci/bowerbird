@@ -7,7 +7,7 @@
 install_wget()
 }
 \value{
-TRUE on success
+the path to the installed executable
 }
 \description{
 Currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)

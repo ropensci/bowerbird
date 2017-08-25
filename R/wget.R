@@ -158,7 +158,7 @@ wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
 #'
 #' @references https://eternallybored.org/misc/wget/current/wget.exe
 #'
-#' @return TRUE on success
+#' @return the path to the installed executable
 #'
 #' @examples
 #' \dontrun{
@@ -167,7 +167,7 @@ wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
 #'
 #' @export
 install_wget <- function() {
-    if (.Platform$OS.type!="windows")
+    if (tolower(.Platform$OS.type)!="windows")
         stop("install_wget only supports windows platforms")
     ## NOTE, could also use e.g. https://github.com/r-lib/rappdirs to find this directory
     path <- Sys.getenv("APPDATA")
@@ -178,7 +178,11 @@ install_wget <- function() {
         ok <- download.file("https://eternallybored.org/misc/wget/current/wget.exe",
                       destfile=file.path(path,"wget.exe"),
                       mode="wb")
-        ok==0
+        if (ok==0) {
+            file.path(path,"wget.exe")
+        } else {
+            stop("Sorry, could not install wget")
+        }
     } else {
         stop("Sorry, could not find the user APPDATA directory to install wget into")
     }
