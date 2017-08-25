@@ -57,11 +57,11 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
             ## workaround: send output to temporary file so that we can capture it
             output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
             this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
-            syscall_obj <- wget(cfrow$source_url,this_flags,verbose=verbose)$status==0
+            syscall_obj <- wget(cfrow$source_url,this_flags,verbose=verbose)
             ## now echo the contents of output_file to console, so that sink() captures it
             if (verbose) cat(readLines(output_file),sep="\n")
         } else {
-            syscall_obj <- wget(cfrow$source_url,this_flags,verbose=verbose)$status==0
+            syscall_obj <- wget(cfrow$source_url,this_flags,verbose=verbose)
         }
         ## now return an appropriate indicator of success
         if (is.null(syscall_obj)) {
@@ -112,9 +112,9 @@ wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
     }
 }
 
-#' Helper function to install wget on Windows
+#' Helper function to install wget
 #'
-#' The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+#' Currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
 #'
 #' @references https://eternallybored.org/misc/wget/current/wget.exe
 #'
@@ -210,13 +210,14 @@ wget_exe <- function() {
     options(bowerbird=bb_opts)
     myexe
 }
-## test a potential wget executable path
+
+## internal: test a potential wget executable path
 wget_test <- function(wget_path) {
     try({system(paste0(wget_path," --help"),intern=TRUE);return(TRUE)},silent=TRUE)
     FALSE
 }
 
-
+## internal: merge two sets of wget flags
 resolve_wget_clobber_flags <- function(primary_flags,secondary_flags) {
     wgf <- str_split(primary_flags,"[ ]+")[[1]]
     secondary_flags <- str_split(secondary_flags,"[ ]+")[[1]]

@@ -2,7 +2,7 @@
 % Please edit documentation in R/wget.R
 \name{install_wget}
 \alias{install_wget}
-\title{Helper function to install wget on Windows}
+\title{Helper function to install wget}
 \usage{
 install_wget()
 }
@@ -10,7 +10,7 @@ install_wget()
 TRUE on success
 }
 \description{
-The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+Currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
 }
 \examples{
 \dontrun{
