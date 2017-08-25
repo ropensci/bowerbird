@@ -1,3 +1,29 @@
+## internal: take flags and convert to character vector
+## flags can either be a string (will be split on white spaces)
+## or list (expect single element, which is a character vector) - as would get from tibble list column
+## or character vector (convert to empty character vector if null, NA, or empty string, otherwise return as is)
+flags_to_charvec <- function(fl) {
+    if (is.list(fl)) {
+        fl[[1]]
+    } else if (is.null(fl) || length(fl)<1) {
+        character()
+    } else if (is.character(fl)) {
+        if (is.string(fl)) {
+            if (is.null(fl) || is.na(fl) || !nzchar(fl)) {
+                character()
+            } else {
+                ## split on whitespaces
+                strsplit(fl,"[[:space:]]+")[[1]]
+            }
+        } else {
+            fl
+        }
+    } else {
+        stop("expecting flags as character vector or list")
+    }
+}
+
+
 #' Mirror an external data source using the wget utility
 #'
 #' @param cfrow data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})
@@ -18,9 +44,17 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
     if (local_dir_only)
         return(file.path(bb_attributes(cfrow)$local_file_root,directory_from_url(cfrow$source_url)))
 
-    this_flags <- if (is.na(cfrow$method_flags)) cfrow$wget_default_flags else cfrow$method_flags
+    this_flags <- flags_to_charvec(cfrow$method_flags)
+    if (length(this_flags)<1) {
+        this_flags <- flags_to_charvec(cfrow$wget_default_flags)
+    }
+    ##this_flags <- if (is.na(cfrow$method_flags)) cfrow$wget_default_flags else cfrow$method_flags
     ## add wget_global_flags
-    if (!is.null(cfrow$wget_global_flags)) this_flags <- paste(this_flags,cfrow$wget_global_flags,sep=" ")
+    ##if (!is.null(cfrow$wget_global_flags)) this_flags <- paste(this_flags,cfrow$wget_global_flags,sep=" ")
+    gflags <- flags_to_charvec(cfrow$wget_global_flags)
+    if (length(gflags)>0)
+        this_flags <- c(this_flags,gflags)
+
     ## proxy-user and proxy-password flags
     ## this needs to decide whether it should use http_proxy_user or ftp_proxy_user info - exclude for now
     #if (!grepl("proxy-user=",cfrow$wget_flags)) {
@@ -38,17 +72,20 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
         }
     }
     ## add user, password flags
-    if (!is.na(cfrow$user) && nchar(cfrow$user)>0) this_flags <- paste0(this_flags," --user='",cfrow$user,"'")
-    if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- paste0(this_flags," --password='",cfrow$password,"'")
+    ##if (!is.na(cfrow$user) && nchar(cfrow$user)>0) this_flags <- paste0(this_flags," --user='",cfrow$user,"'")
+    if (!is.na(cfrow$user) && nchar(cfrow$user)>0) this_flags <- c(this_flags,"--user",cfrow$user)
+    ##if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- paste0(this_flags," --password='",cfrow$password,"'")
+    if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- c(this_flags,"--password",cfrow$password)
     ##if (cfrow$wait>0) this_flags <- paste0(this_flags," --wait=",cfrow$wait)
 
     if (!verbose) {
         ## suppress wget's own output
-        if (!grepl("quiet",tolower(this_flags))) this_flags <- paste0(this_flags," --quiet")
+        ##if (!grepl("quiet",tolower(this_flags))) this_flags <- paste0(this_flags," --quiet")
+        if (!grepl("quiet",tolower(this_flags))) this_flags <- c(this_flags,"--quiet")
     }
 
     if (!is.null(cfrow$skip_downloads) && cfrow$skip_downloads) {
-        if (verbose) cat(sprintf(" skip_downloads is TRUE, not executing: wget %s %s\n",this_flags,cfrow$source_url))
+        if (verbose) cat(sprintf(" skip_downloads is TRUE, not executing: wget %s %s\n",paste(this_flags,collapse=" "),cfrow$source_url))
         ok <- TRUE
     } else {
         if (sink.number()>0) {
@@ -56,7 +93,8 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
             ## sink() won't catch the output of system commands, which means we miss stuff in our log
             ## workaround: send output to temporary file so that we can capture it
             output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
-            this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
+            ##this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
+            this_flags <- c("-o",output_file,this_flags)
             syscall_obj <- wget(cfrow$source_url,this_flags,verbose=verbose)
             ## now echo the contents of output_file to console, so that sink() captures it
             if (verbose) cat(readLines(output_file),sep="\n")
@@ -97,15 +135,15 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
 wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
     assert_that(is.string(url))
     assert_that(is.character(flags))
-    if (length(flags)<1) flags <- ""
     assert_that(is.flag(verbose))
     assert_that(is.flag(stop_on_error))
     if (tolower(url) %in% c("-h","--help") || tolower(flags) %in% c("-h","--help")) {
         sys::exec_internal(wget_exe(),args="--help",error=stop_on_error)
     } else {
         ## sys expects flags as a char vector, not a string
-        if (is.string(flags))
-            flags <- strsplit(flags,"[[:space:]]+")[[1]]
+        ##if (is.string(flags))
+        ##    flags <- strsplit(flags,"[[:space:]]+")[[1]]
+        flags <- flags_to_charvec(flags) ## will split string, or replace NA/"" with empty character vector
         if (verbose) cat(sprintf(" executing wget %s %s\n",paste(flags,collapse=" "),url))
         sys::exec_internal(wget_exe(),args=c(flags,url),error=stop_on_error)
         ##system2(wget_exe(),args=paste(flags,url,sep=" "),...)
@@ -218,9 +256,12 @@ wget_test <- function(wget_path) {
 }
 
 ## internal: merge two sets of wget flags
+## take flags as either character vector, single-element list of character vector, space-separated string (as per flags_to_charvec)
 resolve_wget_clobber_flags <- function(primary_flags,secondary_flags) {
-    wgf <- str_split(primary_flags,"[ ]+")[[1]]
-    secondary_flags <- str_split(secondary_flags,"[ ]+")[[1]]
+    ##wgf <- str_split(primary_flags,"[ ]+")[[1]]
+    ##secondary_flags <- str_split(secondary_flags,"[ ]+")[[1]]
+    wgf <- flags_to_charvec(primary_flags)
+    secondary_flags <- flags_to_charvec(secondary_flags)
     for (thisflag in setdiff(secondary_flags,wgf)) {
         switch(thisflag,
                "-N"=,
@@ -229,7 +270,8 @@ resolve_wget_clobber_flags <- function(primary_flags,secondary_flags) {
                "--no-clobber"={ if (! any(c("--timestamping","-N") %in% wgf)) wgf <- c(wgf,thisflag) },
                wgf <- c(wgf,thisflag))
     }
-    paste(wgf,sep="",collapse=" ")
+    ##paste(wgf,sep="",collapse=" ")
+    wgf
 }
 
 
