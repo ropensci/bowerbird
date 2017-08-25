@@ -57,11 +57,18 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
             ## workaround: send output to temporary file so that we can capture it
             output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
             this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
-            ok <- wget(cfrow$source_url,this_flags,verbose=verbose)$status==0
+            syscall_obj <- wget(cfrow$source_url,this_flags,verbose=verbose)$status==0
             ## now echo the contents of output_file to console, so that sink() captures it
             if (verbose) cat(readLines(output_file),sep="\n")
         } else {
-            ok <- wget(cfrow$source_url,this_flags,verbose=verbose)$status==0
+            syscall_obj <- wget(cfrow$source_url,this_flags,verbose=verbose)$status==0
+        }
+        ## now return an appropriate indicator of success
+        if (is.null(syscall_obj)) {
+            ## no object returned - this happens if process is interrupted by the user on unix
+            ok <- NA
+        } else {
+            ok <- syscall_obj$status==0
         }
     }
     ok
