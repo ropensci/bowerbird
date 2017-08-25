@@ -66,7 +66,7 @@ bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
         ## now return an appropriate indicator of success
         if (is.null(syscall_obj)) {
             ## no object returned - this happens if process is interrupted by the user on unix
-            ok <- NA
+            ok <- as.logical(NA)
         } else {
             ok <- syscall_obj$status==0
         }
