@@ -20,7 +20,7 @@ test_that("config operations preserve attributes", {
         license="Please cite",
         comment="",
         method=oceandata_get,
-        method_flags="search=T20000322000060.L3m_MO_SST_sst_9km.nc",
+        method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=NULL,
         access_function="",
         data_group="Sea surface temperature")
@@ -55,7 +55,7 @@ test_that("local directory looks right",{
         source_url="http://some.place.com/some/path/",
         license="blah",
         method=bb_wget,
-        method_flags="",
+        method_flags=c(),
         data_group="blah")
     cf <- bb_config("/some/local/path") %>% add(src)
     temp <- data_source_dir(cf[1,])

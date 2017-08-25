@@ -21,7 +21,7 @@ test_that("bb_sync is quiet when asked",{
         license="blah",
         method=bb_wget,
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd", ## just some file to download
-        method_flags="--recursive --level=1")
+        method_flags=c("--recursive","--level=1"))
     cf <- cf %>% add(myds)
     expect_silent(bb_sync(cf,verbose=FALSE))
 })
@@ -37,7 +37,7 @@ test_that("bb_sync works on oceandata",{
         license="Please cite",
         comment="",
         method=oceandata_get,
-        method_flags="search=T20000322000060.L3m_MO_SST_sst_9km.nc",
+        method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=NULL,
         access_function="",
         data_group="Sea surface temperature")
@@ -64,7 +64,7 @@ test_that("bb_sync works with a sink() call in place",{
         license="blah",
         method=bb_wget,
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd", ## just some file to download
-        method_flags="--recursive --level=1")
+        method_flags=c("--recursive","--level=1"))
     temp_root <- tempdir()
     cf <- add(bb_config(local_file_root=temp_root,clobber=2),myds)
     bb_sync(cf)

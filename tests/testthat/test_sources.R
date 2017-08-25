@@ -19,7 +19,7 @@ test_that("bb_source works with multiple postprocess actions", {
         license="Please cite",
         comment="",
         method=oceandata_get,
-        method_flags="search=T20000322000060.L3m_MO_SST_sst_9km.nc",
+        method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=list(quote(pp_unzip(delete=TRUE)),pp_gunzip),
         access_function="",
         data_group="Sea surface temperature")
@@ -34,7 +34,7 @@ test_that("bb_source works with multiple postprocess actions", {
         license="Please cite",
         comment="",
         method=oceandata_get,
-        method_flags="search=T20000322000060.L3m_MO_SST_sst_9km.nc",
+        method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=list(pp_unzip,pp_gunzip),
         access_function="",
         data_group="Sea surface temperature")
@@ -57,7 +57,7 @@ test_that("authentication checks work",{
         license="blah",
         authentication_note="auth note",
         method=bb_wget,
-        method_flags="",
+        method_flags=c(),
         postprocess=NULL,
         data_group="blah"))
 
@@ -72,7 +72,7 @@ test_that("authentication checks work",{
         authentication_note="auth note",
         user="",
         method=bb_wget,
-        method_flags="",
+        method_flags=c(),
         postprocess=NULL,
         data_group="blah"))
 
@@ -87,7 +87,7 @@ test_that("authentication checks work",{
         authentication_note="auth note",
         password="",
         method=bb_wget,
-        method_flags="",
+        method_flags=c(),
         postprocess=NULL,
         data_group="blah"))
 
@@ -104,7 +104,7 @@ test_that("authentication checks work",{
         user="user",
         password="password",
         method=bb_wget,
-        method_flags="",
+        method_flags=c(),
         postprocess=NULL,
         data_group="blah")
 })

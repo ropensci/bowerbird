@@ -12,7 +12,7 @@ test_that("oceandata_get works",{
         license="Please cite",
         comment="",
         method=oceandata_get,
-        method_flags="search=T20000322000060.L3m_MO_SST_sst_9km.nc",
+        method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=NULL,
         access_function="",
         data_group="Sea surface temperature")
