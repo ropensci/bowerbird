@@ -17,7 +17,7 @@ test_that("oceandata_get works",{
         access_function="",
         data_group="Sea surface temperature")
     temp_root <- tempdir()
-    ocf <- add(bb_config(local_file_root="irrelevant_here"),ods)
+    ocf <- bb_add(bb_config(local_file_root="irrelevant_here"),ods)
     ## will be calling oceandata_get directly, not via bb_sync, so do some extra steps
     cwd <- getwd()
     setwd(temp_root)

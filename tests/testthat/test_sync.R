@@ -4,7 +4,7 @@ test_that("bb_sync works with dry run on bb_wget",{
     skip_on_cran()
     temp_root <- tempdir()
     cf <- bb_config(local_file_root=temp_root,skip_downloads=TRUE)
-    cf <- cf %>% add(bb_example_sources()[1,])
+    cf <- cf %>% bb_add(bb_example_sources()[1,])
     bb_sync(cf,catch_errors=FALSE)
 })
 
@@ -22,7 +22,7 @@ test_that("bb_sync is quiet when asked",{
         method=bb_wget,
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd", ## just some file to download
         method_flags=c("--recursive","--level=1"))
-    cf <- cf %>% add(myds)
+    cf <- cf %>% bb_add(myds)
     expect_silent(bb_sync(cf,verbose=FALSE))
 })
 
@@ -42,7 +42,7 @@ test_that("bb_sync works on oceandata",{
         access_function="",
         data_group="Sea surface temperature")
     temp_root <- tempdir()
-    cf <- add(bb_config(local_file_root=temp_root,clobber=2),ods)
+    cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),ods)
     bb_sync(cf)
 
     fnm <- file.path(temp_root,"oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc")
@@ -66,7 +66,7 @@ test_that("bb_sync works with a sink() call in place",{
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd", ## just some file to download
         method_flags=c("--recursive","--level=1"))
     temp_root <- tempdir()
-    cf <- add(bb_config(local_file_root=temp_root,clobber=2),myds)
+    cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),myds)
     bb_sync(cf)
     sink()
     op <- readLines(sinkfile)

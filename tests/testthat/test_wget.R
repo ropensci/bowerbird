@@ -2,10 +2,10 @@ context("wget stuff")
 
 test_that("wget_install works and wget_exe() finds something", {
     if (.Platform$OS.type!="windows") {
-        expect_error(install_wget())
-        expect_true(is.string(wget_exe()))
+        expect_error(bb_install_wget()) ## only supported for Windows platforms
+        expect_true(is.string(wget_exe())) ## should still be able to find system-installed wget
     } else {
-        wge <- install_wget()
+        wge <- bb_install_wget()
         expect_true(file.exists(wge))
         expect_true(is.string(wget_exe()))
     }
