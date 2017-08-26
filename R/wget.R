@@ -164,6 +164,8 @@ wget_flags_to_short <- function(flags) {
         flags[flags=="--verbose"] <- "-v"
         flags[flags=="--no-verbose"] <- "-nv"
         flags[flags=="--force-html"] <- "-F"
+        flags[flags=="--directory-prefix"] <- "-P"
+        flags[flags=="--no-host-directories"] <- "-nH"
         flags
 }
 
