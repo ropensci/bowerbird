@@ -20,25 +20,25 @@ test_that("wget help works", {
 
 test_that("internal flags_to_charvec function behaves",{
     is_zerolen_char <- function(z) is.character(z) && length(z)<1
-    expect_true(is_zerolen_char(c()))
-    expect_true(is_zerolen_char(""))
-    expect_true(is_zerolen_char(NULL))
-    expect_true(is_zerolen_char(NA_character_))
-    expect_error(flags_to_charvec(NA))
+    expect_true(is_zerolen_char(bowerbird:::flags_to_charvec(c())))
+    expect_true(is_zerolen_char(bowerbird:::flags_to_charvec("")))
+    expect_true(is_zerolen_char(bowerbird:::flags_to_charvec(NULL)))
+    expect_true(is_zerolen_char(bowerbird:::flags_to_charvec(NA_character_)))
+    expect_error(bowerbird:::flags_to_charvec(NA))
 })
 
 test_that("internal resolve_wget_clobber_flags function behaves",{
-    expect_equal(resolve_wget_clobber_flags(c("blah"),c("--no-clobber")),
+    expect_equal(bowerbird:::resolve_wget_clobber_flags(c("blah"),c("--no-clobber")),
                  c("blah","--no-clobber"))
-    expect_equal(resolve_wget_clobber_flags(c("blah","--timestamping"),c("--no-clobber")),
+    expect_equal(bowerbird:::resolve_wget_clobber_flags(c("blah","--timestamping"),c("--no-clobber")),
                  c("blah","--timestamping"))
-    expect_equal(resolve_wget_clobber_flags(c("blah","--no-clobber"),c("--timestamping")),
+    expect_equal(bowerbird:::resolve_wget_clobber_flags(c("blah","--no-clobber"),c("--timestamping")),
                  c("blah","--no-clobber"))
 
-    expect_equal(resolve_wget_clobber_flags(c("blah"),c("-nc")),
+    expect_equal(bowerbird:::resolve_wget_clobber_flags(c("blah"),c("-nc")),
                  c("blah","-nc"))
-    expect_equal(resolve_wget_clobber_flags(c("blah","-N"),c("-nc")),
+    expect_equal(bowerbird:::resolve_wget_clobber_flags(c("blah","-N"),c("-nc")),
                  c("blah","-N"))
-    expect_equal(resolve_wget_clobber_flags(c("blah","-nc"),c("-N")),
+    expect_equal(bowerbird:::resolve_wget_clobber_flags(c("blah","-nc"),c("-N")),
                  c("blah","-nc"))
 })
