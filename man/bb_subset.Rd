@@ -20,7 +20,7 @@ Keep only selected data_sources in a bowerbird configuration
 \examples{
 \dontrun{
   cf <- bb_config("/my/file/root") \%>\%
-    add(bb_example_sources()) \%>\%
+    bb_add(bb_example_sources()) \%>\%
     bb_subset(1:2)
 }
 }

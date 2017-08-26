@@ -22,7 +22,7 @@ Despite this, bowerbird can provide some general information to assist with data
 Say we have a bowerbird config:
 ```{r}
 library(bowerbird)
-cf <- bb_config("/some/local/path") %>% add(bb_example_sources())
+cf <- bb_config("/some/local/path") %>% bb_add(bb_example_sources())
 ```
 
 We can ask bowerbird where these files are stored locally:

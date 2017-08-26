@@ -41,7 +41,7 @@
 #'    collection_size=0.6)
 #'
 #' cf <- bb_config("/my/repo/root")
-#' cf <- add(cf,my_source)
+#' cf <- bb_add(cf,my_source)
 #'
 #' @export
 bb_source <- function(id,name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method=bb_wget,method_flags=character(),postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,collection_size=NA,warn_empty_auth=TRUE) {

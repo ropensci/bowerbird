@@ -34,7 +34,7 @@ Produce summary of bowerbird configuration
 \examples{
 \dontrun{
   cf <- bb_config("/my/file/root") \%>\%
-    add(bb_example_sources())
+    bb_add(bb_example_sources())
   browseURL(bb_summary(cf))
 }
 

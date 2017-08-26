@@ -18,7 +18,7 @@ Runs some basic sanity checks on a bowerbird configuration.
 \examples{
 \dontrun{
   cf <- bb_config("/my/file/root") \%>\%
-    add(bb_example_sources())
+    bb_add(bb_example_sources())
   bb_validate() ## will complain about lacking authentication info
 }
 }

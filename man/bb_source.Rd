@@ -73,7 +73,7 @@ my_source <- bb_source(
    collection_size=0.6)
 
 cf <- bb_config("/my/repo/root")
-cf <- add(cf,my_source)
+cf <- bb_add(cf,my_source)
 
 }
 \seealso{

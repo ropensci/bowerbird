@@ -17,7 +17,7 @@
 #' @examples
 #' \dontrun{
 #' cf <- bb_config("/my/file/root") %>%
-#'   add(bb_example_sources()[5,])
+#'   bb_add(bb_example_sources()[5,])
 #' bb_sync(cf)
 #' }
 #' @export

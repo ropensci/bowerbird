@@ -61,7 +61,7 @@ my_source <- bb_source(
     data_group="Topography")
 
 cf <- bb_config(local_file_root="/temp/data/bbtest") %>%
-    add(my_source)
+    bb_add(my_source)
 ```
 
 A few example data source definitions are provided as part of the bowerbird package --- see the list at the bottom of this document. Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
@@ -137,14 +137,14 @@ Some data providers require users to log in. These are indicated by the `authent
 mysrc <- subset(bb_example_sources(),name=="CMEMS global gridded SSH reprocessed (1993-ongoing)")
 mysrc$user <- "yourusername"
 mysrc$password <- "yourpassword"
-cf <- add(cf,mysrc)
+cf <- bb_add(cf,mysrc)
 
 ## or, using dplyr
 library(dplyr)
 mysrc <- bb_example_sources() %>%
   filter(name=="CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
   mutate(user="yourusername",password="yourpassword")
-cf <- cf %>% add(mysrc)
+cf <- cf %>% bb_add(mysrc)
 ```
 
 #### Reducing download sizes
@@ -156,7 +156,7 @@ Say a particular data provider arranges their files in yearly directories. It wo
 ```{r eval=FALSE}
 mysrc <- mysrc %>%
   mutate(method_flags=c(method_flags,"--accept-regex=/2017/"))
-cf <- cf %>% add(mysrc)
+cf <- cf %>% bb_add(mysrc)
 ```
 
 See the notes above for further guidances on the accept/reject flags.
@@ -193,7 +193,7 @@ These are the example data source definitions that are provided as part of the b
 
 ```{r echo=FALSE,message=FALSE,warning=FALSE,results="asis"}
 devtools::load_all()##library(bowerbird)
-cf <- bb_config("/your/data/root/") %>% add(bb_example_sources())
+cf <- bb_config("/your/data/root/") %>% bb_add(bb_example_sources())
 sf <- bb_summary(cf,format="rmd",inc_license=FALSE,inc_access_function=FALSE,inc_path=FALSE)
 stxt <- readLines(sf)
 stxt <- stxt[(grep("Last updated:",stxt)+1):length(stxt)]

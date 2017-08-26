@@ -16,7 +16,7 @@
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_example_sources())
+#'     bb_add(bb_example_sources())
 #'
 #'   ## save to file
 #'   saveRDS(cf,file="my_config.rds")
@@ -56,7 +56,7 @@ bb_config <- function(local_file_root,wget_default_flags=character(),wget_global
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_example_sources()) %>%
+#'     bb_add(bb_example_sources()) %>%
 #'     bb_subset(1:2)
 #' }
 #' @export
@@ -77,10 +77,10 @@ bb_subset <- function(config,idx) {
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_example_sources())
+#'     bb_add(bb_example_sources())
 #' }
 #' @export
-add <- function(config,source) {
+bb_add <- function(config,source) {
     assert_that(is(config,"bb_config"))
     config$data_sources <- dplyr::bind_rows(config$data_sources,source)
     config
@@ -138,7 +138,7 @@ bb_settings_to_cols <- function(obj) {
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_example_sources())
+#'     bb_add(bb_example_sources())
 #'   browseURL(bb_summary(cf))
 #' }
 #'
@@ -226,7 +226,7 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_example_sources())
+#'     bb_add(bb_example_sources())
 #'   bb_validate() ## will complain about lacking authentication info
 #' }
 #' @seealso \code{\link{bb_config}}

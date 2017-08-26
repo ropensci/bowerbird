@@ -88,14 +88,14 @@ dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is
 #'
 #' Files from each data source are stored locally in the associated directory.
 #'
-#' @param config data.frame: configuration as returned by \code{\link{bb_config}}
+#' @param config bb_config: configuration as returned by \code{\link{bb_config}}
 #'
 #' @return character vector of directories
 #'
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_example_sources())
+#'     bb_add(bb_example_sources())
 #'   data_source_dir(cf)
 #' }
 #'

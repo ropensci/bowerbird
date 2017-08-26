@@ -7,7 +7,7 @@
 data_source_dir(config)
 }
 \arguments{
-\item{config}{data.frame: configuration as returned by \code{\link{bb_config}}}
+\item{config}{bb_config: configuration as returned by \code{\link{bb_config}}}
 }
 \value{
 character vector of directories
@@ -18,7 +18,7 @@ Files from each data source are stored locally in the associated directory.
 \examples{
 \dontrun{
   cf <- bb_config("/my/file/root") \%>\%
-    add(bb_example_sources())
+    bb_add(bb_example_sources())
   data_source_dir(cf)
 }
 
