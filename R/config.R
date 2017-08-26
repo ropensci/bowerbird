@@ -122,6 +122,38 @@ bb_settings_to_cols <- function(obj) {
     obj$data_sources
 }
 
+
+#' Return the local directory of each data source in a configuration
+#'
+#' Files from each data source are stored locally in the associated directory.
+#'
+#' @param config bb_config: configuration as returned by \code{\link{bb_config}}
+#'
+#' @return character vector of directories
+#'
+#' @examples
+#' \dontrun{
+#'   cf <- bb_config("/my/file/root") %>%
+#'     bb_add(bb_example_sources())
+#'   bb_data_source_dir(cf)
+#' }
+#'
+#' @export
+bb_data_source_dir <- function(config) {
+    assert_that(is(config,"bb_config"))
+    single_source_dir <- function(cfrow) {
+        mth <- NULL
+        try(mth <- get_function_from_method(cfrow$data_sources$method[[1]]),silent=TRUE)
+        if (is.function(mth)) {
+            do.call(mth,list(config=cfrow,local_dir_only=TRUE))
+        } else {
+            as.character(NA)
+        }
+    }
+    vapply(seq_len(nrow(config$data_sources)),function(z)single_source_dir(bb_subset(config,z)),FUN.VALUE="")
+}
+
+
 #' Produce summary of bowerbird configuration
 #'
 #' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})

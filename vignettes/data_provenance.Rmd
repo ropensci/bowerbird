@@ -27,7 +27,7 @@ cf <- bb_config("/some/local/path") %>% bb_add(bb_example_sources())
 
 We can ask bowerbird where these files are stored locally:
 ```{r}
-source_dirs <- data_source_dir(cf)
+source_dirs <- bb_data_source_dir(cf)
 knitr::kable(data.frame(name=cf$data_sources$name,source_dir=source_dirs))
 ```
 
