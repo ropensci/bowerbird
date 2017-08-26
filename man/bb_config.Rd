@@ -25,7 +25,7 @@ bb_config(local_file_root, wget_default_flags = character(),
 \item{skip_downloads}{logical: if TRUE, \code{bb_sync} will do a dry run of the synchronisation process but without actually downloading files. For data sources using method bb_wget, this means that the wget calls will not be executed, so e.g. any recursion handled by wget itself will not be simulated}
 }
 \value{
-configuration tibble
+configuration object
 }
 \description{
 The parameters provided here are repository-wide settings, and will be applied to all data sources that are subsequently added to the configuration.

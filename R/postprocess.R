@@ -1,8 +1,9 @@
 #' Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy
-#' \code{pp_unzip}, \code{pp_gunzip}, \code{pp_bunzip2}, and \code{pp_uncompress} are convenience wrappers around \code{pp_decompress} that specify the method.
-#' The dots argument indicates additional arguments that are passed to \code{pp_decompress}. Some may be passed by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
 #'
-#' @param cfrow data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})
+#' This function is not intended to be called directly, but instead can be specified as a postprocessing step to apply to a data source. \code{pp_unzip}, \code{pp_gunzip}, \code{pp_bunzip2}, and \code{pp_uncompress} are convenience wrappers around \code{pp_decompress} that specify the method.
+#' The dots argument indicates additional arguments that are passed to \code{pp_decompress} when called by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
+#'
+#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 #' @param delete logical: delete the zip files after extracting their contents?
 #' @param method string: one of "unzip","gunzip","bunzip2","decompress"
 #' @param ... : additional arguments passed to \code{pp_decompress}
@@ -20,9 +21,9 @@
 #' }
 #'
 #' @export
-pp_decompress <- function(cfrow,delete=FALSE,method,...) {
-    assert_that(is.data.frame(cfrow))
-    assert_that(nrow(cfrow)==1)
+pp_decompress <- function(config,delete=FALSE,method,...) {
+    assert_that(is(config,"bb_config"))
+    assert_that(nrow(config$data_sources)==1)
     assert_that(is.flag(delete))
     assert_that(is.string(method))
     method <- match.arg(tolower(method),c("unzip","gunzip","bunzip2","uncompress"))
@@ -36,7 +37,7 @@ pp_decompress <- function(cfrow,delete=FALSE,method,...) {
                            stop("unrecognized decompression")
                            )
     if (delete) {
-        files_to_decompress <- list.files(directory_from_url(cfrow$source_url),pattern=file_pattern,recursive=TRUE,ignore.case=ignore_case)
+        files_to_decompress <- list.files(directory_from_url(config$data_sourcees$source_url),pattern=file_pattern,recursive=TRUE,ignore.case=ignore_case)
         do_decompress_files(paste0(method,"_delete"),files=files_to_decompress)
     } else {
         file_list_before <- extract_xarg("file_list_before",xargs)
@@ -81,7 +82,9 @@ pp_uncompress <- function(...) pp_decompress(...,method="uncompress")
 
 #' Postprocessing: remove unwanted files
 #'
-#' @param cfrow data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})
+#' This function is not intended to be called directly, but instead can be specified as a postprocessing step to apply to a data source.
+#'
+#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 #' @param pattern string: regular expression, passed to \code{file.info}
 #' @param recursive logical: should the cleanup recurse into subdirectories?
 #' @param ignore_case logical: should pattern matching be case-insensitive?
@@ -98,9 +101,9 @@ pp_uncompress <- function(...) pp_decompress(...,method="uncompress")
 #' }
 #'
 #' @export
-pp_cleanup <- function(cfrow,pattern,recursive=FALSE,ignore_case=FALSE,...) {
-    assert_that(is.data.frame(cfrow))
-    assert_that(nrow(cfrow)==1)
+pp_cleanup <- function(config,pattern,recursive=FALSE,ignore_case=FALSE,...) {
+    assert_that(is(config,"bb_config"))
+    assert_that(nrow(config$data_sources)==1)
     to_delete <- list.files(pattern=pattern,recursive=recursive,ignore.case=ignore_case)
     cat(sprintf("cleaning up files: %s\n",paste(to_delete,collapse=",")))
     unlink(to_delete)==0

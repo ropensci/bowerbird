@@ -1,4 +1,4 @@
-## internal: take flags and convert to character vector
+## internal: take flags and convert to character vector if needed
 ## flags can either be a string (will be split on white spaces)
 ## or list (expect single element, which is a character vector) - as would get from tibble list column
 ## or character vector (convert to empty character vector if null, NA, or empty string, otherwise return as is)
@@ -26,7 +26,7 @@ flags_to_charvec <- function(fl) {
 
 #' Mirror an external data source using the wget utility
 #'
-#' @param cfrow data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})
+#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 #' @param verbose logical: if TRUE, provide additional progress output
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
@@ -35,15 +35,16 @@ flags_to_charvec <- function(fl) {
 #' @seealso \code{\link{wget}}
 #'
 #' @export
-bb_wget <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
-    assert_that(is.data.frame(cfrow))
-    assert_that(nrow(cfrow)==1)
+bb_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
+    assert_that(is(config,"bb_config"))
+    assert_that(nrow(config$data_sources)==1)
     assert_that(is.flag(verbose))
     assert_that(is.flag(local_dir_only))
 
     if (local_dir_only)
-        return(file.path(bb_attributes(cfrow)$local_file_root,directory_from_url(cfrow$source_url)))
+        return(file.path(bb_attributes(config)$local_file_root,directory_from_url(config$data_sources$source_url)))
 
+    cfrow <- bb_attributes_to_cols(config)
     this_flags <- flags_to_charvec(cfrow$method_flags)
     if (length(this_flags)<1) {
         this_flags <- flags_to_charvec(cfrow$wget_default_flags)
@@ -144,14 +145,28 @@ wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
         ##if (is.string(flags))
         ##    flags <- strsplit(flags,"[[:space:]]+")[[1]]
         flags <- flags_to_charvec(flags) ## will split string, or replace NA/"" with empty character vector
-        ## for reasons that are far beyond me, some requests using "--recursive" do not work, but "-r" do ?!?
-        ## TODO: this is just to do with the args total length, can be removed once that bug in sys is fixed
-        flags[flags=="--recursive"] <- "-r"
+        ## sys has a bug in which a long total argument length will cause a session crash on windows (https://github.com/jeroen/sys/issues/17)
+        ## until that bug in sys is fixed, use short-form arguments to reduce total argument length
+        if (tolower(.Platform$OS.type)=="windows")
+            flags <- wget_flags_to_short(flags)
         if (verbose) cat(sprintf(" executing wget %s %s\n",paste(flags,collapse=" "),url))
         sys::exec_internal(wget_exe(),args=c(flags,url),error=stop_on_error)
         ##system2(wget_exe(),args=paste(flags,url,sep=" "),...)
     }
 }
+
+wget_flags_to_short <- function(flags) {
+        flags[flags=="--recursive"] <- "-r"
+        flags[flags=="--no-clobber"] <- "-nc"
+        flags[flags=="--no-parent"] <- "-np"
+        flags[flags=="--quiet"] <- "-q"
+        flags[flags=="--debug"] <- "-d"
+        flags[flags=="--verbose"] <- "-v"
+        flags[flags=="--no-verbose"] <- "-nv"
+        flags[flags=="--force-html"] <- "-F"
+        flags
+}
+
 
 #' Helper function to install wget
 #'

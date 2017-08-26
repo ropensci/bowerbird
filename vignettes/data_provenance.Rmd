@@ -22,13 +22,13 @@ Despite this, bowerbird can provide some general information to assist with data
 Say we have a bowerbird config:
 ```{r}
 library(bowerbird)
-cf <- bb_config("/some/local/path") %>% add(bb_example_sources()[1,])
+cf <- bb_config("/some/local/path") %>% add(bb_example_sources())
 ```
 
 We can ask bowerbird where these files are stored locally:
 ```{r}
 source_dirs <- data_source_dir(cf)
-knitr::kable(data.frame(name=cf$name,source_dir=source_dirs))
+knitr::kable(data.frame(name=cf$data_sources$name,source_dir=source_dirs))
 ```
 
 The directory for each data source will contain *all* of the files associated with that data source, not just the files used in a particular analysis. (In extreme cases this directory might even contain files from other data sources, although this should only happen if multiple data sources have overlapping `source_url` paths, which ought not to be a common occurrence.)

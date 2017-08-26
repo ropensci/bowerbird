@@ -6,11 +6,9 @@
 \alias{pp_gunzip}
 \alias{pp_bunzip2}
 \alias{pp_uncompress}
-\title{Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy
-\code{pp_unzip}, \code{pp_gunzip}, \code{pp_bunzip2}, and \code{pp_uncompress} are convenience wrappers around \code{pp_decompress} that specify the method.
-The dots argument indicates additional arguments that are passed to \code{pp_decompress}. Some may be passed by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.}
+\title{Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy}
 \usage{
-pp_decompress(cfrow, delete = FALSE, method, ...)
+pp_decompress(config, delete = FALSE, method, ...)
 
 pp_unzip(...)
 
@@ -21,7 +19,7 @@ pp_bunzip2(...)
 pp_uncompress(...)
 }
 \arguments{
-\item{cfrow}{data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})}
+\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
 
 \item{delete}{logical: delete the zip files after extracting their contents?}
 
@@ -33,9 +31,8 @@ pp_uncompress(...)
 TRUE on success
 }
 \description{
-Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy
-\code{pp_unzip}, \code{pp_gunzip}, \code{pp_bunzip2}, and \code{pp_uncompress} are convenience wrappers around \code{pp_decompress} that specify the method.
-The dots argument indicates additional arguments that are passed to \code{pp_decompress}. Some may be passed by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
+This function is not intended to be called directly, but instead can be specified as a postprocessing step to apply to a data source. \code{pp_unzip}, \code{pp_gunzip}, \code{pp_bunzip2}, and \code{pp_uncompress} are convenience wrappers around \code{pp_decompress} that specify the method.
+The dots argument indicates additional arguments that are passed to \code{pp_decompress} when called by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
 }
 \examples{
 \dontrun{

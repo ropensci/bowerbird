@@ -1,14 +1,14 @@
 #' Handler for oceandata data sources
 #'
 #' @references https://oceandata.sci.gsfc.nasa.gov/
-#' @param cfrow data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})
+#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 #' @param verbose logical: if TRUE, provide additional progress output
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
-oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
+oceandata_get <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     ## oceandata synchronisation handler
 
     ## oceandata provides a file search interface, e.g.:
@@ -18,19 +18,19 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
     ## returns list of files and SHA1 checksum for each file
     ## each file can be retrieved from https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/filename
 
-    ## expect that cfrow$method_flags will contain the search and dtype components of the post string
+    ## expect that config$data_sources$method_flags will contain the search and dtype components of the post string
     ##  i.e. "search=...&dtype=..." in "dtype=L3m&addurl=1&results_as_file=1&search=A2002*DAY_CHL_chlor*9km*"
     ##  or just include the data type in the search pattern e.g. "search=A2002*L3m_DAY_CHL_chlor*9km*
 
-    assert_that(is.data.frame(cfrow))
-    assert_that(nrow(cfrow)==1)
-    assert_that(is.list(cfrow$method_flags))
-    assert_that(is.character(cfrow$method_flags[[1]]))
+    assert_that(is(config,"bb_config"))
+    assert_that(nrow(config$data_sources)==1)
+    assert_that(is.list(config$data_sources$method_flags))
+    assert_that(is.character(config$data_sources$method_flags[[1]]))
     assert_that(is.flag(verbose))
     assert_that(is.flag(local_dir_only))
 
-    method_flags <- cfrow$method_flags[[1]]
-
+    method_flags <- config$data_sources$method_flags[[1]]
+    this_att <- bb_attributes(config)
     if (local_dir_only) {
         ## highest-level dir
         out <- "oceandata.sci.gsfc.nasa.gov"
@@ -43,7 +43,7 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
         } else if (grepl("L3",this_search_spec)) {
             out <- file.path(out,"L3BIN")
         }
-        return(file.path(bb_attributes(cfrow)$local_file_root,out))
+        return(file.path(this_att$local_file_root,out))
     }
     tries <- 0
     while (tries<3) {
@@ -59,7 +59,7 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
         }
         tries <- tries+1
     }
-    ##if (!is.null(attr(myfiles,"status")) && attr(myfiles,"status")!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",cfrow$method_flags,")")
+    ##if (!is.null(attr(myfiles,"status")) && attr(myfiles,"status")!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",method_flags,")")
     if (myfiles$status!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",method_flags,")")
     myfiles <- strsplit(rawToChar(myfiles$stdout),"\n")[[1]]
     ## catch "Sorry No Files Matched Your Query"
@@ -79,9 +79,9 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
         }
         this_exists <- file.exists(this_fullfile)
         download_this <- !this_exists
-        if (cfrow$clobber==0) {
+        if (this_att$clobber==0) {
             ## don't clobber existing
-        } else if (cfrow$clobber==1) {
+        } else if (this_att$clobber==1) {
             ## replace existing if server copy newer than local copy
             ## use checksum rather than dates for this
             if (this_exists) {
@@ -92,17 +92,12 @@ oceandata_get <- function(cfrow,verbose=FALSE,local_dir_only=FALSE) {
             download_this <- TRUE
         }
         if (download_this) {
-            dummy <- cfrow
+            dummy <- config
             ## note that if skip_downloads is TRUE, it will be passed through to bb_wget here
             ##dummy$method_flags <- paste("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
-            dummy$method_flags <- list(c("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories"))
-            dummy$source_url <- this_url
+            dummy$data_sources$method_flags <- list(c("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories"))
+            dummy$data_sources$source_url <- this_url
             out <- out && bb_wget(dummy,verbose=verbose)
-            ## recalculate checksum so that cache gets updated
-            ## but not if skip_downloads
-            ## TODO CHECK THIS CODE IS NEEDED - was this left over from memoized hashing?
-            if (is.null(cfrow$skip_downloads) || !cfrow$skip_downloads)
-                blah <- file_hash(this_fullfile,"sha1")
         } else {
             if (this_exists) {
                 if (verbose) cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))

@@ -2,20 +2,20 @@
 % Please edit documentation in R/config.R
 \name{add}
 \alias{add}
-\title{Add a new data source to a bowerbird configuration}
+\title{Add new data sources to a bowerbird configuration}
 \usage{
 add(cf, source)
 }
 \arguments{
 \item{cf}{data.frame: configuration, as returned by \code{bb_config}}
 
-\item{source}{data.frame: data source definition to add to the configuration, as returned by \code{bb_source}}
+\item{source}{data.frame: one or more data source definitions, as returned by \code{bb_source}, to add to the configuration}
 }
 \value{
-configuration tibble
+configuration object
 }
 \description{
-Add a new data source to a bowerbird configuration
+Add new data sources to a bowerbird configuration
 }
 \examples{
 \dontrun{

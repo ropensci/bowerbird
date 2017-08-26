@@ -42,7 +42,7 @@ test_that("bb_sync works on oceandata",{
         access_function="",
         data_group="Sea surface temperature")
     temp_root <- tempdir()
-    cf <- add(bb_config(local_file_root=temp_root),ods)
+    cf <- add(bb_config(local_file_root=temp_root,clobber=2),ods)
     bb_sync(cf)
 
     fnm <- file.path(temp_root,"oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc")

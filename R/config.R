@@ -14,7 +14,7 @@ bb_global_atts <- function() c("wget_default_flags","wget_global_flags","http_pr
 #' @param ftp_proxy string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)
 #' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)
 #' @param skip_downloads logical: if TRUE, \code{bb_sync} will do a dry run of the synchronisation process but without actually downloading files. For data sources using method bb_wget, this means that the wget calls will not be executed, so e.g. any recursion handled by wget itself will not be simulated
-#' @return configuration tibble
+#' @return configuration object
 #'
 #' @seealso \code{\link{bb_source}}
 #'
@@ -36,61 +36,32 @@ bb_config <- function(local_file_root,wget_default_flags=character(),wget_global
     assert_that(is.flag(skip_downloads))
     assert_that(is.character(wget_default_flags))
     assert_that(is.character(wget_global_flags))
-    cf <- tibble()
-    attr(cf,"wget_default_flags") <- wget_default_flags
-    attr(cf,"wget_global_flags") <- wget_global_flags
-    attr(cf,"http_proxy") <- http_proxy
-    attr(cf,"ftp_proxy") <- ftp_proxy
-    attr(cf,"local_file_root") <- local_file_root
-    attr(cf,"clobber") <- clobber
-    attr(cf,"skip_downloads") <- skip_downloads
-    class(cf) <- c("bb_cf",class(cf))
+    structure(
+        list(data_sources=tibble(),
+             settings=list(
+                 wget_default_flags=str_trim(wget_default_flags),
+                 wget_global_flags=str_trim(wget_global_flags),
+                 http_proxy=http_proxy,
+                 ftp_proxy=ftp_proxy,
+                 local_file_root=local_file_root,
+                 clobber=clobber,
+                 skip_downloads=skip_downloads)),
+        class="bb_config")
+}
+
+## internal helper function, return the config but with only
+## one or more rows of its data_sources
+cf_subset <- function(cf,idx) {
+    cf$data_sources <- cf$data_sources[idx,]
     cf
 }
 
-#' Select a subset of data sources within a bowerbird configuration
-#'
-#' @param .data list: configuration, as returned by \code{bb_config}
-#' @param x list: configuration, as returned by \code{bb_config}
-#' @param i numeric: integer row values
-#' @param j numeric: ignored
-#' @param ... : integer row values
-#'
-#' @return configuration
-#'
-#' @examples
-#' \dontrun{
-#'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_sources()) %>%
-#'     slice(1:5)
-#' }
-#'
-#' @method slice bb_cf
-#' @export
-slice.bb_cf <- function(.data,...) {
-    ##re_add_class <- function(z) {class(z) <- c("bb_cf",class(z)); z}
-    ##class(.data) <- setdiff(class(.data),"bb_cf")
-    ##re_add_class(copy_bb_attributes(do.call(slice_,list(.data,...)),.data))
-
-    ## hmm, that doesn't work, so do this for now
-    .data[...,]
-}
-
-#' @rdname slice.bb_cf
-#' @method [ bb_cf
-#' @export
-`[.bb_cf` <- function(x,i,j,...) {
-    re_add_class <- function(z) {class(z) <- c("bb_cf",class(z)); z}
-    re_add_class(copy_bb_attributes(NextMethod("["),x))
-}
-
-
-#' Add a new data source to a bowerbird configuration
+#' Add new data sources to a bowerbird configuration
 #'
 #' @param cf data.frame: configuration, as returned by \code{bb_config}
-#' @param source data.frame: data source definition to add to the configuration, as returned by \code{bb_source}
+#' @param source data.frame: one or more data source definitions, as returned by \code{bb_source}, to add to the configuration
 #'
-#' @return configuration tibble
+#' @return configuration object
 #'
 #' @seealso \code{\link{bb_source}} \code{\link{bb_config}}
 #' @examples
@@ -100,7 +71,9 @@ slice.bb_cf <- function(.data,...) {
 #' }
 #' @export
 add <- function(cf,source) {
-    copy_bb_attributes(dplyr::bind_rows(cf,source),cf)
+    ##copy_bb_attributes(dplyr::bind_rows(cf,source),cf)
+    cf$data_sources <- dplyr::bind_rows(cf$data_sources,source)
+    cf
 }
 
 
@@ -118,28 +91,30 @@ add <- function(cf,source) {
 #'
 #' @export
 bb_attributes <- function(cf) {
-    out <- attributes(cf)
-    out[names(out) %in% bb_global_atts()]
+    ##out <- attributes(cf)
+    ##out[names(out) %in% bb_global_atts()]
+    cf$settings
 }
 
 ## helper functions to manage attributes, not exported to user
 ## copy attributes
-copy_bb_attributes <- function(to,from) {
-    attributes(to) <- c(attributes(to),bb_attributes(from))
-    to
-}
+#copy_bb_attributes <- function(to,from) {
+#    attributes(to) <- c(attributes(to),bb_attributes(from))
+#    to
+#}
 
 ## copy each bb attribute into column
+## return only the augmented data_sources table
 bb_attributes_to_cols <- function(obj) {
     ## flags handled as lists
-    obj$wget_global_flags <- rep(list(attr(obj,"wget_global_flags")),nrow(obj))
-    obj$wget_default_flags <- rep(list(attr(obj,"wget_default_flags")),nrow(obj))
+    obj$data_sources$wget_global_flags <- rep(list(obj$settings$wget_global_flags),nrow(obj$data_sources))
+    obj$data_sources$wget_default_flags <- rep(list(obj$settings$wget_default_flags),nrow(obj$data_sources))
     for (nm in setdiff(bb_global_atts(),c("wget_default_flags","wget_global_flags"))) {
-        thisatt <- attr(obj,nm)
+        thisatt <- obj$settings[[nm]]
         if (!is.null(thisatt))
-            obj[,nm] <- thisatt
+            obj$data_sources[,nm] <- thisatt
     }
-    obj
+    obj$data_sources
 }
 
 #' Produce summary of bowerbird configuration
@@ -164,6 +139,7 @@ bb_attributes_to_cols <- function(obj) {
 #'
 #' @export
 bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_license=TRUE,inc_auth=TRUE,inc_size=TRUE,inc_access_function=TRUE,inc_path=TRUE) {
+    assert_that(is(cf,"bb_config"))
     assert_that(is.string(file))
     assert_that(is.string(format))
     assert_that(is.flag(inc_license))
@@ -247,8 +223,10 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_licen
 #'
 #' @export
 bb_validate <- function(cf) {
-    idx <- !is.na(cf$authentication_note) & (na_or_empty(cf$user) || na_or_empty(cf$password))
+    assert_that(is(cf,"bb_config"))
+    cfds <- cf$data_sources
+    idx <- !is.na(cfds$authentication_note) & (na_or_empty(cfds$user) || na_or_empty(cfds$password))
     if (any(idx))
-        stop(paste(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s\n",cf$name[idx],cf$authentication_note[idx]),collapse="\n"))
+        stop(paste(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s\n",cfds$name[idx],cfds$authentication_note[idx]),collapse="\n"))
     invisible(TRUE)
 }

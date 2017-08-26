@@ -4,10 +4,10 @@
 \alias{pp_cleanup}
 \title{Postprocessing: remove unwanted files}
 \usage{
-pp_cleanup(cfrow, pattern, recursive = FALSE, ignore_case = FALSE, ...)
+pp_cleanup(config, pattern, recursive = FALSE, ignore_case = FALSE, ...)
 }
 \arguments{
-\item{cfrow}{data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})}
+\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
 
 \item{pattern}{string: regular expression, passed to \code{file.info}}
 
@@ -21,7 +21,7 @@ pp_cleanup(cfrow, pattern, recursive = FALSE, ignore_case = FALSE, ...)
 TRUE on success
 }
 \description{
-Postprocessing: remove unwanted files
+This function is not intended to be called directly, but instead can be specified as a postprocessing step to apply to a data source.
 }
 \examples{
 \dontrun{

@@ -4,10 +4,10 @@
 \alias{bb_wget}
 \title{Mirror an external data source using the wget utility}
 \usage{
-bb_wget(cfrow, verbose = FALSE, local_dir_only = FALSE)
+bb_wget(config, verbose = FALSE, local_dir_only = FALSE)
 }
 \arguments{
-\item{cfrow}{data.frame: a single row from a bowerbird configuration (as returned by \code{bb_config})}
+\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
 
 \item{verbose}{logical: if TRUE, provide additional progress output}
 

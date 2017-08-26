@@ -101,19 +101,19 @@ dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is
 #'
 #' @export
 data_source_dir <- function(config) {
-    assert_that(is.data.frame(config))
+    assert_that(is(config,"bb_config"))
     single_source_dir <- function(cfrow) {
         ## copy bb attrs into cfrow, in case handler relies on them
-        cfrow <- bb_attributes_to_cols(cfrow)
+        ##cfrow <- bb_attributes_to_cols(cfrow)
         mth <- NULL
-        try(mth <- get_function_from_method(cfrow$method[[1]]),silent=TRUE)
+        try(mth <- get_function_from_method(cfrow$data_sources$method[[1]]),silent=TRUE)
         if (is.function(mth)) {
-            do.call(mth,list(cfrow=cfrow,local_dir_only=TRUE))
+            do.call(mth,list(config=cfrow,local_dir_only=TRUE))
         } else {
             as.character(NA)
         }
     }
-    vapply(seq_len(nrow(config)),function(z)single_source_dir(config[z,]),FUN.VALUE="")
+    vapply(seq_len(nrow(config$data_sources)),function(z)single_source_dir(cf_subset(config,z)),FUN.VALUE="")
 }
 
 directory_from_url <- function(this_url) {
