@@ -1,7 +1,7 @@
 context("oceandata handler")
 
 test_that("oceandata_get works",{
-    skip_on_os("windows") ## failing on AppVeyor for unknown reasons
+    skip_on_appveyor() ## failing on AppVeyor for unknown reasons
     ods <- bb_source(
         id="bilbobaggins",
         name="Oceandata test",
@@ -19,7 +19,6 @@ test_that("oceandata_get works",{
     temp_root <- tempdir()
     ocf <- add(bb_config(local_file_root="irrelevant_here"),ods)
     ## will be calling oceandata_get directly, not via bb_sync, so do some extra steps
-    ocf <- bowerbird:::bb_attributes_to_cols(ocf)
     cwd <- getwd()
     setwd(temp_root)
     oceandata_get(ocf)

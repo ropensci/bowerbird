@@ -35,7 +35,7 @@ bb_fingerprint <- function(config,hash="sha1",verbose=TRUE) {
 do_fingerprint <- function(this_dataset,hash,verbose,settings) {
     on.exit({ restore_settings(settings) })
     if (nrow(this_dataset$data_sources)!=1) stop("expecting single-row data set")
-    ## copy bb attrs into this_dataset
+    ## copy bb settings into this_dataset
     this_dataset <- bb_settings_to_cols(this_dataset)
     ## check that the root directory exists
     if (!dir_exists(this_dataset$local_file_root)) {
