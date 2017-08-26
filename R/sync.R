@@ -46,10 +46,8 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     on.exit({ restore_settings(settings) })
     if (nrow(this_dataset$data_sources)!=1)
         stop("expecting single-row data set")
-    ## copy bb attrs into this_dataset
-##    this_dataset <- bb_attributes_to_cols(this_dataset)
-## check that the root directory exists
-    this_att <- bb_attributes(this_dataset)
+    this_att <- bb_settings(this_dataset)
+    ## check that the root directory exists
     if (!dir_exists(this_att$local_file_root)) {
         ## no, it does not exist
         ## unless create_root is TRUE, we won't create it, in case the user simply hasn't specified the right location

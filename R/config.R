@@ -99,10 +99,10 @@ add <- function(config,source) {
 #'
 #' @examples
 #' cf <- bb_config(local_file_root="/your/data/directory")
-#' bb_attributes(cf)
+#' bb_settings(cf)
 #'
 #' @export
-bb_attributes <- function(config) {
+bb_settings <- function(config) {
     assert_that(is(config,"bb_config"))
     config$settings
 }
@@ -110,7 +110,7 @@ bb_attributes <- function(config) {
 ## internal helper function
 ## copy each bb setting into a column of data_sources table
 ## return only the augmented data_sources table
-bb_attributes_to_cols <- function(obj) {
+bb_settings_to_cols <- function(obj) {
     ## flags handled as lists
     obj$data_sources$wget_global_flags <- rep(list(obj$settings$wget_global_flags),nrow(obj$data_sources))
     obj$data_sources$wget_default_flags <- rep(list(obj$settings$wget_default_flags),nrow(obj$data_sources))
@@ -161,7 +161,7 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_licen
     cat("Summary of bowerbird configuration\n========\n",file=rmd_file,append=TRUE)
     cat("\nLast updated: ",format(Sys.time()),"\n",file=rmd_file,append=TRUE)
 
-    cf <- bb_attributes_to_cols(cf)
+    cf <- bb_settings_to_cols(cf)
 
     cf <- cf %>% group_by_(~data_group,~name) %>% mutate_(source_urls=~paste(file.path(local_file_root,directory_from_url(source_url)),collapse=", ")) %>% ungroup() %>% select_(~-source_url,~-method,~-method_flags,~-postprocess) %>% unique()
 

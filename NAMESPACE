@@ -2,10 +2,10 @@
 
 export("%>%")
 export(add)
-export(bb_attributes)
 export(bb_config)
 export(bb_example_sources)
 export(bb_fingerprint)
+export(bb_settings)
 export(bb_source)
 export(bb_subset)
 export(bb_summary)

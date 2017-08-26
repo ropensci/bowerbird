@@ -103,8 +103,6 @@ dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is
 data_source_dir <- function(config) {
     assert_that(is(config,"bb_config"))
     single_source_dir <- function(cfrow) {
-        ## copy bb attrs into cfrow, in case handler relies on them
-        ##cfrow <- bb_attributes_to_cols(cfrow)
         mth <- NULL
         try(mth <- get_function_from_method(cfrow$data_sources$method[[1]]),silent=TRUE)
         if (is.function(mth)) {

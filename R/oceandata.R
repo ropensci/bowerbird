@@ -30,7 +30,7 @@ oceandata_get <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is.flag(local_dir_only))
 
     method_flags <- config$data_sources$method_flags[[1]]
-    this_att <- bb_attributes(config)
+    this_att <- bb_settings(config)
     if (local_dir_only) {
         ## highest-level dir
         out <- "oceandata.sci.gsfc.nasa.gov"

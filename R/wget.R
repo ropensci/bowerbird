@@ -42,9 +42,9 @@ bb_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is.flag(local_dir_only))
 
     if (local_dir_only)
-        return(file.path(bb_attributes(config)$local_file_root,directory_from_url(config$data_sources$source_url)))
+        return(file.path(bb_settings(config)$local_file_root,directory_from_url(config$data_sources$source_url)))
 
-    cfrow <- bb_attributes_to_cols(config)
+    cfrow <- bb_settings_to_cols(config)
     this_flags <- flags_to_charvec(cfrow$method_flags)
     if (length(this_flags)<1) {
         this_flags <- flags_to_charvec(cfrow$wget_default_flags)

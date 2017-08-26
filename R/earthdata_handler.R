@@ -17,7 +17,7 @@ earthdata_get <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     if (local_dir_only)
         return(bb_wget(config,verbose=verbose,local_dir_only=TRUE))
 
-    cfrow <- bb_attributes_to_cols(config)
+    cfrow <- bb_settings_to_cols(config)
     if (na_or_empty(cfrow$user) || na_or_empty(cfrow$password))
         stop(sprintf("Earthdata source \"%s\" requires user and password",cfrow$name))
     cookies_file <- gsub("\\\\","/",tempfile()) ## probably don't need the gsub, was there for windows debugging
