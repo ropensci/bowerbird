@@ -25,7 +25,7 @@ bb_fingerprint <- function(config,hash="sha1",verbose=TRUE) {
     }
     bb_validate(config)
     settings <- save_current_settings()
-    fp <- tbl_df(do.call(rbind,lapply(seq_len(nrow(config$data_sources)),function(di) do_fingerprint(cf_subset(config,di),hash,verbose,settings))))
+    fp <- tbl_df(do.call(rbind,lapply(seq_len(nrow(config$data_sources)),function(di) do_fingerprint(bb_subset(config,di),hash,verbose,settings))))
     ## fp <- config %>% rowwise() %>% do(do_fingerprint,verbose=verbose,settings=settings) ??
     restore_settings(settings)
     fp

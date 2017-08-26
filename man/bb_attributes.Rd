@@ -2,18 +2,18 @@
 % Please edit documentation in R/config.R
 \name{bb_attributes}
 \alias{bb_attributes}
-\title{Returns a configuration object's bowerbird-specific attributes}
+\title{Returns a bowerbird configuration object's settings}
 \usage{
-bb_attributes(cf)
+bb_attributes(config)
 }
 \arguments{
-\item{cf}{data.frame: configuration, as returned by \code{bb_config}}
+\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config})}
 }
 \value{
 named list
 }
 \description{
-Returns a configuration object's bowerbird-specific attributes
+These are repository-wide settings that are applied to all data sources added to the configuration.
 }
 \examples{
 cf <- bb_config(local_file_root="/your/data/directory")

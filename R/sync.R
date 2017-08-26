@@ -26,7 +26,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     ## iterate through each dataset in turn
     if (catch_errors) {
         sync_wrapper <- function(di) {
-            tryCatch(do_sync_repo(cf_subset(config,di),create_root,verbose,settings),
+            tryCatch(do_sync_repo(bb_subset(config,di),create_root,verbose,settings),
                 error=function(e) {
                     message("There was a problem synchronizing the dataset: ",config$data_sources$name[di],".\nThe error message was: ",e$message)
                     FALSE
@@ -35,7 +35,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
         }
         sync_ok <- vapply(seq_len(nrow(config$data_sources)),sync_wrapper,FUN.VALUE=TRUE)
     } else {
-        sync_ok <- vapply(seq_len(nrow(config$data_sources)),function(di) do_sync_repo(cf_subset(config,di),create_root,verbose,settings),FUN.VALUE=TRUE)
+        sync_ok <- vapply(seq_len(nrow(config$data_sources)),function(di) do_sync_repo(bb_subset(config,di),create_root,verbose,settings),FUN.VALUE=TRUE)
     }
     sync_ok
 }

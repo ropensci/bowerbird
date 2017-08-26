@@ -1,8 +1,3 @@
-## list of global flags, stored as attributes on the configuration tibble
-## internal function
-bb_global_atts <- function() c("wget_default_flags","wget_global_flags","http_proxy","ftp_proxy","local_file_root","clobber","skip_downloads")
-
-
 #' Initialize a bowerbird configuration
 #'
 #' The parameters provided here are repository-wide settings, and will be applied to all data sources that are subsequently added to the configuration.
@@ -49,16 +44,31 @@ bb_config <- function(local_file_root,wget_default_flags=character(),wget_global
         class="bb_config")
 }
 
-## internal helper function, return the config but with only
-## one or more rows of its data_sources
-cf_subset <- function(cf,idx) {
-    cf$data_sources <- cf$data_sources[idx,]
-    cf
+
+#' Keep only selected data_sources in a bowerbird configuration
+#'
+#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
+#' @param idx logical or numeric: index vector of data_source rows to retain
+#'
+#' @return configuration object
+#'
+#' @seealso \code{\link{bb_source}} \code{\link{bb_config}}
+#' @examples
+#' \dontrun{
+#'   cf <- bb_config("/my/file/root") %>%
+#'     add(bb_example_sources()) %>%
+#'     bb_subset(1:2)
+#' }
+#' @export
+bb_subset <- function(config,idx) {
+    assert_that(is(config,"bb_config"))
+    config$data_sources <- config$data_sources[idx,]
+    config
 }
 
 #' Add new data sources to a bowerbird configuration
 #'
-#' @param cf data.frame: configuration, as returned by \code{bb_config}
+#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
 #' @param source data.frame: one or more data source definitions, as returned by \code{bb_source}, to add to the configuration
 #'
 #' @return configuration object
@@ -67,19 +77,21 @@ cf_subset <- function(cf,idx) {
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+#'     add(bb_example_sources())
 #' }
 #' @export
-add <- function(cf,source) {
-    ##copy_bb_attributes(dplyr::bind_rows(cf,source),cf)
-    cf$data_sources <- dplyr::bind_rows(cf$data_sources,source)
-    cf
+add <- function(config,source) {
+    assert_that(is(config,"bb_config"))
+    config$data_sources <- dplyr::bind_rows(config$data_sources,source)
+    config
 }
 
 
-#' Returns a configuration object's bowerbird-specific attributes
+#' Returns a bowerbird configuration object's settings
 #'
-#' @param cf data.frame: configuration, as returned by \code{bb_config}
+#' These are repository-wide settings that are applied to all data sources added to the configuration.
+#'
+#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
 #'
 #' @return named list
 #'
@@ -90,26 +102,19 @@ add <- function(cf,source) {
 #' bb_attributes(cf)
 #'
 #' @export
-bb_attributes <- function(cf) {
-    ##out <- attributes(cf)
-    ##out[names(out) %in% bb_global_atts()]
-    cf$settings
+bb_attributes <- function(config) {
+    assert_that(is(config,"bb_config"))
+    config$settings
 }
 
-## helper functions to manage attributes, not exported to user
-## copy attributes
-#copy_bb_attributes <- function(to,from) {
-#    attributes(to) <- c(attributes(to),bb_attributes(from))
-#    to
-#}
-
-## copy each bb attribute into column
+## internal helper function
+## copy each bb setting into a column of data_sources table
 ## return only the augmented data_sources table
 bb_attributes_to_cols <- function(obj) {
     ## flags handled as lists
     obj$data_sources$wget_global_flags <- rep(list(obj$settings$wget_global_flags),nrow(obj$data_sources))
     obj$data_sources$wget_default_flags <- rep(list(obj$settings$wget_default_flags),nrow(obj$data_sources))
-    for (nm in setdiff(bb_global_atts(),c("wget_default_flags","wget_global_flags"))) {
+    for (nm in setdiff(names(obj$settings),c("wget_default_flags","wget_global_flags"))) {
         thisatt <- obj$settings[[nm]]
         if (!is.null(thisatt))
             obj$data_sources[,nm] <- thisatt
