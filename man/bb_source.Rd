@@ -69,7 +69,7 @@ my_source <- bb_source(
    comment="",
    method=quote(bb_wget),
    method_flags=c("--recursive","--level=1","--accept=*bin*.zip,README.TXT"),
-   postprocess=quote(pp_unzip),
+   postprocess=quote(bb_unzip),
    collection_size=0.6)
 
 cf <- bb_config("/my/repo/root")

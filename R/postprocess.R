@@ -1,27 +1,27 @@
 #' Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy
 #'
-#' This function is not intended to be called directly, but instead can be specified as a postprocessing step to apply to a data source. \code{pp_unzip}, \code{pp_gunzip}, \code{pp_bunzip2}, and \code{pp_uncompress} are convenience wrappers around \code{pp_decompress} that specify the method.
-#' The dots argument indicates additional arguments that are passed to \code{pp_decompress} when called by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
+#' This function is not intended to be called directly, but instead can be specified as a postprocessing step to apply to a data source. \code{bb_unzip}, \code{bb_gunzip}, \code{bb_bunzip2}, and \code{bb_uncompress} are convenience wrappers around \code{bb_decompress} that specify the method.
+#' The dots argument indicates additional arguments that are passed to \code{bb_decompress} when called by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
 #'
 #' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 #' @param delete logical: delete the zip files after extracting their contents?
 #' @param method string: one of "unzip","gunzip","bunzip2","decompress"
-#' @param ... : additional arguments passed to \code{pp_decompress}
+#' @param ... : additional arguments passed to \code{bb_decompress}
 #'
 #' @return TRUE on success
 #'
-#' @seealso \code{\link{bb_source}} \code{\link{bb_config}} \code{\link{pp_cleanup}}
+#' @seealso \code{\link{bb_source}} \code{\link{bb_config}} \code{\link{bb_cleanup}}
 #' @examples
 #' \dontrun{
 #'   ## decompress .zip files after synchronisation but keep zip files intact
-#'   my_source <- bb_source(...,postprocess=quote(pp_unzip))
+#'   my_source <- bb_source(...,postprocess=quote(bb_unzip))
 #'
 #'   ## decompress .zip files after synchronisation and delete zip files
-#'   my_source <- bb_source(...,postprocess=quote(pp_unzip(delete=TRUE)))
+#'   my_source <- bb_source(...,postprocess=quote(bb_unzip(delete=TRUE)))
 #' }
 #'
 #' @export
-pp_decompress <- function(config,delete=FALSE,method,...) {
+bb_decompress <- function(config,delete=FALSE,method,...) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(config$data_sources)==1)
     assert_that(is.flag(delete))
@@ -54,7 +54,7 @@ pp_decompress <- function(config,delete=FALSE,method,...) {
 }
 # @param file_list_before data.frame: files present in the directory before synchronising, as returned by \code{file.info}. Only required if delete=TRUE
 # @param file_list_after data.frame: files present in the directory after synchronising, as returned by \code{file.info}. Only required if delete=TRUE
-# @param ... : arguments passed to \code{pp_decompress}
+# @param ... : arguments passed to \code{bb_decompress}
 
 
 ## decompression behaviour: for *_delete, unconditionally decompress all compressed files and then delete them
@@ -63,21 +63,21 @@ pp_decompress <- function(config,delete=FALSE,method,...) {
 
 extract_xarg <- function(required,xargs) if (required %in% names(xargs)) xargs[[required]] else stop("need ",required," passed as one of the dots arguments")
 
-#' @rdname pp_decompress
+#' @rdname bb_decompress
 #' @export
-pp_unzip <- function(...) pp_decompress(...,method="unzip")
+bb_unzip <- function(...) bb_decompress(...,method="unzip")
 
-#' @rdname pp_decompress
+#' @rdname bb_decompress
 #' @export
-pp_gunzip <- function(...) pp_decompress(...,method="gunzip")
+bb_gunzip <- function(...) bb_decompress(...,method="gunzip")
 
-#' @rdname pp_decompress
+#' @rdname bb_decompress
 #' @export
-pp_bunzip2 <- function(...) pp_decompress(...,method="bunzip2")
+bb_bunzip2 <- function(...) bb_decompress(...,method="bunzip2")
 
-#' @rdname pp_decompress
+#' @rdname bb_decompress
 #' @export
-pp_uncompress <- function(...) pp_decompress(...,method="uncompress")
+bb_uncompress <- function(...) bb_decompress(...,method="uncompress")
 
 
 #' Postprocessing: remove unwanted files
@@ -92,16 +92,16 @@ pp_uncompress <- function(...) pp_decompress(...,method="uncompress")
 #'
 #' @return TRUE on success
 #'
-#' @seealso \code{\link{bb_source}} \code{\link{bb_config}} \code{\link{pp_decompress}}
+#' @seealso \code{\link{bb_source}} \code{\link{bb_config}} \code{\link{bb_decompress}}
 #'
 #' @examples
 #' \dontrun{
 #'   ## remove .asc files after synchronisation
-#'   my_source <- bb_source(...,postprocess=quote(pp_cleanup,pattern="\\.asc$"))
+#'   my_source <- bb_source(...,postprocess=quote(bb_cleanup,pattern="\\.asc$"))
 #' }
 #'
 #' @export
-pp_cleanup <- function(config,pattern,recursive=FALSE,ignore_case=FALSE,...) {
+bb_cleanup <- function(config,pattern,recursive=FALSE,ignore_case=FALSE,...) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(config$data_sources)==1)
     to_delete <- list.files(pattern=pattern,recursive=recursive,ignore.case=ignore_case)

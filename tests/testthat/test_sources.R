@@ -20,7 +20,7 @@ test_that("bb_source works with multiple postprocess actions", {
         comment="",
         method=oceandata_get,
         method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
-        postprocess=list(quote(pp_unzip(delete=TRUE)),pp_gunzip),
+        postprocess=list(quote(bb_unzip(delete=TRUE)),bb_gunzip),
         access_function="",
         data_group="Sea surface temperature")
 
@@ -35,7 +35,7 @@ test_that("bb_source works with multiple postprocess actions", {
         comment="",
         method=oceandata_get,
         method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
-        postprocess=list(pp_unzip,pp_gunzip),
+        postprocess=list(bb_unzip,bb_gunzip),
         access_function="",
         data_group="Sea surface temperature")
 })

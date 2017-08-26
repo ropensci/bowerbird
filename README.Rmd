@@ -56,7 +56,7 @@ my_source <- bb_source(
     license="CC-BY 4.0",
     method=quote(bb_wget),
     method_flags="--recursive",
-    postprocess=quote(pp_unzip),
+    postprocess=quote(bb_unzip),
     collection_size=0.4,
     data_group="Topography")
 
@@ -101,7 +101,7 @@ my_source <- bb_source(
     license="CC-BY 4.0",
     method=quote(bb_wget),
     method_flags="--recursive",
-    postprocess=quote(pp_unzip),
+    postprocess=quote(bb_unzip),
     collection_size=0.4,
     data_group="Topography")
 ```
@@ -117,7 +117,7 @@ Some particularly important components of this definition are:
 
 Some subtleties to bear in mind:
 
-1. If the data source delivers compressed files, you will most likely want to decompress them after downloading. The postprocess options `pp_decompress`, `pp_unzip`, etc will do this for you. By default, these *do not* delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.
+1. If the data source delivers compressed files, you will most likely want to decompress them after downloading. The postprocess options `bb_decompress`, `bb_unzip`, etc will do this for you. By default, these *do not* delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.
 
 1. You will almost certainly want to specify `--recursive` as part of the `method_flags`. The synchronization process saves files relative to the `local_file_root` directory specified in the call to `bb_config`. If `--recursive` is specified, then wget creates a directory structure that follows the URL structure. For example, calling `wget --recursive http://www.somewhere.org/monkey/banana/dataset.zip` will save the local file `www.somewhere.org/monkey/banana/dataset.zip`. Thus, specifying `--recursive` will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your `local_file_root`.
 
