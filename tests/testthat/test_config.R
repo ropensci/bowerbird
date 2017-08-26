@@ -30,7 +30,7 @@ test_that("local directory looks right",{
         method_flags=character(),
         data_group="blah")
     cf <- bb_config("/some/local/path") %>% bb_add(src)
-    temp <- data_source_dir(cf)
+    temp <- bb_data_source_dir(cf)
     temp <- gsub("\\+","/",temp) ## make sure are unix-style path seps
     expect_identical(sub("/$","",temp),"/some/local/path/some.place.com/some/path")
 })
