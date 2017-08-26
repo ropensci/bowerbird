@@ -4,12 +4,12 @@
 \alias{bb_summary}
 \title{Produce summary of bowerbird configuration}
 \usage{
-bb_summary(cf, file = tempfile(fileext = ".html"), format = "html",
+bb_summary(config, file = tempfile(fileext = ".html"), format = "html",
   inc_license = TRUE, inc_auth = TRUE, inc_size = TRUE,
   inc_access_function = TRUE, inc_path = TRUE)
 }
 \arguments{
-\item{cf}{data.frame: configuration, as returned by \code{bb_config}}
+\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config})}
 
 \item{file}{string: path to file to write summary to. A temporary file is used by default}
 
@@ -34,7 +34,7 @@ Produce summary of bowerbird configuration
 \examples{
 \dontrun{
   cf <- bb_config("/my/file/root") \%>\%
-    add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+    add(bb_example_sources())
   browseURL(bb_summary(cf))
 }
 

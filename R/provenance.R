@@ -8,7 +8,7 @@
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+#'     add(bb_example_sources())
 #'   bb_fingerprint(cf)
 #' }
 #'
@@ -60,10 +60,4 @@ do_fingerprint <- function(this_dataset,hash,verbose,settings) {
     }
     if (verbose) cat(sprintf("done.\n"))
     file_list
-}
-
-if (FALSE) {
-   cf <- bb_config("~/temp/datatest") %>%
-             add(bb_sources("GVdem_2008"))
-   fp <- bb_fingerprint(cf)
 }

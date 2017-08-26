@@ -22,7 +22,7 @@ Fingerprint the files associated with a data source
 \examples{
 \dontrun{
   cf <- bb_config("/my/file/root") \%>\%
-    add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+    add(bb_example_sources())
   bb_fingerprint(cf)
 }
 

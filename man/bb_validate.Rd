@@ -4,16 +4,23 @@
 \alias{bb_validate}
 \title{Validate a bowerbird configuration}
 \usage{
-bb_validate(cf)
+bb_validate(config)
 }
 \arguments{
-\item{cf}{data.frame: configuration, as returned by \code{bb_config}}
+\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config})}
 }
 \value{
-TRUE (invisibly) or throw error
+TRUE or throw error
 }
 \description{
 Runs some basic sanity checks on a bowerbird configuration.
+}
+\examples{
+\dontrun{
+  cf <- bb_config("/my/file/root") \%>\%
+    add(bb_example_sources())
+  bb_validate() ## will complain about lacking authentication info
+}
 }
 \seealso{
 \code{\link{bb_config}}

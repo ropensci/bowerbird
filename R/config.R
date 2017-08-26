@@ -16,7 +16,7 @@
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+#'     add(bb_example_sources())
 #'
 #'   ## save to file
 #'   saveRDS(cf,file="my_config.rds")
@@ -124,7 +124,7 @@ bb_settings_to_cols <- function(obj) {
 
 #' Produce summary of bowerbird configuration
 #'
-#' @param cf data.frame: configuration, as returned by \code{bb_config}
+#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
 #' @param file string: path to file to write summary to. A temporary file is used by default
 #' @param format string: produce HTML ("html") or Rmarkdown ("Rmd") file?
 #' @param inc_license logical: include each source's license and citation details?
@@ -138,13 +138,13 @@ bb_settings_to_cols <- function(obj) {
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
-#'     add(bb_sources("NSIDC SMMR-SSM/I Nasateam sea ice concentration"))
+#'     add(bb_example_sources())
 #'   browseURL(bb_summary(cf))
 #' }
 #'
 #' @export
-bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_license=TRUE,inc_auth=TRUE,inc_size=TRUE,inc_access_function=TRUE,inc_path=TRUE) {
-    assert_that(is(cf,"bb_config"))
+bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_license=TRUE,inc_auth=TRUE,inc_size=TRUE,inc_access_function=TRUE,inc_path=TRUE) {
+    assert_that(is(config,"bb_config"))
     assert_that(is.string(file))
     assert_that(is.string(format))
     assert_that(is.flag(inc_license))
@@ -161,45 +161,45 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_licen
     cat("Summary of bowerbird configuration\n========\n",file=rmd_file,append=TRUE)
     cat("\nLast updated: ",format(Sys.time()),"\n",file=rmd_file,append=TRUE)
 
-    cf <- bb_settings_to_cols(cf)
+    config <- bb_settings_to_cols(config)
 
-    cf <- cf %>% group_by_(~data_group,~name) %>% mutate_(source_urls=~paste(file.path(local_file_root,directory_from_url(source_url)),collapse=", ")) %>% ungroup() %>% select_(~-source_url,~-method,~-method_flags,~-postprocess) %>% unique()
+    config <- config %>% group_by_(~data_group,~name) %>% mutate_(source_urls=~paste(file.path(local_file_root,directory_from_url(source_url)),collapse=", ")) %>% ungroup() %>% select_(~-source_url,~-method,~-method_flags,~-postprocess) %>% unique()
 
-    cf$data_group[cf$data_group==""] <- NA ## so that arrange puts them last
-    cf <- cf[order(cf$data_group), ]
-    cf$data_group[is.na(cf$data_group)] <- ""
+    config$data_group[config$data_group==""] <- NA ## so that arrange puts them last
+    config <- config[order(config$data_group), ]
+    config$data_group[is.na(config$data_group)] <- ""
 
     last_group <- "blah"
-    for (k in seq_len(nrow(cf))) {
-        if (last_group!=cf$data_group[k]) {
-            cat("\n## Data group: ",cf$data_group[k],"\n",file=rmd_file,append=TRUE)
+    for (k in seq_len(nrow(config))) {
+        if (last_group!=config$data_group[k]) {
+            cat("\n## Data group: ",config$data_group[k],"\n",file=rmd_file,append=TRUE)
         }
-        last_group <- cf$data_group[k]
-        cat("\n### ",cf$name[k],"\n",file=rmd_file,append=TRUE)
-        cat("\n",cf$description[k],"\n",file=rmd_file,append=TRUE)
-        if (inc_auth && !is.na(cf$authentication_note[k]))
-            cat("\nAuthentication note:", cf$authentication_note[k],"\n",file=rmd_file,append=TRUE)
+        last_group <- config$data_group[k]
+        cat("\n### ",config$name[k],"\n",file=rmd_file,append=TRUE)
+        cat("\n",config$description[k],"\n",file=rmd_file,append=TRUE)
+        if (inc_auth && !is.na(config$authentication_note[k]))
+            cat("\nAuthentication note:", config$authentication_note[k],"\n",file=rmd_file,append=TRUE)
         if (inc_size)
-            cat("\nApproximate size:", if (is.na(cf$collection_size[k])) "not specified" else paste0(cf$collection_size[k], " GB"),"\n",file=rmd_file,append=TRUE)
-        cat("\nReference: ",cf$reference[k],"\n",file=rmd_file,append=TRUE)
+            cat("\nApproximate size:", if (is.na(config$collection_size[k])) "not specified" else paste0(config$collection_size[k], " GB"),"\n",file=rmd_file,append=TRUE)
+        cat("\nReference: ",config$reference[k],"\n",file=rmd_file,append=TRUE)
         if (inc_license) {
-            this_citation <- cf$citation[k]
+            this_citation <- config$citation[k]
             if (is.null(this_citation) || is.na(this_citation) || this_citation=="") {
                 this_citation <- "No citation details provided; see reference"
             }
             cat("\nCitation: ",this_citation,"\n",file=rmd_file,append=TRUE)
-            this_license <- cf$license[k]
+            this_license <- config$license[k]
             if (is.null(this_license) || is.na(this_license) || this_license=="") {
                 this_license <- "No formal license details provided; see reference"
             }
             cat("\nLicense: ",this_license,"\n",file=rmd_file,append=TRUE)
         }
-        temp <- cf$source_urls[[k]]
+        temp <- config$source_urls[[k]]
         temp <- gsub("\\\\","/",temp)
         temp <- unique(gsub("/+","/",temp))
         if (inc_path) cat("\nLocal file system path:\n",paste(paste0("- ",temp),sep="\n",collapse="\n"),"\n",file=rmd_file,append=TRUE,sep="")
         if (inc_access_function) {
-            thisfun <- cf$access_function[k]
+            thisfun <- config$access_function[k]
             if (is.null(thisfun) || is.na(thisfun) || thisfun=="") { thisfun <- "none registered" }
             cat("\nAssociated access functions: ",thisfun,"\n",file=rmd_file,append=TRUE)
         }
@@ -220,18 +220,23 @@ bb_summary <- function(cf,file=tempfile(fileext=".html"),format="html",inc_licen
 #'
 #' Runs some basic sanity checks on a bowerbird configuration.
 #'
-#' @param cf data.frame: configuration, as returned by \code{bb_config}
+#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
 #'
-#' @return TRUE (invisibly) or throw error
-#'
+#' @return TRUE or throw error
+#' @examples
+#' \dontrun{
+#'   cf <- bb_config("/my/file/root") %>%
+#'     add(bb_example_sources())
+#'   bb_validate() ## will complain about lacking authentication info
+#' }
 #' @seealso \code{\link{bb_config}}
 #'
 #' @export
-bb_validate <- function(cf) {
-    assert_that(is(cf,"bb_config"))
-    cfds <- cf$data_sources
+bb_validate <- function(config) {
+    assert_that(is(config,"bb_config"))
+    cfds <- config$data_sources
     idx <- !is.na(cfds$authentication_note) & (na_or_empty(cfds$user) || na_or_empty(cfds$password))
     if (any(idx))
         stop(paste(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s\n",cfds$name[idx],cfds$authentication_note[idx]),collapse="\n"))
-    invisible(TRUE)
+    TRUE
 }
