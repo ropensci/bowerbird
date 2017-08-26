@@ -22,7 +22,7 @@ install_github("AustralianAntarcticDivision/bowerbird",build_vignettes=TRUE)
 ```
 
 Bowerbird uses the third-party utility `wget` to do the heavy lifting of recursively downloading files from data providers. `wget` is typically installed by default on Linux.
-On Windows you can use the `install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from https://eternallybored.org/misc/wget/current/wget.exe) and make sure it is on your path.
+On Windows you can use the `bb_install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from https://eternallybored.org/misc/wget/current/wget.exe) and make sure it is on your path.
 
 ## Usage
 

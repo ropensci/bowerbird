@@ -114,25 +114,25 @@ bb_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
 }
 
 
-#' Make a wget call
-#'
-#' The wget system call is made using the \code{exec_internal} function from the sys package.
-#'
-#' @param url string: the URL to retrieve
-#' @param flags character: character vector of command-line flags to pass to wget
-#' @param verbose logical: print trace output?
-#' @param stop_on_error logical: throw an error if the exit status is non-zero?
-#'
-#' @return the result of the system call
-#'
-#' @seealso \code{\link{install_wget}}
-#' @examples
-#' \dontrun{
-#' ## get help about wget command line parameters
-#' wget("--help")
-#' }
-#'
-# @export
+# Make a wget call
+#
+# The wget system call is made using the \code{exec_internal} function from the sys package.
+#
+# @param url string: the URL to retrieve
+# @param flags character: character vector of command-line flags to pass to wget
+# @param verbose logical: print trace output?
+# @param stop_on_error logical: throw an error if the exit status is non-zero?
+#
+# @return the result of the system call
+#
+# @seealso \code{\link{bb_install_wget}}
+# @examples
+# \dontrun{
+# ## get help about wget command line parameters
+# wget("--help")
+# }
+#
+# ## not exported @export
 wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
     assert_that(is.string(url))
     assert_that(is.character(flags))
@@ -178,13 +178,13 @@ wget_flags_to_short <- function(flags) {
 #'
 #' @examples
 #' \dontrun{
-#'   install_wget()
+#'   bb_install_wget()
 #' }
 #'
 #' @export
-install_wget <- function() {
+bb_install_wget <- function() {
     if (tolower(.Platform$OS.type)!="windows")
-        stop("install_wget only supports windows platforms")
+        stop("bb_install_wget only supports windows platforms")
     ## NOTE, could also use e.g. https://github.com/r-lib/rappdirs to find this directory
     path <- Sys.getenv("APPDATA")
     if (dir_exists(path)) {
@@ -216,7 +216,7 @@ install_wget <- function() {
 ## #' \dontrun{
 ## #'   have_wget <- check_wget()
 ## #'   if (!have_wget && .Platform$OS.type=="windows")
-## #'     install_wget()
+## #'     bb_install_wget()
 ## #' }
 ## #'
 ## #' @export
@@ -233,7 +233,7 @@ install_wget <- function() {
 ##         if (.Platform$OS.type=="windows") {
 ##             myexe <- file.path(Sys.getenv("APPDATA"),"bowerbird","wget.exe")
 ##             if (!wget_test(myexe)) {
-##                 return(FALSE)stop("could not find the wget executable. Try the install_wget() function, or install it yourself and ensure that it is on the path")
+##                 return(FALSE)stop("could not find the wget executable. Try the bb_install_wget() function, or install it yourself and ensure that it is on the path")
 ##             }
 ##         } else {
 ##             return(FALSE)
@@ -260,7 +260,7 @@ wget_exe <- function() {
         if (.Platform$OS.type=="windows") {
             myexe <- file.path(Sys.getenv("APPDATA"),"bowerbird","wget.exe")
             if (!wget_test(myexe)) {
-                stop("could not find the wget executable. Try the install_wget() function, or install it yourself and ensure that it is on the path")
+                stop("could not find the wget executable. Try the bb_install_wget() function, or install it yourself and ensure that it is on the path")
             }
         } else {
             stop("could not find the wget executable")
