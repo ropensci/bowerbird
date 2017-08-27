@@ -46,10 +46,6 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
 
     cfrow <- bb_settings_to_cols(config)
     this_flags <- flags_to_charvec(cfrow$method_flags)
-    if (length(this_flags)<1) {
-        this_flags <- flags_to_charvec(cfrow$wget_default_flags)
-    }
-    ##this_flags <- if (is.na(cfrow$method_flags)) cfrow$wget_default_flags else cfrow$method_flags
     ## add wget_global_flags
     ##if (!is.null(cfrow$wget_global_flags)) this_flags <- paste(this_flags,cfrow$wget_global_flags,sep=" ")
     gflags <- flags_to_charvec(cfrow$wget_global_flags)
