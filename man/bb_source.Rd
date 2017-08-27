@@ -31,7 +31,7 @@ bb_source(id, name, description = NA_character_, reference, source_url,
 
 \item{method}{function, call, or symbol: (required) the function that handles the synchronisation process for this data source}
 
-\item{method_flags}{character vector: flags to pass to the method. If method is \code{bb_handler_wget}, these are wget flags. Run \code{wget("--help")} to get help on these flags}
+\item{method_flags}{character vector: flags to pass to the method. If method is \code{bb_handler_wget}, these are wget flags. Run \code{bb_wget("--help")} to get help on these flags}
 
 \item{postprocess}{function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied}
 

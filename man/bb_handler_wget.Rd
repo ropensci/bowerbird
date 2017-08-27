@@ -20,5 +20,5 @@ the directory if local_dir_only is TRUE, otherwise TRUE on success
 Mirror an external data source using the wget utility
 }
 \seealso{
-\code{\link{wget}}
+\code{\link{bb_wget}}
 }

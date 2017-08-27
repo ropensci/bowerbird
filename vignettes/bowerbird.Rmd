@@ -103,7 +103,7 @@ Some particularly important components of this definition are:
 
 1. The `license` and `citation` are important so that users know what conditions govern the usage of the data, and the appropriate citation to use to acknowledge the data providers. The `reference` entry should refer to a metadata or documentation page that describes the data in detail.
 
-1. The `method`, `method_flags`, and `source_url` define how this data will be retrieved. Most sources will use the `bb_handler_wget` method, which is a wrapper around the wget utility. If you are unfamiliar with wget, consult one of the many online tutorials. You can also see the in-built wget help by running `wget("--help")`.
+1. The `method`, `method_flags`, and `source_url` define how this data will be retrieved. Most sources will use the `bb_handler_wget` method, which is a wrapper around the wget utility. If you are unfamiliar with wget, consult one of the many online tutorials. You can also see the in-built wget help by running `bb_wget("--help")`.
 
 
 Some subtleties to bear in mind:

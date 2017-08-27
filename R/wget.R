@@ -32,7 +32,7 @@ flags_to_charvec <- function(fl) {
 #'
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
-#' @seealso \code{\link{wget}}
+#' @seealso \code{\link{bb_wget}}
 #'
 #' @export
 bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
@@ -96,11 +96,11 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
             output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
             ##this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
             this_flags <- c("-o",output_file,this_flags)
-            syscall_obj <- wget(cfrow$source_url,this_flags,verbose=verbose)
+            syscall_obj <- bb_wget(cfrow$source_url,this_flags,verbose=verbose)
             ## now echo the contents of output_file to console, so that sink() captures it
             if (verbose) cat(readLines(output_file),sep="\n")
         } else {
-            syscall_obj <- wget(cfrow$source_url,this_flags,verbose=verbose)
+            syscall_obj <- bb_wget(cfrow$source_url,this_flags,verbose=verbose)
         }
         ## now return an appropriate indicator of success
         if (is.null(syscall_obj)) {
@@ -114,26 +114,26 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
 }
 
 
-# Make a wget call
-#
-# The wget system call is made using the \code{exec_internal} function from the sys package.
-#
-# @param url string: the URL to retrieve
-# @param flags character: character vector of command-line flags to pass to wget
-# @param verbose logical: print trace output?
-# @param stop_on_error logical: throw an error if the exit status is non-zero?
-#
-# @return the result of the system call
-#
-# @seealso \code{\link{bb_install_wget}}
-# @examples
-# \dontrun{
-# ## get help about wget command line parameters
-# wget("--help")
-# }
-#
-# ## not exported @export
-wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
+#' Make a wget call
+#'
+#' The wget system call is made using the \code{exec_internal} function from the sys package.
+#'
+#' @param url string: the URL to retrieve
+#' @param flags character: character vector of command-line flags to pass to wget
+#' @param verbose logical: print trace output?
+#' @param stop_on_error logical: throw an error if the exit status is non-zero?
+#'
+#' @return the result of the system call
+#'
+#' @seealso \code{\link{bb_install_wget}}
+#' @examples
+#' \dontrun{
+#'   ## get help about wget command line parameters
+#'   bb_wget("--help")
+#' }
+#'
+#' @export
+bb_wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
     assert_that(is.string(url))
     assert_that(is.character(flags))
     assert_that(is.flag(verbose))

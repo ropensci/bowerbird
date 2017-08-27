@@ -9,7 +9,7 @@
 #' @param license string: (required) description of the license. For standard licenses (e.g. creative commons) include the license descriptor ("CC-BY", etc)
 #' @param comment string: comments about the data source. If only part of the original data collection is mirrored, mention that here
 #' @param method function, call, or symbol: (required) the function that handles the synchronisation process for this data source
-#' @param method_flags character vector: flags to pass to the method. If method is \code{bb_handler_wget}, these are wget flags. Run \code{wget("--help")} to get help on these flags
+#' @param method_flags character vector: flags to pass to the method. If method is \code{bb_handler_wget}, these are wget flags. Run \code{bb_wget("--help")} to get help on these flags
 #' @param postprocess function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
 #' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
 #' @param user string: username, if required
