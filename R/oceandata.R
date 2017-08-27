@@ -8,7 +8,7 @@
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
-oceandata_get <- function(config,verbose=FALSE,local_dir_only=FALSE) {
+bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     ## oceandata synchronisation handler
 
     ## oceandata provides a file search interface, e.g.:

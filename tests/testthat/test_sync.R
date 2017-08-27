@@ -36,7 +36,7 @@ test_that("bb_sync works on oceandata",{
         citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
         license="Please cite",
         comment="",
-        method=oceandata_get,
+        method=bb_handler_oceandata,
         method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=NULL,
         access_function="",

@@ -8,7 +8,7 @@
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @export
-earthdata_get <- function(config,verbose=FALSE,local_dir_only=FALSE) {
+bb_handler_earthdata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(config$data_sources)==1)
     assert_that(is.flag(verbose))

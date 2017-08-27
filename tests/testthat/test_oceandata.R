@@ -1,6 +1,6 @@
 context("oceandata handler")
 
-test_that("oceandata_get works",{
+test_that("bb_handler_oceandata works",{
     skip_on_appveyor() ## failing on AppVeyor for unknown reasons
     ods <- bb_source(
         id="bilbobaggins",
@@ -11,17 +11,16 @@ test_that("oceandata_get works",{
         source_url="",
         license="Please cite",
         comment="",
-        method=oceandata_get,
+        method=bb_handler_oceandata,
         method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=NULL,
         access_function="",
         data_group="Sea surface temperature")
     temp_root <- tempdir()
     ocf <- bb_add(bb_config(local_file_root="irrelevant_here"),ods)
-    ## will be calling oceandata_get directly, not via bb_sync, so do some extra steps
     cwd <- getwd()
     setwd(temp_root)
-    oceandata_get(ocf)
+    bb_handler_oceandata(ocf)
     fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc" ## relative file name
     expect_true(file.exists(fnm))
     expect_true(file.exists(file.path(temp_root,fnm)))

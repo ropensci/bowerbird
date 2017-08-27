@@ -4,15 +4,15 @@
 #' \itemize{
 #'   \item "NOAA OI SST V2"
 #'   \item "CMEMS global gridded SSH reprocessed (1993-ongoing)" - a data source that requires a username and password
-#'   \item "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a" - an example data source that uses the \code{oceandata_get} method
-#'   \item "Nimbus Ice Edge Points from Nimbus Visible Imagery" - an example data source that uses the \code{earthdata_get} method
+#'   \item "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a" - an example data source that uses the \code{bb_handler_oceandata} method
+#'   \item "Nimbus Ice Edge Points from Nimbus Visible Imagery" - an example data source that uses the \code{bb_handler_earthdata} method
 #'   \item "Bathymetry of Lake Superior" - an example that passes extra flags to the \code{bb_handler_wget} call in order to restrict what is downloaded
 #' }
 #' @references See the \code{reference} and \code{citation} field in each row of the returned tibble for references associated with these particular data sources
 #'
 #' @return data.frame
 #'
-#' @seealso \code{\link{bb_config}} \code{\link{bb_handler_wget}} \code{\link{oceandata_get}} \code{\link{earthdata_get}}
+#' @seealso \code{\link{bb_config}} \code{\link{bb_handler_wget}} \code{\link{bb_handler_oceandata}} \code{\link{bb_handler_earthdata}}
 #'
 #' @examples
 #' \dontrun{
@@ -61,7 +61,7 @@ bb_example_sources <- function() {
             reference= "http://oceancolor.gsfc.nasa.gov/",
             citation="See https://oceancolor.gsfc.nasa.gov/citations",
             license="Please cite",
-            method=quote(oceandata_get),
+            method=quote(bb_handler_oceandata),
             method_flags=c("search=S*L3m_MO_CHL_chlor_a_9km.nc"),
             postprocess=NULL,
             collection_size=7.2,
@@ -75,7 +75,7 @@ bb_example_sources <- function() {
             source_url="https://n5eil01u.ecs.nsidc.org/NIMBUS/NmIcEdg2.001/",
             license="Please cite, see http://nsidc.org/about/use_copyright.html",
             authentication_note="Requires Earthdata login, see https://urs.earthdata.nasa.gov/",
-            method=quote(earthdata_get),
+            method=quote(bb_handler_earthdata),
             method_flags=c("--recursive","--level=2","--no-parent","--accept-regex=/NmIcEdg2.001/"),
             user="",
             password="",

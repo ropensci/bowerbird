@@ -156,7 +156,7 @@ Alternatively, for data sources that are divided into subdirectories, one could 
 
 ### Defining new data source methods
 
-Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_handler_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `oceandata_get` or `earthdata_get`.
+Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_handler_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `bb_handler_oceandata` or `bb_handler_earthdata`.
 
 ### Parallelized sync
 
