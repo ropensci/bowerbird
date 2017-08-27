@@ -12,8 +12,7 @@ test_that("wget_install works and wget_exe() finds something", {
 })
 
 test_that("wget help works", {
-    blah <- bb_wget("--help")
-    blah <- rawToChar(blah$stdout)
+    blah <- capture_messages(bb_wget("--help"))
     ## should see the phrase "Mail bug reports and suggestions to <bug-wget@gnu.org>" in the output
     expect_true(grepl("bug reports and suggestions",blah,ignore.case=TRUE))
 })
