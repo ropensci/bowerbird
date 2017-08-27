@@ -138,7 +138,7 @@ wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
     assert_that(is.character(flags))
     assert_that(is.flag(verbose))
     assert_that(is.flag(stop_on_error))
-    if (tolower(url) %in% c("-h","--help") || tolower(flags) %in% c("-h","--help")) {
+    if (tolower(url) %in% c("-h","--help") || identical(tolower(flags),"-h") || identical(tolower(flags),"--help")) {
         sys::exec_internal(wget_exe(),args="--help",error=stop_on_error)
     } else {
         ## sys expects flags as a char vector, not a string
