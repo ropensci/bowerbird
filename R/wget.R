@@ -90,7 +90,7 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
 #'
 #' @return the result of the system call (or if bb_wget("--help") was called, a message will be issued)
 #'
-#' @seealso \code{\link{bb_install_wget}}
+#' @seealso \code{\link{bb_install_wget}} \code{\link{bb_find_wget}}
 #' @examples
 #' \dontrun{
 #'   ## get help about wget command line parameters
@@ -104,7 +104,7 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
     assert_that(is.flag(verbose))
     assert_that(is.flag(stop_on_error))
     if (tolower(url) %in% c("-h","--help") || identical(tolower(flags),"-h") || identical(tolower(flags),"--help")) {
-        out <- sys::exec_internal(wget_exe(),args="--help",error=TRUE)
+        out <- sys::exec_internal(bb_find_wget(),args="--help",error=TRUE)
         message(rawToChar(out$stdout))
     } else {
         ## sys expects flags as a char vector, not a string
@@ -116,7 +116,7 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
         if (tolower(.Platform$OS.type)=="windows")
             flags <- wget_flags_to_short(flags)
         if (verbose) cat(sprintf(" executing wget %s %s\n",paste(flags,collapse=" "),url))
-        sys::exec_internal(wget_exe(),args=c(flags,url),error=stop_on_error)
+        sys::exec_internal(bb_find_wget(),args=c(flags,url),error=stop_on_error)
         ##system2(wget_exe(),args=paste(flags,url,sep=" "),...)
     }
 }
@@ -149,6 +149,8 @@ wget_flags_to_short <- function(flags) {
 #'   bb_install_wget()
 #' }
 #'
+#' @seealso \code{\link{bb_find_wget}}
+#'
 #' @export
 bb_install_wget <- function() {
     if (tolower(.Platform$OS.type)!="windows")
@@ -172,72 +174,85 @@ bb_install_wget <- function() {
     }
 }
 
-## #' Check that the wget executable exists, and optionally install it if not
-## #'
-## #' Installation currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
-## #'
-## #' @references https://eternallybored.org/misc/wget/current/wget.exe
-## #'
-## #' @return TRUE on success
-## #'
-## #' @examples
-## #' \dontrun{
-## #'   have_wget <- check_wget()
-## #'   if (!have_wget && .Platform$OS.type=="windows")
-## #'     bb_install_wget()
-## #' }
-## #'
-## #' @export
-## check_wget <- function(install=FALSE) {
-##     bb_opts <- getOption("bowerbird")
-##     if (!is.null(bb_opts)) {
-##         if (!is.null(bb_opts$wget_exe)) return(bb_opts$wget_exe)
-##     } else {
-##         bb_opts <- list()
-##     }
-##     if (wget_test("wget")) {
-##         myexe <- "wget"
-##     } else {
-##         if (.Platform$OS.type=="windows") {
-##             myexe <- file.path(Sys.getenv("APPDATA"),"bowerbird","wget.exe")
-##             if (!wget_test(myexe)) {
-##                 return(FALSE)stop("could not find the wget executable. Try the bb_install_wget() function, or install it yourself and ensure that it is on the path")
-##             }
-##         } else {
-##             return(FALSE)
-##             stop("could not find the wget executable")
-##         }
-##     }
-##     bb_opts$wget_exe <- myexe
-##     options(bowerbird=bb_opts)
-##     TRUE
-## }
-
-## internal function to return the wget executable name (possibly with path)
-## if successfully identified, set the bowerbird$wget_exe option (and use this on subsequent calls)
-wget_exe <- function() {
+#' Find the wget executable, and optionally install it if it is not found
+#'
+#' Installation (if required) currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+#'
+#' @references https://eternallybored.org/misc/wget/current/wget.exe
+#'
+#' @param install logical: install the executable if it is not found? (Windows only)
+#'
+#' @return the path to the wget executable, or NULL if it was not found
+#'
+#' @examples
+#' \dontrun{
+#'   wget_path <- bb_find_wget()
+#'   wget_path <- bb_find_wget(install=TRUE) ## install (on windows) if needed
+#' }
+#'
+#' @seealso \code{\link{bb_install_wget}}
+#'
+#' @export
+bb_find_wget <- function(install=FALSE) {
+    assert_that(is.flag(install))
     bb_opts <- getOption("bowerbird")
     if (!is.null(bb_opts)) {
-        if (!is.null(bb_opts$wget_exe)) return(bb_opts$wget_exe)
+        if (!is.null(bb_opts$wget_exe)) {
+            ## already set, just return this
+            return(bb_opts$wget_exe)
+        }
     } else {
         bb_opts <- list()
     }
     if (wget_test("wget")) {
-        myexe <- "wget"
+        myexe <- unname(Sys.which("wget"))
     } else {
         if (.Platform$OS.type=="windows") {
             myexe <- file.path(Sys.getenv("APPDATA"),"bowerbird","wget.exe")
             if (!wget_test(myexe)) {
-                stop("could not find the wget executable. Try the bb_install_wget() function, or install it yourself and ensure that it is on the path")
+                if (!install) {
+                    return(NULL)
+                } else {
+                    ## install wget
+                    bb_install_wget()
+                    ## and try again
+                    return(bb_find_wget(install=FALSE))
+                }
             }
         } else {
-            stop("could not find the wget executable")
+            return(NULL)
         }
     }
     bb_opts$wget_exe <- myexe
     options(bowerbird=bb_opts)
     myexe
 }
+
+## internal function to return the wget executable name (possibly with path)
+## if successfully identified, set the bowerbird$wget_exe option (and use this on subsequent calls)
+##wget_exe <- function() {
+##    bb_opts <- getOption("bowerbird")
+##    if (!is.null(bb_opts)) {
+##        if (!is.null(bb_opts$wget_exe)) return(bb_opts$wget_exe)
+##    } else {
+##        bb_opts <- list()
+##    }
+##    if (wget_test("wget")) {
+##        myexe <- "wget"
+##    } else {
+##        if (.Platform$OS.type=="windows") {
+##            myexe <- file.path(Sys.getenv("APPDATA"),"bowerbird","wget.exe")
+##            if (!wget_test(myexe)) {
+##                stop("could not find the wget executable. Try the bb_install_wget() function, or install it yourself and ensure that it is on the path")
+##            }
+##        } else {
+##            stop("could not find the wget executable")
+##        }
+##    }
+##    bb_opts$wget_exe <- myexe
+##    options(bowerbird=bb_opts)
+##    myexe
+##}
 
 ## internal: test a potential wget executable path
 wget_test <- function(wget_path) {

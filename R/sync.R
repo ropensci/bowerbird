@@ -19,7 +19,8 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     }
     bb_validate(config)
     ## check that wget can be found (this will also set it in the options)
-    blah <- wget_exe()
+    if (is.null(bb_find_wget()))
+        stop("could not find the wget executable. Try the bb_install_wget() function, or install it yourself and ensure that it is on the path")
     ## save some current settings: path and proxy env values
     settings <- save_current_settings()
     on.exit({ restore_settings(settings) })

@@ -21,3 +21,6 @@ Currently only works on Windows platforms. The wget.exe executable will be downl
 \references{
 https://eternallybored.org/misc/wget/current/wget.exe
 }
+\seealso{
+\code{\link{bb_find_wget}}
+}

@@ -29,5 +29,5 @@ The wget system call is made using the \code{exec_internal} function from the sy
 
 }
 \seealso{
-\code{\link{bb_install_wget}}
+\code{\link{bb_install_wget}} \code{\link{bb_find_wget}}
 }
