@@ -18,6 +18,7 @@ test_that("bb_handler_oceandata works",{
         data_group="Sea surface temperature")
     temp_root <- tempdir()
     ocf <- bb_add(bb_config(local_file_root="irrelevant_here"),ods)
+    expect_equal(bb_data_source_dir(ocf),"irrelevant_here/oceandata.sci.gsfc.nasa.gov/MODIST/Mapped")
     cwd <- getwd()
     setwd(temp_root)
     bb_handler_oceandata(ocf)
