@@ -18,7 +18,7 @@ library(devtools)
 install_github("AustralianAntarcticDivision/bowerbird",build_vignettes=TRUE)
 ```
 
-Bowerbird uses the third-party utility `wget` to do the heavy lifting of recursively downloading files from data providers. `wget` is typically installed by default on Linux. On Windows you can use the `install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from <https://eternallybored.org/misc/wget/current/wget.exe>) and make sure it is on your path.
+Bowerbird uses the third-party utility `wget` to do the heavy lifting of recursively downloading files from data providers. `wget` is typically installed by default on Linux. On Windows you can use the `bb_install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from <https://eternallybored.org/misc/wget/current/wget.exe>) and make sure it is on your path.
 
 Usage
 -----
@@ -42,14 +42,14 @@ my_source <- bb_source(
     citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
     source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
     license="CC-BY 4.0",
-    method=quote(bb_wget),
+    method=quote(bb_handler_wget),
     method_flags="--recursive",
-    postprocess=quote(pp_unzip),
+    postprocess=quote(bb_unzip),
     collection_size=0.4,
     data_group="Topography")
 
 cf <- bb_config(local_file_root="/temp/data/bbtest") %>%
-    add(my_source)
+    bb_add(my_source)
 ```
 
 A few example data source definitions are provided as part of the bowerbird package --- see the list at the bottom of this document. Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
@@ -88,9 +88,9 @@ my_source <- bb_source(
     citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
     source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
     license="CC-BY 4.0",
-    method=quote(bb_wget),
+    method=quote(bb_handler_wget),
     method_flags="--recursive",
-    postprocess=quote(pp_unzip),
+    postprocess=quote(bb_unzip),
     collection_size=0.4,
     data_group="Topography")
 ```
@@ -101,19 +101,19 @@ Some particularly important components of this definition are:
 
 2.  The `license` and `citation` are important so that users know what conditions govern the usage of the data, and the appropriate citation to use to acknowledge the data providers. The `reference` entry should refer to a metadata or documentation page that describes the data in detail.
 
-3.  The `method`, `method_flags`, and `source_url` define how this data will be retrieved. Most sources will use the `bb_wget` method, which is a wrapper around the wget utility. If you are unfamiliar with wget, consult one of the many online tutorials. You can also see the in-built wget help by running `wget("--help")`.
+3.  The `method`, `method_flags`, and `source_url` define how this data will be retrieved. Most sources will use the `bb_handler_wget` method, which is a wrapper around the wget utility. If you are unfamiliar with wget, consult one of the many online tutorials. You can also see the in-built wget help by running `bb_wget("--help")`.
 
 Some subtleties to bear in mind:
 
-1.  If the data source delivers compressed files, you will most likely want to decompress them after downloading. The postprocess options `pp_decompress`, `pp_unzip`, etc will do this for you. By default, these *do not* delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.
+1.  If the data source delivers compressed files, you will most likely want to decompress them after downloading. The postprocess options `bb_decompress`, `bb_unzip`, etc will do this for you. By default, these *do not* delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.
 
 2.  You will almost certainly want to specify `--recursive` as part of the `method_flags`. The synchronization process saves files relative to the `local_file_root` directory specified in the call to `bb_config`. If `--recursive` is specified, then wget creates a directory structure that follows the URL structure. For example, calling `wget --recursive http://www.somewhere.org/monkey/banana/dataset.zip` will save the local file `www.somewhere.org/monkey/banana/dataset.zip`. Thus, specifying `--recursive` will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your `local_file_root`.
 
 3.  If you want to include/exclude certain files from being downloaded, use the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` flags. Note that `--accept` and `--reject` apply to file names (not the full path), and can be comma-separated lists of file name suffixes or patterns. The `--accept-regex` and `--reject-regex` flags apply to the full path but can only be a single regular expression each.
 
-4.  Remember that any `wget_global_flags` defined via `bb_config` will be applied to every data source in addition to their specific `method_flags`. Any data source using `bb_wget` but without `method_flags` (i.e. NA) will use the `wget_default_flags` if any were defined via `bb_config`. Sources needing no flags should specify an empty string for `method_flags`.
+4.  Remember that any `wget_global_flags` defined via `bb_config` will be applied to every data source in addition to their specific `method_flags`.
 
-5.  Several wget flags are set by the `bb_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flags is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
+5.  Several wget flags are set by the `bb_handler_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flags is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
 
 ### Modifying data sources
 
@@ -125,26 +125,26 @@ Some data providers require users to log in. These are indicated by the `authent
 mysrc <- subset(bb_example_sources(),name=="CMEMS global gridded SSH reprocessed (1993-ongoing)")
 mysrc$user <- "yourusername"
 mysrc$password <- "yourpassword"
-cf <- add(cf,mysrc)
+cf <- bb_add(cf,mysrc)
 
 ## or, using dplyr
 library(dplyr)
 mysrc <- bb_example_sources() %>%
   filter(name=="CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
   mutate(user="yourusername",password="yourpassword")
-cf <- cf %>% add(mysrc)
+cf <- cf %>% bb_add(mysrc)
 ```
 
 #### Reducing download sizes
 
-Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the `bb_wget` method, you can restrict what is downloaded by modifying the data source's `method_flags`, particularly the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.
+Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the `bb_handler_wget` method, you can restrict what is downloaded by modifying the data source's `method_flags`, particularly the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.
 
 Say a particular data provider arranges their files in yearly directories. It would be fairly easy to restrict ourselves to, say, only the 2017 data:
 
 ``` r
 mysrc <- mysrc %>%
   mutate(method_flags=c(method_flags,"--accept-regex=/2017/"))
-cf <- cf %>% add(mysrc)
+cf <- cf %>% bb_add(mysrc)
 ```
 
 See the notes above for further guidances on the accept/reject flags.
@@ -153,7 +153,7 @@ Alternatively, for data sources that are divided into subdirectories, one could 
 
 ### Defining new data source methods
 
-Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `oceandata_get` or `earthdata_get`.
+Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_handler_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `bb_handler_oceandata` or `bb_handler_earthdata`.
 
 ### Parallelized sync
 
