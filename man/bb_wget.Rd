@@ -16,10 +16,10 @@ bb_wget(url, flags = character(), verbose = FALSE, stop_on_error = FALSE)
 \item{stop_on_error}{logical: throw an error if the exit status is non-zero?}
 }
 \value{
-the result of the system call
+the result of the system call (or if bb_wget("--help") was called, a message will be issued)
 }
 \description{
-The wget system call is made using the \code{exec_internal} function from the sys package.
+The wget system call is made using the \code{exec_internal} function from the sys package. Call \code{bb_wget("--help")} to get a message giving information about wget's command line parameters
 }
 \examples{
 \dontrun{

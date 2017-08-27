@@ -116,14 +116,14 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
 
 #' Make a wget call
 #'
-#' The wget system call is made using the \code{exec_internal} function from the sys package.
+#' The wget system call is made using the \code{exec_internal} function from the sys package. Call \code{bb_wget("--help")} to get a message giving information about wget's command line parameters
 #'
 #' @param url string: the URL to retrieve
 #' @param flags character: character vector of command-line flags to pass to wget
 #' @param verbose logical: print trace output?
 #' @param stop_on_error logical: throw an error if the exit status is non-zero?
 #'
-#' @return the result of the system call
+#' @return the result of the system call (or if bb_wget("--help") was called, a message will be issued)
 #'
 #' @seealso \code{\link{bb_install_wget}}
 #' @examples
