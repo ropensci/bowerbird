@@ -1,6 +1,6 @@
 context("provenance functions")
 
-test_that("bb_fingerprinit does something sensible",{
+test_that("bb_fingerprint does something sensible",{
     skip_on_cran()
     my_source <- bb_source(
         name="Bowerbird test data",
