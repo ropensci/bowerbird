@@ -5,7 +5,7 @@
 \title{Define a data source}
 \usage{
 bb_source(id, name, description = NA_character_, reference, source_url,
-  citation, license, comment = NA_character_, method = bb_wget,
+  citation, license, comment = NA_character_, method = bb_handler_wget,
   method_flags = character(), postprocess,
   authentication_note = NA_character_, user = NA_character_,
   password = NA_character_, access_function = NA_character_,
@@ -31,7 +31,7 @@ bb_source(id, name, description = NA_character_, reference, source_url,
 
 \item{method}{function, call, or symbol: (required) the function that handles the synchronisation process for this data source}
 
-\item{method_flags}{character vector: flags to pass to the method. If method is \code{bb_wget}, these are wget flags. Run \code{wget("--help")} to get help on these flags}
+\item{method_flags}{character vector: flags to pass to the method. If method is \code{bb_handler_wget}, these are wget flags. Run \code{wget("--help")} to get help on these flags}
 
 \item{postprocess}{function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied}
 
@@ -67,7 +67,7 @@ my_source <- bb_source(
    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
    license="",
    comment="",
-   method=quote(bb_wget),
+   method=quote(bb_handler_wget),
    method_flags=c("--recursive","--level=1","--accept=*bin*.zip,README.TXT"),
    postprocess=quote(bb_unzip),
    collection_size=0.6)

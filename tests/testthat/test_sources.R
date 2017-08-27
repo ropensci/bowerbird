@@ -56,7 +56,7 @@ test_that("authentication checks work",{
         source_url="blah",
         license="blah",
         authentication_note="auth note",
-        method=bb_wget,
+        method=bb_handler_wget,
         method_flags=character(),
         postprocess=NULL,
         data_group="blah"))
@@ -71,7 +71,7 @@ test_that("authentication checks work",{
         license="blah",
         authentication_note="auth note",
         user="",
-        method=bb_wget,
+        method=bb_handler_wget,
         method_flags=character(),
         postprocess=NULL,
         data_group="blah"))
@@ -86,7 +86,7 @@ test_that("authentication checks work",{
         license="blah",
         authentication_note="auth note",
         password="",
-        method=bb_wget,
+        method=bb_handler_wget,
         method_flags=character(),
         postprocess=NULL,
         data_group="blah"))
@@ -103,7 +103,7 @@ test_that("authentication checks work",{
         authentication_note="auth note",
         user="user",
         password="password",
-        method=bb_wget,
+        method=bb_handler_wget,
         method_flags=character(),
         postprocess=NULL,
         data_group="blah")

@@ -26,7 +26,7 @@ test_that("local directory looks right",{
         citation="blah",
         source_url="http://some.place.com/some/path/",
         license="blah",
-        method=bb_wget,
+        method=bb_handler_wget,
         method_flags=character(),
         data_group="blah")
     cf <- bb_config("/some/local/path") %>% bb_add(src)

@@ -1,11 +1,11 @@
 context("test bowerbird utilities")
 
 test_that("check_method_is works",{
-    expect_true(check_method_is("bb_wget",bb_wget)) ## function name as string
-    expect_true(check_method_is(bb_wget,bb_wget)) ## function
-    expect_true(check_method_is(enquote(bb_wget),bb_wget))
-    expect_true(check_method_is(quote(bb_wget()),bb_wget))
-    expect_true(check_method_is(quote(bb_wget),bb_wget)) ## symbol
+    expect_true(check_method_is("bb_handler_wget",bb_handler_wget)) ## function name as string
+    expect_true(check_method_is(bb_handler_wget,bb_handler_wget)) ## function
+    expect_true(check_method_is(enquote(bb_handler_wget),bb_handler_wget))
+    expect_true(check_method_is(quote(bb_handler_wget()),bb_handler_wget))
+    expect_true(check_method_is(quote(bb_handler_wget),bb_handler_wget)) ## symbol
 })
 
 test_that("method dispatch code works",{

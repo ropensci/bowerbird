@@ -6,13 +6,13 @@
 #'   \item "CMEMS global gridded SSH reprocessed (1993-ongoing)" - a data source that requires a username and password
 #'   \item "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a" - an example data source that uses the \code{oceandata_get} method
 #'   \item "Nimbus Ice Edge Points from Nimbus Visible Imagery" - an example data source that uses the \code{earthdata_get} method
-#'   \item "Bathymetry of Lake Superior" - an example that passes extra flags to the \code{bb_wget} call in order to restrict what is downloaded
+#'   \item "Bathymetry of Lake Superior" - an example that passes extra flags to the \code{bb_handler_wget} call in order to restrict what is downloaded
 #' }
 #' @references See the \code{reference} and \code{citation} field in each row of the returned tibble for references associated with these particular data sources
 #'
 #' @return data.frame
 #'
-#' @seealso \code{\link{bb_config}} \code{\link{bb_wget}} \code{\link{oceandata_get}} \code{\link{earthdata_get}}
+#' @seealso \code{\link{bb_config}} \code{\link{bb_handler_wget}} \code{\link{oceandata_get}} \code{\link{earthdata_get}}
 #'
 #' @examples
 #' \dontrun{
@@ -31,7 +31,7 @@ bb_example_sources <- function() {
             citation="NOAA_OI_SST_V2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
             source_url="ftp://ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/*",
             license="Please cite",
-            method=quote(bb_wget),
+            method=quote(bb_handler_wget),
             method_flags=c("--recursive","--level=1","--no-parent"),
             postprocess=NULL,
             access_function="readsst",
@@ -45,7 +45,7 @@ bb_example_sources <- function() {
             citation="In case of any publication, the Licensee will ensure credit the Copernicus Marine Service in the following manner: \"This study has been conducted using E.U. Copernicus Marine Service Information\"",
             source_url=c("ftp://ftp.sltac.cls.fr/Core/SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047/dataset-duacs-rep-global-merged-allsat-phy-l4-v3/"),
             license="See http://marine.copernicus.eu/services-portfolio/service-commitments-and-licence/",
-            method=quote(bb_wget),
+            method=quote(bb_handler_wget),
             method_flags=c("--recursive","--level=3","--follow-ftp","--no-parent"),
             postprocess=quote(bb_gunzip),
             authentication_note="Copernicus Marine login required, see http://marine.copernicus.eu/services-portfolio/register-now/",
@@ -90,7 +90,7 @@ bb_example_sources <- function() {
             source_url="https://www.ngdc.noaa.gov/mgg/greatlakes/superior/data/",
             citation="Publisher: DOC/NOAA/NESDIS/NCEI > National Centers for Environmental Information, NESDIS, NOAA, U.S. Department of Commerce",
             license="https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright",
-            method=quote(bb_wget),
+            method=quote(bb_handler_wget),
             method_flags=c("--recursive","--level=2","--accept-regex=/netcdf/","--reject=index.html*"),
             comment="Only the netcdf format data are retrieved here - adjust the accept parameter in the method_flags to get other formats",
             postprocess=quote(bb_gunzip),

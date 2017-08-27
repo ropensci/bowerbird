@@ -16,7 +16,7 @@ Five example data sources:
   \item "CMEMS global gridded SSH reprocessed (1993-ongoing)" - a data source that requires a username and password
   \item "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a" - an example data source that uses the \code{oceandata_get} method
   \item "Nimbus Ice Edge Points from Nimbus Visible Imagery" - an example data source that uses the \code{earthdata_get} method
-  \item "Bathymetry of Lake Superior" - an example that passes extra flags to the \code{bb_wget} call in order to restrict what is downloaded
+  \item "Bathymetry of Lake Superior" - an example that passes extra flags to the \code{bb_handler_wget} call in order to restrict what is downloaded
 }
 }
 \examples{
@@ -30,5 +30,5 @@ bb_sync(cf)
 See the \code{reference} and \code{citation} field in each row of the returned tibble for references associated with these particular data sources
 }
 \seealso{
-\code{\link{bb_config}} \code{\link{bb_wget}} \code{\link{oceandata_get}} \code{\link{earthdata_get}}
+\code{\link{bb_config}} \code{\link{bb_handler_wget}} \code{\link{oceandata_get}} \code{\link{earthdata_get}}
 }

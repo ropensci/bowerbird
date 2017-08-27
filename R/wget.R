@@ -35,7 +35,7 @@ flags_to_charvec <- function(fl) {
 #' @seealso \code{\link{wget}}
 #'
 #' @export
-bb_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
+bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(config$data_sources)==1)
     assert_that(is.flag(verbose))

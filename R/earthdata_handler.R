@@ -15,7 +15,7 @@ earthdata_get <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is.flag(local_dir_only))
 
     if (local_dir_only)
-        return(bb_wget(config,verbose=verbose,local_dir_only=TRUE))
+        return(bb_handler_wget(config,verbose=verbose,local_dir_only=TRUE))
 
     cfrow <- bb_settings_to_cols(config)
     if (na_or_empty(cfrow$user) || na_or_empty(cfrow$password))
@@ -31,5 +31,5 @@ earthdata_get <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     dummy$method_flags <- list(c(mflags,"--http-user",dummy$user,"--http-password",dummy$password,"--load-cookies",cookies_file,"--save-cookies",cookies_file,"--keep-session-cookies","--reject=index.html*","-e","robots=off")) ##"--no-check-certificate" "--auth-no-challenge",
     dummy$user <- NA_character_
     dummy$password <- NA_character_
-    bb_wget(dummy,verbose=verbose)
+    bb_handler_wget(dummy,verbose=verbose)
 }

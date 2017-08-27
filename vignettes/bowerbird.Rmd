@@ -45,7 +45,7 @@ my_source <- bb_source(
     citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
     source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
     license="CC-BY 4.0",
-    method=quote(bb_wget),
+    method=quote(bb_handler_wget),
     method_flags="--recursive",
     postprocess=quote(bb_unzip),
     collection_size=0.4,
@@ -90,7 +90,7 @@ my_source <- bb_source(
     citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
     source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
     license="CC-BY 4.0",
-    method=quote(bb_wget),
+    method=quote(bb_handler_wget),
     method_flags="--recursive",
     postprocess=quote(bb_unzip),
     collection_size=0.4,
@@ -103,7 +103,7 @@ Some particularly important components of this definition are:
 
 1. The `license` and `citation` are important so that users know what conditions govern the usage of the data, and the appropriate citation to use to acknowledge the data providers. The `reference` entry should refer to a metadata or documentation page that describes the data in detail.
 
-1. The `method`, `method_flags`, and `source_url` define how this data will be retrieved. Most sources will use the `bb_wget` method, which is a wrapper around the wget utility. If you are unfamiliar with wget, consult one of the many online tutorials. You can also see the in-built wget help by running `wget("--help")`.
+1. The `method`, `method_flags`, and `source_url` define how this data will be retrieved. Most sources will use the `bb_handler_wget` method, which is a wrapper around the wget utility. If you are unfamiliar with wget, consult one of the many online tutorials. You can also see the in-built wget help by running `wget("--help")`.
 
 
 Some subtleties to bear in mind:
@@ -114,9 +114,9 @@ Some subtleties to bear in mind:
 
 1. If you want to include/exclude certain files from being downloaded, use the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` flags. Note that `--accept` and `--reject` apply to file names (not the full path), and can be comma-separated lists of file name suffixes or patterns. The `--accept-regex` and `--reject-regex` flags apply to the full path but can only be a single regular expression each.
 
-1. Remember that any `wget_global_flags` defined via `bb_config` will be applied to every data source in addition to their specific `method_flags`. Any data source using `bb_wget` but without `method_flags` (i.e. NA) will use the `wget_default_flags` if any were defined via `bb_config`. Sources needing no flags should specify an empty string for `method_flags`.
+1. Remember that any `wget_global_flags` defined via `bb_config` will be applied to every data source in addition to their specific `method_flags`. Any data source using `bb_handler_wget` but without `method_flags` (i.e. NA) will use the `wget_default_flags` if any were defined via `bb_config`. Sources needing no flags should specify an empty string for `method_flags`.
 
-1. Several wget flags are set by the `bb_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flags is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
+1. Several wget flags are set by the `bb_handler_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flags is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
 
 ### Modifying data sources
 
@@ -140,7 +140,7 @@ cf <- cf %>% bb_add(mysrc)
 
 #### Reducing download sizes
 
-Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the `bb_wget` method, you can restrict what is downloaded by modifying the data source's `method_flags`, particularly the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.
+Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the `bb_handler_wget` method, you can restrict what is downloaded by modifying the data source's `method_flags`, particularly the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.
 
 Say a particular data provider arranges their files in yearly directories. It would be fairly easy to restrict ourselves to, say, only the 2017 data:
 
@@ -156,7 +156,7 @@ Alternatively, for data sources that are divided into subdirectories, one could 
 
 ### Defining new data source methods
 
-Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `oceandata_get` or `earthdata_get`.
+Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_handler_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `oceandata_get` or `earthdata_get`.
 
 ### Parallelized sync
 

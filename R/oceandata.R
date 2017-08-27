@@ -93,11 +93,11 @@ oceandata_get <- function(config,verbose=FALSE,local_dir_only=FALSE) {
         }
         if (download_this) {
             dummy <- config
-            ## note that if skip_downloads is TRUE, it will be passed through to bb_wget here
+            ## note that if skip_downloads is TRUE, it will be passed through to bb_handler_wget here
             ##dummy$method_flags <- paste("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
             dummy$data_sources$method_flags <- list(c("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories"))
             dummy$data_sources$source_url <- this_url
-            out <- out && bb_wget(dummy,verbose=verbose)
+            out <- out && bb_handler_wget(dummy,verbose=verbose)
         } else {
             if (this_exists) {
                 if (verbose) cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))

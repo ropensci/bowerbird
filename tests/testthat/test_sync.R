@@ -1,6 +1,6 @@
 context("sync")
 
-test_that("bb_sync works with dry run on bb_wget",{
+test_that("bb_sync works with dry run on bb_handler_wget",{
     skip_on_cran()
     temp_root <- tempdir()
     cf <- bb_config(local_file_root=temp_root,skip_downloads=TRUE)
@@ -19,7 +19,7 @@ test_that("bb_sync is quiet when asked",{
         reference= "http://some.where.org/",
         citation="blah",
         license="blah",
-        method=bb_wget,
+        method=bb_handler_wget,
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd", ## just some file to download
         method_flags=c("--recursive","--level=1"))
     cf <- cf %>% bb_add(myds)
@@ -62,7 +62,7 @@ test_that("bb_sync works with a sink() call in place",{
         reference= "http://some.where.org/",
         citation="blah",
         license="blah",
-        method=bb_wget,
+        method=bb_handler_wget,
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd", ## just some file to download
         method_flags=c("--recursive","--level=1"))
     temp_root <- tempdir()
