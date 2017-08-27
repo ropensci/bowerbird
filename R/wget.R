@@ -1,29 +1,3 @@
-## internal: take flags and convert to character vector if needed
-## flags can either be a string (will be split on white spaces)
-## or list (expect single element, which is a character vector) - as would get from tibble list column
-## or character vector (convert to empty character vector if null, NA, or empty string, otherwise return as is)
-flags_to_charvec <- function(fl) {
-    if (is.list(fl)) {
-        fl[[1]]
-    } else if (is.null(fl) || length(fl)<1) {
-        character()
-    } else if (is.character(fl)) {
-        if (is.string(fl)) {
-            if (is.null(fl) || is.na(fl) || !nzchar(fl)) {
-                character()
-            } else {
-                ## split on whitespaces
-                strsplit(fl,"[[:space:]]+")[[1]]
-            }
-        } else {
-            fl
-        }
-    } else {
-        stop("expecting flags as character vector or list")
-    }
-}
-
-
 #' Mirror an external data source using the wget utility
 #'
 #' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
@@ -47,7 +21,6 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     cfrow <- bb_settings_to_cols(config)
     this_flags <- flags_to_charvec(cfrow$method_flags)
     ## add wget_global_flags
-    ##if (!is.null(cfrow$wget_global_flags)) this_flags <- paste(this_flags,cfrow$wget_global_flags,sep=" ")
     gflags <- flags_to_charvec(cfrow$wget_global_flags)
     if (length(gflags)>0)
         this_flags <- c(this_flags,gflags)
@@ -69,15 +42,12 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
         }
     }
     ## add user, password flags
-    ##if (!is.na(cfrow$user) && nchar(cfrow$user)>0) this_flags <- paste0(this_flags," --user='",cfrow$user,"'")
     if (!is.na(cfrow$user) && nchar(cfrow$user)>0) this_flags <- c(this_flags,"--user",cfrow$user)
-    ##if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- paste0(this_flags," --password='",cfrow$password,"'")
     if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- c(this_flags,"--password",cfrow$password)
-    ##if (cfrow$wait>0) this_flags <- paste0(this_flags," --wait=",cfrow$wait)
+    ##if (cfrow$wait>0) this_flags <- c(this_flags,"--wait=",cfrow$wait)
 
     if (!verbose) {
         ## suppress wget's own output
-        ##if (!grepl("quiet",tolower(this_flags))) this_flags <- paste0(this_flags," --quiet")
         if (!any(grepl("quiet",tolower(this_flags)))) this_flags <- c(this_flags,"--quiet")
     }
 
@@ -90,7 +60,6 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
             ## sink() won't catch the output of system commands, which means we miss stuff in our log
             ## workaround: send output to temporary file so that we can capture it
             output_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
-            ##this_flags <- paste0("-o \"",output_file,"\" ",this_flags)
             this_flags <- c("-o",output_file,this_flags)
             syscall_obj <- bb_wget(cfrow$source_url,this_flags,verbose=verbose)
             ## now echo the contents of output_file to console, so that sink() captures it
@@ -279,8 +248,6 @@ wget_test <- function(wget_path) {
 ## internal: merge two sets of wget flags
 ## take flags as either character vector, single-element list of character vector, space-separated string (as per flags_to_charvec)
 resolve_wget_clobber_flags <- function(primary_flags,secondary_flags) {
-    ##wgf <- str_split(primary_flags,"[ ]+")[[1]]
-    ##secondary_flags <- str_split(secondary_flags,"[ ]+")[[1]]
     wgf <- flags_to_charvec(primary_flags)
     secondary_flags <- flags_to_charvec(secondary_flags)
     for (thisflag in setdiff(secondary_flags,wgf)) {
@@ -291,9 +258,35 @@ resolve_wget_clobber_flags <- function(primary_flags,secondary_flags) {
                "--no-clobber"={ if (! any(c("--timestamping","-N") %in% wgf)) wgf <- c(wgf,thisflag) },
                wgf <- c(wgf,thisflag))
     }
-    ##paste(wgf,sep="",collapse=" ")
     wgf
 }
+
+
+## internal: take flags and convert to character vector if needed
+## flags can either be a string (will be split on white spaces)
+## or list (expect single element, which is a character vector) - as would get from tibble list column
+## or character vector (convert to empty character vector if null, NA, or empty string, otherwise return as is)
+flags_to_charvec <- function(fl) {
+    if (is.list(fl)) {
+        fl[[1]]
+    } else if (is.null(fl) || length(fl)<1) {
+        character()
+    } else if (is.character(fl)) {
+        if (is.string(fl)) {
+            if (is.null(fl) || is.na(fl) || !nzchar(fl)) {
+                character()
+            } else {
+                ## split on whitespaces
+                strsplit(fl,"[[:space:]]+")[[1]]
+            }
+        } else {
+            fl
+        }
+    } else {
+        stop("expecting flags as character vector or list")
+    }
+}
+
 
 
 ##dir_exists <- function(z) utils::file_test("-d",z)
