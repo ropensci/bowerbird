@@ -8,5 +8,9 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libarchive-dev libapparmor-dev
 
+# set NOT_CRAN to true to ensure that skip_on_cran tests are run here
+env:
+  - NOT_CRAN=true
+
 after_success:
   - Rscript -e 'covr::codecov()'
