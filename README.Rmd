@@ -22,6 +22,12 @@ knitr::opts_chunk$set(
 
 Often it's desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be necessary to have local copies. This is particularly common in ecology and the environmental sciences. Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
 
+Bowerbird might be used in several different modes:
+
+- interactively, from the R console, to download or update data files on an as-needed basis
+- from the command line, perhaps as a regular scheduled task
+- from within other R packages.
+
 ## Installing
 
 ```{r eval=FALSE}
@@ -43,24 +49,23 @@ Build up a configuration by first defining global options such as the destinatio
 cf <- bb_config(local_file_root="~/your/data/directory")
 ```
 
-Bowerbird must then be told which data sources to synchronize. Use the `bb_source()` function to define a data source:
+Bowerbird must then be told which data sources to synchronize. Use the `bb_source()` function to define a data source. Let's use a dataset of bike paths in Geelong as an example:
 
 ```{r eval=FALSE}
 my_source <- bb_source(
-    name="Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
-    id="10.4225/25/53D9B12E0F96E",
-    description="This is a compilation of all the processed multibeam bathymetry data that are publicly available in Geoscience Australia's data holding for the Macquarie Ridge.",
-    reference="http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_b9224f95-a416-07f8-e044-00144fdd4fa6/XYZ+multibeam+bathymetric+grids+of+the+Macquarie+Ridge",
-    citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
-    source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
-    license="CC-BY 4.0",
+    name="Bike Paths - Greater Geelong",
+    id="http://data.gov.au/dataset/7af9cf59-a4ea-47b2-8652-5e5eeed19611",
+    description="Polyline data of bike path locations for the City of Greater Geelong.",
+    reference="https://data.gov.au/dataset/geelong-bike-paths",
+    citation="",
+    source_url="https://data.gov.au/dataset/7af9cf59-a4ea-47b2-8652-5e5eeed19611",
+    license="CC-BY",
     method=quote(bb_handler_wget),
-    method_flags="--recursive",
+    method_flags=c("--recursive","--level",1,"--accept-regex=download","--adjust-extension"),
     postprocess=quote(bb_unzip),
-    collection_size=0.4,
-    data_group="Topography")
+    collection_size=0.002)
 
-cf <- bb_config(local_file_root="/temp/data/bbtest") %>%
+cf <- bb_config(local_file_root="~/temp/data/bbtest") %>%
     bb_add(my_source)
 ```
 
@@ -76,9 +81,20 @@ bb_sync(cf)
 
 Congratulations! You now have your own local copy of your chosen data sets.
 
+
 ### Ongoing updates
 
 At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the `clobber` parameter set to 0 (do not overwrite existing files) or 1 (overwrite only if the remote file is newer than the local copy) then the sync process will run quite quickly because it will not need to re-download any data files.
+
+### Use of bowerbird within other packages
+
+Bowerbird might be useful to developers of packages that download resources from remote locations. When might you consider using bowerbird rather than, say, [curl](https://cran.r-project.org/package=curl) or [crul](https://cran.r-project.org/package=crul)? The principal advantage of bowerbird is that it can download files recursively. In many cases, it is only necessary to specify the top-level URL, and bowerbird (through the magic of `wget`) can recursively download linked resources. Bowerbird can also:
+
+
+- decompress downloaded files (if the remote server provides them in, say, zipped or gzipped form).
+
+- incrementally update files that you have previously downloaded. Bowerbird can be instructed not to re-download files that exist locally, unless they have changed on the remote server. Compressed files will also only be decompressed if changed.
+
 
 ## Nuances
 
@@ -179,7 +195,7 @@ library(doFuture)
 registerDoFuture()
 plan(multiprocess)
 
-foreach (i=unique(cf$name),.export=c("cf")) %dopar% {bb_sync(cf[cf$name==i,])}
+foreach (i=unique(cf$data_sources$name),.export=c("cf")) %dopar% {bb_sync(bb_subset(cf,cf$data_sources$name==i))}
 ```
 
 ### Data provenance and reproducible research
