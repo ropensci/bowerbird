@@ -81,14 +81,14 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
 
 #' Make a wget call
 #'
-#' The wget system call is made using the \code{exec_internal} function from the sys package. Call \code{bb_wget("--help")} to get a message giving information about wget's command line parameters
+#' The wget system call is made using the \code{exec_wait} function from the sys package. Call \code{bb_wget("--help")} to get a message giving information about wget's command line parameters
 #'
 #' @param url string: the URL to retrieve
 #' @param flags character: character vector of command-line flags to pass to wget
 #' @param verbose logical: print trace output?
-#' @param stop_on_error logical: throw an error if the exit status is non-zero?
+#' @param capture_stdout logical: if TRUE, return 'stdout' and 'stderr' output in the returned object (see exec_internal from the sys package). Otherwise send these outputs to the console
 #'
-#' @return the result of the system call (or if bb_wget("--help") was called, a message will be issued)
+#' @return the result of the system call (or if bb_wget("--help") was called, a message will be issued). The returned object will have components 'status' and (if capture_stdout was TRUE) 'stdout' and 'stderr'
 #'
 #' @seealso \code{\link{bb_install_wget}} \code{\link{bb_find_wget}}
 #' @examples
@@ -98,11 +98,11 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
 #' }
 #'
 #' @export
-bb_wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
+bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
     assert_that(is.string(url))
     assert_that(is.character(flags))
     assert_that(is.flag(verbose))
-    assert_that(is.flag(stop_on_error))
+    assert_that(is.flag(capture_stdout))
     if (tolower(url) %in% c("-h","--help") || identical(tolower(flags),"-h") || identical(tolower(flags),"--help")) {
         out <- sys::exec_internal(bb_find_wget(),args="--help",error=TRUE)
         message(rawToChar(out$stdout))
@@ -116,7 +116,12 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,stop_on_error=FALSE) {
         if (tolower(.Platform$OS.type)=="windows")
             flags <- wget_flags_to_short(flags)
         if (verbose) cat(sprintf(" executing wget %s %s\n",paste(flags,collapse=" "),url))
-        sys::exec_internal(bb_find_wget(),args=c(flags,url),error=stop_on_error)
+        if (capture_stdout) {
+            sys::exec_internal(bb_find_wget(),args=c(flags,url),error=FALSE)
+        } else {
+            status <- sys::exec_wait(bb_find_wget(),args=c(flags,url),std_out=TRUE,std_err=TRUE)
+            list(status=status)
+        }
         ##system2(wget_exe(),args=paste(flags,url,sep=" "),...)
     }
 }
@@ -130,6 +135,7 @@ wget_flags_to_short <- function(flags) {
         flags[flags=="--verbose"] <- "-v"
         flags[flags=="--no-verbose"] <- "-nv"
         flags[flags=="--force-html"] <- "-F"
+        flags[flags=="--adjust-extension"] <- "-E"
         flags[flags=="--directory-prefix"] <- "-P"
         flags[flags=="--no-host-directories"] <- "-nH"
         flags

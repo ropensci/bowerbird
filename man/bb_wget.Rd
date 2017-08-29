@@ -4,7 +4,7 @@
 \alias{bb_wget}
 \title{Make a wget call}
 \usage{
-bb_wget(url, flags = character(), verbose = FALSE, stop_on_error = FALSE)
+bb_wget(url, flags = character(), verbose = FALSE, capture_stdout = FALSE)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
@@ -13,13 +13,13 @@ bb_wget(url, flags = character(), verbose = FALSE, stop_on_error = FALSE)
 
 \item{verbose}{logical: print trace output?}
 
-\item{stop_on_error}{logical: throw an error if the exit status is non-zero?}
+\item{capture_stdout}{logical: if TRUE, return 'stdout' and 'stderr' output in the returned object (see exec_internal from the sys package). Otherwise send these outputs to the console}
 }
 \value{
-the result of the system call (or if bb_wget("--help") was called, a message will be issued)
+the result of the system call (or if bb_wget("--help") was called, a message will be issued). The returned object will have components 'status' and (if capture_stdout was TRUE) 'stdout' and 'stderr'
 }
 \description{
-The wget system call is made using the \code{exec_internal} function from the sys package. Call \code{bb_wget("--help")} to get a message giving information about wget's command line parameters
+The wget system call is made using the \code{exec_wait} function from the sys package. Call \code{bb_wget("--help")} to get a message giving information about wget's command line parameters
 }
 \examples{
 \dontrun{
