@@ -13,7 +13,7 @@ install:
 # Adapt as necessary starting from here
 
 environment:
-#  NOT_CRAN: true
+  NOT_CRAN: true
   global:
    _R_CHECK_FORCE_SUGGESTS_: false
 #   WARNINGS_ARE_ERRORS: 0
