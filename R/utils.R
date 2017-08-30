@@ -244,6 +244,7 @@ do_decompress_files <- function(method,files,overwrite=TRUE) {
                        tryCatch({
                            fsize <- ceiling(file.info(thisf)$size/1e4)*1e4
                            ff <- archive::file_read(thisf)
+                           open(ff,"rb") ## open in binary mode, so that readBin is happy
                            writeBin(readBin(ff,"raw",fsize),destname)
                            close(ff)
                            if (grepl("delete",method)) file.remove(thisf)
