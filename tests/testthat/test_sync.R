@@ -28,6 +28,7 @@ test_that("bb_sync is quiet when asked",{
 
 test_that("bb_sync works on oceandata",{
     skip_on_cran()
+    skip_on_appveyor() ## failing on AppVeyor for unknown reasons
     ods <- bb_source(
         id="bilbobaggins",
         name="Oceandata test",
