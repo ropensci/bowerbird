@@ -2,6 +2,7 @@ context("provenance functions")
 
 test_that("bb_fingerprint does something sensible",{
     skip_on_cran()
+    #skip_on_appveyor() ## appveyor does not recognize github's certificate
     my_source <- bb_source(
         name="Bowerbird test data",
         id="bbtest-v0.1",
@@ -11,7 +12,7 @@ test_that("bb_fingerprint does something sensible",{
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/example_data_was_gzipped.csv.gz",
         license="MIT",
         method=quote(bb_handler_wget),
-        method_flags=c("--recursive","--level=1","-e","robots=off"),
+        method_flags=c("--recursive","--level=1","--no-check-certificate","-e","robots=off"),
         postprocess=quote(bb_gunzip))
 
     temp_root <- tempdir()

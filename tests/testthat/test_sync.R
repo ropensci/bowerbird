@@ -21,7 +21,7 @@ test_that("bb_sync is quiet when asked",{
         license="blah",
         method=bb_handler_wget,
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd", ## just some file to download
-        method_flags=c("--recursive","--level=1"))
+        method_flags=c("--recursive","--no-check-certificate","--level=1"))
     cf <- cf %>% bb_add(myds)
     expect_silent(bb_sync(cf,verbose=FALSE))
 })
@@ -64,7 +64,7 @@ test_that("bb_sync works with a sink() call in place",{
         license="blah",
         method=bb_handler_wget,
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd", ## just some file to download
-        method_flags=c("--recursive","--level=1"))
+        method_flags=c("--recursive","--no-check-certificate","--level=1"))
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),myds)
     bb_sync(cf)
@@ -74,4 +74,5 @@ test_that("bb_sync works with a sink() call in place",{
     expect_true(any(grepl("Synchronizing dataset: test",op)))
     ## sink file should also contain wget output, e.g. "FINISHED"
     expect_true(any(grepl("FINISHED",op)))
+    if (!any(grepl("FINISHED",op)))     cat(op)
 })
