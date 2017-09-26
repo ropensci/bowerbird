@@ -10,6 +10,7 @@ Description: Tools to get and maintain a data repository from third-party data
 URL: https://github.com/AustralianAntarcticDivision/bowerbird
 BugReports: https://github.com/AustralianAntarcticDivision/bowerbird/issues
 License: MIT + file LICENSE
+Depends: R (>= 3.3.0)
 Imports:
     assertthat,
     dplyr,
