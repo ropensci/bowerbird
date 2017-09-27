@@ -19,7 +19,7 @@ Imports:
     R.utils,
     rmarkdown,
     stringr,
-    sys
+    sys (>= 1.4.9000)
 LazyLoad: yes
 RoxygenNote: 6.0.1
 Suggests:
