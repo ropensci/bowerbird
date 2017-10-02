@@ -107,40 +107,42 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     ## run the method
     mth <- get_function_from_method(this_dataset$data_sources$method[[1]])
     ok <- do.call(mth,list(config=this_dataset,verbose=verbose))
-    if (is.na(ok)) {
-        warning("TODO: should postprocess run if process was interrupted by user?")
-    }
-    ## build file list if postprocessing required
+
+    ## postprocessing
     if (length(pp)>0) {
-        if (verbose) cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep))
-        file_list_after <- file.info(list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE))
-        if (file.exists(this_path_no_trailing_sep)) {
-            ## in some cases this points directly to a file
-            temp <- file.info(this_path_no_trailing_sep)
-            temp <- temp[!temp$isdir,]
-            if (nrow(temp)>0) { file_list_after <- rbind(file_list_after,temp) }
-        }
-        if (verbose) cat(sprintf("done.\n"))
-    }
-    if (length(pp)>0) {
-        for (i in seq_len(length(pp))) {
-            ## postprocessing steps are passed as functions or calls
-            qq <- pp[[i]]
-            if (is.function(qq)) {
-                ## passed as function
-                ## evaluate with extra args
-                do.call(qq,list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
-            } else if (is.symbol(qq)) {
-                ## passed as symbol
-                do.call(eval(qq),list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
-            } else if (is.call(qq)) {
-                if (all.names(qq)[1]=="quote") {
-                    ## call was constructed as e.g. enquote(fun)
+        if (is.na(ok) || !ok) {
+            if (verbose) cat(" download failed or was interrupted: not running post-processing step\n")
+        } else {
+            ## build file list
+            if (verbose) cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep))
+            file_list_after <- file.info(list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE))
+            if (file.exists(this_path_no_trailing_sep)) {
+                ## in some cases this points directly to a file
+                temp <- file.info(this_path_no_trailing_sep)
+                temp <- temp[!temp$isdir,]
+                if (nrow(temp)>0) { file_list_after <- rbind(file_list_after,temp) }
+            }
+            if (verbose) cat(sprintf("done.\n"))
+
+            for (i in seq_len(length(pp))) {
+                ## postprocessing steps are passed as functions or calls
+                qq <- pp[[i]]
+                if (is.function(qq)) {
+                    ## passed as function
+                    ## evaluate with extra args
+                    do.call(qq,list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                } else if (is.symbol(qq)) {
+                    ## passed as symbol
                     do.call(eval(qq),list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
-                } else {
-                    ## call was constructed as e.g. quote(fun()) or quote(fun(var=arg))
-                    thisargs <- inject_args(qq,list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
-                    do.call(all.names(qq)[1],thisargs)
+                } else if (is.call(qq)) {
+                    if (all.names(qq)[1]=="quote") {
+                        ## call was constructed as e.g. enquote(fun)
+                        do.call(eval(qq),list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                    } else {
+                        ## call was constructed as e.g. quote(fun()) or quote(fun(var=arg))
+                        thisargs <- inject_args(qq,list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                        do.call(all.names(qq)[1],thisargs)
+                    }
                 }
             }
         }
