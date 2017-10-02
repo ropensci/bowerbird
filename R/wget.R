@@ -113,8 +113,6 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
         flags <- flags_to_charvec(flags) ## will split string, or replace NA/"" with empty character vector
         ## sys has a bug in which a long total argument length will cause a session crash on windows (https://github.com/jeroen/sys/issues/17)
         ## until that bug in sys is fixed, use short-form arguments to reduce total argument length
-        if (tolower(.Platform$OS.type)=="windows")
-            flags <- wget_flags_to_short(flags)
         if (verbose) cat(sprintf(" executing wget %s %s\n",paste(flags,collapse=" "),url))
         if (capture_stdout) {
             sys::exec_internal(bb_find_wget(),args=c(flags,url),error=FALSE)
@@ -125,22 +123,6 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
         ##system2(wget_exe(),args=paste(flags,url,sep=" "),...)
     }
 }
-
-wget_flags_to_short <- function(flags) {
-        flags[flags=="--recursive"] <- "-r"
-        flags[flags=="--no-clobber"] <- "-nc"
-        flags[flags=="--no-parent"] <- "-np"
-        flags[flags=="--quiet"] <- "-q"
-        flags[flags=="--debug"] <- "-d"
-        flags[flags=="--verbose"] <- "-v"
-        flags[flags=="--no-verbose"] <- "-nv"
-        flags[flags=="--force-html"] <- "-F"
-        flags[flags=="--adjust-extension"] <- "-E"
-        flags[flags=="--directory-prefix"] <- "-P"
-        flags[flags=="--no-host-directories"] <- "-nH"
-        flags
-}
-
 
 #' Helper function to install wget
 #'
