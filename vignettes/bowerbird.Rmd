@@ -19,6 +19,14 @@ Bowerbird can be used in several different modes:
 - from the command line, perhaps as a regular scheduled task
 - programatically, including from within other R packages, scripts, or R markdown documents that require local copies of particular data files.
 
+When might you consider using bowerbird rather than, say, [curl](https://cran.r-project.org/package=curl) or [crul](https://cran.r-project.org/package=crul)? The principal advantage of bowerbird is that it can download files recursively. In many cases, it is only necessary to specify the top-level URL, and bowerbird can recursively download linked resources. Bowerbird can also:
+
+
+- decompress downloaded files (if the remote server provides them in, say, zipped or gzipped form).
+
+- incrementally update files that you have previously downloaded. Bowerbird can be instructed not to re-download files that exist locally, unless they have changed on the remote server. Compressed files will also only be decompressed if changed.
+
+
 ## Installing
 
 Temporary note: until `sys` version 1.5 hits CRAN, you will need to do `devtools::install_github("jeroen/sys")` to install from github, prior to installing bowerbird.
@@ -78,16 +86,6 @@ Congratulations! You now have your own local copy of your chosen data sets.
 ### Ongoing updates
 
 At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the `clobber` parameter set to 0 (do not overwrite existing files) or 1 (overwrite only if the remote file is newer than the local copy) then the sync process will run more quickly because it will not need to re-download any data files.
-
-### Use of bowerbird within other packages
-
-Bowerbird might be useful to developers of packages that download resources from remote locations. When might you consider using bowerbird rather than, say, [curl](https://cran.r-project.org/package=curl) or [crul](https://cran.r-project.org/package=crul)? The principal advantage of bowerbird is that it can download files recursively. In many cases, it is only necessary to specify the top-level URL, and bowerbird (through the magic of `wget`) can recursively download linked resources. Bowerbird can also:
-
-
-- decompress downloaded files (if the remote server provides them in, say, zipped or gzipped form).
-
-- incrementally update files that you have previously downloaded. Bowerbird can be instructed not to re-download files that exist locally, unless they have changed on the remote server. Compressed files will also only be decompressed if changed.
-
 
 ## Data source handlers
 
