@@ -60,21 +60,20 @@ Build up a configuration by first defining global options such as the destinatio
 cf <- bb_config(local_file_root="~/your/data/directory")
 ```
 
-Bowerbird must then be told which data sources to synchronize. Use the `bb_source()` function to define a data source. Let's use a dataset of bike paths in Geelong, Australia as an example:
+Bowerbird must then be told which data sources to synchronize. Use the `bb_source()` function to define a data source. Let's use data from the 2016 Australian federal election as an example:
 
 ```{r eval=FALSE}
 my_source <- bb_source(
-    name="Bike Paths - Greater Geelong",
-    id="http://data.gov.au/dataset/7af9cf59-a4ea-47b2-8652-5e5eeed19611",
-    description="Polyline data of bike path locations for the City of Greater Geelong.",
-    reference="https://data.gov.au/dataset/geelong-bike-paths",
-    citation="",
-    source_url="https://data.gov.au/dataset/7af9cf59-a4ea-47b2-8652-5e5eeed19611",
+    name="Australian Election 2016 House of Representatives data",
+    id="aus-election-house-2016",
+    description="House of Representatives results from the 2016 Australian election.",
+    reference="http://results.aec.gov.au/",
+    citation="Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
+    source_url=c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
     license="CC-BY",
     method=quote(bb_handler_wget),
-    method_flags=c("--recursive","--level",1,"--accept-regex=download","--adjust-extension"),
-    postprocess=quote(bb_unzip),
-    collection_size=0.002)
+    method_flags=c("--recursive","--level=1","--accept=csv","--no-if-modified-since"),
+    collection_size=0.01)
 
 cf <- bb_config(local_file_root="~/temp/data/bbtest") %>%
     bb_add(my_source)
