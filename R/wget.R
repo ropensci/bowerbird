@@ -108,11 +108,7 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
         message(rawToChar(out$stdout))
     } else {
         ## sys expects flags as a char vector, not a string
-        ##if (is.string(flags))
-        ##    flags <- strsplit(flags,"[[:space:]]+")[[1]]
         flags <- flags_to_charvec(flags) ## will split string, or replace NA/"" with empty character vector
-        ## sys has a bug in which a long total argument length will cause a session crash on windows (https://github.com/jeroen/sys/issues/17)
-        ## until that bug in sys is fixed, use short-form arguments to reduce total argument length
         if (verbose) cat(sprintf(" executing wget %s %s\n",paste(flags,collapse=" "),url))
         if (capture_stdout) {
             sys::exec_internal(bb_find_wget(),args=c(flags,url),error=FALSE)
