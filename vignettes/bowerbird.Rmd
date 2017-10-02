@@ -11,9 +11,18 @@ vignette: >
 
 # Bowerbird
 
-Often it's desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be necessary to have local copies. This is particularly common in ecology and the environmental sciences. Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
+Often it's desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be better to have local copies. This is particularly common in environmental and other sciences that deal with large data sets (e.g. satellite or global climate model products). Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
+
+Bowerbird can be used in several different modes:
+
+- interactively from the R console, to download or update data files on an as-needed basis
+- from the command line, perhaps as a regular scheduled task
+- programatically, including from within other R packages, scripts, or R markdown documents that require local copies of particular data files.
 
 ## Installing
+
+Temporary note: until `sys` version 1.5 hits CRAN, you will need to do `devtools::install_github("jeroen/sys")` to install from github, prior to installing bowerbird.
+
 
 ```{r eval=FALSE}
 install.packages("devtools")
@@ -34,24 +43,23 @@ Build up a configuration by first defining global options such as the destinatio
 cf <- bb_config(local_file_root="~/your/data/directory")
 ```
 
-Bowerbird must then be told which data sources to synchronize. Use the `bb_source()` function to define a data source:
+Bowerbird must then be told which data sources to synchronize. Use the `bb_source()` function to define a data source. Let's use a dataset of bike paths in Geelong, Australia as an example:
 
 ```{r eval=FALSE}
 my_source <- bb_source(
-    name="Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
-    id="10.4225/25/53D9B12E0F96E",
-    description="This is a compilation of all the processed multibeam bathymetry data that are publicly available in Geoscience Australia's data holding for the Macquarie Ridge.",
-    reference="http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_b9224f95-a416-07f8-e044-00144fdd4fa6/XYZ+multibeam+bathymetric+grids+of+the+Macquarie+Ridge",
-    citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
-    source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
-    license="CC-BY 4.0",
+    name="Bike Paths - Greater Geelong",
+    id="http://data.gov.au/dataset/7af9cf59-a4ea-47b2-8652-5e5eeed19611",
+    description="Polyline data of bike path locations for the City of Greater Geelong.",
+    reference="https://data.gov.au/dataset/geelong-bike-paths",
+    citation="",
+    source_url="https://data.gov.au/dataset/7af9cf59-a4ea-47b2-8652-5e5eeed19611",
+    license="CC-BY",
     method=quote(bb_handler_wget),
-    method_flags="--recursive",
+    method_flags=c("--recursive","--level",1,"--accept-regex=download","--adjust-extension"),
     postprocess=quote(bb_unzip),
-    collection_size=0.4,
-    data_group="Topography")
+    collection_size=0.002)
 
-cf <- bb_config(local_file_root="/temp/data/bbtest") %>%
+cf <- bb_config(local_file_root="~/temp/data/bbtest") %>%
     bb_add(my_source)
 ```
 
@@ -69,7 +77,21 @@ Congratulations! You now have your own local copy of your chosen data sets.
 
 ### Ongoing updates
 
-At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the `clobber` parameter set to 0 (do not overwrite existing files) or 1 (overwrite only if the remote file is newer than the local copy) then the sync process will run quite quickly because it will not need to re-download any data files.
+At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the `clobber` parameter set to 0 (do not overwrite existing files) or 1 (overwrite only if the remote file is newer than the local copy) then the sync process will run more quickly because it will not need to re-download any data files.
+
+### Use of bowerbird within other packages
+
+Bowerbird might be useful to developers of packages that download resources from remote locations. When might you consider using bowerbird rather than, say, [curl](https://cran.r-project.org/package=curl) or [crul](https://cran.r-project.org/package=crul)? The principal advantage of bowerbird is that it can download files recursively. In many cases, it is only necessary to specify the top-level URL, and bowerbird (through the magic of `wget`) can recursively download linked resources. Bowerbird can also:
+
+
+- decompress downloaded files (if the remote server provides them in, say, zipped or gzipped form).
+
+- incrementally update files that you have previously downloaded. Bowerbird can be instructed not to re-download files that exist locally, unless they have changed on the remote server. Compressed files will also only be decompressed if changed.
+
+
+## Data source handlers
+
+The philosophy of bowerbird is to use the `wget` utility as much as possible to handle web transactions. The `bb_handler_wget` R function provides a wrapper around `wget` that should be sufficient for many data sources. However, some data sources can't be retrieved using only simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_handler_wget`. Notes will be added here about defining new handler functions, but in the meantime look at e.g. `bb_handler_oceandata` or `bb_handler_earthdata`, which provide handlers for [oceandata](https://oceandata.sci.gsfc.nasa.gov/) and [earthdata](https://earthdata.nasa.gov/) data sources.
 
 ## Nuances
 
@@ -103,26 +125,26 @@ Some particularly important components of this definition are:
 
 1. The `license` and `citation` are important so that users know what conditions govern the usage of the data, and the appropriate citation to use to acknowledge the data providers. The `reference` entry should refer to a metadata or documentation page that describes the data in detail.
 
-1. The `method`, `method_flags`, and `source_url` define how this data will be retrieved. Most sources will use the `bb_handler_wget` method, which is a wrapper around the wget utility. If you are unfamiliar with wget, consult one of the many online tutorials. You can also see the in-built wget help by running `bb_wget("--help")`.
+1. The `method`, `method_flags`, and `source_url` define how this data will be retrieved. Most sources will use the `bb_handler_wget` method, which is a wrapper around the `wget` utility. If you are unfamiliar with wget, consult the [wget manual](https://www.gnu.org/software/wget/manual/wget.html) or one of the many online tutorials. You can also see the in-built wget help by running `bb_wget("--help")`.
 
 
 Some subtleties to bear in mind:
 
 1. If the data source delivers compressed files, you will most likely want to decompress them after downloading. The postprocess options `bb_decompress`, `bb_unzip`, etc will do this for you. By default, these *do not* delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.
 
-1. You will almost certainly want to specify `--recursive` as part of the `method_flags`. The synchronization process saves files relative to the `local_file_root` directory specified in the call to `bb_config`. If `--recursive` is specified, then wget creates a directory structure that follows the URL structure. For example, calling `wget --recursive http://www.somewhere.org/monkey/banana/dataset.zip` will save the local file `www.somewhere.org/monkey/banana/dataset.zip`. Thus, specifying `--recursive` will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your `local_file_root`.
+1. You will probably want to specify `--recursive` as part of the `method_flags`, even if the data source doesn't require a recursive download. The synchronization process saves files relative to the `local_file_root` directory specified in the call to `bb_config`. If `--recursive` is specified, then wget creates a directory structure that follows the URL structure. For example, calling `wget --recursive http://www.somewhere.org/monkey/banana/dataset.zip` will save the local file `www.somewhere.org/monkey/banana/dataset.zip`. Thus, specifying `--recursive` will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your `local_file_root`.
 
 1. If you want to include/exclude certain files from being downloaded, use the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` flags. Note that `--accept` and `--reject` apply to file names (not the full path), and can be comma-separated lists of file name suffixes or patterns. The `--accept-regex` and `--reject-regex` flags apply to the full path but can only be a single regular expression each.
 
 1. Remember that any `wget_global_flags` defined via `bb_config` will be applied to every data source in addition to their specific `method_flags`.
 
-1. Several wget flags are set by the `bb_handler_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flags is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
+1. Several wget flags are set by the `bb_handler_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flag is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
 
 ### Modifying data sources
 
 #### Authentication
 
-Some data providers require users to log in. These are indicated by the `authentication_note` column in the configuration table. For these sources, you will need to provide your user name and password, e.g.:
+Some data providers require users to log in. The `authentication_note` column in the configuration table should indicate when this is the case, including a reference (e.g. the URL via which an account can be obtained). For these sources, you will need to provide your user name and password, e.g.:
 
 ```{r eval=FALSE}
 mysrc <- subset(bb_example_sources(),name=="CMEMS global gridded SSH reprocessed (1993-ongoing)")
@@ -154,23 +176,12 @@ See the notes above for further guidances on the accept/reject flags.
 
 Alternatively, for data sources that are divided into subdirectories, one could replace the whole-data-source `source_url` with one or more that point to the specific subdirectories that are wanted.
 
-### Defining new data source methods
-
-Some data sources can't be retrieved only using simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_handler_wget`. Notes will be added here about defining new methods functions, but in the meantime look at e.g. `bb_handler_oceandata` or `bb_handler_earthdata`.
-
 ### Parallelized sync
 
 If you have many data sources in your configuration, running the sync in parallel is likely to speed the process up considerably (unless your bandwidth is the limiting factor).
 
-Note that a given data source may have several `source_url` values, in which case that data source will be expanded to multiple rows in the configuration object with one `source_url` per row (but all with the same data source `name` value). It is probably prudent to avoid running these in within-data-source replicates in parallel, because they might overlap in terms of the parts of the remote site that they are mirroring. Thus, it's probably best to split the configuration up by data source `name` or `id` and run those subsets in parallel, perhaps with (untested code):
+Note that a given data source may have several `source_url` values, in which case that data source will be expanded to multiple rows in the configuration object with one `source_url` per row (but all with the same data source `name` value). It is probably prudent to avoid running these in within-data-source replicates in parallel, because they might overlap in terms of the parts of the remote site that they are mirroring. Thus, it's probably best to split the configuration up by data source `name` or `id` and run those subsets in parallel.
 
-```{r eval=FALSE}
-library(doFuture)
-registerDoFuture()
-plan(multiprocess)
-
-foreach (i=unique(cf$name),.export=c("cf")) %dopar% {bb_sync(cf[cf$name==i,])}
-```
 
 ### Data provenance and reproducible research
 
