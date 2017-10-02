@@ -52,6 +52,17 @@ test_that("bb_sync works on oceandata",{
     expect_gt(fi$size,6e6)
 })
 
+test_that("bb_sync errors on a source that is missing required authentication info",{
+    skip_on_cran()
+    mysrc <- bb_example_sources() %>%
+        dplyr::filter(name=="Nimbus Ice Edge Points from Nimbus Visible Imagery")
+    cf <- bb_config(local_file_root=tempdir()) %>% bb_add(mysrc)
+    expect_error(bb_sync(cf)) ## error at the bb_validate stage, because user and password have not been set
+
+    ## would also get error at the handler stage, for the same reason
+    expect_error(bb_handler_earthdata(cf))
+})
+
 test_that("bb_sync works with a sink() call in place",{
     skip_on_cran()
     sinkfile <- tempfile()
