@@ -95,6 +95,18 @@ bb_example_sources <- function() {
             comment="Only the netcdf format data are retrieved here - adjust the accept parameter in the method_flags to get other formats",
             postprocess=quote(bb_gunzip),
             collection_size=0.03,
-            data_group="Topography")
+            data_group="Topography"),
+        bb_source(
+            name="Australian Election 2016 House of Representatives data",
+            id="aus-election-house-2016",
+            description="House of Representatives results from the 2016 Australian election.",
+            reference="http://results.aec.gov.au/",
+            citation="Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
+            source_url=c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
+            license="CC-BY",
+            method=quote(bb_handler_wget),
+            method_flags=c("--recursive","--level=1","--accept=csv","--no-if-modified-since"),
+            collection_size=0.01,
+            data_group="Electoral")
     )
 }
