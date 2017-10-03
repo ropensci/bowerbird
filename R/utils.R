@@ -84,12 +84,15 @@ restore_settings <- function(settings) {
 dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is.na(file.info(z)$isdir))
 
 directory_from_url <- function(this_url) {
-    this_url <- sub("^(http|https|ftp)://","",this_url)
+    ## this_url can be character or list of char
+    this_url <- sub("^(http|https|ftp)://","",unlist(this_url))
     this_url <- sub(":","+",this_url) ## port
     ## discard anything after the last trailing slash if it includes asterisks (is a file mask)
     ##sub("/[^/]*\\*[^/]*$","/",this_url)
     ## discard anything at all after the last trailing slash
-    sub("/[^/]*$","/",this_url)
+    this_url <- sub("/[^/]*$","/",this_url)
+    this_url[grepl("[^/\\]$",this_url)] <- paste0(this_url[grepl("[^/\\]$",this_url)],"/")
+    this_url ## returns char vector
 }
 
 find_changed_files <- function(file_list_before,file_list_after,filename_pattern=".*") {
