@@ -64,8 +64,6 @@ cf <- bb_config(local_file_root="~/temp/data/bbtest") %>%
     bb_add(my_source)
 ```
 
-A few example data source definitions are provided as part of the bowerbird package --- see the list at the bottom of this document. Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
-
 ### First-time synchronization
 
 Once the configuration has been defined, run the sync process:
@@ -74,11 +72,13 @@ Once the configuration has been defined, run the sync process:
 bb_sync(cf)
 ```
 
-Congratulations! You now have your own local copy of your chosen data sets.
-
-### Ongoing updates
+Congratulations! You now have your own local copy of your chosen data sets. This particular example is fairly small (about 10MB, as you can see from the `collection_size` entry --- which is in GB), so it should not take too long to download.
 
 At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the `clobber` parameter set to 0 (do not overwrite existing files) or 1 (overwrite only if the remote file is newer than the local copy) then the sync process will run more quickly because it will not need to re-download any data files.
+
+### Prepackaged data source definitions
+
+A few example data source definitions are provided as part of the bowerbird package --- see the list at the bottom of this document. Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
 
 ### Use of bowerbird within other packages
 
@@ -214,6 +214,16 @@ Authentication note: Copernicus Marine login required, see <http://marine.copern
 Approximate size: 310 GB
 
 Reference: <http://cmems-resources.cls.fr/?option=com_csw&view=details&tab=info&product_id=SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047>
+
+### Data group: Electoral
+
+#### Australian Election 2016 House of Representatives data
+
+House of Representatives results from the 2016 Australian election.
+
+Approximate size: 0.01 GB
+
+Reference: <http://results.aec.gov.au/>
 
 ### Data group: Ocean colour
 
