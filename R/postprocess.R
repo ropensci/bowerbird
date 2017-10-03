@@ -37,7 +37,7 @@ bb_decompress <- function(config,delete=FALSE,method,...) {
                            stop("unrecognized decompression")
                            )
     if (delete) {
-        files_to_decompress <- list.files(directory_from_url(config$data_sourcees$source_url),pattern=file_pattern,recursive=TRUE,ignore.case=ignore_case)
+        files_to_decompress <- list.files(directory_from_url(config$data_sources$source_url),pattern=file_pattern,recursive=TRUE,ignore.case=ignore_case)
         do_decompress_files(paste0(method,"_delete"),files=files_to_decompress)
     } else {
         file_list_before <- extract_xarg("file_list_before",xargs)
