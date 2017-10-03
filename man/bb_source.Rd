@@ -21,7 +21,7 @@ bb_source(id, name, description = NA_character_, reference, source_url,
 
 \item{reference}{string: (required) URL to the metadata record or home page of the data source}
 
-\item{source_url}{character vector: one or more source URLs. Generally required, although some \code{method} functions might not require one}
+\item{source_url}{character vector: one or more source URLs. Required for \code{bb_handler_wget}, although some \code{method} functions might not require one}
 
 \item{citation}{string: (required) details of the citation for the data source}
 

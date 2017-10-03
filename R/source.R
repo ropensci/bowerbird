@@ -4,7 +4,7 @@
 #' @param name string: (required) a unique name for the data source. This should be a human-readable but still concise name
 #' @param description string: a description of the data source
 #' @param reference string: (required) URL to the metadata record or home page of the data source
-#' @param source_url character vector: one or more source URLs. Generally required, although some \code{method} functions might not require one
+#' @param source_url character vector: one or more source URLs. Required for \code{bb_handler_wget}, although some \code{method} functions might not require one
 #' @param citation string: (required) details of the citation for the data source
 #' @param license string: (required) description of the license. For standard licenses (e.g. creative commons) include the license descriptor ("CC-BY", etc)
 #' @param comment string: comments about the data source. If only part of the original data collection is mirrored, mention that here
