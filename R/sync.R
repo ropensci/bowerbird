@@ -25,6 +25,11 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     settings <- save_current_settings()
     on.exit({ restore_settings(settings) })
     ## iterate through each dataset in turn
+    ## first expand the source_url list-column, so that we have one row per source_url entry
+    ## tidyr::unnest does something like this, but is unhappy with the other list-columns in the data_sources tbl
+    temp <- config$data_sources
+    ns <- vapply(temp$source_url,length,FUN.VALUE=1) ## number of source_url entries per row
+    config$data_sources <- do.call(rbind,lapply(seq_len(nrow(temp)),function(z){ out <- temp[rep(z,ns[z]),]; out$source_url <- temp$source_url[[z]]; out}))
     if (catch_errors) {
         sync_wrapper <- function(di) {
             tryCatch(do_sync_repo(bb_subset(config,di),create_root,verbose,settings),
