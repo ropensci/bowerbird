@@ -8,6 +8,81 @@ test_that("predefined sources work", {
     expect_equal(nrow(src),1)
 })
 
+test_that("empty/missing/NA source_urls get dealt with correctly",{
+    ds <- bb_source(
+        id="xxx",
+        name="xxx",
+        description="xxx",
+        reference="xxx",
+        citation="blah",
+        license="",
+        source_url="",
+        method=quote(bb_handler_oceandata))
+    expect_identical(ds$source_url,list(c(NA_character_)))
+
+    ## missing/empty source_url (if allowed by the handler) should be converted to NA
+    ds <- bb_source(
+        id="xxx",
+        name="xxx",
+        description="xxx",
+        reference="xxx",
+        citation="blah",
+        license="",
+        method=quote(bb_handler_oceandata))
+    expect_identical(ds$source_url,list(c(NA_character_)))
+    ds <- bb_source(
+        id="xxx",
+        name="xxx",
+        description="xxx",
+        reference="xxx",
+        citation="blah",
+        source_url="",
+        license="",
+        method=quote(bb_handler_oceandata))
+    expect_identical(ds$source_url,list(c(NA_character_)))
+
+    ## wget handler requires non-missing/non-NA/non-empty source_url
+    expect_error(bb_source(
+        id="xxx",
+        name="xxx",
+        description="xxx",
+        reference="xxx",
+        citation="blah",
+        license="",
+        method=quote(bb_handler_wget)))
+    expect_error(bb_source(
+        id="xxx",
+        name="xxx",
+        description="xxx",
+        reference="xxx",
+        citation="blah",
+        source_url="",
+        license="",
+        method=quote(bb_handler_wget)))
+    expect_error(bb_source(
+        id="xxx",
+        name="xxx",
+        description="xxx",
+        reference="xxx",
+        citation="blah",
+        source_url=NA,
+        license="",
+        method=quote(bb_handler_wget)))
+
+    ## multiple source_urls, empty/NA ones should be removed
+    ds <- bb_source(
+        id="xxx",
+        name="xxx",
+        description="xxx",
+        reference="xxx",
+        citation="blah",
+        source_url=c("aaa","",NA_character_),
+        license="",
+        method=quote(bb_handler_wget))
+    expect_identical(ds$source_url,list(c("aaa")))
+
+})
+
 test_that("bb_source works with multiple postprocess actions", {
     bb_source(
         id="bilbobaggins",
