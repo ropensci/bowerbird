@@ -66,7 +66,7 @@ test_that("method dispatch code works",{
 
 test_that("internal directory_from_url function works",{
     this_url <- c("http://blah.blah","https://some.thing/blah","https://some.thing/blah/","ftp://yah.yah.yah/a.b/c/")
-    expect_identical(directory_from_url(this_url),c("blah.blah/","some.thing/","some.thing/blah/","yah.yah.yah/a.b/c/"
-    expect_identical(directory_from_url(list(this_url)),c("blah.blah/","some.thing/","some.thing/blah/","yah.yah.yah/a.b/c/"
+    expect_identical(directory_from_url(this_url),c("blah.blah/","some.thing/","some.thing/blah/","yah.yah.yah/a.b/c/"))
+    expect_identical(directory_from_url(list(this_url)),c("blah.blah/","some.thing/","some.thing/blah/","yah.yah.yah/a.b/c/"))
 })
 
