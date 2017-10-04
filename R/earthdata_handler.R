@@ -17,19 +17,16 @@ bb_handler_earthdata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     if (local_dir_only)
         return(bb_handler_wget(config,verbose=verbose,local_dir_only=TRUE))
 
-    cfrow <- bb_settings_to_cols(config)
-    if (na_or_empty(cfrow$user) || na_or_empty(cfrow$password))
-        stop(sprintf("Earthdata source \"%s\" requires user and password",cfrow$name))
+    if (na_or_empty(config$data_sources$user) || na_or_empty(config$data_sources$password))
+            stop(sprintf("Earthdata source \"%s\" requires user and password",config$data_sources$name))
     cookies_file <- gsub("\\\\","/",tempfile()) ## probably don't need the gsub, was there for windows debugging
     ## create this file
     if (!file.exists(cookies_file)) cat("",file=cookies_file)
-    dummy <- cfrow
-    mflags <- dummy$method_flags
-    if (is.string(mflags))
-        mflags <- strsplit(mflags,"[[:space:]]+")[[1]]
-    ##dummy$method_flags <- paste0("--http-user ",dummy$user," --http-password ",dummy$password," --load-cookies ",cookies_file," --save-cookies ",cookies_file," --keep-session-cookies --no-check-certificate --auth-no-challenge -r --reject index.html* -np -e robots=off ",dummy$method_flags)
+    dummy <- config$data_sources
+    mflags <- flags_to_charvec(dummy$method_flags)
     dummy$method_flags <- list(c(mflags,"--http-user",dummy$user,"--http-password",dummy$password,"--load-cookies",cookies_file,"--save-cookies",cookies_file,"--keep-session-cookies","--reject=index.html*","-e","robots=off")) ##"--no-check-certificate" "--auth-no-challenge",
     dummy$user <- NA_character_
     dummy$password <- NA_character_
-    bb_handler_wget(dummy,verbose=verbose)
+    config$data_sources <- dummy
+    bb_handler_wget(config,verbose=verbose)
 }
