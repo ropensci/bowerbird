@@ -178,9 +178,7 @@ Alternatively, for data sources that are divided into subdirectories, one could 
 
 ### Parallelized sync
 
-If you have many data sources in your configuration, running the sync in parallel is likely to speed the process up considerably (unless your bandwidth is the limiting factor).
-
-Note that a given data source may have several `source_url` values, in which case that data source will be expanded to multiple rows in the configuration object with one `source_url` per row (but all with the same data source `name` value). It is probably prudent to avoid running these in within-data-source replicates in parallel, because they might overlap in terms of the parts of the remote site that they are mirroring. Thus, it's probably best to split the configuration up by data source `name` or `id` and run those subsets in parallel.
+If you have many data sources in your configuration, running the sync in parallel is likely to speed the process up considerably (unless your bandwidth is the limiting factor). A logical approach to this would be to split a configuration, with a subset of data sources in each (see `bb_subset`), and run those subsets in parallel. One potential catch to keep in mind would be data sources that hit the same remote data provider. If they overlap overlap in terms of the parts of the remote site that they are mirroring, that might invoke odd behaviour (race conditions, simultaneous downloads of the same file by different parallel processes, etc).
 
 ### Data provenance and reproducible research
 
