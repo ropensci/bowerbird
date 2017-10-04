@@ -65,7 +65,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     }
     if (verbose) {
         cat(sprintf("\n%s\nSynchronizing dataset: %s\n",base::date(),this_dataset$data_sources$name))
-        if (!is.na(this_dataset$data_sources$source_url)) cat(sprintf("Source URL %s\n",this_dataset$data_sources$source_url))
+        if (!all(is.na(this_dataset$data_sources$source_url))) cat(sprintf("Source URL %s\n",this_dataset$data_sources$source_url))
         cat("--------------------------------------------------------------------------------------------\n\n")
     }
     setwd(this_att$local_file_root)

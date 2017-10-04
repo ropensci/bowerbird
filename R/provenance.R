@@ -44,7 +44,7 @@ do_fingerprint <- function(this_dataset,hash,verbose,settings) {
     }
     if (verbose) {
         cat(sprintf("Data source: %s",this_dataset$name))
-        if (!is.na(this_dataset$source_url)) cat(sprintf(", source URL %s",this_dataset$source_url))
+        if (!all(is.na(this_dataset$source_url[[1]]))) cat(sprintf(", source URL %s",this_dataset$source_url[[1]]))
         cat("\n")
     }
     setwd(this_dataset$local_file_root)
