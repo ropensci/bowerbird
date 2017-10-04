@@ -57,11 +57,15 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
         stop("Please provide license and citation information for the data source, so that users properly acknowledge it")
     if (missing(reference))
         stop("Please provide a reference (a URL to the data source's metadata record or home page")
-    if (missing(source_url)) {
-        if (check_method_is(method,bb_handler_wget)) stop("method 'bb_handler_wget' requires at least one source URL")
-        ##warning("no source_url provided")
+
+    if (missing(source_url)) source_url <- NA_character_
+    source_url <- source_url[nzchar(source_url) & !is.na(source_url)] ## drop empty and NA strings
+    if (length(source_url)<1) {
+        if (check_method_is(method,bb_handler_wget)) stop("method 'bb_handler_wget' requires at least one non-empty source URL")
         source_url <- NA_character_
     }
+    ##if (check_method_is(method,bb_handler_wget) && all(is.na(source_url))) stop("method 'bb_handler_wget' requires at least one non-empty source URL")
+
     if (missing(postprocess) || is.null(postprocess)) {
         postprocess <- list()
     } else {
