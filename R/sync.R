@@ -94,7 +94,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         stop("the postprocess argument should be a list of functions, calls, or symbols of functions")
 
     ## do the main synchonization, usually directly with wget, otherwise with custom methods
-    this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(bb_data_sources(this_dataset)$source_url))
+    this_path_no_trailing_sep <- sub("[\\/]$","",bb_data_source_dir(this_dataset))
     if (verbose) cat(sprintf(" this dataset path is: %s\n",this_path_no_trailing_sep))
     ## build file list if postprocessing required
     if (length(pp)>0) {
