@@ -10,23 +10,23 @@
 #' @export
 bb_handler_earthdata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is(config,"bb_config"))
-    assert_that(nrow(config$data_sources)==1)
+    assert_that(nrow(bb_data_sources(config))==1)
     assert_that(is.flag(verbose))
     assert_that(is.flag(local_dir_only))
 
     if (local_dir_only)
         return(bb_handler_wget(config,verbose=verbose,local_dir_only=TRUE))
 
-    if (na_or_empty(config$data_sources$user) || na_or_empty(config$data_sources$password))
-            stop(sprintf("Earthdata source \"%s\" requires user and password",config$data_sources$name))
+    dummy <- bb_data_sources(config)
+    if (na_or_empty(dummy$user) || na_or_empty(dummy$password))
+            stop(sprintf("Earthdata source \"%s\" requires user and password",dummy$name))
     cookies_file <- gsub("\\\\","/",tempfile()) ## probably don't need the gsub, was there for windows debugging
     ## create this file
     if (!file.exists(cookies_file)) cat("",file=cookies_file)
-    dummy <- config$data_sources
     mflags <- flags_to_charvec(dummy$method_flags)
     dummy$method_flags <- list(c(mflags,"--http-user",dummy$user,"--http-password",dummy$password,"--load-cookies",cookies_file,"--save-cookies",cookies_file,"--keep-session-cookies","--reject=index.html*","-e","robots=off")) ##"--no-check-certificate" "--auth-no-challenge",
     dummy$user <- NA_character_
     dummy$password <- NA_character_
-    config$data_sources <- dummy
+    bb_data_sources(config) <- dummy
     bb_handler_wget(config,verbose=verbose)
 }

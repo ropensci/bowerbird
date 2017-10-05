@@ -19,13 +19,13 @@ bb_fingerprint <- function(config,hash="sha1",verbose=TRUE) {
     assert_that(is.flag(verbose))
     hash <- match.arg(tolower(hash),c("none","md5","sha1"))
     assert_that(is.flag(verbose))
-    if (nrow(config$data_sources)<1) {
+    if (nrow(bb_data_sources(config))<1) {
         warning("config has no data sources: nothing for bb_fingerprint to do")
         return(invisible(NULL))
     }
     bb_validate(config)
     settings <- save_current_settings()
-    fp <- tbl_df(do.call(rbind,lapply(seq_len(nrow(config$data_sources)),function(di) do_fingerprint(bb_subset(config,di),hash,verbose,settings))))
+    fp <- tbl_df(do.call(rbind,lapply(seq_len(nrow(bb_data_sources(config))),function(di) do_fingerprint(bb_subset(config,di),hash,verbose,settings))))
     ## fp <- config %>% rowwise() %>% do(do_fingerprint,verbose=verbose,settings=settings) ??
     restore_settings(settings)
     fp
@@ -34,7 +34,7 @@ bb_fingerprint <- function(config,hash="sha1",verbose=TRUE) {
 
 do_fingerprint <- function(this_dataset,hash,verbose,settings) {
     on.exit({ restore_settings(settings) })
-    if (nrow(this_dataset$data_sources)!=1) stop("expecting single-row data set")
+    if (nrow(bb_data_sources(this_dataset))!=1) stop("expecting single-row data set")
     ## copy bb settings into this_dataset
     this_dataset <- bb_settings_to_cols(this_dataset)
     ## check that the root directory exists

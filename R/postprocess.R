@@ -23,7 +23,7 @@
 #' @export
 bb_decompress <- function(config,delete=FALSE,method,...) {
     assert_that(is(config,"bb_config"))
-    assert_that(nrow(config$data_sources)==1)
+    assert_that(nrow(bb_data_sources(config))==1)
     assert_that(is.flag(delete))
     assert_that(is.string(method))
     method <- match.arg(tolower(method),c("unzip","gunzip","bunzip2","uncompress"))
@@ -37,7 +37,7 @@ bb_decompress <- function(config,delete=FALSE,method,...) {
                            stop("unrecognized decompression")
                            )
     if (delete) {
-        files_to_decompress <- list.files(directory_from_url(config$data_sources$source_url),pattern=file_pattern,recursive=TRUE,ignore.case=ignore_case)
+        files_to_decompress <- list.files(directory_from_url(bb_data_sources(config)$source_url),pattern=file_pattern,recursive=TRUE,ignore.case=ignore_case)
         do_decompress_files(paste0(method,"_delete"),files=files_to_decompress)
     } else {
         file_list_before <- extract_xarg("file_list_before",xargs)
@@ -103,7 +103,7 @@ bb_uncompress <- function(...) bb_decompress(...,method="uncompress")
 #' @export
 bb_cleanup <- function(config,pattern,recursive=FALSE,ignore_case=FALSE,...) {
     assert_that(is(config,"bb_config"))
-    assert_that(nrow(config$data_sources)==1)
+    assert_that(nrow(bb_data_sources(config))==1)
     to_delete <- list.files(pattern=pattern,recursive=recursive,ignore.case=ignore_case)
     cat(sprintf("cleaning up files: %s\n",paste(to_delete,collapse=",")))
     unlink(to_delete)==0

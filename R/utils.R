@@ -91,7 +91,7 @@ directory_from_url <- function(this_url) {
     ##sub("/[^/]*\\*[^/]*$","/",this_url)
     ## discard anything at all after the last trailing slash
     this_url <- sub("/[^/]*$","/",this_url)
-    this_url[grepl("[^/\\]$",this_url)] <- paste0(this_url[grepl("[^/\\]$",this_url)],"/")
+    this_url[grepl("[^/\\]$",this_url)] <- paste0(this_url[grepl("[^/\\]$",this_url)],"/") ## enforce trailing slash (?)
     this_url ## returns char vector
 }
 

@@ -59,7 +59,7 @@ bb_config <- function(local_file_root,wget_global_flags=c("--restrict-file-names
 #' @export
 bb_subset <- function(config,idx) {
     assert_that(is(config,"bb_config"))
-    config$data_sources <- config$data_sources[idx,]
+    bb_data_sources(config) <- bb_data_sources(config)[idx,]##config$data_sources <- config$data_sources[idx,]
     config
 }
 
@@ -79,16 +79,18 @@ bb_subset <- function(config,idx) {
 #' @export
 bb_add <- function(config,source) {
     assert_that(is(config,"bb_config"))
-    config$data_sources <- dplyr::bind_rows(config$data_sources,source)
+    ##config$data_sources <- dplyr::bind_rows(config$data_sources,source)
+    bb_data_sources(config) <- dplyr::bind_rows(bb_data_sources(config),source)
     config
 }
 
 
-#' Returns a bowerbird configuration object's settings
+#' Gets or sets a bowerbird configuration object's settings
 #'
 #' These are repository-wide settings that are applied to all data sources added to the configuration.
 #'
 #' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
+#' @param value list: new values to set
 #'
 #' @return named list
 #'
@@ -104,18 +106,56 @@ bb_settings <- function(config) {
     config$settings
 }
 
+#' @rdname bb_settings
+#' @export
+`bb_settings<-` <- function(config,value) {
+    assert_that(is(config,"bb_config"))
+    config$settings <- value
+    config
+}
+
+#' Gets or sets a bowerbird configuration object's data sources
+#'
+#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
+#' @param value data.frame: new data sources to set (e.g. as returned by \code{bb_example_sources}
+#'
+#' @return data.frame
+#'
+#' @seealso \code{\link{bb_config}}
+#'
+#' @examples
+#' cf <- bb_config(local_file_root="/your/data/directory")
+#' cf <- bb_add(cf,bb_example_sources())
+#' bb_data_sources(cf)
+#'
+#' @export
+bb_data_sources <- function(config) {
+    assert_that(is(config,"bb_config"))
+    config$data_sources
+}
+
+#' @rdname bb_data_sources
+#' @export
+`bb_data_sources<-` <- function(config,value) {
+    assert_that(is(config,"bb_config"))
+    config$data_sources <- value
+    config
+}
+
 ## internal helper function
 ## copy each bb setting into a column of data_sources table
 ## return only the augmented data_sources table
 bb_settings_to_cols <- function(obj) {
+    ds <- bb_data_sources(obj)
+    st <- bb_settings(obj)
     ## flags handled as lists
-    obj$data_sources$wget_global_flags <- rep(list(obj$settings$wget_global_flags),nrow(obj$data_sources))
-    for (nm in setdiff(names(obj$settings),c("wget_global_flags"))) {
-        thisatt <- obj$settings[[nm]]
+    ds$wget_global_flags <- rep(list(st$wget_global_flags),nrow(ds))
+    for (nm in setdiff(names(st),c("wget_global_flags"))) {
+        thisatt <- st[[nm]]
         if (!is.null(thisatt))
-            obj$data_sources[,nm] <- thisatt
+            ds[,nm] <- thisatt
     }
-    obj$data_sources
+    ds
 }
 
 
@@ -139,14 +179,14 @@ bb_data_source_dir <- function(config) {
     assert_that(is(config,"bb_config"))
     single_source_dir <- function(cfrow) {
         mth <- NULL
-        try(mth <- get_function_from_method(cfrow$data_sources$method[[1]]),silent=TRUE)
+        try(mth <- get_function_from_method(bb_data_sources(cfrow)$method[[1]]),silent=TRUE)
         if (is.function(mth)) {
             do.call(mth,list(config=cfrow,local_dir_only=TRUE))
         } else {
             as.character(NA)
         }
     }
-    vapply(seq_len(nrow(config$data_sources)),function(z)single_source_dir(bb_subset(config,z)),FUN.VALUE="")
+    vapply(seq_len(nrow(bb_data_sources(config))),function(z)single_source_dir(bb_subset(config,z)),FUN.VALUE="")
 }
 
 
@@ -262,7 +302,7 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
 #' @export
 bb_validate <- function(config) {
     assert_that(is(config,"bb_config"))
-    cfds <- config$data_sources
+    cfds <- bb_data_sources(config)
     idx <- !is.na(cfds$authentication_note) & (na_or_empty(cfds$user) || na_or_empty(cfds$password))
     if (any(idx))
         stop(paste(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s\n",cfds$name[idx],cfds$authentication_note[idx]),collapse="\n"))

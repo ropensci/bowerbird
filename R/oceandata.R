@@ -23,13 +23,13 @@ bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     ##  or just include the data type in the search pattern e.g. "search=A2002*L3m_DAY_CHL_chlor*9km*
 
     assert_that(is(config,"bb_config"))
-    assert_that(nrow(config$data_sources)==1)
-    assert_that(is.list(config$data_sources$method_flags))
-    assert_that(is.character(config$data_sources$method_flags[[1]]))
+    assert_that(nrow(bb_data_sources(config))==1)
+    assert_that(is.list(bb_data_sources(config)$method_flags))
+    assert_that(is.character(bb_data_sources(config)$method_flags[[1]]))
     assert_that(is.flag(verbose))
     assert_that(is.flag(local_dir_only))
 
-    method_flags <- config$data_sources$method_flags[[1]]
+    method_flags <- bb_data_sources(config)$method_flags[[1]]
     this_att <- bb_settings(config)
     if (local_dir_only) {
         ## highest-level dir
@@ -95,8 +95,10 @@ bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
             dummy <- config
             ## note that if skip_downloads is TRUE, it will be passed through to bb_handler_wget here
             ##dummy$method_flags <- paste("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
-            dummy$data_sources$method_flags <- list(c("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories"))
-            dummy$data_sources$source_url <- this_url
+            temp <- bb_data_sources(dummy)
+            temp$method_flags <- list(c("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories"))
+            temp$source_url <- this_url
+            bb_data_sources(dummy) <- temp
             out <- out && bb_handler_wget(dummy,verbose=verbose)
         } else {
             if (this_exists) {

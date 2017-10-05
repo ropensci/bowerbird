@@ -2,12 +2,17 @@
 % Please edit documentation in R/config.R
 \name{bb_settings}
 \alias{bb_settings}
-\title{Returns a bowerbird configuration object's settings}
+\alias{bb_settings<-}
+\title{Gets or sets a bowerbird configuration object's settings}
 \usage{
 bb_settings(config)
+
+bb_settings(config) <- value
 }
 \arguments{
 \item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config})}
+
+\item{value}{list: new values to set}
 }
 \value{
 named list

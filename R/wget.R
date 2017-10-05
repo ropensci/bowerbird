@@ -11,12 +11,12 @@
 #' @export
 bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is(config,"bb_config"))
-    assert_that(nrow(config$data_sources)==1)
+    assert_that(nrow(bb_data_sources(config))==1)
     assert_that(is.flag(verbose))
     assert_that(is.flag(local_dir_only))
 
     if (local_dir_only)
-        return(file.path(bb_settings(config)$local_file_root,directory_from_url(config$data_sources$source_url)))
+        return(file.path(bb_settings(config)$local_file_root,directory_from_url(bb_data_sources(config)$source_url)))
 
     cfrow <- bb_settings_to_cols(config)
     this_flags <- flags_to_charvec(cfrow$method_flags)

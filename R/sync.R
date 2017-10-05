@@ -13,7 +13,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     assert_that(is(config,"bb_config"))
     assert_that(is.flag(create_root))
     assert_that(is.flag(verbose))
-    if (nrow(config$data_sources)<1) {
+    if (nrow(bb_data_sources(config))<1) {
         warning("config has no data sources: nothing for bb_sync to do")
         return(invisible(NULL))
     }
@@ -27,21 +27,21 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     ## iterate through each dataset in turn
     ## first expand the source_url list-column, so that we have one row per source_url entry
     ## tidyr::unnest does something like this, but is unhappy with the other list-columns in the data_sources tbl
-    temp <- config$data_sources
+    temp <- bb_data_sources(config)
     ns <- vapply(temp$source_url,length,FUN.VALUE=1) ## number of source_url entries per row
-    config$data_sources <- do.call(rbind,lapply(seq_len(nrow(temp)),function(z){ out <- temp[rep(z,ns[z]),]; out$source_url <- temp$source_url[[z]]; out}))
+    bb_data_sources(config) <- do.call(rbind,lapply(seq_len(nrow(temp)),function(z){ out <- temp[rep(z,ns[z]),]; out$source_url <- temp$source_url[[z]]; out}))
     if (catch_errors) {
         sync_wrapper <- function(di) {
             tryCatch(do_sync_repo(bb_subset(config,di),create_root,verbose,settings),
                 error=function(e) {
-                    message("There was a problem synchronizing the dataset: ",config$data_sources$name[di],".\nThe error message was: ",e$message)
+                    message("There was a problem synchronizing the dataset: ",bb_data_sources(config)$name[di],".\nThe error message was: ",e$message)
                     FALSE
                 }
                 )
         }
-        sync_ok <- vapply(seq_len(nrow(config$data_sources)),sync_wrapper,FUN.VALUE=TRUE)
+        sync_ok <- vapply(seq_len(nrow(bb_data_sources(config))),sync_wrapper,FUN.VALUE=TRUE)
     } else {
-        sync_ok <- vapply(seq_len(nrow(config$data_sources)),function(di) do_sync_repo(bb_subset(config,di),create_root,verbose,settings),FUN.VALUE=TRUE)
+        sync_ok <- vapply(seq_len(nrow(bb_data_sources(config))),function(di) do_sync_repo(bb_subset(config,di),create_root,verbose,settings),FUN.VALUE=TRUE)
     }
     sync_ok
 }
@@ -50,7 +50,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
 do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     assert_that(is(this_dataset,"bb_config"))
     on.exit({ restore_settings(settings) })
-    if (nrow(this_dataset$data_sources)!=1)
+    if (nrow(bb_data_sources(this_dataset))!=1)
         stop("expecting single-row data set")
     this_att <- bb_settings(this_dataset)
     ## check that the root directory exists
@@ -64,8 +64,8 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         }
     }
     if (verbose) {
-        cat(sprintf("\n%s\nSynchronizing dataset: %s\n",base::date(),this_dataset$data_sources$name))
-        if (!all(is.na(this_dataset$data_sources$source_url))) cat(sprintf("Source URL %s\n",this_dataset$data_sources$source_url))
+        cat(sprintf("\n%s\nSynchronizing dataset: %s\n",base::date(),bb_data_sources(this_dataset)$name))
+        if (!all(is.na(bb_data_sources(this_dataset)$source_url))) cat(sprintf("Source URL %s\n",bb_data_sources(this_dataset)$source_url))
         cat("--------------------------------------------------------------------------------------------\n\n")
     }
     setwd(this_att$local_file_root)
@@ -84,7 +84,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
 
     ## check postprocessing
     ## should be a nested list of (list of functions or call objects, or empty list)
-    pp <- this_dataset$data_sources$postprocess
+    pp <- bb_data_sources(this_dataset)$postprocess
     if (length(pp)==1) {
         pp <- pp[[1]]
     } else {
@@ -94,7 +94,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         stop("the postprocess argument should be a list of functions, calls, or symbols of functions")
 
     ## do the main synchonization, usually directly with wget, otherwise with custom methods
-    this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(this_dataset$data_sources$source_url))
+    this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(bb_data_sources(this_dataset)$source_url))
     if (verbose) cat(sprintf(" this dataset path is: %s\n",this_path_no_trailing_sep))
     ## build file list if postprocessing required
     if (length(pp)>0) {
@@ -110,7 +110,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         if (verbose) cat(sprintf("done.\n"))
     }
     ## run the method
-    mth <- get_function_from_method(this_dataset$data_sources$method[[1]])
+    mth <- get_function_from_method(bb_data_sources(this_dataset)$method[[1]])
     ok <- do.call(mth,list(config=this_dataset,verbose=verbose))
 
     ## postprocessing
@@ -152,6 +152,6 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             }
         }
     }
-    if (verbose) cat(sprintf("\n%s dataset synchronization complete: %s\n",base::date(),this_dataset$data_sources$name))
+    if (verbose) cat(sprintf("\n%s dataset synchronization complete: %s\n",base::date(),bb_data_sources(this_dataset)$name))
     ok
 }
