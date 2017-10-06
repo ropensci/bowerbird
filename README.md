@@ -140,6 +140,8 @@ Some subtleties to bear in mind:
 
 5.  Several wget flags are set by the `bb_handler_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flag is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
 
+6. If `wget` is not behaving as expected, try adding the `--debug` flag to see additional diagnostic output.
+
 ### Modifying data sources
 
 #### Authentication
