@@ -29,17 +29,10 @@ bb_handler_earthdata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     cookies_file <- gsub("\\\\","/",tempfile()) ## probably don't need the gsub, was there for windows debugging
     ## create this file
     if (!file.exists(cookies_file)) cat("",file=cookies_file)
-#    netrc_file <- tempfile()
-#    on.exit(file.remove(netrc_file))
-#    ## from https://wiki.earthdata.nasa.gov/display/EL/How+To+Access+Data+With+cURL+And+Wget
-#    ## A backslash or space anywhere in your password will need to be escaped with an additional backslash. Similarly, if you use a '#' as the first character of your password, it will also need to be escaped with a preceding backslash
-#    safe_pw <- gsub("\\\\","\\\\\\\\",dummy$password)
-#    safe_pw <- gsub("[[:space:]]","\\ ",safe_pw)
-#    safe_pw <- gsub("^#","\\#",safe_pw)
-#    cat(sprintf("machine urs.earthdata.nasa.gov login %s password %s",dummy$user,safe_pw),file=netrc_file,append=FALSE)
-#
+    on.exit(file.remove(cookies_file))
     mflags <- flags_to_charvec(dummy$method_flags)
-    dummy$method_flags <- list(c(mflags,"--http-user",dummy$user,"--http-password",dummy$password,"--auth-no-challenge","--load-cookies",cookies_file,"--save-cookies",cookies_file,"--keep-session-cookies","-e","robots=off")) ##"--no-check-certificate" , ##"--reject=index.html*",,"--no-hsts" "--span-hosts","--max-redirect=10",
+    ## must use --auth-no-challenge else the server redirects to the html login page, rather than accepting the provided credentials
+    dummy$method_flags <- list(c(mflags,"--http-user",dummy$user,"--http-password",dummy$password,"--auth-no-challenge","--load-cookies",cookies_file,"--save-cookies",cookies_file,"--keep-session-cookies","--reject=index.html*","-e","robots=off"))
     dummy$user <- NA_character_
     dummy$password <- NA_character_
     bb_data_sources(config) <- dummy
