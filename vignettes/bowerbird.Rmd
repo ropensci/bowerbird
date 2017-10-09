@@ -91,7 +91,7 @@ A few example data source definitions are provided as part of the bowerbird pack
 
 ### Data source definitions
 
-The philosophy of bowerbird is to use the `wget` utility as much as possible to handle web transactions. Using `wget` (and its recursive download) simplifies the process of writing and maintaining data source definitions (and thus R packages that provide access to such data). Typically, one only needs to provide the top-level URL and appropriate flags to pass to `wget`, along with some basic metadata (primarily intended to be read by the user).
+The philosophy of bowerbird is to use the `wget` utility as much as possible to handle web transactions. Using `wget` (and its recursive download functionality) simplifies the process of writing and maintaining data source definitions. Typically, one only needs to provide the top-level URL and appropriate flags to pass to `wget`, along with some basic metadata (primarily intended to be read by the user).
 
 However, one of the consequences of this approach is that bowerbird actually knows very little about the data files that it maintains, which can be limiting in some respects. It is not generally possible, for example, to provide the user with an indication of download progress (progress bar or similar) for a given data source because neither bowerbird nor `wget` actually know how many files are in it. Data sources do have a `collection_size` entry, to give the user some indication of the disk space required, but this is only approximate (and must be hand-coded by the data source maintainer). See the 'Reducing download sizes' section below for tips on retrieving only a subset of a large data source.
 
