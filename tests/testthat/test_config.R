@@ -35,3 +35,36 @@ test_that("local directory looks right",{
     expect_identical(sub("/$","",temp),"/some/local/path/some.place.com/some/path")
 })
 
+test_that("config validation works",{
+    src <- bb_source(
+        id="bilbobaggins",
+        name="Test",
+        description="blah",
+        reference="blah",
+        citation="blah",
+        source_url="http://some.place.com/some/path/",
+        license="blah",
+        method=bb_handler_wget,
+        method_flags=character(),
+        data_group="blah")
+    src2 <- bb_source(
+        id="bilbobaggins",
+        name="Test",
+        description="blah",
+        reference="blah",
+        citation="blah",
+        source_url="http://some.place.com/some/path/",
+        license="blah",
+        authentication_note="this source requires login",
+        method=bb_handler_wget,
+        method_flags=character(),
+        data_group="blah",
+        warn_empty_auth=FALSE)
+    cf <- bb_config("/some/local/path") %>% bb_add(src) %>% bb_add(src2)
+    expect_error(bb_validate(cf))
+
+    src2$user <- "username"
+    src2$password <- "password"
+    cf <- bb_config("/some/local/path") %>% bb_add(src) %>% bb_add(src2)
+    expect_true(bb_validate(cf))
+})
