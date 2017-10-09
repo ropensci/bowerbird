@@ -15,7 +15,7 @@ bb_data_sources(config) <- value
 \item{value}{data.frame: new data sources to set (e.g. as returned by \code{bb_example_sources}}
 }
 \value{
-data.frame
+tibble
 }
 \description{
 Gets or sets a bowerbird configuration object's data sources

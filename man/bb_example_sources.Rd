@@ -7,7 +7,7 @@
 bb_example_sources()
 }
 \value{
-data.frame
+tibble
 }
 \description{
 Five example data sources:

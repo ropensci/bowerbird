@@ -50,7 +50,7 @@ bb_source(id, name, description = NA_character_, reference, source_url,
 \item{warn_empty_auth}{logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided}
 }
 \value{
-data.frame
+tibble
 }
 \description{
 Define a data source

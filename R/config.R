@@ -119,7 +119,7 @@ bb_settings <- function(config) {
 #' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
 #' @param value data.frame: new data sources to set (e.g. as returned by \code{bb_example_sources}
 #'
-#' @return data.frame
+#' @return tibble
 #'
 #' @seealso \code{\link{bb_config}}
 #'

@@ -7,14 +7,14 @@
 bb_fingerprint(config, hash = "sha1", verbose = TRUE)
 }
 \arguments{
-\item{config}{data.frame: configuration as returned by \code{\link{bb_config}}}
+\item{config}{bb_config: configuration as returned by \code{\link{bb_config}}}
 
 \item{hash}{string: algorithm to use to calculate file hashes: "md5", "sha1", or "none". Note that file hashing can be slow for large file collections}
 
 \item{verbose}{logical: if TRUE, provide additional progress output}
 }
 \value{
-data.frame
+tibble
 }
 \description{
 Fingerprint the files associated with a data source

@@ -1,10 +1,10 @@
 #' Fingerprint the files associated with a data source
 #'
-#' @param config data.frame: configuration as returned by \code{\link{bb_config}}
+#' @param config bb_config: configuration as returned by \code{\link{bb_config}}
 #' @param hash string: algorithm to use to calculate file hashes: "md5", "sha1", or "none". Note that file hashing can be slow for large file collections
 #' @param verbose logical: if TRUE, provide additional progress output
 #'
-#' @return data.frame
+#' @return tibble
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%

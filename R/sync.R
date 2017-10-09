@@ -1,6 +1,6 @@
 #' Run a bowerbird data repository synchronisation
 #'
-#' @param config data.frame: configuration as returned by \code{\link{bb_config}}
+#' @param config bb_config: configuration as returned by \code{\link{bb_config}}
 #' @param create_root logical: should the data root directory be created if it does not exist?
 #' @param verbose logical: if TRUE, provide additional progress output
 #' @param catch_errors logical: if TRUE, catch errors and continue the synchronisation process

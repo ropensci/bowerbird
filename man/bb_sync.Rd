@@ -7,7 +7,7 @@
 bb_sync(config, create_root = FALSE, verbose = TRUE, catch_errors = TRUE)
 }
 \arguments{
-\item{config}{data.frame: configuration as returned by \code{\link{bb_config}}}
+\item{config}{bb_config: configuration as returned by \code{\link{bb_config}}}
 
 \item{create_root}{logical: should the data root directory be created if it does not exist?}
 
