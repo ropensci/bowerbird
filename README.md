@@ -80,21 +80,18 @@ At a later time you can re-run this synchronization process. If the remote files
 
 A few example data source definitions are provided as part of the bowerbird package --- see the list at the bottom of this document. Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
 
-### Use of bowerbird within other packages
-
-Bowerbird might be useful to developers of packages that download resources from remote locations. When might you consider using bowerbird rather than, say, [curl](https://cran.r-project.org/package=curl) or [crul](https://cran.r-project.org/package=crul)? The principal advantage of bowerbird is that it can download files recursively. In many cases, it is only necessary to specify the top-level URL, and bowerbird (through the magic of `wget`) can recursively download linked resources. Bowerbird can also:
-
--   decompress downloaded files (if the remote server provides them in, say, zipped or gzipped form).
-
--   incrementally update files that you have previously downloaded. Bowerbird can be instructed not to re-download files that exist locally, unless they have changed on the remote server. Compressed files will also only be decompressed if changed.
-
-Data source handlers
---------------------
-
-The philosophy of bowerbird is to use the `wget` utility as much as possible to handle web transactions. The `bb_handler_wget` R function provides a wrapper around `wget` that should be sufficient for many data sources. However, some data sources can't be retrieved using only simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_handler_wget`. Notes will be added here about defining new handler functions, but in the meantime look at e.g. `bb_handler_oceandata` or `bb_handler_earthdata`, which provide handlers for [oceandata](https://oceandata.sci.gsfc.nasa.gov/) and [earthdata](https://earthdata.nasa.gov/) data sources.
-
 Nuances
 -------
+
+### Data source definitions
+
+The philosophy of bowerbird is to use the `wget` utility as much as possible to handle web transactions. Using `wget` (and its recursive download) simplifies the process of writing and maintaining data source definitions (and thus R packages that provide access to such data). Typically, one only needs to provide the top-level URL and appropriate flags to pass to `wget`, along with some basic metadata (primarily intended to be read by the user).
+
+However, one of the consequences of this approach is that bowerbird actually knows very little about the data files that it maintains, which can be limiting in some respects. It is not generally possible, for example, to provide the user with an indication of download progress (progress bar or similar) for a given data source because neither bowerbird nor `wget` actually know how many files are in it. Data sources do have a `collection_size` entry, to give the user some indication of the disk space required, but this is only approximate (and must be hand-coded by the data source maintainer). See the 'Reducing download sizes' section below for tips on retrieving only a subset of a large data source.
+
+### Data source handlers
+
+The `bb_handler_wget` R function provides a wrapper around `wget` that should be sufficient for many data sources. However, some data sources can't be retrieved using only simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_handler_wget`. Notes will be added here about defining new handler functions, but in the meantime look at e.g. `bb_handler_oceandata` or `bb_handler_earthdata`, which provide handlers for [oceandata](https://oceandata.sci.gsfc.nasa.gov/) and [earthdata](https://earthdata.nasa.gov/) data sources.
 
 ### Choosing a data directory
 
@@ -140,7 +137,7 @@ Some subtleties to bear in mind:
 
 5.  Several wget flags are set by the `bb_handler_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flag is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
 
-6. If `wget` is not behaving as expected, try adding the `--debug` flag to see additional diagnostic output.
+6.  If `wget` is not behaving as expected, try adding the `--debug` flag to see additional diagnostic output.
 
 ### Modifying data sources
 
@@ -237,15 +234,15 @@ Reference: <http://oceancolor.gsfc.nasa.gov/>
 
 ### Data group: Sea ice
 
-#### Nimbus Ice Edge Points from Nimbus Visible Imagery
+#### Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2
 
-This data set (NmIcEdg2) estimates the location of the North and South Pole sea ice edges at various times during the mid to late 1960s, based on recovered Nimbus 1 (1964), Nimbus 2 (1966), and Nimbus 3 (1969) visible imagery.
+NSIDC provides this data set to aid in the investigations of the variability and trends of sea ice cover. Ice cover in these data are indicated by sea ice concentration: the percentage of the ocean surface covered by ice. The ice-covered area indicates how much ice is present; it is the total area of a pixel multiplied by the ice concentration in that pixel. Ice persistence is the percentage of months over the data set time period that ice existed at a location. The ice-extent indicates whether ice is present; here, ice is considered to exist in a pixel if the sea ice concentration exceeds 15 percent. This data set provides users with data about total ice-covered areas, sea ice extent, ice persistence, and monthly climatologies of sea ice concentrations.
 
-Authentication note: Requires Earthdata login, see <https://urs.earthdata.nasa.gov/>
+Authentication note: Requires Earthdata login, see <https://urs.earthdata.nasa.gov/>. Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at <https://urs.earthdata.nasa.gov/profile>)
 
-Approximate size: 0.1 GB
+Approximate size: 0.02 GB
 
-Reference: <http://nsidc.org/data/nmicedg2/>
+Reference: <https://nsidc.org/data/NSIDC-0192/versions/2>
 
 ### Data group: Sea surface temperature
 
