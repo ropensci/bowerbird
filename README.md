@@ -24,8 +24,6 @@ When might you consider using bowerbird rather than, say, [curl](https://cran.r-
 Installing
 ----------
 
-Temporary note: until `sys` version 1.5 hits CRAN, you will need to do `devtools::install_github("jeroen/sys")` to install from github, prior to installing bowerbird.
-
 ``` r
 install.packages("devtools")
 library(devtools)
