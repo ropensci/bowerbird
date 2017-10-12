@@ -16,8 +16,8 @@ bb_sync(config, create_root = FALSE, verbose = TRUE, catch_errors = TRUE)
 \item{catch_errors}{logical: if TRUE, catch errors and continue the synchronisation process}
 }
 \value{
-vector of logical values indicating success of each data source in config
+a tibble with the name, id, source_url, and sync success status of each data source (multiple source_urls within a data source will appear in separate rows)
 }
 \description{
-Run a bowerbird data repository synchronisation
+For sync purposes, each row in the config's data_sources table is expanded on source_url, so that there is one row per unique data_source/source_url combination. Hence the returned tibble from \code{bb_sync} may have more rows than \code{bb_data_sources(config)}.
 }

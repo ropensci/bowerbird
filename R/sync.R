@@ -1,11 +1,13 @@
 #' Run a bowerbird data repository synchronisation
 #'
+#' For sync purposes, each row in the config's data_sources table is expanded on source_url, so that there is one row per unique data_source/source_url combination. Hence the returned tibble from \code{bb_sync} may have more rows than \code{bb_data_sources(config)}.
+#'
 #' @param config bb_config: configuration as returned by \code{\link{bb_config}}
 #' @param create_root logical: should the data root directory be created if it does not exist?
 #' @param verbose logical: if TRUE, provide additional progress output
 #' @param catch_errors logical: if TRUE, catch errors and continue the synchronisation process
 #'
-#' @return vector of logical values indicating success of each data source in config
+#' @return a tibble with the name, id, source_url, and sync success status of each data source (multiple source_urls within a data source will appear in separate rows)
 #'
 #' @export
 bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
@@ -43,7 +45,8 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     } else {
         sync_ok <- vapply(seq_len(nrow(bb_data_sources(config))),function(di) do_sync_repo(bb_subset(config,di),create_root,verbose,settings),FUN.VALUE=TRUE)
     }
-    sync_ok
+    temp <- bb_data_sources(config)
+    tibble(name=temp$name,id=temp$id,source_url=temp$source_url,status=sync_ok)
 }
 
 
