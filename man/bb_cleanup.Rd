@@ -26,7 +26,7 @@ This function is not intended to be called directly, but instead can be specifie
 \examples{
 \dontrun{
   ## remove .asc files after synchronisation
-  my_source <- bb_source(...,postprocess=quote(bb_cleanup,pattern="\\\\.asc$"))
+  my_source <- bb_source(...,postprocess=quote(bb_cleanup(pattern="\\\\.asc$")))
 }
 
 }

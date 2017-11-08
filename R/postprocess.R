@@ -97,7 +97,7 @@ bb_uncompress <- function(...) bb_decompress(...,method="uncompress")
 #' @examples
 #' \dontrun{
 #'   ## remove .asc files after synchronisation
-#'   my_source <- bb_source(...,postprocess=quote(bb_cleanup,pattern="\\.asc$"))
+#'   my_source <- bb_source(...,postprocess=quote(bb_cleanup(pattern="\\.asc$")))
 #' }
 #'
 #' @export
