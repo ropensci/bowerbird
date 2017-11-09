@@ -27,7 +27,7 @@
 bb_config <- function(local_file_root,wget_global_flags=c("--restrict-file-names=windows","--progress=dot:giga"),http_proxy=NULL,ftp_proxy=NULL,clobber=1,skip_downloads=FALSE) {
     assert_that(is.string(local_file_root))
     assert_that(clobber %in% c(0,1,2))
-    assert_that(is.flag(skip_downloads))
+    assert_that(is_nna_flag(skip_downloads))
     assert_that(is.character(wget_global_flags))
     structure(
         list(data_sources=tibble(),
@@ -215,11 +215,11 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
     assert_that(is(config,"bb_config"))
     assert_that(is.string(file))
     assert_that(is.string(format))
-    assert_that(is.flag(inc_license))
-    assert_that(is.flag(inc_auth))
-    assert_that(is.flag(inc_size))
-    assert_that(is.flag(inc_access_function))
-    assert_that(is.flag(inc_path))
+    assert_that(is_nna_flag(inc_license))
+    assert_that(is_nna_flag(inc_auth))
+    assert_that(is_nna_flag(inc_size))
+    assert_that(is_nna_flag(inc_access_function))
+    assert_that(is_nna_flag(inc_path))
     format <- match.arg(tolower(format),c("html","rmd"))
 
     ## write summary as temporary Rmd file

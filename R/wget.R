@@ -12,8 +12,8 @@
 bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(bb_data_sources(config))==1)
-    assert_that(is.flag(verbose))
-    assert_that(is.flag(local_dir_only))
+    assert_that(is_nna_flag(verbose))
+    assert_that(is_nna_flag(local_dir_only))
 
     if (local_dir_only)
         return(file.path(bb_settings(config)$local_file_root,directory_from_url(bb_data_sources(config)$source_url)))
@@ -101,8 +101,8 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
 bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
     assert_that(is.string(url))
     assert_that(is.character(flags))
-    assert_that(is.flag(verbose))
-    assert_that(is.flag(capture_stdout))
+    assert_that(is_nna_flag(verbose))
+    assert_that(is_nna_flag(capture_stdout))
     if (tolower(url) %in% c("-h","--help") || identical(tolower(flags),"-h") || identical(tolower(flags),"--help")) {
         out <- sys::exec_internal(bb_find_wget(),args="--help",error=TRUE)
         message(rawToChar(out$stdout))
@@ -123,7 +123,7 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
 
 #' Make a wget call
 #'
-#' The wget system call is made using the \code{exec_wait} function from the sys package. Call \code{bb_wget2("--help")} to get a message giving information about wget's command line parameters
+#' The wget system call is made using the \code{exec_wait} function from the sys package. Call \code{bb_wget2("help")} to get a message giving information about wget's command line parameters
 #'
 #' @param url string: the URL to retrieve
 #' @param recursive logical: if true, turn on recursive retrieving
@@ -135,6 +135,8 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
 #' @param reject_regex character: as for \code{accept_regex}, but specifying regular expressions to reject
 #' @param exclude_directories character: character vector with one or more entries. Each entry specifies a comma-separated list of directories you wish to exclude from download. Elements may contain wildcards
 #' @param execute character: a character vector with one or more entries. Each entry is an command to be executed. A common use for this is \code{execute=c("robots=off")}, in order to avoid wget's default behaviour of identifying as a robot. Some servers will exclude robots from certain parts of their sites. See \url(https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion, and \url{https://www.gnu.org/software/wget/manual/wget.html#Wgetrc-Commands} for a full list of commands that can be specified here
+#' @param restrict_file_names character: vector of one of more strings from the set "unix", "windows", "nocontrol", "ascii", "lowercase", and "uppercase". \code{restrict_file_names="windows"} is useful if you are downloading files to be used on both Windows and Unix file systems. See \url{https://www.gnu.org/software/wget/manual/wget.html#index-Windows-file-names} for more information on this parameter
+#' @param progress string: the type of progress indicator you wish to use. Legal indicators are "dot" and "bar". "dot" prints progress with dots, with each dot representing a fixed amount of downloaded data. The style can be adjusted: "dot:mega" will show 64K per dot and 3M per line; "dot:giga" shows 1M per dot and 32M per line. See \url{https://www.gnu.org/software/wget/manual/wget.html#index-dot-style} for more information
 #' @param no_parent logical: if TRUE, do not ever ascend to the parent directory when retrieving recursively. This is TRUE by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded
 #' @param no_if_modified_since logical: applies when retrieving recursively with timestamping (i.e. only downloading files that have changed since last download, which is achieved using \code{bb_config(...,clobber=1)}). The default method for timestamping is to issue an "If-Modified-Since" header on the request, which instructs the remote server not to return the file if it has not changed since the specified date. Some servers do not support this header. In these cases, trying using \code{no_if_modified_since=TRUE}, which will instead send a preliminary HEAD request to ascertain the date of the remote file
 #' @param no_check_certificate logical: if TRUE, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution
@@ -150,14 +152,14 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
 #' @examples
 #' \dontrun{
 #'   ## get help about wget command line parameters
-#'   bb_wget2("--help")
+#'   bb_wget2("help")
 #' }
 #'
 # @export
 ## like bb_wget, but with some wget flags promoted to explicit function parms
-bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex,reject_regex,exclude_directories,execute,no_parent=TRUE,no_if_modified_since=FALSE,no_check_certificate=FALSE,relative=FALSE,adjust_extension=FALSE,extra_flags=character(),verbose=FALSE,capture_stdout=FALSE) {
+bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex,reject_regex,exclude_directories,execute,restrict_file_names,progress,no_parent=TRUE,no_if_modified_since=FALSE,no_check_certificate=FALSE,relative=FALSE,adjust_extension=FALSE,extra_flags=character(),verbose=FALSE,capture_stdout=FALSE) {
     assert_that(is.string(url))
-    assert_that(is.flag(recursive))
+    assert_that(is_nna_flag(recursive))
     if (recursive) assert_that(is.numeric(level),level>=0)
     if (missing(accept)) accept <- character()
     assert_that(is.character(accept))
@@ -169,18 +171,22 @@ bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_rege
     assert_that(is.character(reject_regex))
     if (missing(exclude_directories)) exclude_directories <- character()
     assert_that(is.character(exclude_directories))
-    assert_that(is.flag(no_parent))
-    assert_that(is.flag(no_if_modified_since))
-    assert_that(is.flag(no_check_certificate))
-    assert_that(is.flag(relative))
-    assert_that(is.flag(adjust_extension))
+    if (missing(restrict_file_names)) restrict_file_names <- character()
+    assert_that(is.character(restrict_file_names))
+    if (missing(progress)) progress <- ""
+    assert_that(is.string(progress))
+    assert_that(is_nna_flag(no_parent))
+    assert_that(is_nna_flag(no_if_modified_since))
+    assert_that(is_nna_flag(no_check_certificate))
+    assert_that(is_nna_flag(relative))
+    assert_that(is_nna_flag(adjust_extension))
     assert_that(is.numeric(wait))
     if (missing(execute)) execute <- character()
     assert_that(is.character(execute))
     assert_that(is.character(extra_flags))
-    assert_that(is.flag(verbose))
-    assert_that(is.flag(capture_stdout))
-    if (tolower(url) %in% c("-h","--help")) {
+    assert_that(is_nna_flag(verbose))
+    assert_that(is_nna_flag(capture_stdout))
+    if (tolower(sub("^\\-+","",url)) %in% c("h","help")) {
         out <- sys::exec_internal(bb_find_wget(),args="--help",error=TRUE)
         message(rawToChar(out$stdout))
     } else {
@@ -192,24 +198,30 @@ bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_rege
         flags <- c(flags,vapply(reject,function(z)paste0("--reject=",z),FUN.VALUE="",USE.NAMES=FALSE))
         flags <- c(flags,vapply(reject_regex,function(z)paste0("--reject-regex=",z),FUN.VALUE="",USE.NAMES=FALSE))
         flags <- c(flags,vapply(exclude_directories,function(z)paste0("--exclude_directories=",z),FUN.VALUE="",USE.NAMES=FALSE))
+        if (length(restrict_file_names)>0) {
+            restrict_file_names <- paste(restrict_file_names,sep=",",collapse=",")
+            flags <- c(flags,paste0("--restrict_file_names=",restrict_file_names))
+        }
+        if (length(progress)>0 && nzchar(progress)) flags <- c(flags,paste0("--progress=",progress))
         if (recursive && no_parent) flags <- c(flags,"--no-parent")
         if (no_if_modified_since) flags <- c(flags,"--no-if-modified-since")
         if (no_check_certificate) flags <- c(flags,"--no-check-certificate")
         if (relative) flags <- c(flags,"--relative")
         if (adjust_extension) flags <- c(flags,"--adjust-extension")
         if (wait>0) flags <- c(flags,paste0("--wait=",wait))
-        flags <- c(flags,paste("-e",execute,sep=" ")) ## these need to be of the form '-e first_command' '-e second_command'
+        if (length(execute)>0)
+            flags <- c(flags,paste("-e",execute,sep=" ")) ## these need to be of the form '-e first_command' '-e second_command'
         ## add any extra_flags
         ## sys expects flags as a char vector, not a string
         extra_flags <- flags_to_charvec(extra_flags) ## will split string, or replace NA/"" with empty character vector
         flags <- c(flags,extra_flags)
         if (verbose) cat(sprintf(" executing wget %s %s\n",paste(flags,collapse=" "),url))
-        if (capture_stdout) {
-            sys::exec_internal(bb_find_wget(),args=c(flags,url),error=FALSE)
-        } else {
-            status <- sys::exec_wait(bb_find_wget(),args=c(flags,url),std_out=TRUE,std_err=TRUE)
-            list(status=status)
-        }
+        #if (capture_stdout) {
+        #    sys::exec_internal(bb_find_wget(),args=c(flags,url),error=FALSE)
+        #} else {
+        #    status <- sys::exec_wait(bb_find_wget(),args=c(flags,url),std_out=TRUE,std_err=TRUE)
+        #    list(status=status)
+        #}
     }
 }
 
@@ -272,7 +284,7 @@ bb_install_wget <- function() {
 #'
 #' @export
 bb_find_wget <- function(install=FALSE) {
-    assert_that(is.flag(install))
+    assert_that(is_nna_flag(install))
     bb_opts <- getOption("bowerbird")
     if (!is.null(bb_opts)) {
         if (!is.null(bb_opts$wget_exe)) {

@@ -13,6 +13,7 @@ file_hash <- function(filename,hash="sha1") {
            )
 }
 
+is_nna_flag <- function(z) is.flag(z) && !is.na(z)
 
 ## NA or empty string
 na_or_empty <- function(z) is.na(z) | !nzchar(z)
