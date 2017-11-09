@@ -21,8 +21,16 @@ bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
     }
     bb_validate(config)
     ## check that wget can be found (this will also set it in the options)
-    if (is.null(bb_find_wget()))
-        stop("could not find the wget executable. Try the bb_install_wget() function, or install it yourself and ensure that it is on the path")
+    if (is.null(bb_find_wget())) {
+        my_os <- get_os()
+        switch(my_os,
+               "windows"=stop("could not find the wget executable.\n Try the bb_install_wget() function, or install wget yourself and ensure that it is on the system path"),
+               "osx"=stop("could not find the wget executable.\n You will need to install wget yourself and ensure that it is on the system path.\n Use \"brew install wget\" or \"brew install --with-libressl wget\" if you get SSL-related errors.\n If you do not have brew installed, see https://brew.sh/ (note: you will need admin privileges to install brew)."),
+               "unix"=,
+               "linux"=stop("could not find the wget executable.\n You will need to install wget yourself and ensure that it is on the system path.\n Use e.g. \"sudo apt install wget\" on Debian/Ubuntu, or \"sudo yum install wget\" on Fedora/CentOS.\n Note: you will need admin privileges for this."),
+               stop("could not find the wget executable.\n You will need to install wget yourself and ensure that it is on the system path.")
+               )
+    }
     ## save some current settings: path and proxy env values
     settings <- save_current_settings()
     on.exit({ restore_settings(settings) })
