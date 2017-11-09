@@ -120,6 +120,100 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
     }
 }
 
+
+#' Make a wget call
+#'
+#' The wget system call is made using the \code{exec_wait} function from the sys package. Call \code{bb_wget2("--help")} to get a message giving information about wget's command line parameters
+#'
+#' @param url string: the URL to retrieve
+#' @param recursive logical: if true, turn on recursive retrieving
+#' @param level integer >=0: recursively download to this maximum depth level. Only applicable if \code{recursive} is TRUE. Specify 0 for infinite recursion. See \url{https://www.gnu.org/software/wget/manual/wget.html#Recursive-Download} for more information about wget's recursive downloading
+#' @param wait numeric >=0: wait this number of seconds between successive retrievals. This option may help with servers that block multiple successive requests, by introducing a delay between requests
+#' @param accept character: character vector with one or more entries. Each entry specifies a comma-separated list of filename suffixes or patterns to accept. Note that if any of the wildcard characters '*', '?', '[', or ']' appear in an element of accept, it will be treated as a filename pattern, rather than a filename suffix. In this case, you have to enclose the pattern in quotes, for example \code{accept="\"*.csv\""}
+#' @param accept_regex character: character vector with one or more entries. Each entry provides a regular expression that is applied to the complete URL. Matching URLs will be accepted for download
+#' @param reject character: as for \code{accept}, but specifying filename suffixes or patterns to reject
+#' @param reject_regex character: as for \code{accept_regex}, but specifying regular expressions to reject
+#' @param exclude_directories character: character vector with one or more entries. Each entry specifies a comma-separated list of directories you wish to exclude from download. Elements may contain wildcards
+#' @param execute character: a character vector with one or more entries. Each entry is an command to be executed. A common use for this is \code{execute=c("robots=off")}, in order to avoid wget's default behaviour of identifying as a robot. Some servers will exclude robots from certain parts of their sites. See \url(https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion, and \url{https://www.gnu.org/software/wget/manual/wget.html#Wgetrc-Commands} for a full list of commands that can be specified here
+#' @param no_parent logical: if TRUE, do not ever ascend to the parent directory when retrieving recursively. This is TRUE by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded
+#' @param no_if_modified_since logical: applies when retrieving recursively with timestamping (i.e. only downloading files that have changed since last download, which is achieved using \code{bb_config(...,clobber=1)}). The default method for timestamping is to issue an "If-Modified-Since" header on the request, which instructs the remote server not to return the file if it has not changed since the specified date. Some servers do not support this header. In these cases, trying using \code{no_if_modified_since=TRUE}, which will instead send a preliminary HEAD request to ascertain the date of the remote file
+#' @param no_check_certificate logical: if TRUE, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution
+#' @param relative logical: if TRUE, only follow relative links. This can sometimes be useful for restricting what is downloaded in recursive mode
+#' @param adjust_extension logical: if a file of type 'application/xhtml+xml' or 'text/html' is downloaded and the URL does not end with .htm or .html, this option will cause the suffix '.html' to be appended to the local filename. This can be useful when mirroring a remote site that has page URLs that conflict with directories (e.g. http://somewhere.org/this/page which has further content below it, say at http://somewhere.org/this/page/more. If "somewhere.org/this/page" is saved as a page, that name can't also be used as a local directory in which to store the lower-level content. Setting \code{adjust_extension=TRUE} will cause the page to be saved as "somewhere.org/this/page.html", thus resolving the conflict
+#' @param extra_flags character: character vector of additional command-line flags to pass to wget
+#' @param verbose logical: print trace output?
+#' @param capture_stdout logical: if TRUE, return 'stdout' and 'stderr' output in the returned object (see exec_internal from the sys package). Otherwise send these outputs to the console
+#'
+#' @return the result of the system call (or if bb_wget("--help") was called, a message will be issued). The returned object will have components 'status' and (if capture_stdout was TRUE) 'stdout' and 'stderr'
+#'
+#' @seealso \code{\link{bb_install_wget}} \code{\link{bb_find_wget}}
+#' @examples
+#' \dontrun{
+#'   ## get help about wget command line parameters
+#'   bb_wget2("--help")
+#' }
+#'
+# @export
+## like bb_wget, but with some wget flags promoted to explicit function parms
+bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex,reject_regex,exclude_directories,execute,no_parent=TRUE,no_if_modified_since=FALSE,no_check_certificate=FALSE,relative=FALSE,adjust_extension=FALSE,extra_flags=character(),verbose=FALSE,capture_stdout=FALSE) {
+    assert_that(is.string(url))
+    assert_that(is.flag(recursive))
+    if (recursive) assert_that(is.numeric(level),level>=0)
+    if (missing(accept)) accept <- character()
+    assert_that(is.character(accept))
+    if (missing(accept_regex)) accept_regex <- character()
+    assert_that(is.character(accept_regex))
+    if (missing(reject)) reject <- character()
+    assert_that(is.character(reject))
+    if (missing(reject_regex)) reject_regex <- character()
+    assert_that(is.character(reject_regex))
+    if (missing(exclude_directories)) exclude_directories <- character()
+    assert_that(is.character(exclude_directories))
+    assert_that(is.flag(no_parent))
+    assert_that(is.flag(no_if_modified_since))
+    assert_that(is.flag(no_check_certificate))
+    assert_that(is.flag(relative))
+    assert_that(is.flag(adjust_extension))
+    assert_that(is.numeric(wait))
+    if (missing(execute)) execute <- character()
+    assert_that(is.character(execute))
+    assert_that(is.character(extra_flags))
+    assert_that(is.flag(verbose))
+    assert_that(is.flag(capture_stdout))
+    if (tolower(url) %in% c("-h","--help")) {
+        out <- sys::exec_internal(bb_find_wget(),args="--help",error=TRUE)
+        message(rawToChar(out$stdout))
+    } else {
+        ## build wget flags
+        flags <- character()
+        if (recursive) flags <- c(flags,"--recursive",paste0("--level=",level))
+        flags <- c(flags,vapply(accept,function(z)paste0("--accept=",z),FUN.VALUE="",USE.NAMES=FALSE))
+        flags <- c(flags,vapply(accept_regex,function(z)paste0("--accept-regex=",z),FUN.VALUE="",USE.NAMES=FALSE))
+        flags <- c(flags,vapply(reject,function(z)paste0("--reject=",z),FUN.VALUE="",USE.NAMES=FALSE))
+        flags <- c(flags,vapply(reject_regex,function(z)paste0("--reject-regex=",z),FUN.VALUE="",USE.NAMES=FALSE))
+        flags <- c(flags,vapply(exclude_directories,function(z)paste0("--exclude_directories=",z),FUN.VALUE="",USE.NAMES=FALSE))
+        if (recursive && no_parent) flags <- c(flags,"--no-parent")
+        if (no_if_modified_since) flags <- c(flags,"--no-if-modified-since")
+        if (no_check_certificate) flags <- c(flags,"--no-check-certificate")
+        if (relative) flags <- c(flags,"--relative")
+        if (adjust_extension) flags <- c(flags,"--adjust-extension")
+        if (wait>0) flags <- c(flags,paste0("--wait=",wait))
+        flags <- c(flags,paste("-e",execute,sep=" ")) ## these need to be of the form '-e first_command' '-e second_command'
+        ## add any extra_flags
+        ## sys expects flags as a char vector, not a string
+        extra_flags <- flags_to_charvec(extra_flags) ## will split string, or replace NA/"" with empty character vector
+        flags <- c(flags,extra_flags)
+        if (verbose) cat(sprintf(" executing wget %s %s\n",paste(flags,collapse=" "),url))
+        if (capture_stdout) {
+            sys::exec_internal(bb_find_wget(),args=c(flags,url),error=FALSE)
+        } else {
+            status <- sys::exec_wait(bb_find_wget(),args=c(flags,url),std_out=TRUE,std_err=TRUE)
+            list(status=status)
+        }
+    }
+}
+
+
 #' Helper function to install wget
 #'
 #' Currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
