@@ -24,7 +24,7 @@
 bb_decompress <- function(config,delete=FALSE,method,...) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(bb_data_sources(config))==1)
-    assert_that(is_nna_flag(delete))
+    assert_that(is.flag(delete),!is.na(delete))
     assert_that(is.string(method))
     method <- match.arg(tolower(method),c("unzip","gunzip","bunzip2","uncompress"))
     xargs <- list(...)

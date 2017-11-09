@@ -11,8 +11,8 @@
 bb_handler_earthdata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(bb_data_sources(config))==1)
-    assert_that(is_nna_flag(verbose))
-    assert_that(is_nna_flag(local_dir_only))
+    assert_that(is.flag(verbose),!is.na(verbose))
+    assert_that(is.flag(local_dir_only),!is.na(local_dir_only))
 
     ## the earthdata-recommended way to use wget requires a .netrc file with username and password
     ## see e.g. https://wiki.earthdata.nasa.gov/display/EL/How+To+Access+Data+With+cURL+And+Wget

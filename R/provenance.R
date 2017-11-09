@@ -16,9 +16,8 @@
 bb_fingerprint <- function(config,hash="sha1",verbose=TRUE) {
     assert_that(is(config,"bb_config"))
     assert_that(is.string(hash))
-    assert_that(is_nna_flag(verbose))
+    assert_that(is.flag(verbose),!is.na(verbose))
     hash <- match.arg(tolower(hash),c("none","md5","sha1"))
-    assert_that(is_nna_flag(verbose))
     if (nrow(bb_data_sources(config))<1) {
         warning("config has no data sources: nothing for bb_fingerprint to do")
         return(invisible(NULL))

@@ -26,8 +26,8 @@ bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(nrow(bb_data_sources(config))==1)
     assert_that(is.list(bb_data_sources(config)$method_flags))
     assert_that(is.character(bb_data_sources(config)$method_flags[[1]]))
-    assert_that(is_nna_flag(verbose))
-    assert_that(is_nna_flag(local_dir_only))
+    assert_that(is.flag(verbose),!is.na(verbose))
+    assert_that(is.flag(local_dir_only),!is.na(local_dir_only))
 
     method_flags <- bb_data_sources(config)$method_flags[[1]]
     this_att <- bb_settings(config)
@@ -281,7 +281,7 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
     ## [yyyy] only for 8Day,Daily,Rolling_32_Day
     ## Binned files (L3b) should become oceandata.sci.gsfc.nasa.gov/platform/L3BIN/yyyy/ddd/basename
     assert_that(is.string(this_url))
-    assert_that(is_nna_flag(path_only))
+    assert_that(is.flag(path_only),!is.na(path_only))
     assert_that(is.string(sep))
     if (grepl("\\.L3m_",this_url)) {
         ## mapped file

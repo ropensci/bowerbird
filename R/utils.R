@@ -13,8 +13,6 @@ file_hash <- function(filename,hash="sha1") {
            )
 }
 
-is_nna_flag <- function(z) is.flag(z) && !is.na(z)
-
 ## NA or empty string
 na_or_empty <- function(z) is.na(z) | !nzchar(z)
 
@@ -53,7 +51,7 @@ get_function_from_method <- function(method) {
 ## qfun is a quoted function with arguments already provided, e.g. quote(fun(var=arg))
 ## we want to add some extra args (xargs, named list)
 inject_args <- function(qfun,xargs,extras_first=TRUE) {
-    assert_that(is.flag(extras_first))
+    assert_that(is.flag(extras_first),!is.na(extras_first))
     ## xargs is the named list of extra arguments to add
     if (extras_first) {
         arglist <- xargs

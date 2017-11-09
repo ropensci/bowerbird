@@ -12,8 +12,8 @@
 bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(bb_data_sources(config))==1)
-    assert_that(is_nna_flag(verbose))
-    assert_that(is_nna_flag(local_dir_only))
+    assert_that(is.flag(verbose),!is.na(verbose))
+    assert_that(is.flag(local_dir_only),!is.na(local_dir_only))
 
     if (local_dir_only)
         return(file.path(bb_settings(config)$local_file_root,directory_from_url(bb_data_sources(config)$source_url)))
@@ -101,8 +101,8 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
 bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
     assert_that(is.string(url))
     assert_that(is.character(flags))
-    assert_that(is_nna_flag(verbose))
-    assert_that(is_nna_flag(capture_stdout))
+    assert_that(is.flag(verbose),!is.na(verbose))
+    assert_that(is.flag(capture_stdout),!is.na(capture_stdout))
     if (tolower(url) %in% c("-h","--help") || identical(tolower(flags),"-h") || identical(tolower(flags),"--help")) {
         out <- sys::exec_internal(bb_find_wget(),args="--help",error=TRUE)
         message(rawToChar(out$stdout))
@@ -159,7 +159,7 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
 ## like bb_wget, but with some wget flags promoted to explicit function parms
 bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex,reject_regex,exclude_directories,execute,restrict_file_names,progress,no_parent=TRUE,no_if_modified_since=FALSE,no_check_certificate=FALSE,relative=FALSE,adjust_extension=FALSE,extra_flags=character(),verbose=FALSE,capture_stdout=FALSE) {
     assert_that(is.string(url))
-    assert_that(is_nna_flag(recursive))
+    assert_that(is.flag(recursive),!is.na(recursive))
     if (recursive) assert_that(is.numeric(level),level>=0)
     if (missing(accept)) accept <- character()
     assert_that(is.character(accept))
@@ -175,17 +175,17 @@ bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_rege
     assert_that(is.character(restrict_file_names))
     if (missing(progress)) progress <- ""
     assert_that(is.string(progress))
-    assert_that(is_nna_flag(no_parent))
-    assert_that(is_nna_flag(no_if_modified_since))
-    assert_that(is_nna_flag(no_check_certificate))
-    assert_that(is_nna_flag(relative))
-    assert_that(is_nna_flag(adjust_extension))
+    assert_that(is.flag(no_parent),!is.na(no_parent))
+    assert_that(is.flag(no_if_modified_since),!is.na(no_if_modified_since))
+    assert_that(is.flag(no_check_certificate),!is.na(no_check_certificate))
+    assert_that(is.flag(relative),!is.na(relative))
+    assert_that(is.flag(adjust_extension),!is.na(adjust_extension))
     assert_that(is.numeric(wait))
     if (missing(execute)) execute <- character()
     assert_that(is.character(execute))
     assert_that(is.character(extra_flags))
-    assert_that(is_nna_flag(verbose))
-    assert_that(is_nna_flag(capture_stdout))
+    assert_that(is.flag(verbose),!is.na(verbose))
+    assert_that(is.flag(capture_stdout),!is.na(capture_stdout))
     if (tolower(sub("^\\-+","",url)) %in% c("h","help")) {
         out <- sys::exec_internal(bb_find_wget(),args="--help",error=TRUE)
         message(rawToChar(out$stdout))
@@ -284,7 +284,7 @@ bb_install_wget <- function() {
 #'
 #' @export
 bb_find_wget <- function(install=FALSE) {
-    assert_that(is_nna_flag(install))
+    assert_that(is.flag(install),!is.na(install))
     bb_opts <- getOption("bowerbird")
     if (!is.null(bb_opts)) {
         if (!is.null(bb_opts$wget_exe)) {
