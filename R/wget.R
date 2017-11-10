@@ -146,7 +146,7 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
 #' @param verbose logical: print trace output?
 #' @param capture_stdout logical: if TRUE, return 'stdout' and 'stderr' output in the returned object (see exec_internal from the sys package). Otherwise send these outputs to the console
 #'
-#' @return the result of the system call (or if bb_wget("--help") was called, a message will be issued). The returned object will have components 'status' and (if capture_stdout was TRUE) 'stdout' and 'stderr'
+#' @return the result of the system call (or if \code{bb_wget("--help")} was called, a message will be issued). The returned object will have components 'status' and (if \code{capture_stdout} was \code{TRUE}) 'stdout' and 'stderr'
 #'
 #' @seealso \code{\link{bb_install_wget}} \code{\link{bb_find_wget}}
 #' @examples
