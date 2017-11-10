@@ -282,7 +282,8 @@ get_os <- function() {
         if (grepl("linux-gnu", R.version$os,ignore.case=TRUE))
             os <- "linux"
     }
+    os <- tolower(os)
     if (!os %in% c("windows","linux","unix","osx"))
         stop("unknown operating system: ",os)
-    tolower(os)
+    os
 }
