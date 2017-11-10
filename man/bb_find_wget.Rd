@@ -4,13 +4,15 @@
 \alias{bb_find_wget}
 \title{Find the wget executable, and optionally install it if it is not found}
 \usage{
-bb_find_wget(install = FALSE)
+bb_find_wget(install = FALSE, error = TRUE)
 }
 \arguments{
-\item{install}{logical: install the executable if it is not found? (Windows only)}
+\item{install}{logical: attempt to install the executable if it is not found? (Windows only)}
+
+\item{error}{logical: if wget is not found, raise an error if wget is not found. If FALSE, do not raise an error but return NULL}
 }
 \value{
-the path to the wget executable, or NULL if it was not found
+the path to the wget executable, or (if error is FALSE) NULL if it was not found
 }
 \description{
 Installation (if required) currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
