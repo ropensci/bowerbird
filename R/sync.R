@@ -113,7 +113,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     }
     ## run the method
     mth <- match.fun(bb_data_sources(this_dataset)$method[[1]])
-    if (check_method_is(mth,bb_handler_wget2) || check_method_is(mth,bb_handler_oceandata2)) {
+    if (check_method_is(mth,bb_handler_wget2) || check_method_is(mth,bb_handler_oceandata2) || check_method_is(mth,bb_handler_earthdata2)) {
         ok <- do.call(mth,c(list(config=this_dataset,verbose=verbose),bb_data_sources(this_dataset)$method_flags[[1]]))
     } else {
         ok <- do.call(mth,list(config=this_dataset,verbose=verbose))
