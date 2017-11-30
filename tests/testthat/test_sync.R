@@ -54,13 +54,24 @@ test_that("bb_sync works on oceandata",{
 
 test_that("bb_sync errors on a source that is missing required authentication info",{
     skip_on_cran()
-    mysrc <- bb_example_sources() %>%
-        dplyr::filter(name=="Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2")
-    cf <- bb_config(local_file_root=tempdir()) %>% bb_add(mysrc)
+    expect_warning(ods <- bb_source(
+        id="bilbobaggins",
+        name="Oceandata test",
+        description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
+        reference= "http://oceancolor.gsfc.nasa.gov/",
+        citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
+        license="Please cite",
+        comment="",
+        method=bb_handler_oceandata,
+        method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
+        authentication_note="Requires auth",
+        user="",
+        password="",
+        postprocess=NULL,
+        access_function="",
+        data_group="Sea surface temperature"))
+    cf <- bb_config(local_file_root=tempdir()) %>% bb_add(ods)
     expect_error(bb_sync(cf)) ## error at the bb_validate stage, because user and password have not been set
-
-    ## would also get error at the handler stage, for the same reason
-    expect_error(bb_handler_earthdata(cf))
 })
 
 test_that("bb_sync works with a sink() call in place",{
