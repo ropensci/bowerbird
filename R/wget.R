@@ -35,7 +35,7 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
                                         #}
     ## add flags for clobber behaviour
     if (!is.null(cfrow$clobber) && !is.na(cfrow$clobber) && cfrow$clobber %in% c(0,1)) {
-        if (cfrow$clobber==0) {
+        if (cfrow$clobber<1) {
             this_flags <- resolve_wget_clobber_flags(this_flags,"--no-clobber")
         } else {
             this_flags <- resolve_wget_clobber_flags(this_flags,"--timestamping")
@@ -72,12 +72,11 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE) {
             ## no object returned - this happens if process is interrupted by the user on unix
             ok <- as.logical(NA)
         } else {
-            ok <- syscall_obj$status==0
+            ok <- !syscall_obj$status ## status code of 0 means OK
         }
     }
     ok
 }
-
 
 #' Make a wget call
 #'
@@ -121,6 +120,91 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
 }
 
 
+#' Mirror an external data source using the wget utility
+#'
+#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
+#' @param verbose logical: if TRUE, provide additional progress output
+#' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
+#'
+#' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
+#'
+#' @seealso \code{\link{bb_wget}}
+#'
+#' @export
+bb_handler_wget2 <- function(config,verbose=FALSE,local_dir_only=FALSE) {
+    assert_that(is(config,"bb_config"))
+    assert_that(nrow(bb_data_sources(config))==1)
+    assert_that(is.flag(verbose),!is.na(verbose))
+    assert_that(is.flag(local_dir_only),!is.na(local_dir_only))
+
+    if (local_dir_only)
+        return(file.path(bb_settings(config)$local_file_root,directory_from_url(bb_data_sources(config)$source_url)))
+
+    cfrow <- bb_settings_to_cols(config)
+    this_flags <- cfrow$method_flags[[1]]
+    ## add wget_global_flags
+    gflags <- cfrow$wget_global_flags[[1]]
+    if (length(gflags)>0)
+        this_flags <- c(this_flags,gflags)
+
+    ## proxy-user and proxy-password flags
+    ## this needs to decide whether it should use http_proxy_user or ftp_proxy_user info - exclude for now
+    #if (!grepl("proxy-user=",cfrow$wget_flags)) {
+    #    cfrow$wget_flags=paste(cfrow$wget_flags,paste0("--proxy-user=",cfrow$http_proxy_user),sep=" ")
+    #}
+    #if (!grepl("proxy-password=",cfrow$wget_flags)) {
+    #    cfrow$wget_flags=paste(cfrow$wget_flags,paste0("--proxy-password=",cfrow$http_proxy_password),sep=" ")
+                                        #}
+    ## add flags for clobber behaviour
+    if (!is.null(cfrow$clobber) && !is.na(cfrow$clobber) && cfrow$clobber %in% c(0,1)) {
+        if (cfrow$clobber<1) {
+            this_flags <- merge_wget_flags(this_flags,list(no_clobber=TRUE))
+        } else {
+            this_flags <- merge_wget_flags(this_flags,list(timestamping=TRUE))
+        }
+    }
+    ## add user, password flags
+    if (!is.na(cfrow$user) && nchar(cfrow$user)>0) this_flags <- c(this_flags,list(user=cfrow$user))
+    if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- c(this_flags,list(password=cfrow$password))
+    ##if (cfrow$wait>0) this_flags <- c(this_flags,"--wait=",cfrow$wait)
+
+    if (!verbose) {
+        ## suppress wget's own output
+        if (!"quiet" %in% names(this_flags)) this_flags <- c(this_flags,list(quiet=TRUE))
+    }
+
+    if (!is.null(cfrow$skip_downloads) && cfrow$skip_downloads) {
+        if (verbose) {
+            temp <- vapply(seq_len(length(this_flags)),function(z)paste0(names(this_flags)[z],"=",this_flags[z]),FUN.VALUE="",USE.NAMES=FALSE)
+            cat(sprintf(" skip_downloads is TRUE, not executing: wget %s %s\n",paste(temp,collapse=" "),cfrow$source_url))
+        }
+        ok <- TRUE
+    } else {
+        this_flags <- c(list(url=cfrow$source_url),this_flags,list(verbose=verbose))
+        if (sink.number()>0) {
+            ## we have a sink() redirection in place
+            ## sink() won't catch the output of system commands, which means we miss stuff in our log
+            ## workaround: send output to temporary file so that we can capture it
+            op_file <- gsub("\\\\","\\\\\\\\",tempfile()) ## escape backslashes
+            this_flags <- c(list(output_file=op_file),this_flags)
+            syscall_obj <- do.call(bb_wget2,this_flags)
+            ## now echo the contents of op_file to console, so that sink() captures it
+            if (verbose) cat(readLines(op_file),sep="\n")
+        } else {
+            syscall_obj <- do.call(bb_wget2,this_flags)
+        }
+        ## now return an appropriate indicator of success
+        if (is.null(syscall_obj)) {
+            ## no object returned - this happens if process is interrupted by the user on unix
+            ok <- as.logical(NA)
+        } else {
+            ok <- !syscall_obj$status ## status code of 0 means OK
+        }
+    }
+    ok
+}
+
+
 #' Make a wget call
 #'
 #' The wget system call is made using the \code{exec_wait} function from the sys package. Call \code{bb_wget2("help")} to get a message giving information about wget's command line parameters
@@ -137,14 +221,20 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
 #' @param execute character: a character vector with one or more entries. Each entry is an command to be executed. A common use for this is \code{execute=c("robots=off")}, in order to avoid wget's default behaviour of identifying as a robot. Some servers will exclude robots from certain parts of their sites. See \url{https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion, and \url{https://www.gnu.org/software/wget/manual/wget.html#Wgetrc-Commands} for a full list of commands that can be specified here
 #' @param restrict_file_names character: vector of one of more strings from the set "unix", "windows", "nocontrol", "ascii", "lowercase", and "uppercase". \code{restrict_file_names="windows"} is useful if you are downloading files to be used on both Windows and Unix file systems. See \url{https://www.gnu.org/software/wget/manual/wget.html#index-Windows-file-names} for more information on this parameter
 #' @param progress string: the type of progress indicator you wish to use. Legal indicators are "dot" and "bar". "dot" prints progress with dots, with each dot representing a fixed amount of downloaded data. The style can be adjusted: "dot:mega" will show 64K per dot and 3M per line; "dot:giga" shows 1M per dot and 32M per line. See \url{https://www.gnu.org/software/wget/manual/wget.html#index-dot-style} for more information
-#' @param no_parent logical: if TRUE, do not ever ascend to the parent directory when retrieving recursively. This is TRUE by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded
+#' @param user string: username used to authenticate to the remote server
+#' @param password string: password used to authenticate to the remote server
+#' @param output_file string: save wget's output messages to this file
+#' @param timestamping logical: if TRUE, don't re-retrieve a remote file unless it is newer than the local copy (or there is no local copy)
 #' @param no_if_modified_since logical: applies when retrieving recursively with timestamping (i.e. only downloading files that have changed since last download, which is achieved using \code{bb_config(...,clobber=1)}). The default method for timestamping is to issue an "If-Modified-Since" header on the request, which instructs the remote server not to return the file if it has not changed since the specified date. Some servers do not support this header. In these cases, trying using \code{no_if_modified_since=TRUE}, which will instead send a preliminary HEAD request to ascertain the date of the remote file
+#' @param no_clobber logical: if TRUE, skip downloads that would overwrite existing local files
+#' @param no_parent logical: if TRUE, do not ever ascend to the parent directory when retrieving recursively. This is TRUE by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded
 #' @param no_check_certificate logical: if TRUE, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution
 #' @param relative logical: if TRUE, only follow relative links. This can sometimes be useful for restricting what is downloaded in recursive mode
 #' @param adjust_extension logical: if a file of type 'application/xhtml+xml' or 'text/html' is downloaded and the URL does not end with .htm or .html, this option will cause the suffix '.html' to be appended to the local filename. This can be useful when mirroring a remote site that has page URLs that conflict with directories (e.g. http://somewhere.org/this/page which has further content below it, say at http://somewhere.org/this/page/more. If "somewhere.org/this/page" is saved as a page, that name can't also be used as a local directory in which to store the lower-level content. Setting \code{adjust_extension=TRUE} will cause the page to be saved as "somewhere.org/this/page.html", thus resolving the conflict
 #' @param extra_flags character: character vector of additional command-line flags to pass to wget
 #' @param verbose logical: print trace output?
 #' @param capture_stdout logical: if TRUE, return 'stdout' and 'stderr' output in the returned object (see exec_internal from the sys package). Otherwise send these outputs to the console
+#' @param quiet logical: if TRUE, suppress wget's output
 #'
 #' @return the result of the system call (or if \code{bb_wget("--help")} was called, a message will be issued). The returned object will have components 'status' and (if \code{capture_stdout} was \code{TRUE}) 'stdout' and 'stderr'
 #'
@@ -157,7 +247,7 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
 #'
 # @export
 ## like bb_wget, but with some wget flags promoted to explicit function parms
-bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex,reject_regex,exclude_directories,execute,restrict_file_names,progress,no_parent=TRUE,no_if_modified_since=FALSE,no_check_certificate=FALSE,relative=FALSE,adjust_extension=FALSE,extra_flags=character(),verbose=FALSE,capture_stdout=FALSE) {
+bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex,reject_regex,exclude_directories,execute,restrict_file_names,progress,user,password,output_file,timestamping=FALSE,no_if_modified_since=FALSE,no_clobber=FALSE,no_parent=TRUE,no_check_certificate=FALSE,relative=FALSE,adjust_extension=FALSE,extra_flags=character(),verbose=FALSE,capture_stdout=FALSE,quiet=FALSE) {
     assert_that(is.string(url))
     assert_that(is.flag(recursive),!is.na(recursive))
     if (recursive) assert_that(is.numeric(level),level>=0)
@@ -175,8 +265,16 @@ bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_rege
     assert_that(is.character(restrict_file_names))
     if (missing(progress)) progress <- ""
     assert_that(is.string(progress))
-    assert_that(is.flag(no_parent),!is.na(no_parent))
+    if (missing(user)) user <- ""
+    assert_that(is.string(user))
+    if (missing(password)) password <- ""
+    assert_that(is.string(password))
+    if (missing(output_file)) output_file <- ""
+    assert_that(is.string(output_file))
+    assert_that(is.flag(timestamping),!is.na(timestamping))
     assert_that(is.flag(no_if_modified_since),!is.na(no_if_modified_since))
+    assert_that(is.flag(no_clobber),!is.na(no_clobber))
+    assert_that(is.flag(no_parent),!is.na(no_parent))
     assert_that(is.flag(no_check_certificate),!is.na(no_check_certificate))
     assert_that(is.flag(relative),!is.na(relative))
     assert_that(is.flag(adjust_extension),!is.na(adjust_extension))
@@ -186,6 +284,7 @@ bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_rege
     assert_that(is.character(extra_flags))
     assert_that(is.flag(verbose),!is.na(verbose))
     assert_that(is.flag(capture_stdout),!is.na(capture_stdout))
+    assert_that(is.flag(quiet),!is.na(quiet))
     if (tolower(sub("^\\-+","",url)) %in% c("h","help")) {
         out <- sys::exec_internal(bb_find_wget(),args="--help",error=TRUE)
         message(rawToChar(out$stdout))
@@ -197,18 +296,24 @@ bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_rege
         flags <- c(flags,vapply(accept_regex,function(z)paste0("--accept-regex=",z),FUN.VALUE="",USE.NAMES=FALSE))
         flags <- c(flags,vapply(reject,function(z)paste0("--reject=",z),FUN.VALUE="",USE.NAMES=FALSE))
         flags <- c(flags,vapply(reject_regex,function(z)paste0("--reject-regex=",z),FUN.VALUE="",USE.NAMES=FALSE))
-        flags <- c(flags,vapply(exclude_directories,function(z)paste0("--exclude_directories=",z),FUN.VALUE="",USE.NAMES=FALSE))
+        flags <- c(flags,vapply(exclude_directories,function(z)paste0("--exclude-directories=",z),FUN.VALUE="",USE.NAMES=FALSE))
         if (length(restrict_file_names)>0) {
             restrict_file_names <- paste(restrict_file_names,sep=",",collapse=",")
-            flags <- c(flags,paste0("--restrict_file_names=",restrict_file_names))
+            flags <- c(flags,paste0("--restrict-file-names=",restrict_file_names))
         }
         if (length(progress)>0 && nzchar(progress)) flags <- c(flags,paste0("--progress=",progress))
+        if (length(user)>0 && nzchar(user)) flags <- c(flags,paste0("--user=",user))
+        if (length(password)>0 && nzchar(password)) flags <- c(flags,paste0("--password=",password))
+        if (length(output_file)>0 && nzchar(output_file)) flags <- c(flags,paste0("--output-file=",output_file))
         if (recursive && no_parent) flags <- c(flags,"--no-parent")
+        if (timestamping) flags <- c(flags,"--timestamping")
+        if (no_clobber) flags <- c(flags,"--no-clobber")
         if (no_if_modified_since) flags <- c(flags,"--no-if-modified-since")
         if (no_check_certificate) flags <- c(flags,"--no-check-certificate")
         if (relative) flags <- c(flags,"--relative")
         if (adjust_extension) flags <- c(flags,"--adjust-extension")
         if (wait>0) flags <- c(flags,paste0("--wait=",wait))
+        if (quiet) flags <- c(flags,"--quiet")
         if (length(execute)>0)
             flags <- c(flags,paste("-e",execute,sep=" ")) ## these need to be of the form '-e first_command' '-e second_command'
         ## add any extra_flags
@@ -251,10 +356,10 @@ bb_install_wget <- function() {
         path <- file.path(path,"bowerbird")
         if (!dir_exists(path)) dir.create(path)
         if (!dir_exists(path)) stop("could not create directory ",path," to store the wget executable")
-        ok <- download.file("https://eternallybored.org/misc/wget/current/wget.exe",
+        err <- download.file("https://eternallybored.org/misc/wget/current/wget.exe",
                       destfile=file.path(path,"wget.exe"),
                       mode="wb")
-        if (ok==0) {
+        if (!err) {
             file.path(path,"wget.exe")
         } else {
             stop("Sorry, could not install wget")
@@ -363,6 +468,22 @@ resolve_wget_clobber_flags <- function(primary_flags,secondary_flags) {
                wgf <- c(wgf,thisflag))
     }
     wgf
+}
+
+## internal: merge two sets of wget flags
+## TODO: deal with extra_flags stuff
+merge_wget_flags <- function(primary_flags,secondary_flags) {
+    assert_that(is.list(primary_flags))
+    assert_that(is.list(secondary_flags))
+    f1 <- names(primary_flags)
+    f2 <- names(secondary_flags)
+    for (thisflag in setdiff(f2,f1)) {
+        switch(thisflag,
+               "timestamping"={ if (! "no_clobber" %in% f1) primary_flags <- c(primary_flags,list(timestamping=TRUE)) },
+               "no_clobber"={ if (! "timestamping" %in% f1) primary_flags <- c(primary_flags,list(no_clobber=TRUE)) },
+               primary_flags <- c(primary_flags,secondary_flags[thisflag]))
+    }
+    primary_flags
 }
 
 

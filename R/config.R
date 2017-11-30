@@ -41,6 +41,49 @@ bb_config <- function(local_file_root,wget_global_flags=c("--restrict-file-names
         class="bb_config")
 }
 
+#' Initialize a bowerbird configuration
+#'
+#' The parameters provided here are repository-wide settings, and will be applied to all data sources that are subsequently added to the configuration.
+#'
+#' @param local_file_root string: location of data repository on local file system
+#' @param wget_global_flags list: wget flags that will be applied to all data sources that call \code{bb_wget}. These will be appended to the data-source-specific wget flags provided via the source's method_flags argument
+#' @param http_proxy string: URL of HTTP proxy to use e.g. 'http://your.proxy:8080' (NULL for no proxy)
+#' @param ftp_proxy string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)
+#' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)
+#' @param skip_downloads logical: if TRUE, \code{bb_sync} will do a dry run of the synchronisation process but without actually downloading files. For data sources using method bb_handler_wget, this means that the wget calls will not be executed, so e.g. any recursion handled by wget itself will not be simulated
+#' @return configuration object
+#'
+#' @seealso \code{\link{bb_source}}
+#'
+#' @examples
+#' \dontrun{
+#'   cf <- bb_config("/my/file/root") %>%
+#'     bb_add(bb_example_sources())
+#'
+#'   ## save to file
+#'   saveRDS(cf,file="my_config.rds")
+#'   ## load previously saved config
+#'   cf <- readRDS(file="my_config.rds")
+#' }
+#'
+#' @export
+bb_config2 <- function(local_file_root,wget_global_flags=list(restrict_file_names="windows",progress="dot:giga"),http_proxy=NULL,ftp_proxy=NULL,clobber=1,skip_downloads=FALSE) {
+    assert_that(is.string(local_file_root))
+    assert_that(clobber %in% c(0,1,2))
+    assert_that(is.flag(skip_downloads),!is.na(skip_downloads))
+    assert_that(is.list(wget_global_flags))
+    structure(
+        list(data_sources=tibble(),
+             settings=list(
+                 wget_global_flags=wget_global_flags,
+                 http_proxy=http_proxy,
+                 ftp_proxy=ftp_proxy,
+                 local_file_root=local_file_root,
+                 clobber=clobber,
+                 skip_downloads=skip_downloads)),
+        class="bb_config")
+}
+
 
 #' Keep only selected data_sources in a bowerbird configuration
 #'

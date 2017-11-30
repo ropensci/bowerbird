@@ -23,7 +23,7 @@
 #' @export
 bb_example_sources <- function() {
     bind_rows(
-        bb_source(
+        bb_source2(
             name="NOAA OI SST V2",
             id="oisst.v2",
             description="Weekly and monthly mean and long-term monthly mean SST data, 1-degree resolution, 1981 to present. Ice concentration data are also included, which are the ice concentration values input to the SST analysis",
@@ -31,8 +31,8 @@ bb_example_sources <- function() {
             citation="NOAA_OI_SST_V2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
             source_url=c("ftp://ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/*"),
             license="Please cite",
-            method=quote(bb_handler_wget),
-            method_flags=c("--recursive","--level=1","--no-parent"),
+            method=quote(bb_handler_wget2),
+            method_flags=list(recursive=TRUE,level=1,no_parent=TRUE),
             postprocess=NULL,
             access_function="readsst",
             collection_size=0.9,
@@ -96,7 +96,7 @@ bb_example_sources <- function() {
             postprocess=quote(bb_gunzip),
             collection_size=0.03,
             data_group="Topography"),
-        bb_source(
+        bb_source2(
             name="Australian Election 2016 House of Representatives data",
             id="aus-election-house-2016",
             description="House of Representatives results from the 2016 Australian election.",
@@ -104,8 +104,8 @@ bb_example_sources <- function() {
             citation="Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
             source_url=c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
             license="CC-BY",
-            method=quote(bb_handler_wget),
-            method_flags=c("--recursive","--level=1","--accept=csv","--no-if-modified-since"),
+            method=quote(bb_handler_wget2),
+            method_flags=list(recursive=TRUE,level=1,accept="csv",no_if_modified_since=TRUE),
             collection_size=0.01,
             data_group="Electoral")
     )
