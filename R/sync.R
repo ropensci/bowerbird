@@ -86,15 +86,17 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
 
     ## check postprocessing
     ## should be a nested list of (list of functions or call objects, or empty list)
-    pp <- bb_data_sources(this_dataset)$postprocess
-    if (length(pp)==1) {
-        pp <- pp[[1]]
-    } else {
-        stop("expecting nested list for the postprocess argument")
-    }
-    if (!(is.list(pp) && (length(pp)<1 || all(vapply(pp,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function")),FUN.VALUE=TRUE)))))
-        stop("the postprocess argument should be a list of functions, calls, or symbols of functions")
-
+    ## must be a list, each element is a list with first element resolving to a function via match.fun
+    pp <- bb_data_sources(this_dataset)$postprocess[[1]]
+    ##if (length(pp)==1) {
+    ##    pp <- pp[[1]]
+    ##} else {
+    ##    stop("expecting nested list for the postprocess argument")
+    ##}
+    ##if (!(is.list(pp) && (length(pp)<1 || all(vapply(pp,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function")),FUN.VALUE=TRUE)))))
+    ##    stop("the postprocess argument should be a list of functions, calls, or symbols of functions")
+    if (!(is.list(pp) && all(vapply(pp,function(z)is.list(z) && is_a_fun(z[[1]]),FUN.VALUE=TRUE))))
+        stop("the postprocess argument should be a nested list, with each inner list having a function as its first element")
     ## do the main synchonization, usually directly with wget, otherwise with custom methods
     this_path_no_trailing_sep <- sub("[\\/]$","",bb_data_source_dir(this_dataset))
     if (verbose) cat(sprintf(" this dataset path is: %s\n",this_path_no_trailing_sep))
@@ -118,7 +120,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     } else {
         ok <- do.call(mth,list(config=this_dataset,verbose=verbose))
     }
-
+cat("ok:",str(ok),"\n")
     ## postprocessing
     if (length(pp)>0) {
         if (is.na(ok) || !ok) {
@@ -138,23 +140,26 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
             for (i in seq_len(length(pp))) {
                 ## postprocessing steps are passed as functions or calls
                 qq <- pp[[i]]
-                if (is.function(qq)) {
-                    ## passed as function
-                    ## evaluate with extra args
-                    do.call(qq,list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
-                } else if (is.symbol(qq)) {
-                    ## passed as symbol
-                    do.call(eval(qq),list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
-                } else if (is.call(qq)) {
-                    if (all.names(qq)[1]=="quote") {
-                        ## call was constructed as e.g. enquote(fun)
-                        do.call(eval(qq),list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
-                    } else {
-                        ## call was constructed as e.g. quote(fun()) or quote(fun(var=arg))
-                        thisargs <- inject_args(qq,list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
-                        do.call(all.names(qq)[1],thisargs)
-                    }
-                }
+                qq <- match.fun(pp[[i]][[1]]) ## the function to call
+                qq_args <- pp[[i]][-1]
+                do.call(qq,c(list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after,verbose=verbose),qq_args))
+                ##if (is.function(qq)) {
+                ##    ## passed as function
+                ##    ## evaluate with extra args
+                ##    do.call(qq,list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                ##} else if (is.symbol(qq)) {
+                ##    ## passed as symbol
+                ##    do.call(eval(qq),list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                ##} else if (is.call(qq)) {
+                ##    if (all.names(qq)[1]=="quote") {
+                ##        ## call was constructed as e.g. enquote(fun)
+                ##        do.call(eval(qq),list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                ##    } else {
+                ##        ## call was constructed as e.g. quote(fun()) or quote(fun(var=arg))
+                ##        thisargs <- inject_args(qq,list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after))
+                ##        do.call(all.names(qq)[1],thisargs)
+                ##    }
+                ##}
             }
         }
     }

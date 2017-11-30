@@ -47,7 +47,7 @@ bb_example_sources <- function() {
             license="See http://marine.copernicus.eu/services-portfolio/service-commitments-and-licence/",
             method="bb_handler_wget2",
             method_flags=list(recursive=TRUE,level=3,no_parent=TRUE),
-            postprocess=quote(bb_gunzip),
+            postprocess=list("bb_gunzip"),
             authentication_note="Copernicus Marine login required, see http://marine.copernicus.eu/services-portfolio/register-now/",
             user="",
             password="",
@@ -93,7 +93,7 @@ bb_example_sources <- function() {
             method="bb_handler_wget2",
             method_flags=list(recursive=TRUE,level=2,accept_regex="/netcdf/",reject="index.html*"),
             comment="Only the netcdf format data are retrieved here - adjust the accept parameter in the method_flags to get other formats",
-            postprocess=quote(bb_gunzip),
+            postprocess=list("bb_gunzip"),
             collection_size=0.03,
             data_group="Topography"),
         bb_source2(

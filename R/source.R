@@ -107,9 +107,10 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
 #' @param citation string: (required) details of the citation for the data source
 #' @param license string: (required) description of the license. For standard licenses (e.g. creative commons) include the license descriptor ("CC-BY", etc)
 #' @param comment string: comments about the data source. If only part of the original data collection is mirrored, mention that here
-#' @param method function, call, or symbol: (required) the function that handles the synchronisation process for this data source
+#' @param method function or string: the function that handles the synchronisation process for this data source. The value passed here will be checked using \code{match.fun}, so it can be a function, string (function name), or symbol
 #' @param method_flags character vector: flags to pass to the method. If method is \code{bb_handler_wget}, these are wget flags. Run \code{bb_wget("--help")} to get help on these flags
-#' @param postprocess function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
+#' @param postprocess list: each element of \code{postprocess} defines a postprocessing step to be run after the main synchronization has happened. Each element of this list can be a function or string function name, or a list in the style of \code{list(fun,arg1=val1,arg2=val2)} where \code{fun} is the function to be called and \code{arg1} and \code{arg2} are additional parameters to pass to that function
+#' function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
 #' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
 #' @param user string: username, if required
 #' @param password string: password, if required
@@ -134,9 +135,9 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
 #'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
 #'    license="",
 #'    comment="",
-#'    method=quote(bb_handler_wget),
+#'    method="bb_handler_wget",
 #'    method_flags=c("--recursive","--level=1","--accept=*bin*.zip,README.TXT"),
-#'    postprocess=quote(bb_unzip),
+#'    postprocess=list("bb_unzip"),
 #'    collection_size=0.6)
 #'
 #' cf <- bb_config("/my/repo/root")
@@ -144,7 +145,8 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
 #'
 #' @export
 bb_source2 <- function(id,name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method=bb_handler_wget,method_flags=list(),postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,collection_size=NA,warn_empty_auth=TRUE) {
-    assert_that(is.function(method) || (is.symbol(method) && exists(deparse(method),mode="function")) || is.call(method))
+    if (!is_a_fun(method))
+        stop("method must be a function (or something that resolves to a function via match.fun")
     if (missing(id) || !is_nonempty_string(id))
         stop("Each data source requires a non-empty id")
     if (missing(name) || !is_nonempty_string(name))
@@ -168,9 +170,21 @@ bb_source2 <- function(id,name,description=NA_character_,reference,source_url,ci
     if (missing(postprocess) || is.null(postprocess)) {
         postprocess <- list()
     } else {
-        if (is.function(postprocess) || is.call(postprocess) || is.symbol(postprocess)) postprocess <- list(postprocess)
-        ppchk <- is.list(postprocess) && all(vapply(postprocess,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function")),FUN.VALUE=TRUE))
-        if (!ppchk) stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
+        ## each element of the list should be a list, where the first element should resolve to a function and the rest are arguments. But we'll also accept a list element being a function, in which case we'll treat it as not needing extra args
+        assert_that(is.list(postprocess))
+        for (k in seq_len(length(postprocess))) {
+            if (is_a_fun(postprocess[[k]])) {
+                ## change this to a list with the function as its first (only) element
+                postprocess[[k]] <- list(postprocess[[k]])
+            } else if (is.list(postprocess[[k]]) && is_a_fun(postprocess[[k]][[1]])) {
+                ## ok, leave as is
+            } else {
+                stop("postprocess entry ",k," is not a function or a list with a function as its first element")
+            }
+        }        
+        ##if (is.function(postprocess) || is.call(postprocess) || is.symbol(postprocess)) postprocess <- list(postprocess)
+        ##ppchk <- is.list(postprocess) && all(vapply(postprocess,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function")),FUN.VALUE=TRUE))
+        ##if (!ppchk) stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
     }
     assert_that(is.character(source_url))
     tibble(

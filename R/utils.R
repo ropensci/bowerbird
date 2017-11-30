@@ -25,6 +25,13 @@ check_method_is <- function(method,expected) {
     identical(match.fun(method),expected)
 }
 
+## internal: does something resolve to a function via match.fun?
+is_a_fun <- function(z) {
+    out <- FALSE
+    try({match.fun(z); out <- TRUE},silent=TRUE)
+    out
+}
+
 ## get actual function from method (which may be function, call, or symbol)
 ##get_function_from_method <- function(method) {
 ##    assert_that(is.function(method) || is.call(method) || is.symbol(method) || is.string(method))
