@@ -224,7 +224,11 @@ bb_data_source_dir <- function(config) {
         mth <- NULL
         try(mth <- match.fun(bb_data_sources(cfrow)$method[[1]]),silent=TRUE)
         if (is.function(mth)) {
-            do.call(mth,c(list(config=cfrow,local_dir_only=TRUE),bb_data_sources(cfrow)$method_flags[[1]]))
+            if (check_method_is(mth,bb_handler_wget2) || check_method_is(mth,bb_handler_oceandata2)) {
+                do.call(mth,c(list(config=cfrow,local_dir_only=TRUE),bb_data_sources(cfrow)$method_flags[[1]]))
+            } else {
+                do.call(mth,c(list(config=cfrow,local_dir_only=TRUE)))
+            }
         } else {
             as.character(NA)
         }
