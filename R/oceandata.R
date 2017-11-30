@@ -169,7 +169,7 @@ bb_handler_oceandata2 <- function(config,verbose=FALSE,local_dir_only=FALSE,sear
         qry <- paste0("--post-data=cksum=1&search=",search)
         if (!missing(dtype))
             qry <- paste0(qry,"&dtype=",dtype)
-        qry <- paste0("\"",qry,"\"")
+        ##if (get_os()=="windows") qry <- paste0("\"",qry,"\"") ## not sure if need these on windows or not!!
         myfiles <- bb_wget2("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",recursive=FALSE,extra_flags=c("-q",qry,"-O","-"),capture_stdout=TRUE,verbose=verbose)
         if (myfiles$status==0) break
         tries <- tries+1
