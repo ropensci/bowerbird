@@ -21,31 +21,32 @@ is_nonempty_string <- function(z) is.string(z) && nzchar(z)
 ## check method (which may be function, call, or symbol) matches expected function
 check_method_is <- function(method,expected) {
     assert_that(is.function(expected))
-    identical(get_function_from_method(method),expected)
+    ##identical(get_function_from_method(method),expected)
+    identical(match.fun(method),expected)
 }
 
 ## get actual function from method (which may be function, call, or symbol)
-get_function_from_method <- function(method) {
-    assert_that(is.function(method) || is.call(method) || is.symbol(method) || is.string(method))
-    if (is.function(method)) {
-        return(method)
-    } else if (is.call(method)) {
-        if (all.names(method)[1]=="quote") {
-            ## call was constructed as e.g. enquote(whatever)
-            return(eval(method))
-        } else {
-            ## call was constructed as e.g. quote(whatever())
-            return(get_function_from_method(all.names(method)[1])) ## check using name of called function
-        }
-    } else if (is.string(method)) {
-        ## passed as function name
-        if (exists(method,mode="function")) return(get(method))
-    } else {
-        ## symbol/name, by e.g. quote(whatever)
-        if (exists(deparse(method),mode="function")) return(eval(method))
-    }
-    stop("could not extract the underlying method function")
-}
+##get_function_from_method <- function(method) {
+##    assert_that(is.function(method) || is.call(method) || is.symbol(method) || is.string(method))
+##    if (is.function(method)) {
+##        return(method)
+##    } else if (is.call(method)) {
+##        if (all.names(method)[1]=="quote") {
+##            ## call was constructed as e.g. enquote(whatever)
+##            return(eval(method))
+##        } else {
+##            ## call was constructed as e.g. quote(whatever())
+##            return(get_function_from_method(all.names(method)[1])) ## check using name of called function
+##        }
+##    } else if (is.string(method)) {
+##        ## passed as function name
+##        if (exists(method,mode="function")) return(get(method))
+##    } else {
+##        ## symbol/name, by e.g. quote(whatever)
+##        if (exists(deparse(method),mode="function")) return(eval(method))
+##    }
+##    stop("could not extract the underlying method function")
+##}
 
 ## isn't there a better way to do this?
 ## qfun is a quoted function with arguments already provided, e.g. quote(fun(var=arg))

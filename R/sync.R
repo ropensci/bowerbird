@@ -112,7 +112,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
         if (verbose) cat(sprintf("done.\n"))
     }
     ## run the method
-    mth <- get_function_from_method(bb_data_sources(this_dataset)$method[[1]])
+    mth <- match.fun(bb_data_sources(this_dataset)$method[[1]])
     ok <- do.call(mth,list(config=this_dataset,verbose=verbose))
 
     ## postprocessing

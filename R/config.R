@@ -222,7 +222,7 @@ bb_data_source_dir <- function(config) {
     assert_that(is(config,"bb_config"))
     single_source_dir <- function(cfrow) {
         mth <- NULL
-        try(mth <- get_function_from_method(bb_data_sources(cfrow)$method[[1]]),silent=TRUE)
+        try(mth <- match.fun(bb_data_sources(cfrow)$method[[1]]),silent=TRUE)
         if (is.function(mth)) {
             do.call(mth,list(config=cfrow,local_dir_only=TRUE))
         } else {
