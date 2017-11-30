@@ -120,7 +120,6 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     } else {
         ok <- do.call(mth,list(config=this_dataset,verbose=verbose))
     }
-cat("ok:",str(ok),"\n")
     ## postprocessing
     if (length(pp)>0) {
         if (is.na(ok) || !ok) {
