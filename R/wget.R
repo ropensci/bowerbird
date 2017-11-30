@@ -324,11 +324,15 @@ bb_wget2 <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_rege
         flags <- c(flags,extra_flags)
         if (verbose) cat(sprintf(" executing wget %s %s\n",paste(flags,collapse=" "),url))
         if (capture_stdout) {
-            sys::exec_internal(bb_find_wget(),args=c(flags,url),error=FALSE)
+            out <- sys::exec_internal(bb_find_wget(),args=c(flags,url),error=FALSE)
         } else {
             status <- sys::exec_wait(bb_find_wget(),args=c(flags,url),std_out=TRUE,std_err=TRUE)
-            list(status=status)
+            out <- list(status=status)
         }
+        out$status_text <- decode_wget_exit_status(out$status)
+        if ((is.na(out$status) || out$status>0) && verbose)
+            cat(sprintf(" bb_wget2 exited with status code %d indicating an error (%s)\n",out$status,out$status_text))
+        out
     }
 }
 
@@ -523,4 +527,23 @@ flags_to_charvec <- function(fl) {
     } else {
         stop("expecting flags as character vector or list")
     }
+}
+
+decode_wget_exit_status <- function(status) {
+    ## see https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
+    out <- "unknown status code"
+    if (is.numeric(status) && status>=0 & status<=8) {
+        out <- switch(as.character(status),
+                      "0"="no problems occurred",
+                      "1"="generic error code",
+                      "2"="parse error, for instance when parsing command-line options or the .wgetrc or .netrc files",
+                      "3"="file I/O error",
+                      "4"="network failure",
+                      "5"="SSL verification failure",
+                      "6"="username/password authentication failure",
+                      "7"="protocol error",
+                      "8"="server issued an error response",
+                      "unknown status code")
+    }
+    out
 }
