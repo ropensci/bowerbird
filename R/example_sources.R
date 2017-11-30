@@ -105,7 +105,7 @@ bb_example_sources <- function() {
             source_url=c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
             license="CC-BY",
             method="bb_handler_wget2",
-            method_flags=list(recursive=TRUE,level=1,accept="csv",no_if_modified_since=TRUE),
+            method_flags=list(recursive=TRUE,level=1,accept="csv",no_if_modified_since=TRUE,execute=c("robots=off"),reject_regex="Website/UserControls"),
             collection_size=0.01,
             data_group="Electoral")
     )
