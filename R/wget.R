@@ -125,13 +125,14 @@ bb_wget <- function(url,flags=character(),verbose=FALSE,capture_stdout=FALSE) {
 #' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 #' @param verbose logical: if TRUE, provide additional progress output
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
+#' @param ... : extra arguments passed through to \code{bb_wget2}
 #'
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
 #' @seealso \code{\link{bb_wget}}
 #'
 #' @export
-bb_handler_wget2 <- function(config,verbose=FALSE,local_dir_only=FALSE) {
+bb_handler_wget2 <- function(config,verbose=FALSE,local_dir_only=FALSE,...) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(bb_data_sources(config))==1)
     assert_that(is.flag(verbose),!is.na(verbose))
@@ -141,7 +142,7 @@ bb_handler_wget2 <- function(config,verbose=FALSE,local_dir_only=FALSE) {
         return(file.path(bb_settings(config)$local_file_root,directory_from_url(bb_data_sources(config)$source_url)))
 
     cfrow <- bb_settings_to_cols(config)
-    this_flags <- cfrow$method_flags[[1]]
+    this_flags <- list(...)
     ## add wget_global_flags
     gflags <- cfrow$wget_global_flags[[1]]
     if (length(gflags)>0)
@@ -203,6 +204,7 @@ bb_handler_wget2 <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     }
     ok
 }
+
 
 
 #' Make a wget call
@@ -471,7 +473,7 @@ resolve_wget_clobber_flags <- function(primary_flags,secondary_flags) {
 }
 
 ## internal: merge two sets of wget flags
-## TODO: deal with extra_flags stuff
+## used to add the wget_global_flags (part of the overall config) with source-specific flags
 merge_wget_flags <- function(primary_flags,secondary_flags) {
     assert_that(is.list(primary_flags))
     assert_that(is.list(secondary_flags))
@@ -481,7 +483,18 @@ merge_wget_flags <- function(primary_flags,secondary_flags) {
         switch(thisflag,
                "timestamping"={ if (! "no_clobber" %in% f1) primary_flags <- c(primary_flags,list(timestamping=TRUE)) },
                "no_clobber"={ if (! "timestamping" %in% f1) primary_flags <- c(primary_flags,list(no_clobber=TRUE)) },
+               "extra_flags"={
+                   ## don't do anything with this, handled below
+               },
                primary_flags <- c(primary_flags,secondary_flags[thisflag]))
+    }
+    if ("extra_flags" %in% f1) {
+        ## note that we make no attempt to resolve conflicts between flags here
+        ## but we do put the primary flags last, assuming that wget will follow the
+        ## last instruction given if there are conflicts
+        primary_flags$extra_flags <- c(flags_to_charvec(secondary_flags$extra_flags),flags_to_charvec(primary_flags$extra_flags))
+    } else {
+        primary_flags$extra_flags <- flags_to_charvec(secondary_flags$extra_flags)
     }
     primary_flags
 }
@@ -511,8 +524,3 @@ flags_to_charvec <- function(fl) {
         stop("expecting flags as character vector or list")
     }
 }
-
-
-
-##dir_exists <- function(z) utils::file_test("-d",z)
-##file_exists <- function(x) utils::file_test('-f', x)
