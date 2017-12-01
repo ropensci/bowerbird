@@ -76,14 +76,15 @@ bb_handler_earthdata2 <- function(config,verbose=FALSE,local_dir_only=FALSE,...)
     ## create this file
     if (!file.exists(cookies_file)) cat("",file=cookies_file)
     on.exit(file.remove(cookies_file))
-    mflags <- flags_to_charvec(dummy$method_flags)
+    ##mflags <- list(...)##flags_to_charvec(dummy$method_flags)
     ## must use --auth-no-challenge else the server redirects to the html login page, rather than accepting the provided credentials
-    dummy$method_flags <- list(c(mflags,"--http-user",dummy$user,"--http-password",dummy$password,"--auth-no-challenge","--load-cookies",cookies_file,"--save-cookies",cookies_file,"--keep-session-cookies","--reject=index.html*","-e","robots=off"))
+    dummy$method <- list("bb_handler_wget2",...,extra_flags=c("--http-user",dummy$user,"--http-password",dummy$password,"--auth-no-challenge","--load-cookies",cookies_file,"--save-cookies",cookies_file,"--keep-session-cookies"),reject="index.html*",execute=c("robots=off"))
+    ##dummy$method_flags <- list(c(mflags,"--http-user",dummy$user,"--http-password",dummy$password,"--auth-no-challenge","--load-cookies",cookies_file,"--save-cookies",cookies_file,"--keep-session-cookies","--reject=index.html*","-e","robots=off"))
     dummy$user <- NA_character_
     dummy$password <- NA_character_
     bb_data_sources(config) <- dummy
     ## must make the wget call twice: first time it will authenticate, and write the cookies, but then redirect to the original page and wget won't go further because it knows it's already been there and doesn't want to get into an infinite loop
-    do.call(bb_handler_wget2,c(list(config,verbose=verbose),dummy$method_flags))
+    do.call(bb_handler_wget2,c(list(config,verbose=verbose),dummy$method[-1]))
     ## but the second time it will authenticate using the stored cookie and proceed with the recursion
-    do.call(bb_handler_wget2,c(list(config,verbose=verbose),dummy$method_flags))
+    do.call(bb_handler_wget2,c(list(config,verbose=verbose),dummy$method[-1]))
 }

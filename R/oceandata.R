@@ -210,10 +210,11 @@ bb_handler_oceandata2 <- function(config,verbose=FALSE,local_dir_only=FALSE,sear
             ## note that if skip_downloads is TRUE, it will be passed through to bb_handler_wget here
             ##dummy$method_flags <- paste("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
             temp <- bb_data_sources(dummy)
-            temp$method_flags <- list(list(recursive=TRUE,extra_flags=c("--timeout=1800","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories")))
+            temp$method <- list(list("bb_handler_wget2",recursive=TRUE,extra_flags=c("--timeout=1800","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories")))
+            ##temp$method_flags <- list(list(recursive=TRUE,extra_flags=c("--timeout=1800","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories")))
             temp$source_url <- this_url
             bb_data_sources(dummy) <- temp
-            out <- out && do.call(bb_handler_wget2,c(list(dummy,verbose=verbose),temp$method_flags[[1]]))
+            out <- out && do.call(bb_handler_wget2,c(list(dummy,verbose=verbose),temp$method[[1]][-1]))
         } else {
             if (this_exists) {
                 if (verbose) cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))

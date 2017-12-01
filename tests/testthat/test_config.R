@@ -18,7 +18,7 @@ test_that("config summary appears to work", {
 })
 
 test_that("local directory looks right",{
-    src <- bb_source(
+    src <- bb_source2(
         id="bilbobaggins",
         name="Test",
         description="blah",
@@ -26,17 +26,16 @@ test_that("local directory looks right",{
         citation="blah",
         source_url="http://some.place.com/some/path/",
         license="blah",
-        method=bb_handler_wget,
-        method_flags=character(),
+        method=list("bb_handler_wget"),
         data_group="blah")
-    cf <- bb_config("/some/local/path") %>% bb_add(src)
+    cf <- bb_config2("/some/local/path") %>% bb_add(src)
     temp <- bb_data_source_dir(cf)
     temp <- gsub("\\+","/",temp) ## make sure are unix-style path seps
     expect_identical(sub("/$","",temp),"/some/local/path/some.place.com/some/path")
 })
 
 test_that("config validation works",{
-    src <- bb_source(
+    src <- bb_source2(
         id="bilbobaggins",
         name="Test",
         description="blah",
@@ -44,10 +43,9 @@ test_that("config validation works",{
         citation="blah",
         source_url="http://some.place.com/some/path/",
         license="blah",
-        method=bb_handler_wget,
-        method_flags=character(),
+        method=list("bb_handler_wget"),
         data_group="blah")
-    src2 <- bb_source(
+    src2 <- bb_source2(
         id="bilbobaggins",
         name="Test",
         description="blah",
@@ -56,11 +54,10 @@ test_that("config validation works",{
         source_url="http://some.place.com/some/path/",
         license="blah",
         authentication_note="this source requires login",
-        method=bb_handler_wget,
-        method_flags=character(),
+        method=list("bb_handler_wget"),
         data_group="blah",
         warn_empty_auth=FALSE)
-    cf <- bb_config("/some/local/path") %>% bb_add(src) %>% bb_add(src2)
+    cf <- bb_config2("/some/local/path") %>% bb_add(src) %>% bb_add(src2)
     expect_error(bb_validate(cf))
 
     src2$user <- "username"

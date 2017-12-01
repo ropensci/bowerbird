@@ -1,35 +1,5 @@
 context("oceandata handler")
 
-test_that("bb_handler_oceandata works",{
-    skip_on_appveyor() ## failing on AppVeyor for unknown reasons
-    ods <- bb_source(
-        id="bilbobaggins",
-        name="Oceandata test",
-        description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
-        reference= "http://oceancolor.gsfc.nasa.gov/",
-        citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
-        source_url="",
-        license="Please cite",
-        comment="",
-        method=bb_handler_oceandata,
-        method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
-        postprocess=NULL,
-        access_function="",
-        data_group="Sea surface temperature")
-    temp_root <- tempdir()
-    ocf <- bb_add(bb_config(local_file_root="irrelevant_here"),ods)
-    expect_equal(bb_data_source_dir(ocf),"irrelevant_here/oceandata.sci.gsfc.nasa.gov/MODIST/Mapped")
-    cwd <- getwd()
-    setwd(temp_root)
-    bb_handler_oceandata(ocf)
-    fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc" ## relative file name
-    expect_true(file.exists(fnm))
-    expect_true(file.exists(file.path(temp_root,fnm)))
-    fi <- file.info(fnm)
-    expect_gt(fi$size,6e6)
-    setwd(cwd)
-})
-
 test_that("bb_handler_oceandata2 works",{
     skip_on_appveyor() ## failing on AppVeyor for unknown reasons
     ods <- bb_source2(
@@ -41,8 +11,7 @@ test_that("bb_handler_oceandata2 works",{
         source_url="",
         license="Please cite",
         comment="",
-        method=bb_handler_oceandata2,
-        method_flags=list(search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
+        method=list("bb_handler_oceandata2",search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=NULL,
         access_function="",
         data_group="Sea surface temperature")
@@ -51,7 +20,7 @@ test_that("bb_handler_oceandata2 works",{
     expect_equal(bb_data_source_dir(ocf),"irrelevant_here/oceandata.sci.gsfc.nasa.gov/MODIST/Mapped")
     cwd <- getwd()
     setwd(temp_root)
-    do.call(bb_handler_oceandata2,c(list(ocf,verbose=TRUE),bb_data_sources(ocf)$method_flags[[1]]))
+    do.call(bb_handler_oceandata2,c(list(ocf,verbose=TRUE),bb_data_sources(ocf)$method[[1]][-1]))
     fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc" ## relative file name
     expect_true(file.exists(fnm))
     expect_true(file.exists(file.path(temp_root,fnm)))

@@ -107,10 +107,8 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
 #' @param citation string: (required) details of the citation for the data source
 #' @param license string: (required) description of the license. For standard licenses (e.g. creative commons) include the license descriptor ("CC-BY", etc)
 #' @param comment string: comments about the data source. If only part of the original data collection is mirrored, mention that here
-#' @param method function or string: the function that handles the synchronisation process for this data source. The value passed here will be checked using \code{match.fun}, so it can be a function, string (function name), or symbol
-#' @param method_flags character vector: flags to pass to the method. If method is \code{bb_handler_wget}, these are wget flags. Run \code{bb_wget("--help")} to get help on these flags
+#' @param method list: a list object that defines the function used to synchronise this data source. The first element of the list is the function name (as a string or function). Additional list elements can be used to specify additional parameters to pass to that function. If the handler function uses wget (e.g. \code{bb_handler_wget}), these extra parameters are passed to the \code{bb_wget} function
 #' @param postprocess list: each element of \code{postprocess} defines a postprocessing step to be run after the main synchronization has happened. Each element of this list can be a function or string function name, or a list in the style of \code{list(fun,arg1=val1,arg2=val2)} where \code{fun} is the function to be called and \code{arg1} and \code{arg2} are additional parameters to pass to that function
-#' function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied
 #' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
 #' @param user string: username, if required
 #' @param password string: password, if required
@@ -125,7 +123,7 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
 #'
 #' @examples
 #'
-#' my_source <- bb_source(
+#' my_source <- bb_source2(
 #'    id="gshhg_coastline",
 #'    name="GSHHG coastline data",
 #'    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
@@ -135,8 +133,7 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
 #'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
 #'    license="",
 #'    comment="",
-#'    method="bb_handler_wget",
-#'    method_flags=c("--recursive","--level=1","--accept=*bin*.zip,README.TXT"),
+#'    method=list("bb_handler_wget",recursive=TRUE,level=1,accept="*bin*.zip,README.TXT"),
 #'    postprocess=list("bb_unzip"),
 #'    collection_size=0.6)
 #'
@@ -144,9 +141,9 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
 #' cf <- bb_add(cf,my_source)
 #'
 #' @export
-bb_source2 <- function(id,name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method=bb_handler_wget,method_flags=list(),postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,collection_size=NA,warn_empty_auth=TRUE) {
-    if (!is_a_fun(method))
-        stop("method must be a function (or something that resolves to a function via match.fun")
+bb_source2 <- function(id,name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method,postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,collection_size=NA,warn_empty_auth=TRUE) {
+    assert_that(is.list(method))
+    if (!is_a_fun(method[[1]])) stop("the method parameter should be a list, with the first element being the handler function (a function or something that resolves to a function via match.fun)")
     if (missing(id) || !is_nonempty_string(id))
         stop("Each data source requires a non-empty id")
     if (missing(name) || !is_nonempty_string(name))
@@ -162,11 +159,9 @@ bb_source2 <- function(id,name,description=NA_character_,reference,source_url,ci
     if (missing(source_url)) source_url <- NA_character_
     source_url <- source_url[nzchar(source_url) & !is.na(source_url)] ## drop empty and NA strings
     if (length(source_url)<1) {
-        if (check_method_is(method,bb_handler_wget)) stop("method 'bb_handler_wget' requires at least one non-empty source URL")
+        if (check_method_is(method[[1]],bb_handler_wget) || check_method_is(method[[1]],bb_handler_wget2)) stop("method 'bb_handler_wget' requires at least one non-empty source URL")
         source_url <- NA_character_
     }
-    ##if (check_method_is(method,bb_handler_wget) && all(is.na(source_url))) stop("method 'bb_handler_wget' requires at least one non-empty source URL")
-
     if (missing(postprocess) || is.null(postprocess)) {
         postprocess <- list()
     } else {
@@ -181,10 +176,7 @@ bb_source2 <- function(id,name,description=NA_character_,reference,source_url,ci
             } else {
                 stop("postprocess entry ",k," is not a function or a list with a function as its first element")
             }
-        }        
-        ##if (is.function(postprocess) || is.call(postprocess) || is.symbol(postprocess)) postprocess <- list(postprocess)
-        ##ppchk <- is.list(postprocess) && all(vapply(postprocess,function(z)is.function(z) || is.call(z) || (is.symbol(z) && exists(deparse(z),mode="function")),FUN.VALUE=TRUE))
-        ##if (!ppchk) stop("the postprocess argument should be a list of functions or calls (unevaluated functions)")
+        }
     }
     assert_that(is.character(source_url))
     tibble(
@@ -197,7 +189,6 @@ bb_source2 <- function(id,name,description=NA_character_,reference,source_url,ci
         license=if (assert_that(is.string(license))) license,
         comment=if (assert_that(is.string(comment))) comment,
         method=list(method),
-        method_flags=if (assert_that(is.list(method_flags))) list(method_flags),
         postprocess=list(postprocess),
         authentication_note=if (assert_that(is.string(authentication_note))) authentication_note,
         user=if (assert_that(is.string(user))) user,

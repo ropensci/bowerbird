@@ -222,10 +222,10 @@ bb_data_source_dir <- function(config) {
     assert_that(is(config,"bb_config"))
     single_source_dir <- function(cfrow) {
         mth <- NULL
-        try(mth <- match.fun(bb_data_sources(cfrow)$method[[1]]),silent=TRUE)
+        try(mth <- match.fun(bb_data_sources(cfrow)$method[[1]][[1]]),silent=TRUE)
         if (is.function(mth)) {
             if (check_method_is(mth,bb_handler_wget2) || check_method_is(mth,bb_handler_oceandata2) || check_method_is(mth,bb_handler_earthdata2)) {
-                do.call(mth,c(list(config=cfrow,local_dir_only=TRUE),bb_data_sources(cfrow)$method_flags[[1]]))
+                do.call(mth,c(list(config=cfrow,local_dir_only=TRUE),bb_data_sources(cfrow)$method[[1]][-1]))
             } else {
                 do.call(mth,c(list(config=cfrow,local_dir_only=TRUE)))
             }
@@ -278,7 +278,7 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
 
     config <- bb_settings_to_cols(config)
 
-    config <- config %>% group_by_(~data_group,~name) %>% mutate_(source_urls=~paste(file.path(local_file_root,directory_from_url(source_url)),collapse=", ")) %>% ungroup() %>% select_(~-source_url,~-method,~-method_flags,~-postprocess) %>% unique()
+    config <- config %>% group_by_(~data_group,~name) %>% mutate_(source_urls=~paste(file.path(local_file_root,directory_from_url(source_url)),collapse=", ")) %>% ungroup() %>% select_(~-source_url,~-method,~-postprocess) %>% unique()
 
     config$data_group[config$data_group==""] <- NA ## so that arrange puts them last
     config <- config[order(config$data_group), ]

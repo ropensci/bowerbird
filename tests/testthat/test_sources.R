@@ -84,7 +84,7 @@ test_that("empty/missing/NA source_urls get dealt with correctly",{
 })
 
 test_that("bb_source works with multiple postprocess actions", {
-    bb_source(
+    bb_source2(
         id="bilbobaggins",
         name="Oceandata test",
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
@@ -93,13 +93,12 @@ test_that("bb_source works with multiple postprocess actions", {
         source_url="",
         license="Please cite",
         comment="",
-        method=bb_handler_oceandata,
-        method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
-        postprocess=list(quote(bb_unzip(delete=TRUE)),bb_gunzip),
+        method=list("bb_handler_oceandata2",search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
+        postprocess=list(list("bb_unzip",delete=TRUE),"bb_gunzip"),
         access_function="",
         data_group="Sea surface temperature")
 
-    bb_source(
+    bb_source2(
         id="bilbobaggins",
         name="Oceandata test",
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
@@ -108,8 +107,7 @@ test_that("bb_source works with multiple postprocess actions", {
         source_url="",
         license="Please cite",
         comment="",
-        method=bb_handler_oceandata,
-        method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
+        method=list("bb_handler_oceandata2",search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=list(bb_unzip,bb_gunzip),
         access_function="",
         data_group="Sea surface temperature")
@@ -122,7 +120,7 @@ test_that("sources with authentication have an authentication_note entry", {
 })
 
 test_that("authentication checks work",{
-    expect_warning(bb_source(
+    expect_warning(bb_source2(
         id="bilbobaggins",
         name="Test",
         description="blah",
@@ -131,12 +129,11 @@ test_that("authentication checks work",{
         source_url="blah",
         license="blah",
         authentication_note="auth note",
-        method=bb_handler_wget,
-        method_flags=character(),
+        method=list("bb_handler_wget2"),
         postprocess=NULL,
         data_group="blah"))
 
-    expect_warning(bb_source(
+    expect_warning(bb_source2(
         id="bilbobaggins",
         name="Test",
         description="blah",
@@ -146,12 +143,11 @@ test_that("authentication checks work",{
         license="blah",
         authentication_note="auth note",
         user="",
-        method=bb_handler_wget,
-        method_flags=character(),
+        method=list("bb_handler_wget2"),
         postprocess=NULL,
         data_group="blah"))
 
-    expect_warning(bb_source(
+    expect_warning(bb_source2(
         id="bilbobaggins",
         name="Test",
         description="blah",
@@ -161,13 +157,12 @@ test_that("authentication checks work",{
         license="blah",
         authentication_note="auth note",
         password="",
-        method=bb_handler_wget,
-        method_flags=character(),
+        method=list("bb_handler_wget2"),
         postprocess=NULL,
         data_group="blah"))
 
     ## no warning
-    bb_source(
+    bb_source2(
         id="bilbobaggins",
         name="Test",
         description="blah",
@@ -178,11 +173,7 @@ test_that("authentication checks work",{
         authentication_note="auth note",
         user="user",
         password="password",
-        method=bb_handler_wget,
-        method_flags=character(),
+        method=list("bb_handler_wget2"),
         postprocess=NULL,
         data_group="blah")
 })
-
-
-
