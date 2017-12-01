@@ -10,7 +10,7 @@ bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
   no_if_modified_since = FALSE, no_clobber = FALSE, no_parent = TRUE,
   no_check_certificate = FALSE, relative = FALSE,
   adjust_extension = FALSE, extra_flags = character(), verbose = FALSE,
-  capture_stdout = FALSE, quiet = FALSE)
+  capture_stdout = FALSE, quiet = FALSE, debug = FALSE)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
@@ -64,6 +64,8 @@ bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
 \item{capture_stdout}{logical: if TRUE, return 'stdout' and 'stderr' output in the returned object (see exec_internal from the sys package). Otherwise send these outputs to the console}
 
 \item{quiet}{logical: if TRUE, suppress wget's output}
+
+\item{debug}{logical: if TRUE, wget will print lots of debugging information. If wget is not behaving as expected, try setting this to TRUE}
 }
 \value{
 the result of the system call (or if \code{bb_wget("--help")} was called, a message will be issued). The returned object will have components 'status' and (if \code{capture_stdout} was \code{TRUE}) 'stdout' and 'stderr'

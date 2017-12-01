@@ -115,6 +115,7 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE,...) {
 #' @param verbose logical: print trace output?
 #' @param capture_stdout logical: if TRUE, return 'stdout' and 'stderr' output in the returned object (see exec_internal from the sys package). Otherwise send these outputs to the console
 #' @param quiet logical: if TRUE, suppress wget's output
+#' @param debug logical: if TRUE, wget will print lots of debugging information. If wget is not behaving as expected, try setting this to TRUE
 #'
 #' @return the result of the system call (or if \code{bb_wget("--help")} was called, a message will be issued). The returned object will have components 'status' and (if \code{capture_stdout} was \code{TRUE}) 'stdout' and 'stderr'
 #'
@@ -127,7 +128,7 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE,...) {
 #'
 # @export
 ## like bb_wget, but with some wget flags promoted to explicit function parms
-bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex,reject_regex,exclude_directories,execute,restrict_file_names,progress,user,password,output_file,timestamping=FALSE,no_if_modified_since=FALSE,no_clobber=FALSE,no_parent=TRUE,no_check_certificate=FALSE,relative=FALSE,adjust_extension=FALSE,extra_flags=character(),verbose=FALSE,capture_stdout=FALSE,quiet=FALSE) {
+bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex,reject_regex,exclude_directories,execute,restrict_file_names,progress,user,password,output_file,timestamping=FALSE,no_if_modified_since=FALSE,no_clobber=FALSE,no_parent=TRUE,no_check_certificate=FALSE,relative=FALSE,adjust_extension=FALSE,extra_flags=character(),verbose=FALSE,capture_stdout=FALSE,quiet=FALSE,debug=FALSE) {
     assert_that(is.string(url))
     assert_that(is.flag(recursive),!is.na(recursive))
     if (recursive) assert_that(is.numeric(level),level>=0)
@@ -165,6 +166,7 @@ bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex
     assert_that(is.flag(verbose),!is.na(verbose))
     assert_that(is.flag(capture_stdout),!is.na(capture_stdout))
     assert_that(is.flag(quiet),!is.na(quiet))
+    assert_that(is.flag(debug),!is.na(debug))
     if (tolower(sub("^\\-+","",url)) %in% c("h","help")) {
         out <- sys::exec_internal(bb_find_wget(),args="--help",error=TRUE)
         message(rawToChar(out$stdout))
@@ -194,6 +196,7 @@ bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex
         if (adjust_extension) flags <- c(flags,"--adjust-extension")
         if (wait>0) flags <- c(flags,paste0("--wait=",wait))
         if (quiet) flags <- c(flags,"--quiet")
+        if (debug) flags <- c(flags,"--debug")
         if (length(execute)>0)
             flags <- c(flags,paste("-e",execute,sep=" ")) ## these need to be of the form '-e first_command' '-e second_command'
         ## add any extra_flags
