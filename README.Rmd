@@ -68,8 +68,7 @@ my_source <- bb_source(
     citation="Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
     source_url=c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
     license="CC-BY",
-    method=quote(bb_handler_wget),
-    method_flags=c("--recursive","--level=1","--accept=csv","--no-if-modified-since"),
+    method=list("bb_handler_wget",recursive=TRUE,level=1,accept="csv",no_if_modified_since=TRUE,execute=c("robots=off"),reject_regex="Website/UserControls"),
     collection_size=0.01)
 
 cf <- bb_config(local_file_root="~/temp/data/bbtest") %>%
@@ -125,9 +124,8 @@ my_source <- bb_source(
     citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
     source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
     license="CC-BY 4.0",
-    method=quote(bb_handler_wget),
-    method_flags="--recursive",
-    postprocess=quote(bb_unzip),
+    method=list("bb_handler_wget",recursive=TRUE),
+    postprocess=list("bb_unzip"),
     collection_size=0.4,
     data_group="Topography")
 ```
@@ -138,22 +136,22 @@ Some particularly important components of this definition are:
 
 1. The `license` and `citation` are important so that users know what conditions govern the usage of the data, and the appropriate citation to use to acknowledge the data providers. The `reference` entry should refer to a metadata or documentation page that describes the data in detail.
 
-1. The `method`, `method_flags`, and `source_url` define how this data will be retrieved. Most sources will use the `bb_handler_wget` method, which is a wrapper around the `wget` utility. If you are unfamiliar with wget, consult the [wget manual](https://www.gnu.org/software/wget/manual/wget.html) or one of the many online tutorials. You can also see the in-built wget help by running `bb_wget("--help")`.
+1. The `method` and `source_url` define how this data will be retrieved. Most sources will use the `bb_handler_wget` method function, which is a wrapper around the `wget` utility. If you are unfamiliar with wget, consult the [wget manual](https://www.gnu.org/software/wget/manual/wget.html) or one of the many online tutorials. You can also see the in-built wget help by running `bb_wget("--help")`.
 
 
 Some subtleties to bear in mind:
 
 1. If the data source delivers compressed files, you will most likely want to decompress them after downloading. The postprocess options `bb_decompress`, `bb_unzip`, etc will do this for you. By default, these *do not* delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.
 
-1. You will probably want to specify `--recursive` as part of the `method_flags`, even if the data source doesn't require a recursive download. The synchronization process saves files relative to the `local_file_root` directory specified in the call to `bb_config`. If `--recursive` is specified, then wget creates a directory structure that follows the URL structure. For example, calling `wget --recursive http://www.somewhere.org/monkey/banana/dataset.zip` will save the local file `www.somewhere.org/monkey/banana/dataset.zip`. Thus, specifying `--recursive` will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your `local_file_root`.
+1. The `method` parameter is specified as a list, where the first entry is the function to use and the remaining entries are data-source-specific arguments to pass to that function. You will probably want to specify `recursive=TRUE` in these arguments, even if the data source doesn't require a recursive download. The synchronization process saves files relative to the `local_file_root` directory specified in the call to `bb_config`. If `recursive=TRUE` is specified, then wget creates a directory structure that follows the URL structure. For example, calling `bb_wget("http://www.somewhere.org/monkey/banana/dataset.zip",recursive=TRUE)` will save the local file `www.somewhere.org/monkey/banana/dataset.zip`. Thus, specifying `recursive=TRUE` will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your `local_file_root`. (Note that `recursive` has a default setting of `TRUE` in `bb_wget` for this reason.)
 
-1. If you want to include/exclude certain files from being downloaded, use the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` flags. Note that `--accept` and `--reject` apply to file names (not the full path), and can be comma-separated lists of file name suffixes or patterns. The `--accept-regex` and `--reject-regex` flags apply to the full path but can only be a single regular expression each.
+1. If you want to include/exclude certain files from being downloaded, use the `accept`, `reject`, `accept_regex`, and `reject_regex` flags. Note that `accept` and `reject` apply to file names (not the full path), and can be comma-separated lists of file name suffixes or patterns. The `accept_regex` and `reject_regex` flags apply to the full path but can only be a single regular expression each.
 
-1. Remember that any `wget_global_flags` defined via `bb_config` will be applied to every data source in addition to their specific `method_flags`.
+1. Remember that any `wget_global_flags` defined via `bb_config` will be applied to every data source in addition to their specific `method` flags.
 
 1. Several wget flags are set by the `bb_handler_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flag is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
 
-1. If `wget` is not behaving as expected, try adding the `--debug` flag to see additional diagnostic output.
+1. If `wget` is not behaving as expected, try adding the `debug=TRUE` parameter to see additional diagnostic output.
 
 ### Modifying data sources
 
@@ -177,13 +175,13 @@ cf <- cf %>% bb_add(mysrc)
 
 #### Reducing download sizes
 
-Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the `bb_handler_wget` method, you can restrict what is downloaded by modifying the data source's `method_flags`, particularly the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.
+Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the `bb_handler_wget` method, you can restrict what is downloaded by modifying the arguments passed through the data source's `method` parameter, particularly the `accept`, `reject`, `accept_regex`, and `reject_regex` options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.
 
 Say a particular data provider arranges their files in yearly directories. It would be fairly easy to restrict ourselves to, say, only the 2017 data:
 
 ```{r eval=FALSE}
 mysrc <- mysrc %>%
-  mutate(method_flags=c(method_flags,"--accept-regex=/2017/"))
+  mutate(method=c(method,list(accept_regex="/2017/")))
 cf <- cf %>% bb_add(mysrc)
 ```
 
