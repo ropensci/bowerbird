@@ -4,7 +4,8 @@
 \alias{bb_handler_oceandata}
 \title{Handler for oceandata data sources}
 \usage{
-bb_handler_oceandata(config, verbose = FALSE, local_dir_only = FALSE)
+bb_handler_oceandata(config, verbose = FALSE, local_dir_only = FALSE,
+  search, dtype)
 }
 \arguments{
 \item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
@@ -12,6 +13,10 @@ bb_handler_oceandata(config, verbose = FALSE, local_dir_only = FALSE)
 \item{verbose}{logical: if TRUE, provide additional progress output}
 
 \item{local_dir_only}{logical: if TRUE, just return the local directory into which files from this data source would be saved}
+
+\item{search}{string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)}
+
+\item{dtype}{string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)}
 }
 \value{
 the directory if local_dir_only is TRUE, otherwise TRUE on success

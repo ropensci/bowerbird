@@ -4,18 +4,23 @@
 \alias{bb_cleanup}
 \title{Postprocessing: remove unwanted files}
 \usage{
-bb_cleanup(config, pattern, recursive = FALSE, ignore_case = FALSE, ...)
+bb_cleanup(config, file_list_before, file_list_after, verbose = TRUE, pattern,
+  recursive = FALSE, ignore_case = FALSE)
 }
 \arguments{
 \item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
+
+\item{file_list_before}{data.frame: files present in the directory before synchronising, as returned by \code{file.info}}
+
+\item{file_list_after}{data.frame: files present in the directory after synchronising, as returned by \code{file.info}}
+
+\item{verbose}{logical: if TRUE, provide additional progress output}
 
 \item{pattern}{string: regular expression, passed to \code{file.info}}
 
 \item{recursive}{logical: should the cleanup recurse into subdirectories?}
 
 \item{ignore_case}{logical: should pattern matching be case-insensitive?}
-
-\item{...}{: additional arguments (currently ignored)}
 }
 \value{
 TRUE on success
@@ -26,7 +31,7 @@ This function is not intended to be called directly, but instead can be specifie
 \examples{
 \dontrun{
   ## remove .asc files after synchronisation
-  my_source <- bb_source(...,postprocess=quote(bb_cleanup(pattern="\\\\.asc$")))
+  my_source <- bb_source(...,postprocess=list(list("bb_cleanup",pattern="\\\\.asc$")))
 }
 
 }

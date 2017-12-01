@@ -4,15 +4,14 @@
 \alias{bb_config}
 \title{Initialize a bowerbird configuration}
 \usage{
-bb_config(local_file_root,
-  wget_global_flags = c("--restrict-file-names=windows",
-  "--progress=dot:giga"), http_proxy = NULL, ftp_proxy = NULL,
+bb_config(local_file_root, wget_global_flags = list(restrict_file_names =
+  "windows", progress = "dot:giga"), http_proxy = NULL, ftp_proxy = NULL,
   clobber = 1, skip_downloads = FALSE)
 }
 \arguments{
 \item{local_file_root}{string: location of data repository on local file system}
 
-\item{wget_global_flags}{character vector: wget flags that will be applied to all data sources that call \code{bb_wget}. These will be appended to the data-source-specific wget flags provided via the source's method argument}
+\item{wget_global_flags}{list: wget flags that will be applied to all data sources that call \code{bb_wget}. These will be appended to the data-source-specific wget flags provided via the source's method argument}
 
 \item{http_proxy}{string: URL of HTTP proxy to use e.g. 'http://your.proxy:8080' (NULL for no proxy)}
 

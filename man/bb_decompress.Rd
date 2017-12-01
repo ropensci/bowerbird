@@ -8,7 +8,8 @@
 \alias{bb_uncompress}
 \title{Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy}
 \usage{
-bb_decompress(config, delete = FALSE, method, ...)
+bb_decompress(config, file_list_before, file_list_after, verbose = TRUE,
+  method, delete = FALSE)
 
 bb_unzip(...)
 
@@ -21,11 +22,17 @@ bb_uncompress(...)
 \arguments{
 \item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
 
-\item{delete}{logical: delete the zip files after extracting their contents?}
+\item{file_list_before}{data.frame: files present in the directory before synchronising, as returned by \code{file.info}}
+
+\item{file_list_after}{data.frame: files present in the directory after synchronising, as returned by \code{file.info}}
+
+\item{verbose}{logical: if TRUE, provide additional progress output}
 
 \item{method}{string: one of "unzip","gunzip","bunzip2","decompress"}
 
-\item{...}{: additional arguments passed to \code{bb_decompress}}
+\item{delete}{logical: delete the zip files after extracting their contents?}
+
+\item{...}{: parameters passed to bb_decompress}
 }
 \value{
 TRUE on success
@@ -37,10 +44,10 @@ The dots argument indicates additional arguments that are passed to \code{bb_dec
 \examples{
 \dontrun{
   ## decompress .zip files after synchronisation but keep zip files intact
-  my_source <- bb_source(...,postprocess=quote(bb_unzip))
+  my_source <- bb_source(...,postprocess=list("bb_unzip"))
 
   ## decompress .zip files after synchronisation and delete zip files
-  my_source <- bb_source(...,postprocess=quote(bb_unzip(delete=TRUE)))
+  my_source <- bb_source(...,postprocess=list(list("bb_unzip",delete=TRUE)))
 }
 
 }

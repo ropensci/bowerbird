@@ -4,71 +4,12 @@
 #' The dots argument indicates additional arguments that are passed to \code{bb_decompress} when called by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
 #'
 #' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
-#' @param delete logical: delete the zip files after extracting their contents?
-#' @param method string: one of "unzip","gunzip","bunzip2","decompress"
-#' @param ... : additional arguments passed to \code{bb_decompress}
-#'
-#' @return TRUE on success
-#'
-#' @seealso \code{\link{bb_source}} \code{\link{bb_config}} \code{\link{bb_cleanup}}
-#' @examples
-#' \dontrun{
-#'   ## decompress .zip files after synchronisation but keep zip files intact
-#'   my_source <- bb_source(...,postprocess=quote(bb_unzip))
-#'
-#'   ## decompress .zip files after synchronisation and delete zip files
-#'   my_source <- bb_source(...,postprocess=quote(bb_unzip(delete=TRUE)))
-#' }
-#'
-#' @export
-bb_decompress <- function(config,delete=FALSE,method,...) {
-    assert_that(is(config,"bb_config"))
-    assert_that(nrow(bb_data_sources(config))==1)
-    assert_that(is.flag(delete),!is.na(delete))
-    assert_that(is.string(method))
-    method <- match.arg(tolower(method),c("unzip","gunzip","bunzip2","uncompress"))
-    xargs <- list(...)
-    ignore_case <- method=="unzip"
-    file_pattern <- switch(method,
-                           "unzip"="\\.zip$",
-                           "gunzip"="\\.gz$",
-                           "bunzip2"="\\.bz2$",
-                           "uncompress"="\\.Z$",
-                           stop("unrecognized decompression")
-                           )
-    if (delete) {
-        files_to_decompress <- list.files(directory_from_url(bb_data_sources(config)$source_url),pattern=file_pattern,recursive=TRUE,ignore.case=ignore_case)
-        cat("f2d:",str(files_to_decompress))
-        do_decompress_files(paste0(method,"_delete"),files=files_to_decompress)
-    } else {
-        file_list_before <- extract_xarg("file_list_before",xargs)
-        file_list_after <- extract_xarg("file_list_after",xargs)
-        ## decompress but retain compressed file. decompress only if .zip/.gz/.bz2/.Z file has changed
-        files_to_decompress <- find_changed_files(file_list_before,file_list_after,file_pattern)
-        do_decompress_files(method,files=files_to_decompress)
-        ## also decompress if uncompressed file does not exist
-        files_to_decompress <- setdiff(rownames(file_list_after),files_to_decompress) ## those that we haven't just dealt with
-        files_to_decompress <- files_to_decompress[str_detect(files_to_decompress,regex(file_pattern,ignore_case=ignore_case))] ## only .zip/.gz/.bz2/.Z files
-        do_decompress_files(method,files=files_to_decompress,overwrite=FALSE)
-        ## nb this may be slow, so might be worth explicitly checking for the existence of uncompressed files
-    }
-}
-# @param file_list_before data.frame: files present in the directory before synchronising, as returned by \code{file.info}. Only required if delete=TRUE
-# @param file_list_after data.frame: files present in the directory after synchronising, as returned by \code{file.info}. Only required if delete=TRUE
-# @param ... : arguments passed to \code{bb_decompress}
-
-#' Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy
-#'
-#' This function is not intended to be called directly, but instead can be specified as a postprocessing step to apply to a data source. \code{bb_unzip}, \code{bb_gunzip}, \code{bb_bunzip2}, and \code{bb_uncompress} are convenience wrappers around \code{bb_decompress} that specify the method.
-#' The dots argument indicates additional arguments that are passed to \code{bb_decompress} when called by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
-#'
-#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 #' @param file_list_before data.frame: files present in the directory before synchronising, as returned by \code{file.info}
 #' @param file_list_after data.frame: files present in the directory after synchronising, as returned by \code{file.info}
 #' @param verbose logical: if TRUE, provide additional progress output
 #' @param method string: one of "unzip","gunzip","bunzip2","decompress"
 #' @param delete logical: delete the zip files after extracting their contents?
-#' @param ... : parameters passed to bb_decompress2
+#' @param ... : parameters passed to bb_decompress
 #'
 #' @return TRUE on success
 #'
@@ -83,7 +24,7 @@ bb_decompress <- function(config,delete=FALSE,method,...) {
 #' }
 #'
 #' @export
-bb_decompress2 <- function(config,file_list_before,file_list_after,verbose=TRUE,method,delete=FALSE) {
+bb_decompress <- function(config,file_list_before,file_list_after,verbose=TRUE,method,delete=FALSE) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(bb_data_sources(config))==1)
     assert_that(is.flag(delete),!is.na(delete))
@@ -99,7 +40,6 @@ bb_decompress2 <- function(config,file_list_before,file_list_after,verbose=TRUE,
                            )
     if (delete) {
         files_to_decompress <- list.files(directory_from_url(bb_data_sources(config)$source_url),pattern=file_pattern,recursive=TRUE,ignore.case=ignore_case)
-        cat("f2d:",str(files_to_decompress))
         do_decompress_files(paste0(method,"_delete"),files=files_to_decompress)
     } else {
         ## decompress but retain compressed file. decompress only if .zip/.gz/.bz2/.Z file has changed
@@ -122,49 +62,20 @@ extract_xarg <- function(required,xargs) if (required %in% names(xargs)) xargs[[
 
 #' @rdname bb_decompress
 #' @export
-bb_unzip <- function(...) bb_decompress2(...,method="unzip")
+bb_unzip <- function(...) bb_decompress(...,method="unzip")
 
 #' @rdname bb_decompress
 #' @export
-bb_gunzip <- function(...) bb_decompress2(...,method="gunzip")
+bb_gunzip <- function(...) bb_decompress(...,method="gunzip")
 
 #' @rdname bb_decompress
 #' @export
-bb_bunzip2 <- function(...) bb_decompress2(...,method="bunzip2")
+bb_bunzip2 <- function(...) bb_decompress(...,method="bunzip2")
 
 #' @rdname bb_decompress
 #' @export
-bb_uncompress <- function(...) bb_decompress2(...,method="uncompress")
+bb_uncompress <- function(...) bb_decompress(...,method="uncompress")
 
-
-#' Postprocessing: remove unwanted files
-#'
-#' This function is not intended to be called directly, but instead can be specified as a postprocessing step to apply to a data source.
-#'
-#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
-#' @param pattern string: regular expression, passed to \code{file.info}
-#' @param recursive logical: should the cleanup recurse into subdirectories?
-#' @param ignore_case logical: should pattern matching be case-insensitive?
-#' @param ... : additional arguments (currently ignored)
-#'
-#' @return TRUE on success
-#'
-#' @seealso \code{\link{bb_source}} \code{\link{bb_config}} \code{\link{bb_decompress}}
-#'
-#' @examples
-#' \dontrun{
-#'   ## remove .asc files after synchronisation
-#'   my_source <- bb_source(...,postprocess=quote(bb_cleanup(pattern="\\.asc$")))
-#' }
-#'
-#' @export
-bb_cleanup <- function(config,pattern,recursive=FALSE,ignore_case=FALSE,...) {
-    assert_that(is(config,"bb_config"))
-    assert_that(nrow(bb_data_sources(config))==1)
-    to_delete <- list.files(pattern=pattern,recursive=recursive,ignore.case=ignore_case)
-    cat(sprintf("cleaning up files: %s\n",paste(to_delete,collapse=",")))
-    unlink(to_delete)==0
-}
 
 #' Postprocessing: remove unwanted files
 #'
@@ -189,7 +100,7 @@ bb_cleanup <- function(config,pattern,recursive=FALSE,ignore_case=FALSE,...) {
 #' }
 #'
 #' @export
-bb_cleanup2 <- function(config,file_list_before,file_list_after,verbose=TRUE,pattern,recursive=FALSE,ignore_case=FALSE) {
+bb_cleanup <- function(config,file_list_before,file_list_after,verbose=TRUE,pattern,recursive=FALSE,ignore_case=FALSE) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(bb_data_sources(config))==1)
     to_delete <- list.files(pattern=pattern,recursive=recursive,ignore.case=ignore_case)

@@ -4,7 +4,7 @@
 \alias{bb_handler_earthdata}
 \title{Handler for files files served up through Earthdata providers}
 \usage{
-bb_handler_earthdata(config, verbose = FALSE, local_dir_only = FALSE)
+bb_handler_earthdata(config, verbose = FALSE, local_dir_only = FALSE, ...)
 }
 \arguments{
 \item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
@@ -12,6 +12,8 @@ bb_handler_earthdata(config, verbose = FALSE, local_dir_only = FALSE)
 \item{verbose}{logical: if TRUE, provide additional progress output}
 
 \item{local_dir_only}{logical: if TRUE, just return the local directory into which files from this data source would be saved}
+
+\item{...}{: additional parameters passed through to bb_handler_wget}
 }
 \value{
 the directory if local_dir_only is TRUE, otherwise TRUE on success

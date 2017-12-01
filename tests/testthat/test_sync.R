@@ -11,15 +11,15 @@ test_that("bb_sync works with dry run on bb_handler_wget",{
 test_that("bb_sync is quiet when asked",{
     skip_on_cran()
     temp_root <- tempdir()
-    cf <- bb_config2(local_file_root=temp_root)
-    myds <- bb_source2(
+    cf <- bb_config(local_file_root=temp_root)
+    myds <- bb_source(
         id="bilbobaggins",
         name="test",
         description="blah",
         reference= "http://some.where.org/",
         citation="blah",
         license="blah",
-        method=list("bb_handler_wget2",recursive=TRUE,no_check_certificate=TRUE,level=1),
+        method=list("bb_handler_wget",recursive=TRUE,no_check_certificate=TRUE,level=1),
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd") ## just some file to download
     cf <- cf %>% bb_add(myds)
     expect_silent(bb_sync(cf,verbose=FALSE))
@@ -28,7 +28,7 @@ test_that("bb_sync is quiet when asked",{
 test_that("bb_sync works on oceandata",{
     skip_on_cran()
     skip_on_appveyor() ## failing on AppVeyor for unknown reasons
-    ods <- bb_source2(
+    ods <- bb_source(
         id="bilbobaggins",
         name="Oceandata test",
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
@@ -36,12 +36,12 @@ test_that("bb_sync works on oceandata",{
         citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
         license="Please cite",
         comment="",
-        method=list("bb_handler_oceandata2",search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
+        method=list("bb_handler_oceandata",search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=NULL,
         access_function="",
         data_group="Sea surface temperature")
     temp_root <- tempdir()
-    cf <- bb_add(bb_config2(local_file_root=temp_root,clobber=2),ods)
+    cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),ods)
     bb_sync(cf)
 
     fnm <- file.path(temp_root,"oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc")
@@ -54,28 +54,28 @@ test_that("bb_sync errors on a source that is missing required authentication in
     skip_on_cran()
     mysrc <- bb_example_sources() %>%
         dplyr::filter(name=="Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2")
-    cf <- bb_config2(local_file_root=tempdir()) %>% bb_add(mysrc)
+    cf <- bb_config(local_file_root=tempdir()) %>% bb_add(mysrc)
     expect_error(bb_sync(cf),"requires authentication") ## error at the bb_validate stage, because user and password have not been set
 
     ## would also get error at the handler stage, for the same reason
-    expect_error(do.call(bb_handler_earthdata2,c(list(cf),bb_data_sources(cf)$method[[1]][-1])),"requires user and password")
+    expect_error(do.call(bb_handler_earthdata,c(list(cf),bb_data_sources(cf)$method[[1]][-1])),"requires user and password")
 })
 
 test_that("bb_sync works with a sink() call in place",{
     skip_on_cran()
     sinkfile <- tempfile()
     sink(file=sinkfile)
-    myds <- bb_source2(
+    myds <- bb_source(
         id="bilbobaggins",
         name="test",
         description="blah",
         reference= "http://some.where.org/",
         citation="blah",
         license="blah",
-        method=list("bb_handler_wget2",recursive=TRUE,no_check_certificate=TRUE,level=1),
+        method=list("bb_handler_wget",recursive=TRUE,no_check_certificate=TRUE,level=1),
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd") ## just some file to download
     temp_root <- tempdir()
-    cf <- bb_add(bb_config2(local_file_root=temp_root,clobber=2),myds)
+    cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),myds)
     bb_sync(cf)
     sink()
     op <- readLines(sinkfile)

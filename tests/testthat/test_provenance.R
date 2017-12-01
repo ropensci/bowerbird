@@ -11,9 +11,8 @@ test_that("bb_fingerprint does something sensible",{
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/example_data_was_gzipped.csv.gz",##https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/example_data_was_gzipped.csv.gz",
         license="MIT",
-        method=quote(bb_handler_wget),
-        method_flags=c("--recursive","--level=1","--no-check-certificate","-e","robots=off"),
-        postprocess=quote(bb_gunzip))
+        method=list("bb_handler_wget",recursive=TRUE,level=1,no_check_certificate=TRUE,execute=c("robots=off")),
+        postprocess=list("bb_gunzip"))
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
