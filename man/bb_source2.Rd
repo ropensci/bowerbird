@@ -5,11 +5,11 @@
 \title{Define a data source}
 \usage{
 bb_source2(id, name, description = NA_character_, reference, source_url,
-  citation, license, comment = NA_character_, method = bb_handler_wget,
-  method_flags = list(), postprocess, authentication_note = NA_character_,
-  user = NA_character_, password = NA_character_,
-  access_function = NA_character_, data_group = NA_character_,
-  collection_size = NA, warn_empty_auth = TRUE)
+  citation, license, comment = NA_character_, method, postprocess,
+  authentication_note = NA_character_, user = NA_character_,
+  password = NA_character_, access_function = NA_character_,
+  data_group = NA_character_, collection_size = NA,
+  warn_empty_auth = TRUE)
 }
 \arguments{
 \item{id}{string: (required) a unique identifier of the data source. If the data source has a DOI, use that. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one). The ID should be something that changes when the data set changes (is updated). A DOI is ideal for this}
@@ -28,11 +28,9 @@ bb_source2(id, name, description = NA_character_, reference, source_url,
 
 \item{comment}{string: comments about the data source. If only part of the original data collection is mirrored, mention that here}
 
-\item{method}{function, call, or symbol: (required) the function that handles the synchronisation process for this data source}
+\item{method}{list: a list object that defines the function used to synchronise this data source. The first element of the list is the function name (as a string or function). Additional list elements can be used to specify additional parameters to pass to that function. If the handler function uses wget (e.g. \code{bb_handler_wget}), these extra parameters are passed to the \code{bb_wget} function}
 
-\item{method_flags}{character vector: flags to pass to the method. If method is \code{bb_handler_wget}, these are wget flags. Run \code{bb_wget("--help")} to get help on these flags}
-
-\item{postprocess}{function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied}
+\item{postprocess}{list: each element of \code{postprocess} defines a postprocessing step to be run after the main synchronization has happened. Each element of this list can be a function or string function name, or a list in the style of \code{list(fun,arg1=val1,arg2=val2)} where \code{fun} is the function to be called and \code{arg1} and \code{arg2} are additional parameters to pass to that function}
 
 \item{authentication_note}{string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)}
 
@@ -56,7 +54,7 @@ Define a data source
 }
 \examples{
 
-my_source <- bb_source(
+my_source <- bb_source2(
    id="gshhg_coastline",
    name="GSHHG coastline data",
    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
@@ -66,9 +64,8 @@ my_source <- bb_source(
    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
    license="",
    comment="",
-   method=quote(bb_handler_wget),
-   method_flags=c("--recursive","--level=1","--accept=*bin*.zip,README.TXT"),
-   postprocess=quote(bb_unzip),
+   method=list("bb_handler_wget",recursive=TRUE,level=1,accept="*bin*.zip,README.TXT"),
+   postprocess=list("bb_unzip"),
    collection_size=0.6)
 
 cf <- bb_config("/my/repo/root")

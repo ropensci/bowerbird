@@ -87,7 +87,7 @@ bb_example_sources <- function() {
             citation="Publisher: DOC/NOAA/NESDIS/NCEI > National Centers for Environmental Information, NESDIS, NOAA, U.S. Department of Commerce",
             license="https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright",
             method=list("bb_handler_wget2",recursive=TRUE,level=2,accept_regex="/netcdf/",reject="index.html*"),
-            comment="Only the netcdf format data are retrieved here - adjust the accept parameter in the method_flags to get other formats",
+            comment="Only the netcdf format data are retrieved here - adjust the accept_regex parameter in the method argument to get other formats",
             postprocess=list("bb_gunzip"),
             collection_size=0.03,
             data_group="Topography"),

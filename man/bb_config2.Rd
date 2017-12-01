@@ -11,7 +11,7 @@ bb_config2(local_file_root, wget_global_flags = list(restrict_file_names =
 \arguments{
 \item{local_file_root}{string: location of data repository on local file system}
 
-\item{wget_global_flags}{list: wget flags that will be applied to all data sources that call \code{bb_wget}. These will be appended to the data-source-specific wget flags provided via the source's method_flags argument}
+\item{wget_global_flags}{list: wget flags that will be applied to all data sources that call \code{bb_wget}. These will be appended to the data-source-specific wget flags provided via the source's method argument}
 
 \item{http_proxy}{string: URL of HTTP proxy to use e.g. 'http://your.proxy:8080' (NULL for no proxy)}
 
