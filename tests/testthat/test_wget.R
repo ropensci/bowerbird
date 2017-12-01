@@ -2,7 +2,7 @@ context("wget stuff")
 
 test_that("wget_install works and bb_find_wget finds something", {
     if (.Platform$OS.type!="windows") {
-        expect_error(bb_install_wget()) ## only supported for Windows platforms
+        expect_error(bb_install_wget(),"only supports windows platforms") ## only supported for Windows platforms
         expect_true(is.string(bb_find_wget())) ## should still be able to find system-installed wget
     } else {
         wge <- bb_install_wget()
@@ -23,7 +23,7 @@ test_that("internal flags_to_charvec function behaves",{
     expect_true(is_zerolen_char(bowerbird:::flags_to_charvec("")))
     expect_true(is_zerolen_char(bowerbird:::flags_to_charvec(NULL)))
     expect_true(is_zerolen_char(bowerbird:::flags_to_charvec(NA_character_)))
-    expect_error(bowerbird:::flags_to_charvec(NA))
+    expect_error(bowerbird:::flags_to_charvec(NA),"expecting flags as character vector or list")
 })
 
 test_that("internal resolve_wget_clobber_flags function behaves",{

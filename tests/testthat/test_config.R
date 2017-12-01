@@ -58,7 +58,7 @@ test_that("config validation works",{
         data_group="blah",
         warn_empty_auth=FALSE)
     cf <- bb_config("/some/local/path") %>% bb_add(src) %>% bb_add(src2)
-    expect_error(bb_validate(cf))
+    expect_error(bb_validate(cf),"requires authentication")
 
     src2$user <- "username"
     src2$password <- "password"

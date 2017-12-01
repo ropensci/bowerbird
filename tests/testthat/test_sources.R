@@ -49,7 +49,7 @@ test_that("empty/missing/NA source_urls get dealt with correctly",{
         reference="xxx",
         citation="blah",
         license="",
-        method=list("bb_handler_wget")))
+        method=list("bb_handler_wget")),"requires at least one non-empty source URL")
     expect_error(bb_source(
         id="xxx",
         name="xxx",
@@ -58,7 +58,7 @@ test_that("empty/missing/NA source_urls get dealt with correctly",{
         citation="blah",
         source_url="",
         license="",
-        method=list(bb_handler_wget)))
+        method=list(bb_handler_wget)),"requires at least one non-empty source URL")
     expect_error(bb_source(
         id="xxx",
         name="xxx",
@@ -67,7 +67,7 @@ test_that("empty/missing/NA source_urls get dealt with correctly",{
         citation="blah",
         source_url=NA,
         license="",
-        method=list(bb_handler_wget)))
+        method=list(bb_handler_wget)),"requires at least one non-empty source URL")
 
     ## multiple source_urls, empty/NA ones should be removed
     ds <- bb_source(
@@ -131,7 +131,7 @@ test_that("authentication checks work",{
         authentication_note="auth note",
         method=list("bb_handler_wget"),
         postprocess=NULL,
-        data_group="blah"))
+        data_group="blah"),"requires authentication")
 
     expect_warning(bb_source(
         id="bilbobaggins",
@@ -145,7 +145,7 @@ test_that("authentication checks work",{
         user="",
         method=list("bb_handler_wget"),
         postprocess=NULL,
-        data_group="blah"))
+        data_group="blah"),"requires authentication")
 
     expect_warning(bb_source(
         id="bilbobaggins",
@@ -159,7 +159,7 @@ test_that("authentication checks work",{
         password="",
         method=list("bb_handler_wget"),
         postprocess=NULL,
-        data_group="blah"))
+        data_group="blah"),"requires authentication")
 
     ## no warning
     bb_source(
