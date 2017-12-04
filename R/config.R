@@ -98,7 +98,15 @@ bb_add <- function(config,source) {
 #'
 #' @examples
 #' cf <- bb_config(local_file_root="/your/data/directory")
+#'
+#' ## see current settings
 #' bb_settings(cf)
+#'
+#' ## add an http proxy
+#' bb_settings(cf) <- list(http_proxy="http://my.proxy")
+#'
+#' ## change the current local_file_root setting
+#' bb_settings(cf) <- list(local_file_root="/new/location")
 #'
 #' @export
 bb_settings <- function(config) {
@@ -110,9 +118,24 @@ bb_settings <- function(config) {
 #' @export
 `bb_settings<-` <- function(config,value) {
     assert_that(is(config,"bb_config"))
-    config$settings <- value
+    assert_that(is.list(value))
+    temp <- setdiff(names(value),allowed_settings())
+    if (length(temp)>0) {
+        wstr <- if (length(temp)<2) " is not a recognized bowerbird config setting" else " are not recognized bowerbird config settings"
+        warning(paste(temp,collapse=", "),wstr," and will be ignored")
+        value <- value[names(value) %in% allowed_settings()]
+    }
+    if (length(value)>0) {
+        old_settings <- config$settings
+        new_settings <- c(value,old_settings[!names(old_settings) %in% value])
+        config$settings <- new_settings
+    }
     config
 }
+
+## internal: the list of recognized config settings
+allowed_settings <- function() c("wget_global_flags","http_proxy","ftp_proxy","local_file_root","clobber","skip_downloads")
+
 
 #' Gets or sets a bowerbird configuration object's data sources
 #'

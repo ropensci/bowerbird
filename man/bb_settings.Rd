@@ -22,7 +22,15 @@ These are repository-wide settings that are applied to all data sources added to
 }
 \examples{
 cf <- bb_config(local_file_root="/your/data/directory")
+
+## see current settings
 bb_settings(cf)
+
+## add an http proxy
+bb_settings(cf) <- list(http_proxy="http://my.proxy")
+
+## change the current local_file_root setting
+bb_settings(cf) <- list(local_file_root="/new/location")
 
 }
 \seealso{
