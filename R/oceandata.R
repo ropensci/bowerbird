@@ -1,5 +1,7 @@
 #' Handler for oceandata data sources
 #'
+#' This function is not intended to be called directly by the user, but rather will be called internally by the \code{bb_sync} function. The typical usage of \code{bb_handler_oceandata} is to specify it in the \code{method} parameter of a definition: see the example below.
+#'
 #' @references https://oceandata.sci.gsfc.nasa.gov/
 #' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 #' @param search string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)
@@ -8,6 +10,21 @@
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 #'
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
+#'
+#' @examples
+#'
+#' my_source <- bb_source(
+#'   name="Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a",
+#'   id="SeaWiFS_L3m_MO_CHL_chlor_a_9km",
+#'   description="Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at
+#'     9km spatial resolution",
+#'   doc_url="https://oceancolor.gsfc.nasa.gov/",
+#'   citation="See https://oceancolor.gsfc.nasa.gov/citations",
+#'   license="Please cite",
+#'   method=list("bb_handler_oceandata",search="S*L3m_MO_CHL_chlor_a_9km.nc"),
+#'   postprocess=NULL,
+#'   collection_size=7.2,
+#'   data_group="Ocean colour")
 #'
 #' @export
 bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE,search,dtype) {

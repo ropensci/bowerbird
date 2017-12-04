@@ -22,7 +22,23 @@ bb_handler_oceandata(config, verbose = FALSE, local_dir_only = FALSE,
 the directory if local_dir_only is TRUE, otherwise TRUE on success
 }
 \description{
-Handler for oceandata data sources
+This function is not intended to be called directly by the user, but rather will be called internally by the \code{bb_sync} function. The typical usage of \code{bb_handler_oceandata} is to specify it in the \code{method} parameter of a definition: see the example below.
+}
+\examples{
+
+my_source <- bb_source(
+  name="Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a",
+  id="SeaWiFS_L3m_MO_CHL_chlor_a_9km",
+  description="Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at
+    9km spatial resolution",
+  doc_url="https://oceancolor.gsfc.nasa.gov/",
+  citation="See https://oceancolor.gsfc.nasa.gov/citations",
+  license="Please cite",
+  method=list("bb_handler_oceandata",search="S*L3m_MO_CHL_chlor_a_9km.nc"),
+  postprocess=NULL,
+  collection_size=7.2,
+  data_group="Ocean colour")
+
 }
 \references{
 https://oceandata.sci.gsfc.nasa.gov/

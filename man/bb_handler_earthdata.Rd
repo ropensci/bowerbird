@@ -19,7 +19,30 @@ bb_handler_earthdata(config, verbose = FALSE, local_dir_only = FALSE, ...)
 the directory if local_dir_only is TRUE, otherwise TRUE on success
 }
 \description{
-Handler for files files served up through Earthdata providers
+This function is not intended to be called directly by the user, but rather will be called internally by the \code{bb_sync} function. The typical usage of \code{bb_handler_earthdata} is to specify it in the \code{method} parameter of a definition: see the example below.
+}
+\examples{
+\dontrun{
+
+## note that the full version of this data source is provided as part of bb_example_data_sources()
+
+my_source <- bb_source(
+  name="Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2",
+  id="10.5067/EYICLBOAAJOU",
+  description="NSIDC provides this data set ... [truncated; see bb_example_data_sources()]",
+  doc_url="https://nsidc.org/data/NSIDC-0192/versions/2",
+  citation="Stroeve, J. and W. Meier. 2017. ... [truncated; see bb_example_data_sources()]",
+  source_url=c("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"),
+  license="Please cite, see http://nsidc.org/about/use_copyright.html",
+  authentication_note="Requires Earthdata login, see https://urs.earthdata.nasa.gov/.
+    Note that you will also need to authorize the application 'nsidc-daacdata'
+    (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
+  method=list("bb_handler_earthdata",recursive=TRUE,level=4,no_parent=TRUE,relative=TRUE),
+  user="your_earthdata_username",
+  password="your_earthdata_password",
+  collection_size=0.02)
+}
+
 }
 \references{
 https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login
