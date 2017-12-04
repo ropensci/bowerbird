@@ -1,7 +1,10 @@
 #' Define a data source
 #'
 #' This function is used to define a data source, which can then be added to a data repository configuration. Passing the configuration object to \code{bb_sync} will trigger a download of all of the data sources in that configuration.
-#' The \code{method} parameter defines the function used to synchronize this data source, and any extra parameters that need to be passed to it via its \code{...} argument. Note that \code{bb_sync} automatically passes the \code{config}, \code{verbose}, and \code{local_dir_only} parameters to the method handler, and so do not need to be listed as part of the extra parameters provided in the \code{method} argument here.
+#'
+#' The \code{method} parameter defines the function used to synchronize this data source, and any extra parameters that need to be passed to it via its \code{...} argument. Note that \code{bb_sync} automatically passes the \code{config}, \code{verbose}, and \code{local_dir_only} parameters to the method handler, and so these should not be included in the \code{method} argument here.
+#'
+#' Parameters marked as "required" are the minimal set needed to define a data source. Other parameters are either not relevant to all data sources (e.g. \code{postprocess}, \code{user}, \code{password}) or provide optional helper information to users that is not strictly necessary to allow the data source to be synchronized (e.g. \code{description}, \code{access_function}, \code{data_group}). Note that three of the "required" parameters (namely \code{citation}, \code{license}, and \code{doc_url}) are not strictly needed by the synchronization code, but are treated as "required" because of their fundamental importance to reproducible science.
 #'
 #' @param id string: (required) a unique identifier of the data source. If the data source has a DOI, use that. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one). The ID should be something that changes when the data set changes (is updated). A DOI is ideal for this
 #' @param name string: (required) a unique name for the data source. This should be a human-readable but still concise name
@@ -19,13 +22,28 @@
 #' @param access_function string: name of the R function that can be used to read these data
 #' @param data_group string: the name of the group to which this data source belongs. Useful for arranging sources in terms of thematic areas
 #' @param collection_size numeric: approximate disk space (in GB) used by the data collection, if known. If the data are supplied as compressed files, this size should reflect the disk space used after decompression. If the data_source definition contains multiple source_url entries, this size should reflect the overall disk space used by all combined
-#' @param warn_empty_auth logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided
+#' @param warn_empty_auth logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided. Set this to FALSE if you are defining a data source for others to use with their own credentials: they will typically call your data source constructor and then modify the \code{user} and \code{password} components
 #'
 #' @return tibble
 #'
 #' @seealso \code{\link{bb_config}}
 #'
 #' @examples
+#'
+#' ## a minimal definition for the GSHHG coastline data:
+#'
+#' my_source <- bb_source(
+#'    id="gshhg_coastline",
+#'    name="GSHHG coastline data",
+#'    doc_url= "http://www.soest.hawaii.edu/pwessel/gshhg",
+#'    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
+#'      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
+#'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
+#'    license="LGPL",
+#'    method=list("bb_handler_wget",recursive=TRUE,level=1,accept="*bin*.zip,README.TXT"))
+#'
+#' ## a more complete definition, which unzips the files after downloading and also
+#' ##  provides an indication of the size of the dataset
 #'
 #' my_source <- bb_source(
 #'    id="gshhg_coastline",
