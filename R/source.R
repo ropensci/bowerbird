@@ -1,14 +1,17 @@
 #' Define a data source
 #'
+#' This function is used to define a data source, which can then be added to a data repository configuration. Passing the configuration object to \code{bb_sync} will trigger a download of all of the data sources in that configuration.
+#' The \code{method} parameter defines the function used to synchronize this data source, and any extra parameters that need to be passed to it via its \code{...} argument. Note that \code{bb_sync} automatically passes the \code{config}, \code{verbose}, and \code{local_dir_only} parameters to the method handler, and so do not need to be listed as part of the extra parameters provided in the \code{method} argument here.
+#'
 #' @param id string: (required) a unique identifier of the data source. If the data source has a DOI, use that. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one). The ID should be something that changes when the data set changes (is updated). A DOI is ideal for this
 #' @param name string: (required) a unique name for the data source. This should be a human-readable but still concise name
 #' @param description string: a description of the data source
-#' @param reference string: (required) URL to the metadata record or home page of the data source
+#' @param doc_url string: (required) URL to the metadata record or other documentation of the data source
 #' @param source_url character vector: one or more source URLs. Required for \code{bb_handler_wget}, although some \code{method} functions might not require one
 #' @param citation string: (required) details of the citation for the data source
 #' @param license string: (required) description of the license. For standard licenses (e.g. creative commons) include the license descriptor ("CC-BY", etc)
 #' @param comment string: comments about the data source. If only part of the original data collection is mirrored, mention that here
-#' @param method list: a list object that defines the function used to synchronise this data source. The first element of the list is the function name (as a string or function). Additional list elements can be used to specify additional parameters to pass to that function. If the handler function uses wget (e.g. \code{bb_handler_wget}), these extra parameters are passed to the \code{bb_wget} function
+#' @param method list (required): a list object that defines the function used to synchronise this data source. The first element of the list is the function name (as a string or function). Additional list elements can be used to specify additional parameters to pass to that function. Note that \code{bb_sync} automatically passes the data repository configuration object as the first parameter to the method handler function. If the handler function uses wget (e.g. \code{bb_handler_wget}), these extra parameters are passed through to the \code{bb_wget} function
 #' @param postprocess list: each element of \code{postprocess} defines a postprocessing step to be run after the main synchronization has happened. Each element of this list can be a function or string function name, or a list in the style of \code{list(fun,arg1=val1,arg2=val2)} where \code{fun} is the function to be called and \code{arg1} and \code{arg2} are additional parameters to pass to that function
 #' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
 #' @param user string: username, if required
@@ -28,21 +31,28 @@
 #'    id="gshhg_coastline",
 #'    name="GSHHG coastline data",
 #'    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
-#'    reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
+#'    doc_url= "http://www.soest.hawaii.edu/pwessel/gshhg",
 #'    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
 #'      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
 #'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
-#'    license="",
-#'    comment="",
+#'    license="LGPL",
 #'    method=list("bb_handler_wget",recursive=TRUE,level=1,accept="*bin*.zip,README.TXT"),
 #'    postprocess=list("bb_unzip"),
 #'    collection_size=0.6)
 #'
+#' ## define a data repository configuration
 #' cf <- bb_config("/my/repo/root")
+#'
+#' ## add this source to the repository
 #' cf <- bb_add(cf,my_source)
 #'
+#' \dontrun{
+#' ## sync the repo
+#' bb_sync(cf)
+#' }
+#'
 #' @export
-bb_source <- function(id,name,description=NA_character_,reference,source_url,citation,license,comment=NA_character_,method,postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,collection_size=NA,warn_empty_auth=TRUE) {
+bb_source <- function(id,name,description=NA_character_,doc_url,source_url,citation,license,comment=NA_character_,method,postprocess,authentication_note=NA_character_,user=NA_character_,password=NA_character_,access_function=NA_character_,data_group=NA_character_,collection_size=NA,warn_empty_auth=TRUE) {
     assert_that(is.list(method))
     if (!is_a_fun(method[[1]])) stop("the method parameter should be a list, with the first element being the handler function (a function or something that resolves to a function via match.fun)")
     if (missing(id) || !is_nonempty_string(id))
@@ -54,8 +64,8 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
     }
     if (missing(license) || missing(citation))
         stop("Please provide license and citation information for the data source, so that users properly acknowledge it")
-    if (missing(reference))
-        stop("Please provide a reference (a URL to the data source's metadata record or home page")
+    if (missing(doc_url))
+        stop("Please provide a doc_url (a URL to the data source's metadata record or home page")
 
     if (missing(source_url)) source_url <- NA_character_
     source_url <- source_url[nzchar(source_url) & !is.na(source_url)] ## drop empty and NA strings
@@ -84,7 +94,7 @@ bb_source <- function(id,name,description=NA_character_,reference,source_url,cit
         id=id,
         name=name,
         description=if (assert_that(is.string(description))) description,
-        reference=if (assert_that(is.string(reference))) reference,
+        doc_url=if (assert_that(is.string(doc_url))) doc_url,
         source_url=list(source_url),
         citation=if (assert_that(is.string(citation))) citation,
         license=if (assert_that(is.string(license))) license,

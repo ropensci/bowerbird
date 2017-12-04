@@ -19,8 +19,24 @@ bb_handler_wget(config, verbose = FALSE, local_dir_only = FALSE, ...)
 the directory if local_dir_only is TRUE, otherwise TRUE on success
 }
 \description{
-Mirror an external data source using the wget utility
+This function is not intended to be called directly by the user, but rather will be called internally by the \code{bb_sync} function. The typical usage of \code{bb_handler_wget} is to specify it in the \code{method} parameter of a definition: see the example below.
+}
+\examples{
+
+my_source <- bb_source(
+   id="gshhg_coastline",
+   name="GSHHG coastline data",
+   description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
+   doc_url= "http://www.soest.hawaii.edu/pwessel/gshhg",
+   citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
+     High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
+   source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
+   license="LGPL",
+   method=list("bb_handler_wget",recursive=TRUE,level=1,accept="*bin*.zip,README.TXT"),
+   postprocess=list("bb_unzip"),
+   collection_size=0.6)
+
 }
 \seealso{
-\code{\link{bb_wget}}
+\code{\link{bb_wget}} \code{\link{bb_source}}
 }

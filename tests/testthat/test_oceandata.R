@@ -6,7 +6,7 @@ test_that("bb_handler_oceandata works",{
         id="bilbobaggins",
         name="Oceandata test",
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
-        reference= "http://oceancolor.gsfc.nasa.gov/",
+        doc_url= "http://oceancolor.gsfc.nasa.gov/",
         citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
         source_url="",
         license="Please cite",

@@ -7,7 +7,7 @@ test_that("bb_fingerprint does something sensible",{
         name="Bowerbird test data",
         id="bbtest-v0.1",
         description="These are just some trivial test files provided with the bowerbird package.",
-        reference="https://github.com/AustralianAntarcticDivision/bowerbird",
+        doc_url="https://github.com/AustralianAntarcticDivision/bowerbird",
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/example_data_was_gzipped.csv.gz",##https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/example_data_was_gzipped.csv.gz",
         license="MIT",

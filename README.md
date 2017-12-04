@@ -50,7 +50,7 @@ my_source <- bb_source(
     name="Australian Election 2016 House of Representatives data",
     id="aus-election-house-2016",
     description="House of Representatives results from the 2016 Australian election.",
-    reference="http://results.aec.gov.au/",
+    doc_url="http://results.aec.gov.au/",
     citation="Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
     source_url=c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
     license="CC-BY",
@@ -103,7 +103,7 @@ my_source <- bb_source(
     name="Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
     id="10.4225/25/53D9B12E0F96E",
     description="This is a compilation of all the processed multibeam bathymetry data that are publicly available in Geoscience Australia's data holding for the Macquarie Ridge.",
-    reference="http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_b9224f95-a416-07f8-e044-00144fdd4fa6/XYZ+multibeam+bathymetric+grids+of+the+Macquarie+Ridge",
+    doc_url="http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_b9224f95-a416-07f8-e044-00144fdd4fa6/XYZ+multibeam+bathymetric+grids+of+the+Macquarie+Ridge",
     citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
     source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
     license="CC-BY 4.0",
@@ -117,7 +117,7 @@ Some particularly important components of this definition are:
 
 1.  The `id` uniquely identifies the data source. If the data source has a DOI, use that. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one). The `id` should be something that changes when the data set is updated. A DOI is ideal for this. The `name` entry should be a human-readable but still concise name for the data set.
 
-2.  The `license` and `citation` are important so that users know what conditions govern the usage of the data, and the appropriate citation to use to acknowledge the data providers. The `reference` entry should refer to a metadata or documentation page that describes the data in detail.
+2.  The `license` and `citation` are important so that users know what conditions govern the usage of the data, and the appropriate citation to use to acknowledge the data providers. The `doc_url` entry should refer to a metadata or documentation page that describes the data in detail.
 
 3.  The `method` and `source_url` define how this data will be retrieved. Most sources will use the `bb_handler_wget` method function, which is a wrapper around the `wget` utility. If you are unfamiliar with wget, consult the [wget manual](https://www.gnu.org/software/wget/manual/wget.html) or one of the many online tutorials. You can also see the in-built wget help by running `bb_wget("--help")`.
 
@@ -206,7 +206,7 @@ Authentication note: Copernicus Marine login required, see <http://marine.copern
 
 Approximate size: 310 GB
 
-Reference: <http://cmems-resources.cls.fr/?option=com_csw&view=details&tab=info&product_id=SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047>
+Documentation link: <http://cmems-resources.cls.fr/?option=com_csw&view=details&tab=info&product_id=SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047>
 
 ### Data group: Electoral
 
@@ -216,7 +216,7 @@ House of Representatives results from the 2016 Australian election.
 
 Approximate size: 0.01 GB
 
-Reference: <http://results.aec.gov.au/>
+Documentation link: <http://results.aec.gov.au/>
 
 ### Data group: Ocean colour
 
@@ -226,7 +226,7 @@ Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at 9km spatial r
 
 Approximate size: 7.2 GB
 
-Reference: <https://oceancolor.gsfc.nasa.gov/>
+Documentation link: <https://oceancolor.gsfc.nasa.gov/>
 
 ### Data group: Sea ice
 
@@ -238,7 +238,7 @@ Authentication note: Requires Earthdata login, see <https://urs.earthdata.nasa.g
 
 Approximate size: 0.02 GB
 
-Reference: <https://nsidc.org/data/NSIDC-0192/versions/2>
+Documentation link: <https://nsidc.org/data/NSIDC-0192/versions/2>
 
 ### Data group: Sea surface temperature
 
@@ -248,7 +248,7 @@ Weekly and monthly mean and long-term monthly mean SST data, 1-degree resolution
 
 Approximate size: 0.9 GB
 
-Reference: <http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html>
+Documentation link: <http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html>
 
 ### Data group: Topography
 
@@ -258,4 +258,4 @@ A draft version of the Lake Superior Bathymetry was compiled as a component of a
 
 Approximate size: 0.03 GB
 
-Reference: <https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html>
+Documentation link: <https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html>

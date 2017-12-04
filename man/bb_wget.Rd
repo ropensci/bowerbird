@@ -71,7 +71,7 @@ bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
 the result of the system call (or if \code{bb_wget("--help")} was called, a message will be issued). The returned object will have components 'status' and (if \code{capture_stdout} was \code{TRUE}) 'stdout' and 'stderr'
 }
 \description{
-The wget system call is made using the \code{exec_wait} function from the sys package. Call \code{bb_wget("help")} to get a message giving information about wget's command line parameters
+This function is an R wrapper to the command-line \code{wget} utility, which is called using either the \code{exec_wait} or the \code{exec_internal} function from the sys package. Almost all of the parameters to \code{bb_wget} are translated into command-line flags to \code{wget}. Call \code{bb_wget("help")} to get more information about wget's command line flags. Command-line flags without equivalent \code{bb_wget} function parameters can be passed via the \code{extra_flags} parameter.
 }
 \examples{
 \dontrun{

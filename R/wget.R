@@ -1,5 +1,7 @@
 #' Mirror an external data source using the wget utility
 #'
+#' This function is not intended to be called directly by the user, but rather will be called internally by the \code{bb_sync} function. The typical usage of \code{bb_handler_wget} is to specify it in the \code{method} parameter of a definition: see the example below.
+#'
 #' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 #' @param verbose logical: if TRUE, provide additional progress output
 #' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
@@ -7,7 +9,21 @@
 #'
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
-#' @seealso \code{\link{bb_wget}}
+#' @seealso \code{\link{bb_wget}} \code{\link{bb_source}}
+#' @examples
+#'
+#' my_source <- bb_source(
+#'    id="gshhg_coastline",
+#'    name="GSHHG coastline data",
+#'    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
+#'    doc_url= "http://www.soest.hawaii.edu/pwessel/gshhg",
+#'    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
+#'      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
+#'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
+#'    license="LGPL",
+#'    method=list("bb_handler_wget",recursive=TRUE,level=1,accept="*bin*.zip,README.TXT"),
+#'    postprocess=list("bb_unzip"),
+#'    collection_size=0.6)
 #'
 #' @export
 bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE,...) {
@@ -87,7 +103,7 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE,...) {
 
 #' Make a wget call
 #'
-#' The wget system call is made using the \code{exec_wait} function from the sys package. Call \code{bb_wget("help")} to get a message giving information about wget's command line parameters
+#' This function is an R wrapper to the command-line \code{wget} utility, which is called using either the \code{exec_wait} or the \code{exec_internal} function from the sys package. Almost all of the parameters to \code{bb_wget} are translated into command-line flags to \code{wget}. Call \code{bb_wget("help")} to get more information about wget's command line flags. Command-line flags without equivalent \code{bb_wget} function parameters can be passed via the \code{extra_flags} parameter.
 #'
 #' @param url string: the URL to retrieve
 #' @param recursive logical: if true, turn on recursive retrieving

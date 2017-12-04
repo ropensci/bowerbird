@@ -249,16 +249,16 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
             cat("\nAuthentication note:", config$authentication_note[k],"\n",file=rmd_file,append=TRUE)
         if (inc_size)
             cat("\nApproximate size:", if (is.na(config$collection_size[k])) "not specified" else paste0(config$collection_size[k], " GB"),"\n",file=rmd_file,append=TRUE)
-        cat("\nReference: ",config$reference[k],"\n",file=rmd_file,append=TRUE)
+        cat("\nDocumentation link: ",config$doc_url[k],"\n",file=rmd_file,append=TRUE)
         if (inc_license) {
             this_citation <- config$citation[k]
             if (is.null(this_citation) || is.na(this_citation) || this_citation=="") {
-                this_citation <- "No citation details provided; see reference"
+                this_citation <- "No citation details provided"
             }
             cat("\nCitation: ",this_citation,"\n",file=rmd_file,append=TRUE)
             this_license <- config$license[k]
             if (is.null(this_license) || is.na(this_license) || this_license=="") {
-                this_license <- "No formal license details provided; see reference"
+                this_license <- "No formal license details provided"
             }
             cat("\nLicense: ",this_license,"\n",file=rmd_file,append=TRUE)
         }
