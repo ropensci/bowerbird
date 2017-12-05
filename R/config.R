@@ -307,22 +307,22 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
 
 
 
-#' Validate a bowerbird configuration
-#'
-#' Runs some basic sanity checks on a bowerbird configuration.
-#'
-#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
-#'
-#' @return TRUE or throw error
-#' @examples
-#' \dontrun{
-#'   cf <- bb_config("/my/file/root") %>%
-#'     bb_add(bb_example_sources())
-#'   bb_validate() ## will complain about lacking authentication info
-#' }
-#' @seealso \code{\link{bb_config}}
-#'
-#' @export
+## Internal function
+## Validate a bowerbird configuration
+##
+## Runs some basic sanity checks on a bowerbird configuration.
+##
+## @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
+##
+## @return TRUE or throw error
+## @examples
+## \dontrun{
+##   cf <- bb_config("/my/file/root") %>%
+##     bb_add(bb_example_sources())
+##   bb_validate() ## will complain about lacking authentication info
+## }
+## @seealso \code{\link{bb_config}}
+
 bb_validate <- function(config) {
     assert_that(is(config,"bb_config"))
     cfds <- bb_data_sources(config)
