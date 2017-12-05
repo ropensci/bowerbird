@@ -22,9 +22,9 @@ bb_uncompress(...)
 \arguments{
 \item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
 
-\item{file_list_before}{data.frame: files present in the directory before synchronising, as returned by \code{file.info}}
+\item{file_list_before}{data.frame: files present in the directory before synchronising, as returned by \code{file.info}. (This is not required if \code{delete} is TRUE)}
 
-\item{file_list_after}{data.frame: files present in the directory after synchronising, as returned by \code{file.info}}
+\item{file_list_after}{data.frame: files present in the directory after synchronising, as returned by \code{file.info}. (This is not required if \code{delete} is TRUE)}
 
 \item{verbose}{logical: if TRUE, provide additional progress output}
 
@@ -39,7 +39,7 @@ TRUE on success
 }
 \description{
 This function is not intended to be called directly, but instead can be specified as a postprocessing step to apply to a data source. \code{bb_unzip}, \code{bb_gunzip}, \code{bb_bunzip2}, and \code{bb_uncompress} are convenience wrappers around \code{bb_decompress} that specify the method.
-The dots argument indicates additional arguments that are passed to \code{bb_decompress} when called by \code{bb_sync}. These include parameters named \code{file_list_before} and \code{file_list_after}, which are data.frames as returned by \code{file.info}, listing the files present in the target directory before and after synchronising. These are used if delete=TRUE.
+The dots argument indicates additional arguments that are passed to \code{bb_decompress} when called by \code{bb_sync}. Note that \code{bb_sync} passes the first four arguments (\code{config, file_list_before, file_list_after, verbose}) automatically.
 }
 \examples{
 \dontrun{
