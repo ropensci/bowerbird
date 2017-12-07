@@ -1,6 +1,9 @@
 #' \pkg{bowerbird}
 #'
+#' Often it's desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be better to have local copies. This is particularly common in environmental and other sciences that deal with large data sets (e.g. satellite or global climate model products). Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
+#'
 #' @name bowerbird
+#' @aliases bowerbird-package
 #' @docType package
 #' @references \url{http://data.aad.gov.au}
 #' @importFrom assertthat assert_that is.flag is.string
