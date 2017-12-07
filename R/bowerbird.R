@@ -15,5 +15,5 @@
 #' @importFrom rmarkdown render
 #' @importFrom stats na.omit
 #' @importFrom sys exec_wait exec_internal
-#' @importFrom utils download.file read.table str unzip
+#' @importFrom utils download.file menu read.table str unzip
 NULL
