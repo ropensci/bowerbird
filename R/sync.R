@@ -55,6 +55,15 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
     if (nrow(bb_data_sources(this_dataset))!=1)
         stop("expecting single-row data set")
     this_att <- bb_settings(this_dataset)
+    this_collection_size <- bb_data_sources(this_dataset)$collection_size
+    if (interactive() && !is.null(this_collection_size) && !is.na(this_collection_size) && !is.null(this_att$warn_large_downloads) && this_collection_size>this_att$warn_large_downloads) {
+        go_ahead <- menu(c("Yes","No"),title=sprintf("This data set is %.1f GB in size: are you sure you want to download it?",this_collection_size))
+        if (go_ahead!=1) {
+            if (verbose) cat(sprintf("\n dataset synchronization aborted: %s\n",bb_data_sources(this_dataset)$name))
+            return(NA)
+        }
+    }
+
     ## check that the root directory exists
     if (!dir_exists(this_att$local_file_root)) {
         ## no, it does not exist
