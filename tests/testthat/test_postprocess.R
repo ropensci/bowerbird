@@ -11,7 +11,7 @@ test_that("decompressing zip files works",{
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/example_data.zip",##"https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/example_data.zip",
         license="MIT",
-        method=list("bb_handler_wget",recursive=TRUE,level=1,execute=c("robots=off")),
+        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
         postprocess=list("bb_unzip"))
 
     temp_root <- tempdir()
@@ -36,7 +36,7 @@ test_that("decompressing gzipped files works",{
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/example_data_was_gzipped.csv.gz",##"https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/example_data_was_gzipped.csv.gz",
         license="MIT",
-        method=list("bb_handler_wget",recursive=TRUE,level=1,execute=c("robots=off")),
+        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
         postprocess=list("bb_gunzip"))
 
     temp_root <- tempdir()
@@ -61,7 +61,7 @@ test_that("decompressing bzipped files works",{
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/example_data_was_bzipped.csv.bz2",##"https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/example_data_was_bzipped.csv.bz2",
         license="MIT",
-        method=list("bb_handler_wget",recursive=TRUE,level=1,execute=c("robots=off")),
+        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
         postprocess=list("bb_bunzip2"))
 
     temp_root <- tempdir()
@@ -86,7 +86,7 @@ test_that("decompressing Z-compressed files works",{
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/20170822.nc.Z",##"https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/20170822.nc.Z",
         license="MIT",
-        method=list("bb_handler_wget",recursive=TRUE,level=1,execute=c("robots=off")),
+        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
         postprocess=list("bb_uncompress"))
 
     temp_root <- tempdir()
