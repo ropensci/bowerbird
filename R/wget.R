@@ -114,12 +114,12 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE,...) {
 #' @param reject character: as for \code{accept}, but specifying filename suffixes or patterns to reject
 #' @param reject_regex character: as for \code{accept_regex}, but specifying regular expressions to reject
 #' @param exclude_directories character: character vector with one or more entries. Each entry specifies a comma-separated list of directories you wish to exclude from download. Elements may contain wildcards
-#' @param execute character: a character vector with one or more entries. Each entry is an command to be executed. A common use for this is \code{execute=c("robots=off")}, in order to avoid wget's default behaviour of identifying as a robot. Some servers will exclude robots from certain parts of their sites. See \url{https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion, and \url{https://www.gnu.org/software/wget/manual/wget.html#Wgetrc-Commands} for a full list of commands that can be specified here
 #' @param restrict_file_names character: vector of one of more strings from the set "unix", "windows", "nocontrol", "ascii", "lowercase", and "uppercase". \code{restrict_file_names="windows"} is useful if you are downloading files to be used on both Windows and Unix file systems. See \url{https://www.gnu.org/software/wget/manual/wget.html#index-Windows-file-names} for more information on this parameter
 #' @param progress string: the type of progress indicator you wish to use. Legal indicators are "dot" and "bar". "dot" prints progress with dots, with each dot representing a fixed amount of downloaded data. The style can be adjusted: "dot:mega" will show 64K per dot and 3M per line; "dot:giga" shows 1M per dot and 32M per line. See \url{https://www.gnu.org/software/wget/manual/wget.html#index-dot-style} for more information
 #' @param user string: username used to authenticate to the remote server
 #' @param password string: password used to authenticate to the remote server
 #' @param output_file string: save wget's output messages to this file
+#' @param robots_off logical: by default wget considers itself to be a robot, and therefore won't recurse into areas of a site that are excluded to robots. This can cause problems with servers that exclude robots (accidentally or deliberately) from parts of their sites containing data that we want to retrieve. Setting \code{robots_off} to TRUE will add a "-e robots=off" flag, which instructs wget to behave as a human user, not a robot. See \url{https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion
 #' @param timestamping logical: if TRUE, don't re-retrieve a remote file unless it is newer than the local copy (or there is no local copy)
 #' @param no_if_modified_since logical: applies when retrieving recursively with timestamping (i.e. only downloading files that have changed since last download, which is achieved using \code{bb_config(...,clobber=1)}). The default method for timestamping is to issue an "If-Modified-Since" header on the request, which instructs the remote server not to return the file if it has not changed since the specified date. Some servers do not support this header. In these cases, trying using \code{no_if_modified_since=TRUE}, which will instead send a preliminary HEAD request to ascertain the date of the remote file
 #' @param no_clobber logical: if TRUE, skip downloads that would overwrite existing local files
@@ -144,7 +144,7 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE,...) {
 #'
 # @export
 ## like bb_wget, but with some wget flags promoted to explicit function parms
-bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex,reject_regex,exclude_directories,execute,restrict_file_names,progress,user,password,output_file,timestamping=FALSE,no_if_modified_since=FALSE,no_clobber=FALSE,no_parent=TRUE,no_check_certificate=FALSE,relative=FALSE,adjust_extension=FALSE,extra_flags=character(),verbose=FALSE,capture_stdout=FALSE,quiet=FALSE,debug=FALSE) {
+bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex,reject_regex,exclude_directories,restrict_file_names,progress,user,password,output_file,robots_off=FALSE,timestamping=FALSE,no_if_modified_since=FALSE,no_clobber=FALSE,no_parent=TRUE,no_check_certificate=FALSE,relative=FALSE,adjust_extension=FALSE,extra_flags=character(),verbose=FALSE,capture_stdout=FALSE,quiet=FALSE,debug=FALSE) {
     assert_that(is.string(url))
     assert_that(is.flag(recursive),!is.na(recursive))
     if (recursive) assert_that(is.numeric(level),level>=0)
@@ -168,6 +168,7 @@ bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex
     assert_that(is.string(password))
     if (missing(output_file)) output_file <- ""
     assert_that(is.string(output_file))
+    assert_that(is.flag(robots_off),!is.na(robots_off))
     assert_that(is.flag(timestamping),!is.na(timestamping))
     assert_that(is.flag(no_if_modified_since),!is.na(no_if_modified_since))
     assert_that(is.flag(no_clobber),!is.na(no_clobber))
@@ -176,8 +177,6 @@ bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex
     assert_that(is.flag(relative),!is.na(relative))
     assert_that(is.flag(adjust_extension),!is.na(adjust_extension))
     assert_that(is.numeric(wait))
-    if (missing(execute)) execute <- character()
-    assert_that(is.character(execute))
     assert_that(is.character(extra_flags))
     assert_that(is.flag(verbose),!is.na(verbose))
     assert_that(is.flag(capture_stdout),!is.na(capture_stdout))
@@ -213,8 +212,7 @@ bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex
         if (wait>0) flags <- c(flags,paste0("--wait=",wait))
         if (quiet) flags <- c(flags,"--quiet")
         if (debug) flags <- c(flags,"--debug")
-        if (length(execute)>0)
-            flags <- c(flags,paste("-e",execute,sep=" ")) ## these need to be of the form '-e first_command' '-e second_command'
+        if (robots_off) flags <- c(flags,"-e robots=off")
         ## add any extra_flags
         ## sys expects flags as a char vector, not a string
         extra_flags <- flags_to_charvec(extra_flags) ## will split string, or replace NA/"" with empty character vector

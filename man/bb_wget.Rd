@@ -5,10 +5,10 @@
 \title{Make a wget call}
 \usage{
 bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
-  accept_regex, reject_regex, exclude_directories, execute, restrict_file_names,
-  progress, user, password, output_file, timestamping = FALSE,
-  no_if_modified_since = FALSE, no_clobber = FALSE, no_parent = TRUE,
-  no_check_certificate = FALSE, relative = FALSE,
+  accept_regex, reject_regex, exclude_directories, restrict_file_names,
+  progress, user, password, output_file, robots_off = FALSE,
+  timestamping = FALSE, no_if_modified_since = FALSE, no_clobber = FALSE,
+  no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE,
   adjust_extension = FALSE, extra_flags = character(), verbose = FALSE,
   capture_stdout = FALSE, quiet = FALSE, debug = FALSE)
 }
@@ -31,8 +31,6 @@ bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
 
 \item{exclude_directories}{character: character vector with one or more entries. Each entry specifies a comma-separated list of directories you wish to exclude from download. Elements may contain wildcards}
 
-\item{execute}{character: a character vector with one or more entries. Each entry is an command to be executed. A common use for this is \code{execute=c("robots=off")}, in order to avoid wget's default behaviour of identifying as a robot. Some servers will exclude robots from certain parts of their sites. See \url{https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion, and \url{https://www.gnu.org/software/wget/manual/wget.html#Wgetrc-Commands} for a full list of commands that can be specified here}
-
 \item{restrict_file_names}{character: vector of one of more strings from the set "unix", "windows", "nocontrol", "ascii", "lowercase", and "uppercase". \code{restrict_file_names="windows"} is useful if you are downloading files to be used on both Windows and Unix file systems. See \url{https://www.gnu.org/software/wget/manual/wget.html#index-Windows-file-names} for more information on this parameter}
 
 \item{progress}{string: the type of progress indicator you wish to use. Legal indicators are "dot" and "bar". "dot" prints progress with dots, with each dot representing a fixed amount of downloaded data. The style can be adjusted: "dot:mega" will show 64K per dot and 3M per line; "dot:giga" shows 1M per dot and 32M per line. See \url{https://www.gnu.org/software/wget/manual/wget.html#index-dot-style} for more information}
@@ -42,6 +40,8 @@ bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
 \item{password}{string: password used to authenticate to the remote server}
 
 \item{output_file}{string: save wget's output messages to this file}
+
+\item{robots_off}{logical: by default wget considers itself to be a robot, and therefore won't recurse into areas of a site that are excluded to robots. This can cause problems with servers that exclude robots (accidentally or deliberately) from parts of their sites containing data that we want to retrieve. Setting \code{robots_off} to TRUE will add a "-e robots=off" flag, which instructs wget to behave as a human user, not a robot. See \url{https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion}
 
 \item{timestamping}{logical: if TRUE, don't re-retrieve a remote file unless it is newer than the local copy (or there is no local copy)}
 
