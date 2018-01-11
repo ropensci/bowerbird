@@ -22,7 +22,7 @@
 #' }
 #' @export
 bb_example_sources <- function() {
-    bind_rows(
+    rbind(
         bb_source(
             name="NOAA OI SST V2",
             id="oisst.v2",

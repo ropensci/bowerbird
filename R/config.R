@@ -88,8 +88,8 @@ bb_subset <- function(config,idx) {
 #' @export
 bb_add <- function(config,source) {
     assert_that(is(config,"bb_config"))
-    ##config$data_sources <- dplyr::bind_rows(config$data_sources,source)
-    bb_data_sources(config) <- dplyr::bind_rows(bb_data_sources(config),source)
+    ##bb_data_sources(config) <- dplyr::bind_rows(bb_data_sources(config),source)
+    bb_data_sources(config) <- rbind(bb_data_sources(config),source)
     config
 }
 
@@ -263,10 +263,20 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
 
     config <- bb_settings_to_cols(config)
 
-    config <- config %>% group_by_(~data_group,~name) %>% mutate_(source_urls=~paste(file.path(local_file_root,directory_from_url(source_url)),collapse=", ")) %>% ungroup() %>% select_(~-source_url,~-method,~-postprocess) %>% unique()
+    ##config <- config %>% group_by_(~data_group,~name) %>%
+    ##    mutate_(local_file_paths=~paste(file.path(local_file_root,directory_from_url(source_url)),collapse=", ")) %>%
+    ##    ungroup() %>%
+    ##    select_(~-source_url,~-method,~-postprocess) %>%
+    ##    unique()
 
-    config$data_group[config$data_group==""] <- NA ## so that arrange puts them last
-    config <- config[order(config$data_group), ]
+    config$local_file_paths <- vapply(seq_len(nrow(config)),function(z) {
+        temp <- directory_from_url(config$source_url[[z]])
+        temp[is.na(temp)] <- ""
+        paste(file.path(config$local_file_root[z],temp),collapse=", ")},FUN.VALUE="")
+    ## order by data group
+    config <- unique(config[,!names(config) %in% c("source_url","method","postprocess")]) ## drop cols, take unique rows
+    config$data_group[!nzchar(config$data_group)] <- NA ## so that these appear last
+    config <- config[order(config$data_group,config$name), ]
     config$data_group[is.na(config$data_group)] <- ""
 
     last_group <- "blah"
@@ -284,23 +294,23 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
         cat("\nDocumentation link: ",config$doc_url[k],"\n",file=rmd_file,append=TRUE)
         if (inc_license) {
             this_citation <- config$citation[k]
-            if (is.null(this_citation) || is.na(this_citation) || this_citation=="") {
+            if (is.null(this_citation) || is.na(this_citation) || !nzchar(this_citation)) {
                 this_citation <- "No citation details provided"
             }
             cat("\nCitation: ",this_citation,"\n",file=rmd_file,append=TRUE)
             this_license <- config$license[k]
-            if (is.null(this_license) || is.na(this_license) || this_license=="") {
+            if (is.null(this_license) || is.na(this_license) || !nzchar(this_license)) {
                 this_license <- "No formal license details provided"
             }
             cat("\nLicense: ",this_license,"\n",file=rmd_file,append=TRUE)
         }
-        temp <- config$source_urls[[k]]
+        temp <- config$local_file_paths[[k]]
         temp <- gsub("\\\\","/",temp)
         temp <- unique(gsub("/+","/",temp))
-        if (inc_path) cat("\nLocal file system path:\n",paste(paste0("- ",temp),sep="\n",collapse="\n"),"\n",file=rmd_file,append=TRUE,sep="")
+        if (inc_path) cat("\nLocal file system paths: ",temp,"\n",file=rmd_file,append=TRUE,sep="")
         if (inc_access_function) {
             thisfun <- config$access_function[k]
-            if (is.null(thisfun) || is.na(thisfun) || thisfun=="") { thisfun <- "none registered" }
+            if (is.null(thisfun) || is.na(thisfun) || !nzchar(thisfun)) { thisfun <- "none registered" }
             cat("\nAssociated access functions: ",thisfun,"\n",file=rmd_file,append=TRUE)
         }
     }

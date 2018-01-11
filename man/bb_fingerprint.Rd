@@ -4,14 +4,12 @@
 \alias{bb_fingerprint}
 \title{Fingerprint the files associated with a data source}
 \usage{
-bb_fingerprint(config, hash = "sha1", verbose = TRUE)
+bb_fingerprint(config, hash = "sha1")
 }
 \arguments{
 \item{config}{bb_config: configuration as returned by \code{\link{bb_config}}}
 
 \item{hash}{string: algorithm to use to calculate file hashes: "md5", "sha1", or "none". Note that file hashing can be slow for large file collections}
-
-\item{verbose}{logical: if TRUE, provide additional progress output}
 }
 \value{
 tibble

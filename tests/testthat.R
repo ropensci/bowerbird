@@ -1,5 +1,5 @@
 library(testthat)
-library(dplyr)
+library(magrittr)
 library(bowerbird)
 
 if (.Platform$OS.type=="windows") {

@@ -84,9 +84,9 @@ bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE,searc
     ## catch "Sorry No Files Matched Your Query"
     if (any(grepl("no files matched your query",myfiles,ignore.case=TRUE))) stop("No files matched the supplied oceancolour data file search query (",search,")")
     myfiles <- myfiles[-c(1,2)] ## get rid of header line and blank line that follows it
-    myfiles <- tbl_df(do.call(rbind,lapply(myfiles,function(z)strsplit(z,"[[:space:]]+")[[1]]))) ## split checksum and file name from each line
+    myfiles <- as_tibble(do.call(rbind,lapply(myfiles,function(z)strsplit(z,"[[:space:]]+")[[1]]))) ## split checksum and file name from each line
     colnames(myfiles) <- c("checksum","filename")
-    myfiles <- myfiles %>% dplyr::arrange_(~filename)
+    myfiles <- myfiles[order(myfiles$filename),]
     ## for each file, download if needed and store in appropriate directory
     out <- TRUE
     for (idx in seq_len(nrow(myfiles))) {

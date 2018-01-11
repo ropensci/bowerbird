@@ -14,13 +14,14 @@ License: MIT + file LICENSE
 Depends: R (>= 3.3.0)
 Imports:
     assertthat,
-    dplyr,
+    magrittr,
     methods,
     openssl,
     R.utils,
     rmarkdown,
     stringr,
-    sys (>= 1.4.9000)
+    sys (>= 1.4.9000),
+    tibble
 LazyLoad: yes
 RoxygenNote: 6.0.1
 Suggests:
