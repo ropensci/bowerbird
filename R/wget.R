@@ -9,7 +9,7 @@
 #'
 #' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
 #'
-#' @seealso \code{\link{bb_wget}} \code{\link{bb_source}}
+#' @seealso \code{\link{bb_wget}}, \code{\link{bb_source}}
 #' @examples
 #'
 #' my_source <- bb_source(
@@ -135,7 +135,7 @@ bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE,...) {
 #'
 #' @return the result of the system call (or if \code{bb_wget("--help")} was called, a message will be issued). The returned object will have components 'status' and (if \code{capture_stdout} was \code{TRUE}) 'stdout' and 'stderr'
 #'
-#' @seealso \code{\link{bb_install_wget}} \code{\link{bb_find_wget}}
+#' @seealso \code{\link{bb_install_wget}}, \code{\link{bb_find_wget}}
 #' @examples
 #' \dontrun{
 #'   ## get help about wget command line parameters

@@ -71,7 +71,7 @@ bb_example_sources <- function() {
             citation="Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2. [Indicate subset used]. Boulder, Colorado USA. NASA National Snow and Ice Data Center Distributed Active Archive Center. doi: http://dx.doi.org/10.5067/EYICLBOAAJOU. [Date Accessed].",
             source_url=c("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"),
             license="Please cite, see http://nsidc.org/about/use_copyright.html",
-            authentication_note="Requires Earthdata login, see https://urs.earthdata.nasa.gov/. Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
+            authentication_note="Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login . Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
             method=list("bb_handler_earthdata",recursive=TRUE,level=4,no_parent=TRUE,relative=TRUE),
             user="",
             password="",
@@ -99,7 +99,7 @@ bb_example_sources <- function() {
             citation="Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
             source_url=c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
             license="CC-BY",
-            method=list("bb_handler_wget",recursive=TRUE,level=1,accept="csv",no_if_modified_since=TRUE,robots_off=TRUE,reject_regex="Website/UserControls"),
+            method=list("bb_handler_wget",recursive=TRUE,level=1,accept="csv",reject_regex="Website/UserControls"),
             collection_size=0.01,
             data_group="Electoral")
     )
