@@ -5,7 +5,8 @@
 Bowerbird
 =========
 
-<!--img align="right" src="https://rawgit.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/bowerbird.svg" /-->
+<img align="right" src="https://rawgit.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/bowerbird.svg" />
+
 Often it's desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be better to have local copies. This is particularly common in environmental and other sciences that deal with large data sets (e.g. satellite or global climate model products). Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
 
 Bowerbird can be used in several different modes:
@@ -259,36 +260,30 @@ cf <- bb_add(cf,mysrc)
 
 ### Example 4: an Oceandata source
 
-NASA's [Oceandata](https://oceandata.sci.gsfc.nasa.gov/) system provides access to a range of satellite-derived marine data products. The `bb_oceandata_handler` can be used to download these data. It does a two-step process: first it makes a query to the Oceancolour data file search tool (<https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi>) to find files that match your specified criterion, and then downloads the matching files.
+NASA's [Oceandata](https://oceandata.sci.gsfc.nasa.gov/) system provides access to a range of satellite-derived marine data products. The `bb_oceandata_handler` can be used to download these data. It uses a two-step process: first it makes a query to the Oceancolour data file search tool (<https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi>) to find files that match your specified criterion, and then downloads the matching files.
 
-' my\_source &lt;- bb\_source(
-==============================
+Oceandata uses standardized file naming conventions (see <https://oceancolor.gsfc.nasa.gov/docs/format/>), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S\*L3m\_MO\_CHL\_chlor\_a\_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the `search` argument to the `bb_handler_oceandata` handler function. Note that the `bb_handler_oceandata` does not take need `source_url` to be specified.
 
-' name="Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a",
-============================================================
+Here, for the sake of a small example, we'll limit ourselves to a single file ("T20000322000060.L3m\_MO\_SST\_sst\_9km.nc", which is sea surface temperature from the Terra satellite in February 2000):
 
-' id="SeaWiFS\_L3m\_MO\_CHL\_chlor\_a\_9km",
-============================================
+``` r
+src4 <- bb_source(
+    name="Oceandata test file",
+    id="oceandata-test",
+    description="Monthly, 9km remote-sensed sea surface temperature from the MODIS Terra satellite",
+    doc_url= "http://oceancolor.gsfc.nasa.gov/",
+    citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
+    license="Please cite",
+    method=list("bb_handler_oceandata",search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
+    data_group="Sea surface temperature")
 
-' description="Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at
-=================================================================================
+## add this source to a configuration and synchronize it:
+cf <- bb_config("c:/temp/data/bbtest") %>% bb_add(src4)
+status <- bb_sync(cf)
 
-' 9km spatial resolution",
-==========================
-
-' doc\_url="<https://oceancolor.gsfc.nasa.gov/>",
-=================================================
-
-' citation="See <https://oceancolor.gsfc.nasa.gov/citations>",
-==============================================================
-
-' license="Please cite",
-========================
-
-' method=list("bb\_handler\_oceandata",search="S\*L3m\_MO\_CHL\_chlor\_a\_9km.nc"), \#' postprocess=NULL, \#' collection\_size=7.2, \#' data\_group="Ocean colour")
-===================================================================================================================================================================
-
-&&&TODO
+## and now we can see our local copy of this data file:
+dir(bb_data_source_dir(cf),recursive=TRUE)
+```
 
 Nuances
 -------
@@ -313,7 +308,7 @@ Recursion is a powerful tool but will sometimes download much more than you real
 
 -   `no_parent=TRUE` prevents `wget` from ascending to a parent directory during its recursion process, because if it did so it would likely be downloading files that are not part of the data set that we want (this is `TRUE` by default).
 
-#### wget gotchas and tips, including resolving recursive download issues
+#### wget tips and tricks, including resolving recursive download issues
 
 Recursive download not working as expected, or other `wget` oddities?
 
@@ -332,8 +327,6 @@ Recursive download not working as expected, or other `wget` oddities?
 -   setting `wait` will cause `wget` to pause for this number of seconds between successive retrievals. This option may help with servers that block multiple successive requests, by introducing a delay between requests
 
 -   if `wget` is not behaving as expected, try adding `debug=TRUE`. This gives debugging output from `wget` itself (which is additional to the output obtained by calling `bb_sync(...,verbose=TRUE)`).
-
-&&&
 
 ### Choosing a data directory
 
