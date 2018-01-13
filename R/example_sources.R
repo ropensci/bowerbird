@@ -12,7 +12,7 @@
 #'
 #' @return tibble
 #'
-#' @seealso \code{\link{bb_config}} \code{\link{bb_handler_wget}} \code{\link{bb_handler_oceandata}} \code{\link{bb_handler_earthdata}}
+#' @seealso \code{\link{bb_config}}, \code{\link{bb_handler_wget}}, \code{\link{bb_handler_oceandata}}, \code{\link{bb_handler_earthdata}}
 #'
 #' @examples
 #' \dontrun{
@@ -31,7 +31,7 @@ bb_example_sources <- function() {
             citation="NOAA_OI_SST_V2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
             source_url=c("ftp://ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/*"),
             license="Please cite",
-            method=list("bb_handler_wget",recursive=TRUE,level=1,no_parent=TRUE),
+            method=list("bb_handler_wget",recursive=TRUE,level=1),
             postprocess=NULL,
             access_function="readsst",
             collection_size=0.9,
@@ -44,7 +44,7 @@ bb_example_sources <- function() {
             citation="In case of any publication, the Licensee will ensure credit the Copernicus Marine Service in the following manner: \"This study has been conducted using E.U. Copernicus Marine Service Information\"",
             source_url=c("ftp://ftp.sltac.cls.fr/Core/SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047/dataset-duacs-rep-global-merged-allsat-phy-l4-v3/"),
             license="See http://marine.copernicus.eu/services-portfolio/service-commitments-and-licence/",
-            method=list("bb_handler_wget",recursive=TRUE,level=3,no_parent=TRUE),
+            method=list("bb_handler_wget",recursive=TRUE,level=3),
             postprocess=list("bb_gunzip"),
             authentication_note="Copernicus Marine login required, see http://marine.copernicus.eu/services-portfolio/register-now/",
             user="",
@@ -72,7 +72,7 @@ bb_example_sources <- function() {
             source_url=c("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"),
             license="Please cite, see http://nsidc.org/about/use_copyright.html",
             authentication_note="Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login . Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
-            method=list("bb_handler_earthdata",recursive=TRUE,level=4,no_parent=TRUE,relative=TRUE),
+            method=list("bb_handler_earthdata",recursive=TRUE,level=4,relative=TRUE),
             user="",
             password="",
             postprocess=NULL,
