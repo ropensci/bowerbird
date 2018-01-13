@@ -139,7 +139,7 @@ bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE,searc
 # @param error_no_match logical: should an error be thrown if the abbrev is not matched?
 # @references \url{https://oceandata.sci.gsfc.nasa.gov/}
 # @return Either the platform name string corresponding to the abbreviation, if \code{abbrev} supplied, or a data.frame of all abbreviations and platform name strings if \code{abbrev} is missing
-# @seealso \code{\link{oceandata_timeperiod_map}} \code{\link{oceandata_parameter_map}}
+# @seealso \code{\link{oceandata_timeperiod_map}}, \code{\link{oceandata_parameter_map}}
 # @export
 oceandata_platform_map <- function(abbrev,error_no_match=FALSE) {
     rawtext <- "abbrev,platform
@@ -173,7 +173,7 @@ V,VIIRS"
 # @param abbrev string: the time period abbreviation from the URL (e.g. "DAY" for daily, "SCSP" for seasonal spring climatology)
 # @param error_no_match logical: should an error be thrown if the abbrev is not matched?
 # @return Either the time period string corresponding to the abbreviation, if \code{abbrev} supplied, or a data.frame of all abbreviations and time period strings if \code{abbrev} is missing
-# @seealso \code{\link{oceandata_platform_map}} \code{\link{oceandata_parameter_map}}
+# @seealso \code{\link{oceandata_platform_map}}, \code{\link{oceandata_parameter_map}}
 # @export
 oceandata_timeperiod_map <- function(abbrev,error_no_match=FALSE) {
     rawtext <- "abbrev,time_period

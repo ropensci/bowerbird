@@ -58,7 +58,7 @@ bb_config <- function(local_file_root,wget_global_flags=list(restrict_file_names
 #'
 #' @return configuration object
 #'
-#' @seealso \code{\link{bb_source}} \code{\link{bb_config}}
+#' @seealso \code{\link{bb_source}}, \code{\link{bb_config}}
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
@@ -79,7 +79,7 @@ bb_subset <- function(config,idx) {
 #'
 #' @return configuration object
 #'
-#' @seealso \code{\link{bb_source}} \code{\link{bb_config}}
+#' @seealso \code{\link{bb_source}}, \code{\link{bb_config}}
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
