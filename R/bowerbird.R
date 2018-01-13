@@ -5,7 +5,7 @@
 #' @name bowerbird
 #' @aliases bowerbird-package
 #' @docType package
-#' @references \url{http://data.aad.gov.au}
+#' @references \url{https://github.com/AustralianAntarcticDivision/bowerbird}
 #' @importFrom assertthat assert_that is.flag is.string
 #' @importFrom magrittr %>%
 #' @importFrom methods is
