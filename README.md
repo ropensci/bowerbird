@@ -197,7 +197,7 @@ You can immediately see that by using a recursive download, not only did we not 
 
 ### Example 3: an Earthdata source
 
-The [Earthdata system](https://earthdata.nasa.gov/) is NASA's data management system and home to a vast range of Earth science data from satellites, aircraft, field measurements, and other sources. Say you had a rummage through their [data catalogue](https://search.earthdata.nasa.gov/) and found yourself wanting a copy of [Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS](http://doi.org/10.5067/EYICLBOAAJOU). How would you go about setting this up with bowerbird?
+The [Earthdata system](https://earthdata.nasa.gov/) is one of NASA's data management systems and home to a vast range of Earth science data from satellites, aircraft, field measurements, and other sources. Say you had a rummage through their [data catalogue](https://search.earthdata.nasa.gov/) and found yourself wanting a copy of [Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS](http://doi.org/10.5067/EYICLBOAAJOU).
 
 Data sources served through the Earthdata system require users to have an Earthdata account, and to log in with their credential when downloading data. Bowerbird's `bb_handler_earthdata` function eases some of the hassle involved with these Earthdata sources.
 
@@ -262,7 +262,7 @@ cf <- bb_add(cf,mysrc)
 
 NASA's [Oceandata](https://oceandata.sci.gsfc.nasa.gov/) system provides access to a range of satellite-derived marine data products. The `bb_oceandata_handler` can be used to download these data. It uses a two-step process: first it makes a query to the Oceancolour data file search tool (<https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi>) to find files that match your specified criterion, and then downloads the matching files.
 
-Oceandata uses standardized file naming conventions (see <https://oceancolor.gsfc.nasa.gov/docs/format/>), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S\*L3m\_MO\_CHL\_chlor\_a\_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the `search` argument to the `bb_handler_oceandata` handler function. Note that the `bb_handler_oceandata` does not take need `source_url` to be specified.
+Oceandata uses standardized file naming conventions (see <https://oceancolor.gsfc.nasa.gov/docs/format/>), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S\*L3m\_MO\_CHL\_chlor\_a\_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the `search` argument to the `bb_handler_oceandata` handler function. Note that the `bb_handler_oceandata` does not need a `source_url` to be specified in the `bb_source` call.
 
 Here, for the sake of a small example, we'll limit ourselves to a single file ("T20000322000060.L3m\_MO\_SST\_sst\_9km.nc", which is sea surface temperature from the Terra satellite in February 2000):
 
