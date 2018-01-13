@@ -76,7 +76,7 @@ test_that("bb_sync works with a sink() call in place",{
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd") ## just some file to download
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),myds)
-    bb_sync(cf)
+    bb_sync(cf,verbose=TRUE)
     sink()
     op <- readLines(sinkfile)
     ## sink file should contain direct cat output "Synchronizing dataset: test"

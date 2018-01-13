@@ -10,7 +10,7 @@
 #' @return a tibble with the name, id, source_url, and sync success status of each data source (multiple source_urls within a data source will appear in separate rows)
 #'
 #' @export
-bb_sync <- function(config,create_root=FALSE,verbose=TRUE,catch_errors=TRUE) {
+bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE) {
     ## general synchronization handler
     assert_that(is(config,"bb_config"))
     assert_that(is.flag(create_root),!is.na(create_root))
