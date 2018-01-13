@@ -52,8 +52,7 @@ test_that("bb_sync works on oceandata",{
 
 test_that("bb_sync errors on a source that is missing required authentication info",{
     skip_on_cran()
-    mysrc <- bb_example_sources() %>%
-        dplyr::filter(name=="Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2")
+    mysrc <- subset(bb_example_sources(),name=="Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2")
     cf <- bb_config(local_file_root=tempdir()) %>% bb_add(mysrc)
     expect_error(bb_sync(cf),"requires authentication") ## error at the bb_validate stage, because user and password have not been set
 
