@@ -10,19 +10,26 @@ bb_example_sources()
 tibble
 }
 \description{
-Five example data sources:
+These example sources are useful as data sources in their own right, but are primarily provided as demonstrations of how to define data sources. See also \code{vignette("bowerbird")} for further examples and discussion.
+}
+\details{
+Example data sources:
 \itemize{
-  \item "NOAA OI SST V2"
+  \item "NOAA OI SST V2" - a straightforward data source that requires a simple recursive download
+  \item "Australian Election 2016 House of Representatives data" - an example of a recursive download that uses additional criteria to restrict what is downloaded
   \item "CMEMS global gridded SSH reprocessed (1993-ongoing)" - a data source that requires a username and password
   \item "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a" - an example data source that uses the \code{bb_handler_oceandata} method
   \item "Nimbus Ice Edge Points from Nimbus Visible Imagery" - an example data source that uses the \code{bb_handler_earthdata} method
-  \item "Bathymetry of Lake Superior" - an example that passes extra flags to the \code{bb_handler_wget} call in order to restrict what is downloaded
+  \item "Bathymetry of Lake Superior" - another example that passes extra flags to the \code{bb_handler_wget} call in order to restrict what is downloaded
 }
 }
 \examples{
 \dontrun{
+## define a configuration and add the 2016 election data source to it
 cf <- bb_config("/my/file/root") \%>\%
-  bb_add(bb_example_sources()[5,])
+  bb_add(subset(bb_example_sources(),id=="aus-election-house-2016"))
+
+## synchronize (download) the data
 bb_sync(cf)
 }
 }

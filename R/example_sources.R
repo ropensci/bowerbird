@@ -1,12 +1,15 @@
 #' Example bowerbird data sources
 #'
-#' Five example data sources:
+#' These example sources are useful as data sources in their own right, but are primarily provided as demonstrations of how to define data sources. See also \code{vignette("bowerbird")} for further examples and discussion.
+#'
+#' Example data sources:
 #' \itemize{
-#'   \item "NOAA OI SST V2"
+#'   \item "NOAA OI SST V2" - a straightforward data source that requires a simple recursive download
+#'   \item "Australian Election 2016 House of Representatives data" - an example of a recursive download that uses additional criteria to restrict what is downloaded
 #'   \item "CMEMS global gridded SSH reprocessed (1993-ongoing)" - a data source that requires a username and password
 #'   \item "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a" - an example data source that uses the \code{bb_handler_oceandata} method
 #'   \item "Nimbus Ice Edge Points from Nimbus Visible Imagery" - an example data source that uses the \code{bb_handler_earthdata} method
-#'   \item "Bathymetry of Lake Superior" - an example that passes extra flags to the \code{bb_handler_wget} call in order to restrict what is downloaded
+#'   \item "Bathymetry of Lake Superior" - another example that passes extra flags to the \code{bb_handler_wget} call in order to restrict what is downloaded
 #' }
 #' @references See the \code{doc_url} and \code{citation} field in each row of the returned tibble for references associated with these particular data sources
 #'
@@ -16,8 +19,11 @@
 #'
 #' @examples
 #' \dontrun{
+#' ## define a configuration and add the 2016 election data source to it
 #' cf <- bb_config("/my/file/root") %>%
-#'   bb_add(bb_example_sources()[5,])
+#'   bb_add(subset(bb_example_sources(),id=="aus-election-house-2016"))
+#'
+#' ## synchronize (download) the data
 #' bb_sync(cf)
 #' }
 #' @export
@@ -36,6 +42,17 @@ bb_example_sources <- function() {
             access_function="readsst",
             collection_size=0.9,
             data_group="Sea surface temperature"),
+        bb_source(
+            name="Australian Election 2016 House of Representatives data",
+            id="aus-election-house-2016",
+            description="House of Representatives results from the 2016 Australian election.",
+            doc_url="http://results.aec.gov.au/",
+            citation="Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
+            source_url=c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
+            license="CC-BY",
+            method=list("bb_handler_wget",recursive=TRUE,level=1,accept="csv",reject_regex="Website/UserControls"),
+            collection_size=0.01,
+            data_group="Electoral"),
         bb_source(
             name="CMEMS global gridded SSH reprocessed (1993-ongoing)",
             id="SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047",
@@ -90,17 +107,6 @@ bb_example_sources <- function() {
             comment="Only the netcdf format data are retrieved here - adjust the accept_regex parameter in the method argument to get other formats",
             postprocess=list("bb_gunzip"),
             collection_size=0.03,
-            data_group="Topography"),
-        bb_source(
-            name="Australian Election 2016 House of Representatives data",
-            id="aus-election-house-2016",
-            description="House of Representatives results from the 2016 Australian election.",
-            doc_url="http://results.aec.gov.au/",
-            citation="Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
-            source_url=c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
-            license="CC-BY",
-            method=list("bb_handler_wget",recursive=TRUE,level=1,accept="csv",reject_regex="Website/UserControls"),
-            collection_size=0.01,
-            data_group="Electoral")
+            data_group="Topography")
     )
 }

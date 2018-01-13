@@ -94,7 +94,7 @@ At a later time you can re-run this synchronization process. If the remote files
 
 ### Prepackaged data source definitions
 
-A few example data source definitions are provided as part of the bowerbird package --- see the list at the bottom of this document. Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
+A few example data source definitions are provided as part of the bowerbird package --- see `bb_example_sources()` (these are also listed at the bottom of this document). Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
 
 ## Defining your own data sources
 
@@ -104,7 +104,7 @@ The `bb_handler_wget` function is a generic handler function that will be suitab
 
 `bb_handler_wget` is a wrapper around the `wget` utility. The philosophy of bowerbird is to use `wget` as much as possible to handle web transactions. Using `wget` (and in particular its recursive download functionality) simplifies the process of writing and maintaining data source definitions. Typically, one only needs to define a data source in terms of its top-level URL and appropriate flags to pass to `wget`, along with some basic metadata (primarily intended to be read by the user).
 
-Specifying a data source is done by the `bb_source` function. This can seem a little daunting, so let's work through some examples.
+Specifying a data source is done by the `bb_source` function. This can seem a little daunting, so let's work through some examples. (Most of these examples are included in `bb_example_sources()`.)
 
 ### Example 1: a single data file
 
