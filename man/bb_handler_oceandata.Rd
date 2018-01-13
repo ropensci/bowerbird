@@ -2,27 +2,25 @@
 % Please edit documentation in R/oceandata.R
 \name{bb_handler_oceandata}
 \alias{bb_handler_oceandata}
-\title{Handler for oceandata data sources}
+\title{Handler for Oceandata data sets}
 \usage{
-bb_handler_oceandata(config, verbose = FALSE, local_dir_only = FALSE,
-  search, dtype)
+bb_handler_oceandata(search, dtype, ...)
 }
 \arguments{
-\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
-
-\item{verbose}{logical: if TRUE, provide additional progress output}
-
-\item{local_dir_only}{logical: if TRUE, just return the local directory into which files from this data source would be saved}
-
 \item{search}{string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)}
 
 \item{dtype}{string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)}
+
+\item{...}{: extra parameters passed automatically by \code{bb_sync}}
 }
 \value{
-the directory if local_dir_only is TRUE, otherwise TRUE on success
+TRUE on success
 }
 \description{
-This function is not intended to be called directly by the user, but rather will be called internally by the \code{bb_sync} function. The typical usage of \code{bb_handler_oceandata} is to specify it in the \code{method} parameter of a definition: see the example below.
+This is a handler function to be used with data sets from NASA's Oceandata system. This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
+}
+\details{
+Oceandata uses standardized file naming conventions (see https://oceancolor.gsfc.nasa.gov/docs/format/), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the \code{search} argument. Note that the \code{bb_handler_oceandata} does not take need `source_url` to be specified in the \code{bb_source} call.
 }
 \examples{
 

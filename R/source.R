@@ -2,7 +2,7 @@
 #'
 #' This function is used to define a data source, which can then be added to a data repository configuration. Passing the configuration object to \code{bb_sync} will trigger a download of all of the data sources in that configuration.
 #'
-#' The \code{method} parameter defines the function used to synchronize this data source, and any extra parameters that need to be passed to it via its \code{...} argument. Note that \code{bb_sync} automatically passes the \code{config}, \code{verbose}, and \code{local_dir_only} parameters to the method handler, and so these should not be included in the \code{method} argument here.
+#' The \code{method} parameter defines the handler function used to synchronize this data source, and any extra parameters that need to be passed to it.
 #'
 #' Parameters marked as "required" are the minimal set needed to define a data source. Other parameters are either not relevant to all data sources (e.g. \code{postprocess}, \code{user}, \code{password}) or provide optional helper information to users that is not strictly necessary to allow the data source to be synchronized (e.g. \code{description}, \code{access_function}, \code{data_group}). Note that three of the "required" parameters (namely \code{citation}, \code{license}, and \code{doc_url}) are not strictly needed by the synchronization code, but are treated as "required" because of their fundamental importance to reproducible science.
 #'

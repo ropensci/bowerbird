@@ -2,24 +2,21 @@
 % Please edit documentation in R/earthdata_handler.R
 \name{bb_handler_earthdata}
 \alias{bb_handler_earthdata}
-\title{Handler for files files served up through Earthdata providers}
+\title{Handler for data sets from Earthdata providers}
 \usage{
-bb_handler_earthdata(config, verbose = FALSE, local_dir_only = FALSE, ...)
+bb_handler_earthdata(...)
 }
 \arguments{
-\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
-
-\item{verbose}{logical: if TRUE, provide additional progress output}
-
-\item{local_dir_only}{logical: if TRUE, just return the local directory into which files from this data source would be saved}
-
-\item{...}{: additional parameters passed through to bb_handler_wget}
+\item{...}{: parameters passed to \code{\link{bb_wget}}}
 }
 \value{
-the directory if local_dir_only is TRUE, otherwise TRUE on success
+TRUE on success
 }
 \description{
-This function is not intended to be called directly by the user, but rather will be called internally by the \code{bb_sync} function. The typical usage of \code{bb_handler_earthdata} is to specify it in the \code{method} parameter of a definition: see the example below.
+This is a handler function to be used with data sets from NASA's Earthdata system. This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
+}
+\details{
+This function uses \code{\link{bb_wget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_wget}} parameters.
 }
 \examples{
 \dontrun{

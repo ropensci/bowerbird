@@ -16,17 +16,13 @@ test_that("bb_handler_oceandata works",{
         access_function="",
         data_group="Sea surface temperature")
     temp_root <- tempdir()
-    ocf <- bb_add(bb_config(local_file_root="irrelevant_here"),ods)
-    expect_equal(bb_data_source_dir(ocf),"irrelevant_here/oceandata.sci.gsfc.nasa.gov/MODIST/Mapped")
-    cwd <- getwd()
-    setwd(temp_root)
-    do.call(bb_handler_oceandata,c(list(ocf,verbose=TRUE),bb_data_sources(ocf)$method[[1]][-1]))
+    ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODIST/Mapped$",bb_data_source_dir(ocf)))
+    bb_sync(ocf)
     fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc" ## relative file name
-    expect_true(file.exists(fnm))
     expect_true(file.exists(file.path(temp_root,fnm)))
-    fi <- file.info(fnm)
+    fi <- file.info(file.path(temp_root,fnm))
     expect_gt(fi$size,6e6)
-    setwd(cwd)
 })
 
 test_that("url mapper works", {

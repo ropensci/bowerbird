@@ -4,22 +4,19 @@
 \alias{bb_handler_wget}
 \title{Mirror an external data source using the wget utility}
 \usage{
-bb_handler_wget(config, verbose = FALSE, local_dir_only = FALSE, ...)
+bb_handler_wget(...)
 }
 \arguments{
-\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
-
-\item{verbose}{logical: if TRUE, provide additional progress output}
-
-\item{local_dir_only}{logical: if TRUE, just return the local directory into which files from this data source would be saved}
-
-\item{...}{: extra arguments passed through to \code{bb_wget}}
+\item{...}{: parameters passed to \code{\link{bb_wget}}}
 }
 \value{
-the directory if local_dir_only is TRUE, otherwise TRUE on success
+TRUE on success
 }
 \description{
-This function is not intended to be called directly by the user, but rather will be called internally by the \code{bb_sync} function. The typical usage of \code{bb_handler_wget} is to specify it in the \code{method} parameter of a definition: see the example below.
+This is a general handler function that is suitable for a range of data sets. This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
+}
+\details{
+This handler function makes calls to the \code{wget} utility via the \code{\link{bb_wget}} function. All arguments provided here are passed through to \code{\link{bb_wget}}.
 }
 \examples{
 

@@ -1,15 +1,15 @@
-#' Handler for oceandata data sources
+#' Handler for Oceandata data sets
 #'
-#' This function is not intended to be called directly by the user, but rather will be called internally by the \code{bb_sync} function. The typical usage of \code{bb_handler_oceandata} is to specify it in the \code{method} parameter of a definition: see the example below.
+#' This is a handler function to be used with data sets from NASA's Oceandata system. This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
+#'
+#' Oceandata uses standardized file naming conventions (see https://oceancolor.gsfc.nasa.gov/docs/format/), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the \code{search} argument. Note that the \code{bb_handler_oceandata} does not take need `source_url` to be specified in the \code{bb_source} call.
 #'
 #' @references https://oceandata.sci.gsfc.nasa.gov/
-#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 #' @param search string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)
 #' @param dtype string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)
-#' @param verbose logical: if TRUE, provide additional progress output
-#' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
+#' @param ... : extra parameters passed automatically by \code{bb_sync}
 #'
-#' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
+#' @return TRUE on success
 #'
 #' @examples
 #'
@@ -27,7 +27,22 @@
 #'   data_group="Ocean colour")
 #'
 #' @export
-bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE,search,dtype) {
+bb_handler_oceandata <- function(search,dtype,...) {
+    assert_that(is.string(search),nzchar(search))
+    if (!missing(dtype)) {
+        cat("dt:",str(dtype),"\n")
+        if (!is.null(dtype)) assert_that(is.string(dtype),nzchar(dtype))
+    } else {
+        dtype <- NULL
+    }
+    do.call(bb_handler_oceandata_inner,list(...,search=search,dtype=dtype))
+}
+
+
+# @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
+# @param verbose logical: if TRUE, provide additional progress output
+# @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
+bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,search,dtype=NULL) {
     ## oceandata synchronisation handler
 
     ## oceandata provides a file search interface, e.g.:
@@ -48,7 +63,7 @@ bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE,searc
     assert_that(is.flag(verbose),!is.na(verbose))
     assert_that(is.flag(local_dir_only),!is.na(local_dir_only))
     assert_that(is.string(search),nzchar(search))
-    if (!missing(dtype)) assert_that(is.string(dtype),nzchar(dtype))
+    if (!is.null(dtype)) assert_that(is.string(dtype),nzchar(dtype))
 
     ##method_flags <- bb_data_sources(config)$method_flags[[1]]
     ##assert_that(!is.null(method_flags$search),is.string(method_flags$search),nzchar(method_flags$search))
@@ -72,7 +87,7 @@ bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE,searc
         ## sometimes this takes a couple of attempts!
         ## sys code, nb don't quote args, will break on unix
         qry <- paste0("--post-data=cksum=1&search=",search)
-        if (!missing(dtype))
+        if (!is.null(dtype))
             qry <- paste0(qry,"&dtype=",dtype)
         ##if (get_os()=="windows") qry <- paste0("\"",qry,"\"") ## not sure if need these on windows or not!!
         myfiles <- bb_wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",recursive=FALSE,extra_flags=c("-q",qry,"-O","-"),capture_stdout=TRUE,verbose=verbose)

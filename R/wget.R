@@ -1,13 +1,12 @@
 #' Mirror an external data source using the wget utility
 #'
-#' This function is not intended to be called directly by the user, but rather will be called internally by the \code{bb_sync} function. The typical usage of \code{bb_handler_wget} is to specify it in the \code{method} parameter of a definition: see the example below.
+#' This is a general handler function that is suitable for a range of data sets. This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
 #'
-#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
-#' @param verbose logical: if TRUE, provide additional progress output
-#' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-#' @param ... : extra arguments passed through to \code{bb_wget}
+#' This handler function makes calls to the \code{wget} utility via the \code{\link{bb_wget}} function. All arguments provided here are passed through to \code{\link{bb_wget}}.
 #'
-#' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
+#' @param ... : parameters passed to \code{\link{bb_wget}}
+#'
+#' @return TRUE on success
 #'
 #' @seealso \code{\link{bb_wget}}, \code{\link{bb_source}}
 #' @examples
@@ -26,7 +25,14 @@
 #'    collection_size=0.6)
 #'
 #' @export
-bb_handler_wget <- function(config,verbose=FALSE,local_dir_only=FALSE,...) {
+bb_handler_wget <- function(...) {
+    do.call(bb_handler_wget_inner,list(...))
+}
+
+# @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
+# @param verbose logical: if TRUE, provide additional progress output
+# @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
+bb_handler_wget_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,...) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(bb_data_sources(config))==1)
     assert_that(is.flag(verbose),!is.na(verbose))
