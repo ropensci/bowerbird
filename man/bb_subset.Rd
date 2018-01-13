@@ -25,5 +25,5 @@ Keep only selected data_sources in a bowerbird configuration
 }
 }
 \seealso{
-\code{\link{bb_source}} \code{\link{bb_config}}
+\code{\link{bb_source}}, \code{\link{bb_config}}
 }

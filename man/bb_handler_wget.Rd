@@ -38,5 +38,5 @@ my_source <- bb_source(
 
 }
 \seealso{
-\code{\link{bb_wget}} \code{\link{bb_source}}
+\code{\link{bb_wget}}, \code{\link{bb_source}}
 }

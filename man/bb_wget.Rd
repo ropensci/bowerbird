@@ -9,8 +9,9 @@ bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
   progress, user, password, output_file, robots_off = FALSE,
   timestamping = FALSE, no_if_modified_since = FALSE, no_clobber = FALSE,
   no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE,
-  adjust_extension = FALSE, extra_flags = character(), verbose = FALSE,
-  capture_stdout = FALSE, quiet = FALSE, debug = FALSE)
+  adjust_extension = FALSE, retr_symlinks = FALSE,
+  extra_flags = character(), verbose = FALSE, capture_stdout = FALSE,
+  quiet = FALSE, debug = FALSE)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
@@ -31,7 +32,7 @@ bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
 
 \item{exclude_directories}{character: character vector with one or more entries. Each entry specifies a comma-separated list of directories you wish to exclude from download. Elements may contain wildcards}
 
-\item{restrict_file_names}{character: vector of one of more strings from the set "unix", "windows", "nocontrol", "ascii", "lowercase", and "uppercase". \code{restrict_file_names="windows"} is useful if you are downloading files to be used on both Windows and Unix file systems. See \url{https://www.gnu.org/software/wget/manual/wget.html#index-Windows-file-names} for more information on this parameter}
+\item{restrict_file_names}{character: vector of one of more strings from the set "unix", "windows", "nocontrol", "ascii", "lowercase", and "uppercase". See \url{https://www.gnu.org/software/wget/manual/wget.html#index-Windows-file-names} for more information on this parameter. \code{bb_config} sets this to "windows" by default: if you are downloading files from a server with a port (http://somewhere.org:1234/) Unix will allow the ":" as part of directory/file names, but Windows will not (the ":" will be replaced by "+"). Specifying \code{restrict_file_names="windows"} causes Windows-style file naming to be used}
 
 \item{progress}{string: the type of progress indicator you wish to use. Legal indicators are "dot" and "bar". "dot" prints progress with dots, with each dot representing a fixed amount of downloaded data. The style can be adjusted: "dot:mega" will show 64K per dot and 3M per line; "dot:giga" shows 1M per dot and 32M per line. See \url{https://www.gnu.org/software/wget/manual/wget.html#index-dot-style} for more information}
 
@@ -55,7 +56,9 @@ bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
 
 \item{relative}{logical: if TRUE, only follow relative links. This can sometimes be useful for restricting what is downloaded in recursive mode}
 
-\item{adjust_extension}{logical: if a file of type 'application/xhtml+xml' or 'text/html' is downloaded and the URL does not end with .htm or .html, this option will cause the suffix '.html' to be appended to the local filename. This can be useful when mirroring a remote site that has page URLs that conflict with directories (e.g. http://somewhere.org/this/page which has further content below it, say at http://somewhere.org/this/page/more. If "somewhere.org/this/page" is saved as a page, that name can't also be used as a local directory in which to store the lower-level content. Setting \code{adjust_extension=TRUE} will cause the page to be saved as "somewhere.org/this/page.html", thus resolving the conflict}
+\item{adjust_extension}{logical: if a file of type 'application/xhtml+xml' or 'text/html' is downloaded and the URL does not end with .htm or .html, this option will cause the suffix '.html' to be appended to the local filename. This can be useful when mirroring a remote site that has file URLs that conflict with directories (e.g. http://somewhere.org/this/page which has further content below it, say at http://somewhere.org/this/page/more. If "somewhere.org/this/page" is saved as a file with that name, that name can't also be used as the local directory name in which to store the lower-level content. Setting \code{adjust_extension=TRUE} will cause the page to be saved as "somewhere.org/this/page.html", thus resolving the conflict}
+
+\item{retr_symlinks}{logical: if TRUE, follow symbolic links during recursive download. Note that this will only follow symlinks to files, NOT to directories}
 
 \item{extra_flags}{character: character vector of additional command-line flags to pass to wget}
 
@@ -81,5 +84,5 @@ This function is an R wrapper to the command-line \code{wget} utility, which is 
 
 }
 \seealso{
-\code{\link{bb_install_wget}} \code{\link{bb_find_wget}}
+\code{\link{bb_install_wget}}, \code{\link{bb_find_wget}}
 }

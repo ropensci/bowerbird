@@ -8,8 +8,7 @@
 \alias{bb_uncompress}
 \title{Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy}
 \usage{
-bb_decompress(config, file_list_before, file_list_after, verbose = TRUE,
-  method, delete = FALSE)
+bb_decompress(method, delete = FALSE, ...)
 
 bb_unzip(...)
 
@@ -20,26 +19,20 @@ bb_bunzip2(...)
 bb_uncompress(...)
 }
 \arguments{
-\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
-
-\item{file_list_before}{data.frame: files present in the directory before synchronising, as returned by \code{file.info}. (This is not required if \code{delete} is TRUE)}
-
-\item{file_list_after}{data.frame: files present in the directory after synchronising, as returned by \code{file.info}. (This is not required if \code{delete} is TRUE)}
-
-\item{verbose}{logical: if TRUE, provide additional progress output}
-
 \item{method}{string: one of "unzip","gunzip","bunzip2","decompress"}
 
 \item{delete}{logical: delete the zip files after extracting their contents?}
 
-\item{...}{: parameters passed to bb_decompress}
+\item{...}{: extra parameters passed automatically by \code{bb_sync}}
 }
 \value{
 TRUE on success
 }
 \description{
-This function is not intended to be called directly, but instead can be specified as a postprocessing step to apply to a data source. \code{bb_unzip}, \code{bb_gunzip}, \code{bb_bunzip2}, and \code{bb_uncompress} are convenience wrappers around \code{bb_decompress} that specify the method.
-The dots argument indicates additional arguments that are passed to \code{bb_decompress} when called by \code{bb_sync}. Note that \code{bb_sync} passes the first four arguments (\code{config, file_list_before, file_list_after, verbose}) automatically.
+Functions for decompressing files after downloading. These functions are not intended to be called directly, but rather are specified as a \code{postprocess} option in \code{\link{bb_source}}. \code{bb_unzip}, \code{bb_gunzip}, \code{bb_bunzip2}, and \code{bb_uncompress} are convenience wrappers around \code{bb_decompress} that specify the method.
+}
+\details{
+If the data source delivers compressed files, you will most likely want to decompress them after downloading. These functions will do this for you. By default, these do not delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.
 }
 \examples{
 \dontrun{
@@ -52,5 +45,5 @@ The dots argument indicates additional arguments that are passed to \code{bb_dec
 
 }
 \seealso{
-\code{\link{bb_source}} \code{\link{bb_config}} \code{\link{bb_cleanup}}
+\code{\link{bb_source}}, \code{\link{bb_config}}, \code{\link{bb_cleanup}}
 }

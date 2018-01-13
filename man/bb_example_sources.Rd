@@ -30,5 +30,5 @@ bb_sync(cf)
 See the \code{doc_url} and \code{citation} field in each row of the returned tibble for references associated with these particular data sources
 }
 \seealso{
-\code{\link{bb_config}} \code{\link{bb_handler_wget}} \code{\link{bb_handler_oceandata}} \code{\link{bb_handler_earthdata}}
+\code{\link{bb_config}}, \code{\link{bb_handler_wget}}, \code{\link{bb_handler_oceandata}}, \code{\link{bb_handler_earthdata}}
 }
