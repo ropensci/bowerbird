@@ -68,13 +68,17 @@ test_that("config validation works",{
 
 test_that("bb_settings works",{
     cf <- bb_config(local_file_root="/your/data/directory")
-    temp <- bb_settings(cf)
-    expect_true(setequal(names(temp),bowerbird:::allowed_settings()))
-    expect_null(bb_settings(cf)$http_proxy)
+    sets <- bb_settings(cf)
+    expect_true(setequal(names(sets),bowerbird:::allowed_settings()))
+    expect_null(sets$http_proxy)
     ## change a setting
-    bb_settings(cf) <- list(http_proxy="something")
+    sets$http_proxy <- "something"
+    bb_settings(cf) <- sets
     expect_identical(bb_settings(cf)$http_proxy,"something")
     ## try to add a non-recognized setting
     expect_warning(bb_settings(cf) <- list(bilbobaggins=1),"is not a recognized bowerbird config setting")
     expect_null(bb_settings(cf)$bilbobaggins)
+    ## a side effect of that call is that it will have removed all other settings
+    ## because the new settins list contained only the bilbobaggins element
+    expect_true(length(bb_settings(cf))<1)
 })
