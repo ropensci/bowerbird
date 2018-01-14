@@ -2,7 +2,9 @@
 title: "Bowerbird"
 author: "Ben Raymond, Michael Sumner"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    number_sections: true
 vignette: >
   %\VignetteIndexEntry{bowerbird}
   %\VignetteEngine{knitr::rmarkdown}
@@ -35,115 +37,327 @@ library(devtools)
 install_github("AustralianAntarcticDivision/bowerbird",build_vignettes=TRUE)
 ```
 
-Bowerbird uses the third-party utility `wget` to do the heavy lifting of recursively downloading files from data providers. `wget` is typically installed by default on Linux.
-On Windows you can use the `bb_install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from https://eternallybored.org/misc/wget/current/wget.exe) and make sure it is on your path.
+You will also need to have the third-party utility `wget` available, because Bowerbird uses this to do the heavy lifting of recursively downloading files from data providers. Note that installing `wget` may require admin privileges on your local machine.
 
-## Usage
+### Linux
+
+`wget` is typically installed by default on Linux. Otherwise use your package manager to install it, e.g. `sudo apt install wget` on Ubuntu/Debian or `sudo yum install wget` on Fedora/CentOS.
+
+### Windows
+
+On Windows you can use the `bb_install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from https://eternallybored.org/misc/wget/current/wget.exe) and make sure it is on your system path.
+
+### Mac
+
+Use `brew install wget` or `brew install --with-libressl wget` if you get SSL-related errors. If you do not have brew installed, see https://brew.sh/.
+
+
+## Usage overview
 
 ### Configuration
 
 Build up a configuration by first defining global options such as the destination on your local file system:
 
 ```{r eval=FALSE}
+library(bowerbird)
 cf <- bb_config(local_file_root="~/your/data/directory")
 ```
 
-Bowerbird must then be told which data sources to synchronize. Use the `bb_source()` function to define a data source. Let's use data from the 2016 Australian federal election as an example:
+Bowerbird must then be told which data sources to synchronize. Let's use data from the Australian 2016 federal election, which is provided as one of the example data sources:
 
 ```{r eval=FALSE}
-my_source <- bb_source(
-    name="Australian Election 2016 House of Representatives data",
-    id="aus-election-house-2016",
-    description="House of Representatives results from the 2016 Australian election.",
-    reference="http://results.aec.gov.au/",
-    citation="Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
-    source_url=c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
-    license="CC-BY",
-    method=quote(bb_handler_wget),
-    method_flags=c("--recursive","--level=1","--accept=csv","--no-if-modified-since"),
-    collection_size=0.01)
+my_source <- subset(bb_example_sources(),id=="aus-election-house-2016")
 
-cf <- bb_config(local_file_root="~/temp/data/bbtest") %>%
-    bb_add(my_source)
+## add this data source to the configuration
+cf <- bb_add(cf,my_source)
 ```
 
-### First-time synchronization
-
-Once the configuration has been defined, run the sync process:
+Once the configuration has been defined and the data source added to it, run the sync process:
 
 ```{r eval=FALSE}
-bb_sync(cf)
+status <- bb_sync(cf)
 ```
 
-Congratulations! You now have your own local copy of your chosen data sets. This particular example is fairly small (about 10MB, as you can see from the `collection_size` entry --- which is in GB), so it should not take too long to download.
+Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download.
 
-At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the `clobber` parameter set to 0 (do not overwrite existing files) or 1 (overwrite only if the remote file is newer than the local copy) then the sync process will run more quickly because it will not need to re-download any data files.
+At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the `clobber` parameter set to 0 ("do not overwrite existing files") or 1 ("overwrite only if the remote file is newer than the local copy") then the sync process will run more quickly because it will not need to re-download any data files.
 
+
+## Defining data sources
 
 ### Prepackaged data source definitions
 
-A few example data source definitions are provided as part of the bowerbird package --- see the list at the bottom of this document. Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
+A few example data source definitions are provided as part of the bowerbird package --- see `bb_example_sources()` (these are also listed at the bottom of this document). Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
+
+
+### Defining your own data sources
+
+The general bowerbird workflow is to build up a configuration with one or more data sources, and pass that configuration object to the `bb_sync` function to kick off the download process. Each data source contains the details required by bowerbird to be able to fetch it, including a *handler* function that bb_sync will call to do the actual download.
+
+The `bb_handler_wget` function is a generic handler function that will be suitable for many data sources. Note that this `bb_handler_wget` function is not intended to be called directly by the user, but is specified as part of a data source specification. The `bb_sync` function calls `bb_handler_wget` during its run, passing appropriate parameters as it does so.
+
+`bb_handler_wget` is a wrapper around the `wget` utility. The philosophy of bowerbird is to use `wget` as much as possible to handle web transactions. Using `wget` (and in particular its recursive download functionality) simplifies the process of writing and maintaining data source definitions. Typically, one only needs to define a data source in terms of its top-level URL and appropriate flags to pass to `wget`, along with some basic metadata (primarily intended to be read by the user).
+
+Specifying a data source is done by the `bb_source` function. This can seem a little daunting, so let's work through some examples. Most of these examples are included in `bb_example_sources()`.
+
+#### Example 1: a single data file
+
+Say we've found [this bathymetric data set](https://doi.org/10.4225/25/53D9B12E0F96E) and we want to define a data source for it. It's a single zip file that contains some ArcGIS binary grids. A minimal data source definition might look like this:
+
+```{r eval=FALSE}
+src1 <- bb_source(
+    name="Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
+    id="10.4225/25/53D9B12E0F96E",
+    doc_url="https://doi.org/10.4225/25/53D9B12E0F96E",
+    license="CC-BY 4.0",
+    citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
+    source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
+    method=list("bb_handler_wget"))
+```
+
+The parameters provided here are all mandatory:
+
+
+- `id` is a unique identifier for the dataset, and should be something that changes when the data set is updated. Its DOI, if it has one, is ideal for this. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one)
+- `name` is a human-readable but still unique identifier
+- `doc_url` is a link to a metadata record or documentation page that describes the data in detail
+- `license` is the license under which the data are being distributed, and is required so that users are aware of the conditions that govern the usage of the data
+- `citation` gives citation details for the data source. It's generally considered good practice to cite data providers, and indeed under some data licenses this is in fact mandatory
+- the `method` parameter is specified as a list, where the first entry is the name of the handler function that will be used to retrieve this data set (`bb_handler_wget`, in this case)and the remaining entries are data-source-specific arguments to pass to that function (none here)
+- and finally the `source_url` tells bowerbird where to go to get the data.
+
+
+Add this data source to a configuration and synchronize it:
+```{r eval=FALSE}
+cf <- bb_config("c:/temp/data/bbtest") %>% bb_add(src1)
+status <- bb_sync(cf)
+```
+
+This should have caused the zip file to be downloaded the zip file to your local machine, in this case into the `c:/temp/data/bbtest/www.ga.gov.au/corporate_data/73697` directory. 
+
+There are a few additional entries that we might consider for this data source, particularly if we are going to make it available for other users.
+
+Firstly, having the zip file locally is great, but we will need to unzip it before we can actually use it. Bowerbird can do this by specifying a `postprocess` action:
+
+```{r eval=FALSE}
+src1 <- bb_source(..., postprocess=list("bb_unzip"))
+```
+
+For the benefit of other users, we might also add the `description`, `collection_size`, and `data_group` parameters:
+
+- `description` provides a plain-language description of the data set, so that users can get an idea of what it contains (for full details they can consult the `doc_url` link that you already provided)
+- `collection_size` is the approximate disk space (in GB) used by the data collection. Some collections are very large! This parameter obviously gives an indication of the storage space required, but also the download size (noting though that some data sources deliver compressed files, so the download size might be much smaller)
+- `data_group` is a descriptive or thematic group name that this data set belongs to. This can also help users find data sources of interest to them
+
+So our full data source definition now looks like:
+
+```{r eval=FALSE}
+src1 <- bb_source(
+    name="Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
+    id="10.4225/25/53D9B12E0F96E",
+    description="This is a compilation of all the processed multibeam bathymetry data that are publicly available in Geoscience Australia's data holding for the Macquarie Ridge.",
+    doc_url="https://doi.org/10.4225/25/53D9B12E0F96E",
+    license="CC-BY 4.0",
+    citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
+    source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
+    method=list("bb_handler_wget"),
+    postprocess=list("bb_unzip"),
+    collection_size=0.4,
+    data_group="Topography")
+```
+
+#### Example 2: multiple files via recursive download
+
+This data source (Australian Election 2016 House of Representatives data) is provided as one of the example data sources in `bb_example_sources()`, but let's look in a little more detail here.
+
+The primary entry point to this data set is an HTML index page, which links to a number of data files. In principle we could generate a list of all of these data files and download them one by one, but that would be tedious and prone to breaking (if the data files changed our hard-coded list would no longer be correct). Instead we can start at the HTML index and recursively download linked data files.
+
+The definition for this data source is:
+
+```{r eval=FALSE}
+src2 <- bb_source(
+    name="Australian Election 2016 House of Representatives data",
+    id="aus-election-house-2016",
+    description="House of Representatives results from the 2016 Australian election.",
+    doc_url="http://results.aec.gov.au/",
+    citation="Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
+    source_url=c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
+    license="CC-BY",
+    method=list("bb_handler_wget",recursive=TRUE,level=1,accept="csv",reject_regex="Website/UserControls"),
+    collection_size=0.01)
+```
+
+Most of these parameters will be familiar from the previous example, but the `method` definition is more complex. Let's look at the entries in the `method` list (these are all parameters that get passed to the `bb_wget()` function, so you can find more information about these via `help("bb_wget")`):
+
+- `recursive=TRUE` tells `wget` that we want to recursively download multiple files, starting from the `source_url`. The `source_url` points to a html page that contains links to csv files, and it's the csv files that actually contain the data of interest, so we want to follow the links from the html file to the csv files
+- `level=1` specifies that `wget` should only recurse down one level (i.e. follow links found in the top-level `source_url` document, but don't recurse any deeper. If, say, we specified `level=2`, then `wget` would follow links from the top-level document as well as links found in those linked documents.) Recursion `level=1` is the default value, to help avoid very large but unintentional downloads
+- `accept="csv"` means that we only want `wget` to retrieve csv files. Links to html files or directories will typically be followed even if they do not match the `accept` criteria, because they might contain links that are wanted
+- `reject_regex="Website/UserControls"` - this one is slightly esoteric: the top-level document contains this link, but the link does not actually exist on the server. When `wget` tries to retrieve it, the remote server issues a "404 not found" error which causes our `bb_sync` process to think that is has failed! Since this link isn't actually part of our desired data, we can just exclude it with the `reject_regex` parameter, which avoids the error.
+
+
+Add this data source to a configuration and synchronize it:
+```{r eval=FALSE}
+cf <- bb_config("c:/temp/data/bbtest") %>% bb_add(src2)
+status <- bb_sync(cf)
+```
+
+Once again the data have been saved into a subdirectory that reflects the URL structure (`c:/temp/data/bbtest/results.aec.gov.au/20499/Website/Downloads`). If you examine that directory, you will see that it contains around 50 separate csv files, each containing a different component of the data set.
+
+You can immediately see that by using a recursive download, not only did we not need to individually specify all 50 of those data files, but if the data provider adds new files in the future the recursive download process will automatically find them (so long as they are linked from the top-level `source_url` document).
+
+#### Example 3: an Earthdata source
+
+The [Earthdata system](https://earthdata.nasa.gov/) is one of NASA's data management systems and home to a vast range of Earth science data from satellites, aircraft, field measurements, and other sources. Say you had a rummage through their [data catalogue](https://search.earthdata.nasa.gov/) and found yourself wanting a copy of [Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS](http://doi.org/10.5067/EYICLBOAAJOU).
+
+Data sources served through the Earthdata system require users to have an Earthdata account, and to log in with their credential when downloading data. Bowerbird's `bb_handler_earthdata` function eases some of the hassle involved with these Earthdata sources.
+
+First, let's create an account and get ourselves access to the data.
+
+1. create an Earthdata login via https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login if you don't already have one
+
+1. we need to know the URL of the actual data. The [metadata record](http://doi.org/10.5067/EYICLBOAAJOU) for this data set contains a "Get data" button, which in turn directs the user to this URL: https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/. That's the data URL (which will be used as the `source_url` in our data source definition)
+
+1. browse to the [that data URL](https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/), using your Earthdata login to authenticate. When you use access an Earthdata application for the first time, you will be requested to authorize it so that it can access data using your credentials (see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login). This dataset is served by the NSIDC DAAC application, so you will need to authorize this application (either through browsing as just described, or go to 'My Applications' at https://urs.earthdata.nasa.gov/profile and add the application 'nsidc-daacdata' to your list of authorized applications)
+
+You only need to create an Earthdata login once. If you want to download other Earthdata data sets via bowerbird, you'll use the same credentials, but note that you may need to authorize additional applications, depending on where your extra data sets come from.
+
+Now that we have access to the data, we can write our bowerbird data source:
+
+```{r eval=FALSE}
+src3 <- bb_source(
+    name="Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2",
+    id="10.5067/EYICLBOAAJOU",
+    description="NSIDC provides this data set to aid in the investigations of the variability and trends of sea ice cover. Ice cover in these data are indicated by sea ice concentration: the percentage of the ocean surface covered by ice. The ice-covered area indicates how much ice is present; it is the total area of a pixel multiplied by the ice concentration in that pixel. Ice persistence is the percentage of months over the data set time period that ice existed at a location. The ice-extent indicates whether ice is present; here, ice is considered to exist in a pixel if the sea ice concentration exceeds 15 percent. This data set provides users with data about total ice-covered areas, sea ice extent, ice persistence, and monthly climatologies of sea ice concentrations.",
+    doc_url="https://doi.org/10.5067/EYICLBOAAJOU",
+    citation="Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2. [Indicate subset used]. Boulder, Colorado USA. NASA National Snow and Ice Data Center Distributed Active Archive Center. doi: http://dx.doi.org/10.5067/EYICLBOAAJOU. [Date Accessed].",
+    source_url=c("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"),
+    license="Please cite, see http://nsidc.org/about/use_copyright.html",
+    authentication_note="Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login . Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
+    method=list("bb_handler_earthdata",recursive=TRUE,level=4,relative=TRUE),
+    user="your_earthdata_username",
+    password="your_earthdata_password",
+    collection_size=0.02,
+    data_group="Sea ice")
+```
+
+This is very similar to our previous examples, with these differences:
+
+- the `method` specifies `bb_handler_earthdata` (whereas previously we used `bb_handler_wget`). The `bb_handler_earthdata` is actually very similar to `bb_handler_wget`, but it takes care of some Earthdata-specific details like authentication using your Earthdata credentials
+- we want a `recursive=TRUE` download, because the data are arranged in subdirectories. Manual browsing of the data set indicates that we need four levels of recursion, hence `level=4`
+- `relative=TRUE` means that `wget` will only follow relative links (i.e. links of the form `<a href="/some/directory/">...</a>`, which by definition must be on the same server as our `source_url`). Absolute links (i.e. links of the form `<a href="http://some.other.server/some/path">...</a>` will not be followed. This is another mechanism to prevent the recursive download from downloading stuff we don't want.
+
+
+Note that if you were providing this data source definition for other people to use, you would obviously not want to hard-code your Earthdata credentials in the `user` and `password` slots. In this case, specify the credentials as empty strings, and also include `warn_empty_auth=FALSE` in the data source definition (this suppresses the warning that `bb_source` would otherwise give you about missing credentials):
+
+```{r eval=FALSE}
+src3 <- bb_source(
+    name="Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2",
+   ... details as above...,
+    user="",
+	password="",
+    warn_empty_auth=FALSE)
+```
+
+When another user wants to use this data source, they simply insert their own credentials, e.g.:
+
+```{r eval=FALSE}
+mysrc <- src3
+mysrc$user <- "theirusername"
+mysrc$password <- "theirpassword"
+
+## then proceed as per usual
+cf <- bb_add(cf,mysrc)
+```
+
+#### Example 4: an Oceandata source
+
+NASA's [Oceandata](https://oceandata.sci.gsfc.nasa.gov/) system provides access to a range of satellite-derived marine data products. The `bb_oceandata_handler` can be used to download these data. It uses a two-step process: first it makes a query to the Oceancolour data file search tool (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi) to find files that match your specified criterion, and then downloads the matching files.
+
+Oceandata uses standardized file naming conventions (see https://oceancolor.gsfc.nasa.gov/docs/format/), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the `search` argument to the `bb_handler_oceandata` handler function. Note that the `bb_handler_oceandata` does not need a `source_url` to be specified in the `bb_source` call.
+
+Here, for the sake of a small example, we'll limit ourselves to a single file ("T20000322000060.L3m_MO_SST_sst_9km.nc", which is sea surface temperature from the Terra satellite in February 2000):
+
+```{r eval=FALSE}
+src4 <- bb_source(
+    name="Oceandata test file",
+    id="oceandata-test",
+    description="Monthly, 9km remote-sensed sea surface temperature from the MODIS Terra satellite",
+    doc_url= "http://oceancolor.gsfc.nasa.gov/",
+    citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
+    license="Please cite",
+    method=list("bb_handler_oceandata",search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
+    data_group="Sea surface temperature")
+
+## add this source to a configuration and synchronize it:
+cf <- bb_config("c:/temp/data/bbtest") %>% bb_add(src4)
+status <- bb_sync(cf)
+
+## and now we can see our local copy of this data file:
+dir(bb_data_source_dir(cf),recursive=TRUE)
+```
 
 ## Nuances
 
-### Data source definitions
+Bowerbird hands off the complexities of recursive downloading to the `wget` utility. This allows bowerbird's data source definitions to be fairly lightweight and more robust to changes by the data provider. However, one of the consequences of this approach is that bowerbird actually knows very little about the data files that it maintains, which can be limiting in some respects. It is not generally possible, for example, to provide the user with an indication of download progress (progress bar or similar) for a given data source because neither bowerbird nor `wget` actually know in advance how many files are in it or how big they are. Data sources do have a `collection_size` entry, to give the user some indication of the disk space required, but this is only approximate (and must be hand-coded by the data source maintainer). See the 'Reducing download sizes' section below for tips on retrieving only a subset of a large data source.
 
-The philosophy of bowerbird is to use the `wget` utility as much as possible to handle web transactions. Using `wget` (and its recursive download functionality) simplifies the process of writing and maintaining data source definitions. Typically, one only needs to provide the top-level URL and appropriate flags to pass to `wget`, along with some basic metadata (primarily intended to be read by the user).
+### wget gotchas
 
-However, one of the consequences of this approach is that bowerbird actually knows very little about the data files that it maintains, which can be limiting in some respects. It is not generally possible, for example, to provide the user with an indication of download progress (progress bar or similar) for a given data source because neither bowerbird nor `wget` actually know how many files are in it. Data sources do have a `collection_size` entry, to give the user some indication of the disk space required, but this is only approximate (and must be hand-coded by the data source maintainer). See the 'Reducing download sizes' section below for tips on retrieving only a subset of a large data source.
+`wget` is a complicated beast with many command-line options and sometimes inconsistent behaviour. The handler functions (`bb_handler_wget`, `bb_handler_earthdata`, `bb_handler_oceandata`) interact with `wget` via the intermediate `bb_wget` function, which provides an R interface to `wget`. The arguments to this function (see `help("bb_wget")`) are almost all one-to-one mappings of `wget`'s own command-line parameters. You can find more information about `wget` via the [wget manual](https://www.gnu.org/software/wget/manual/wget.html) or one of the many online tutorials. You can also see the in-built wget help by running `bb_wget("--help")`.
+
+Remember that any `wget_global_flags` defined via `bb_config` will be applied to every data source in addition to their specific `method` flags.
+
+The most relevant command-line `wget` command-line options are exposed through arguments to the `bb_wget` function. A few comments on `wget` behaviour and some of its command line options are provided below.
+
+#### Recursive download
+
+- `recursive=TRUE` is the default for `bb_wget` --- you will probably want this even if the data source doesn't strictly require a recursive download. The synchronization process saves files relative to the `local_file_root` directory specified in `bb_config`. If `recursive=TRUE`, then wget creates a directory structure that follows the URL structure. For example, calling `bb_wget("http://www.somewhere.org/monkey/banana/dataset.zip",recursive=TRUE)` will save the local file `www.somewhere.org/monkey/banana/dataset.zip`. Thus, `recursive=TRUE` will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your `local_file_root`
+
+Recursion is a powerful tool but will sometimes download much more than you really wanted. There are various methods for restricting the recursion:
+
+- if you want to include/exclude certain files from being downloaded, use the `accept`, `reject`, `accept_regex`, and `reject_regex` parameters. Note that `accept` and `reject` apply to file names (not the full path), and can be comma-separated lists of file name suffixes or patterns. The `accept_regex` and `reject_regex` parameters apply to the full path but can't be comma-separated (you can specify multiple regular expressions as a character vector, e.g. `accept_regex=c("^foo","bar$")`)
+
+- `no_parent=TRUE` prevents `wget` from ascending to a parent directory during its recursion process, because if it did so it would likely be downloading files that are not part of the data set that we want (this is `TRUE` by default).
 
 
-### Data source handlers
+#### Other wget tips and tricks, including resolving recursive download issues
 
-The `bb_handler_wget` R function provides a wrapper around `wget` that should be sufficient for many data sources. However, some data sources can't be retrieved using only simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_handler_wget`. Notes will be added here about defining new handler functions, but in the meantime look at e.g. `bb_handler_oceandata` or `bb_handler_earthdata`, which provide handlers for [oceandata](https://oceandata.sci.gsfc.nasa.gov/) and [earthdata](https://earthdata.nasa.gov/) data sources.
+Recursive download not working as expected, or other `wget` oddities?
+
+
+- `robots_off=TRUE`: by default wget considers itself to be a robot, and therefore won't recurse into areas of a site that are excluded to robots. This can cause problems with servers that exclude robots (accidentally or deliberately) from parts of their sites containing data that we want to retrieve. Setting \code{robots_off} to TRUE will add a "-e robots=off" flag, which instructs wget to behave as a human user, not a robot. See \url{https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion
+
+- as noted above, `no_parent=TRUE` by default. In some cases, though, you might want the recursion to ascend to a parent directory, and therefore need to override the default setting
+
+- a known limitation of `wget` is that it will NOT follow symbolic links to directories on the remote server. If your recursive download is not descending into directories when you think it should, this might be the cause
+
+- `no_if_modified_since=TRUE` may be useful when downloading files that have changed since last download (i.e. using \code{bb_config(...,clobber=1)}). The default method for doing this is to issue an "If-Modified-Since" header on the request, which instructs the remote server not to return the file if it has not changed since the specified date. Some servers do not support this header. In these cases, trying using \code{no_if_modified_since=TRUE}, which will instead send a preliminary HEAD request to ascertain the date of the remote file
+
+- `no_check_certificate=TRUE` will allow a download from a secure server to proceed even if the server's certificate checks fail. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution
+
+- `adjust_extension`: if a file of type 'application/xhtml+xml' or 'text/html' is downloaded and the URL does not end with .htm or .html, setting `adjust_extension=TRUE` will cause the suffix '.html' to be appended to the local filename. This can be useful when mirroring a remote site that has file URLs that conflict with directories. Say we are recursively downloading from http://somewhere.org/this/page, which has further content below it at http://somewhere.org/this/page/more. If "somewhere.org/this/page" is saved as a file with that name, that name can't also be used as the local directory name in which to store the lower-level content. Setting \code{adjust_extension=TRUE} will cause the page to be saved as "somewhere.org/this/page.html", thus resolving the conflict
+
+- setting `wait` will cause `wget` to pause for this number of seconds between successive retrievals. This option may help with servers that block multiple successive requests, by introducing a delay between requests
+
+- if `wget` is not behaving as expected, try adding `debug=TRUE`. This gives debugging output from `wget` itself (which is additional to the output obtained by calling `bb_sync(...,verbose=TRUE)`).
 
 
 ### Choosing a data directory
 
 It's up to you where you want your data collection kept, and to provide that location to bowerbird. A common use case for bowerbird is maintaining a central data collection for multiple users, in which case that location is likely to be some sort of networked file share. However, if you are keeping a collection for your own use, you might like to look at https://github.com/r-lib/rappdirs to help find a suitable directory location.
 
-### Defining data sources
 
-Data sources are defined using the `bb_source()` function:
+### Post-processing
 
-```{r eval=FALSE}
-my_source <- bb_source(
-    name="Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
-    id="10.4225/25/53D9B12E0F96E",
-    description="This is a compilation of all the processed multibeam bathymetry data that are publicly available in Geoscience Australia's data holding for the Macquarie Ridge.",
-    reference="http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_b9224f95-a416-07f8-e044-00144fdd4fa6/XYZ+multibeam+bathymetric+grids+of+the+Macquarie+Ridge",
-    citation="Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra.",
-    source_url="http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip",
-    license="CC-BY 4.0",
-    method=quote(bb_handler_wget),
-    method_flags="--recursive",
-    postprocess=quote(bb_unzip),
-    collection_size=0.4,
-    data_group="Topography")
-```
+#### Decompressing files
 
-Some particularly important components of this definition are:
+If the data source delivers compressed files, you will most likely want to decompress them after downloading. The postprocess options `bb_decompress`, `bb_unzip`, etc will do this for you. By default, these *do not* delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.
 
-1. The `id` uniquely identifies the data source. If the data source has a DOI, use that. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one). The `id` should be something that changes when the data set is updated. A DOI is ideal for this. The `name` entry should be a human-readable but still concise name for the data set.
+See `help("bb_unzip")` for more information, including usage examples.
 
-1. The `license` and `citation` are important so that users know what conditions govern the usage of the data, and the appropriate citation to use to acknowledge the data providers. The `reference` entry should refer to a metadata or documentation page that describes the data in detail.
+#### Deleting unwanted files
 
-1. The `method`, `method_flags`, and `source_url` define how this data will be retrieved. Most sources will use the `bb_handler_wget` method, which is a wrapper around the `wget` utility. If you are unfamiliar with wget, consult the [wget manual](https://www.gnu.org/software/wget/manual/wget.html) or one of the many online tutorials. You can also see the in-built wget help by running `bb_wget("--help")`.
+The `bb_cleanup` postprocessing option can be used to remove unwanted files after downloading. See See `help("bb_cleanup")`.
 
-
-Some subtleties to bear in mind:
-
-1. If the data source delivers compressed files, you will most likely want to decompress them after downloading. The postprocess options `bb_decompress`, `bb_unzip`, etc will do this for you. By default, these *do not* delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.
-
-1. You will probably want to specify `--recursive` as part of the `method_flags`, even if the data source doesn't require a recursive download. The synchronization process saves files relative to the `local_file_root` directory specified in the call to `bb_config`. If `--recursive` is specified, then wget creates a directory structure that follows the URL structure. For example, calling `wget --recursive http://www.somewhere.org/monkey/banana/dataset.zip` will save the local file `www.somewhere.org/monkey/banana/dataset.zip`. Thus, specifying `--recursive` will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your `local_file_root`.
-
-1. If you want to include/exclude certain files from being downloaded, use the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` flags. Note that `--accept` and `--reject` apply to file names (not the full path), and can be comma-separated lists of file name suffixes or patterns. The `--accept-regex` and `--reject-regex` flags apply to the full path but can only be a single regular expression each.
-
-1. Remember that any `wget_global_flags` defined via `bb_config` will be applied to every data source in addition to their specific `method_flags`.
-
-1. Several wget flags are set by the `bb_handler_wget` function itself. The `--user` and `--password` flags are populated with any values supplied to the `user` and `password` parameters of the source. Similarly, the `clobber` parameter supplied to `bb_config` controls the overwrite behaviour: if `clobber` is 0 then the `--no-clobber` flag is added to each wget call; if `clobber` is 1 then the `--timestamping` flag is added.
-
-1. If `wget` is not behaving as expected, try adding the `--debug` flag to see additional diagnostic output.
 
 ### Modifying data sources
 
@@ -167,19 +381,21 @@ cf <- cf %>% bb_add(mysrc)
 
 #### Reducing download sizes
 
-Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the `bb_handler_wget` method, you can restrict what is downloaded by modifying the data source's `method_flags`, particularly the `--accept`, `--reject`, `--accept-regex`, and `--reject-regex` options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.
+Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the `bb_handler_wget` method, you can restrict what is downloaded by modifying the arguments passed through the data source's `method` parameter, particularly the `accept`, `reject`, `accept_regex`, and `reject_regex` options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.
 
 Say a particular data provider arranges their files in yearly directories. It would be fairly easy to restrict ourselves to, say, only the 2017 data:
 
 ```{r eval=FALSE}
+library(dplyr)
 mysrc <- mysrc %>%
-  mutate(method_flags=c(method_flags,"--accept-regex=/2017/"))
+  mutate(method=c(method,list(accept_regex="/2017/")))
 cf <- cf %>% bb_add(mysrc)
 ```
 
-See the notes above for further guidances on the accept/reject flags.
+See the notes above for further guidance on the accept/reject flags.
 
-Alternatively, for data sources that are divided into subdirectories, one could replace the whole-data-source `source_url` with one or more that point to the specific subdirectories that are wanted.
+Alternatively, for data sources that are arranged in subdirectories, one could replace the `source_url` with one or more that point to the specific subdirectories that are wanted.
+
 
 ### Parallelized sync
 
@@ -191,9 +407,17 @@ If you have many data sources in your configuration, running the sync in paralle
 An aspect of reproducible research is knowing which data were used to perform an analysis, and potentially archiving those data to an appropriate repository. Bowerbird can assist with this: see `vignette("data_provenance")`.
 
 
+## Developer notes
+
+### Writing new data source handlers
+
+The `bb_handler_wget` R function provides a wrapper around `wget` that should be sufficient for many data sources. However, some data sources can't be retrieved using only simple `wget` calls, and so the `method` for such data sources will need to be something more elaborate than `bb_handler_wget`. Notes will be added here about defining new handler functions, but in the meantime look at `bb_handler_oceandata` and `bb_handler_earthdata`, which provide handlers for [Oceandata](https://oceandata.sci.gsfc.nasa.gov/) and [Earthdata](https://earthdata.nasa.gov/) data sources.
+
 ## Data source summary
 
-These are the example data source definitions that are provided as part of the bowerbird package.
+The `bb_summary` function will produce a HTML or Rmarkdown summary of the data sources contained in a configuration object. If you are maintaining a data collection on behalf of other users, or even just for yourself, it may be useful to keep an up-to-date HTML summary of your repository in an accessible location. Users can refer to this summary to see which data are in the repository and some details about them.
+
+Here is a `bb_summary` of the example data source definitions that are provided as part of the bowerbird package:
 
 ```{r echo=FALSE,message=FALSE,warning=FALSE,results="asis"}
 library(bowerbird)

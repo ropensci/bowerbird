@@ -98,7 +98,7 @@ bb_add <- function(config,source) {
 
 #' Gets or sets a bowerbird configuration object's settings
 #'
-#' Gets or sets a bowerbird configuration object's settings. These are repository-wide settings that are applied to all data sources added to the configuration.
+#' Gets or sets a bowerbird configuration object's settings. These are repository-wide settings that are applied to all data sources added to the configuration. Use this function to alter the settings of a configuration previously created using \code{bb_config}.
 #'
 #' Note that an assignment along the lines of \code{bb_settings(cf) <- new_settings} replaces all of the settings in the configuration with the \code{new_settings}. The most common usage pattern is to read the existing settings, modify them as needed, and then rewrite the whole lot back into the configuration object (as per the examples here).
 #'

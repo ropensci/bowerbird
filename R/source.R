@@ -1,10 +1,12 @@
 #' Define a data source
 #'
-#' This function is used to define a data source, which can then be added to a data repository configuration. Passing the configuration object to \code{bb_sync} will trigger a download of all of the data sources in that configuration.
+#' This function is used to define a data source, which can then be added to a bowerbird data repository configuration. Passing the configuration object to \code{bb_sync} will trigger a download of all of the data sources in that configuration.
 #'
 #' The \code{method} parameter defines the handler function used to synchronize this data source, and any extra parameters that need to be passed to it.
 #'
-#' Parameters marked as "required" are the minimal set needed to define a data source. Other parameters are either not relevant to all data sources (e.g. \code{postprocess}, \code{user}, \code{password}) or provide optional helper information to users that is not strictly necessary to allow the data source to be synchronized (e.g. \code{description}, \code{access_function}, \code{data_group}). Note that three of the "required" parameters (namely \code{citation}, \code{license}, and \code{doc_url}) are not strictly needed by the synchronization code, but are treated as "required" because of their fundamental importance to reproducible science.
+#' Parameters marked as "required" are the minimal set needed to define a data source. Other parameters are either not relevant to all data sources (e.g. \code{postprocess}, \code{user}, \code{password}) or provide metadata to users that is not strictly necessary to allow the data source to be synchronized (e.g. \code{description}, \code{access_function}, \code{data_group}). Note that three of the "required" parameters (namely \code{citation}, \code{license}, and \code{doc_url}) are not strictly needed by the synchronization code, but are treated as "required" because of their fundamental importance to reproducible science.
+#'
+#' See \code{vignette("bowerbird")} for more examples and discussion of defining data sources.
 #'
 #' @param id string: (required) a unique identifier of the data source. If the data source has a DOI, use that. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one). The ID should be something that changes when the data set changes (is updated). A DOI is ideal for this
 #' @param name string: (required) a unique name for the data source. This should be a human-readable but still concise name
@@ -22,15 +24,15 @@
 #' @param access_function string: name of the R function that can be used to read these data
 #' @param data_group string: the name of the group to which this data source belongs. Useful for arranging sources in terms of thematic areas
 #' @param collection_size numeric: approximate disk space (in GB) used by the data collection, if known. If the data are supplied as compressed files, this size should reflect the disk space used after decompression. If the data_source definition contains multiple source_url entries, this size should reflect the overall disk space used by all combined
-#' @param warn_empty_auth logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided. Set this to FALSE if you are defining a data source for others to use with their own credentials: they will typically call your data source constructor and then modify the \code{user} and \code{password} components
+#' @param warn_empty_auth logical: if \code{TRUE}, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided. Set this to \code{FALSE} if you are defining a data source for others to use with their own credentials: they will typically call your data source constructor and then modify the \code{user} and \code{password} components
 #'
 #' @return tibble
 #'
-#' @seealso \code{\link{bb_config}}
+#' @seealso \code{\link{bb_config}}, \code{vignette("bowerbird")}
 #'
 #' @examples
 #'
-#' ## a minimal definition for the GSHHG coastline data:
+#' ## a minimal definition for the GSHHG coastline data set:
 #'
 #' my_source <- bb_source(
 #'    id="gshhg_coastline",

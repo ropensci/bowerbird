@@ -15,7 +15,7 @@ bb_fingerprint(config, hash = "sha1")
 tibble
 }
 \description{
-Fingerprint the files associated with a data source
+The \code{bb_fingerprint} function, given a data repository configuration, will return the timestamp of download and hashes of all files associated with its data sources. This is intended as a general helper for tracking data provenance: for all of these files, we have information on where they came from (the data source ID), when they were downloaded, and a hash so that later versions of those files can be compared to detect changes. See also \code{vignette("data_provenance")}.
 }
 \examples{
 \dontrun{
@@ -24,4 +24,7 @@ Fingerprint the files associated with a data source
   bb_fingerprint(cf)
 }
 
+}
+\seealso{
+\code{vignette("data_provenance")}
 }

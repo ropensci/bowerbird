@@ -46,15 +46,15 @@ install_github("AustralianAntarcticDivision/bowerbird",build_vignettes=TRUE)
 
 You will also need to have the third-party utility `wget` available, because Bowerbird uses this to do the heavy lifting of recursively downloading files from data providers. Note that installing `wget` may require admin privileges on your local machine.
 
-#### Linux
+### Linux
 
 `wget` is typically installed by default on Linux. Otherwise use your package manager to install it, e.g. `sudo apt install wget` on Ubuntu/Debian or `sudo yum install wget` on Fedora/CentOS.
 
-#### Windows
+### Windows
 
 On Windows you can use the `bb_install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from https://eternallybored.org/misc/wget/current/wget.exe) and make sure it is on your system path.
 
-#### Mac
+### Mac
 
 Use `brew install wget` or `brew install --with-libressl wget` if you get SSL-related errors. If you do not have brew installed, see https://brew.sh/.
 
@@ -96,7 +96,7 @@ At a later time you can re-run this synchronization process. If the remote files
 
 A few example data source definitions are provided as part of the bowerbird package --- see `bb_example_sources()` (these are also listed at the bottom of this document). Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
 
-## Defining your own data sources
+### Defining your own data sources
 
 The general bowerbird workflow is to build up a configuration with one or more data sources, and pass that configuration object to the `bb_sync` function to kick off the download process. Each data source contains the details required by bowerbird to be able to fetch it, including a *handler* function that bb_sync will call to do the actual download.
 
@@ -104,9 +104,9 @@ The `bb_handler_wget` function is a generic handler function that will be suitab
 
 `bb_handler_wget` is a wrapper around the `wget` utility. The philosophy of bowerbird is to use `wget` as much as possible to handle web transactions. Using `wget` (and in particular its recursive download functionality) simplifies the process of writing and maintaining data source definitions. Typically, one only needs to define a data source in terms of its top-level URL and appropriate flags to pass to `wget`, along with some basic metadata (primarily intended to be read by the user).
 
-Specifying a data source is done by the `bb_source` function. This can seem a little daunting, so let's work through some examples. (Most of these examples are included in `bb_example_sources()`.)
+Specifying a data source is done by the `bb_source` function. This can seem a little daunting, so let's work through some examples. Most of these examples are included in `bb_example_sources()`.
 
-### Example 1: a single data file
+#### Example 1: a single data file
 
 Say we've found [this bathymetric data set](https://doi.org/10.4225/25/53D9B12E0F96E) and we want to define a data source for it. It's a single zip file that contains some ArcGIS binary grids. A minimal data source definition might look like this:
 
@@ -172,9 +172,11 @@ src1 <- bb_source(
     data_group="Topography")
 ```
 
-### Example 2: multiple files via recursive download
+#### Example 2: multiple files via recursive download
 
 This data source (Australian Election 2016 House of Representatives data) is provided as one of the example data sources in `bb_example_sources()`, but let's look in a little more detail here.
+
+The primary entry point to this data set is an HTML index page, which links to a number of data files. In principle we could generate a list of all of these data files and download them one by one, but that would be tedious and prone to breaking (if the data files changed our hard-coded list would no longer be correct). Instead we can start at the HTML index and recursively download linked data files.
 
 The definition for this data source is:
 
@@ -209,7 +211,7 @@ Once again the data have been saved into a subdirectory that reflects the URL st
 
 You can immediately see that by using a recursive download, not only did we not need to individually specify all 50 of those data files, but if the data provider adds new files in the future the recursive download process will automatically find them (so long as they are linked from the top-level `source_url` document).
 
-### Example 3: an Earthdata source
+#### Example 3: an Earthdata source
 
 The [Earthdata system](https://earthdata.nasa.gov/) is one of NASA's data management systems and home to a vast range of Earth science data from satellites, aircraft, field measurements, and other sources. Say you had a rummage through their [data catalogue](https://search.earthdata.nasa.gov/) and found yourself wanting a copy of [Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS](http://doi.org/10.5067/EYICLBOAAJOU).
 
@@ -269,11 +271,11 @@ mysrc <- src3
 mysrc$user <- "theirusername"
 mysrc$password <- "theirpassword"
 
-## then the data source can be used as per usual
+## then proceed as per usual
 cf <- bb_add(cf,mysrc)
 ```
 
-### Example 4: an Oceandata source
+#### Example 4: an Oceandata source
 
 NASA's [Oceandata](https://oceandata.sci.gsfc.nasa.gov/) system provides access to a range of satellite-derived marine data products. The `bb_oceandata_handler` can be used to download these data. It uses a two-step process: first it makes a query to the Oceancolour data file search tool (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi) to find files that match your specified criterion, and then downloads the matching files.
 
@@ -306,7 +308,7 @@ Bowerbird hands off the complexities of recursive downloading to the `wget` util
 
 ### wget gotchas
 
-`wget` is a complicated beast with many command-line options and sometimes inconsistent behaviour. The handler functions (`bb_handler_wget`, `bb_handler_earthdata`, etc) interact with `wget` via the intermediate `bb_wget` function, which provides an R interface to `wget`. The arguments to this function (see `help("bb_wget")`) are almost all one-to-one mappings of `wget`'s own command-line parameters. You can find more information about `wget` via the [wget manual](https://www.gnu.org/software/wget/manual/wget.html) or one of the many online tutorials. You can also see the in-built wget help by running `bb_wget("--help")`.
+`wget` is a complicated beast with many command-line options and sometimes inconsistent behaviour. The handler functions (`bb_handler_wget`, `bb_handler_earthdata`, `bb_handler_oceandata`) interact with `wget` via the intermediate `bb_wget` function, which provides an R interface to `wget`. The arguments to this function (see `help("bb_wget")`) are almost all one-to-one mappings of `wget`'s own command-line parameters. You can find more information about `wget` via the [wget manual](https://www.gnu.org/software/wget/manual/wget.html) or one of the many online tutorials. You can also see the in-built wget help by running `bb_wget("--help")`.
 
 Remember that any `wget_global_flags` defined via `bb_config` will be applied to every data source in addition to their specific `method` flags.
 
@@ -323,7 +325,7 @@ Recursion is a powerful tool but will sometimes download much more than you real
 - `no_parent=TRUE` prevents `wget` from ascending to a parent directory during its recursion process, because if it did so it would likely be downloading files that are not part of the data set that we want (this is `TRUE` by default).
 
 
-#### wget tips and tricks, including resolving recursive download issues
+#### Other wget tips and tricks, including resolving recursive download issues
 
 Recursive download not working as expected, or other `wget` oddities?
 
@@ -332,13 +334,13 @@ Recursive download not working as expected, or other `wget` oddities?
 
 - as noted above, `no_parent=TRUE` by default. In some cases, though, you might want the recursion to ascend to a parent directory, and therefore need to override the default setting
 
-- a known limitation of `wget` is that it will NOT follow symbolic links to directories on the remote server! If your recursive download is not descending into directories when you think it should, this might be the cause
+- a known limitation of `wget` is that it will NOT follow symbolic links to directories on the remote server. If your recursive download is not descending into directories when you think it should, this might be the cause
 
 - `no_if_modified_since=TRUE` may be useful when downloading files that have changed since last download (i.e. using \code{bb_config(...,clobber=1)}). The default method for doing this is to issue an "If-Modified-Since" header on the request, which instructs the remote server not to return the file if it has not changed since the specified date. Some servers do not support this header. In these cases, trying using \code{no_if_modified_since=TRUE}, which will instead send a preliminary HEAD request to ascertain the date of the remote file
 
 - `no_check_certificate=TRUE` will allow a download from a secure server to proceed even if the server's certificate checks fail. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution
 
-- `adjust_extension`: if a file of type 'application/xhtml+xml' or 'text/html' is downloaded and the URL does not end with .htm or .html, setting `adjust_extension=TRUE` will cause the suffix '.html' to be appended to the local filename. This can be useful when mirroring a remote site that has file URLs that conflict with directories (e.g. http://somewhere.org/this/page which has further content below it, say at http://somewhere.org/this/page/more. If "somewhere.org/this/page" is saved as a file with that name, that name can't also be used as the local directory name in which to store the lower-level content. Setting \code{adjust_extension=TRUE} will cause the page to be saved as "somewhere.org/this/page.html", thus resolving the conflict
+- `adjust_extension`: if a file of type 'application/xhtml+xml' or 'text/html' is downloaded and the URL does not end with .htm or .html, setting `adjust_extension=TRUE` will cause the suffix '.html' to be appended to the local filename. This can be useful when mirroring a remote site that has file URLs that conflict with directories. Say we are recursively downloading from http://somewhere.org/this/page, which has further content below it at http://somewhere.org/this/page/more. If "somewhere.org/this/page" is saved as a file with that name, that name can't also be used as the local directory name in which to store the lower-level content. Setting \code{adjust_extension=TRUE} will cause the page to be saved as "somewhere.org/this/page.html", thus resolving the conflict
 
 - setting `wait` will cause `wget` to pause for this number of seconds between successive retrievals. This option may help with servers that block multiple successive requests, by introducing a delay between requests
 
@@ -419,7 +421,9 @@ The `bb_handler_wget` R function provides a wrapper around `wget` that should be
 
 ## Data source summary
 
-These are the example data source definitions that are provided as part of the bowerbird package.
+The `bb_summary` function will produce a HTML or Rmarkdown summary of the data sources contained in a configuration object. If you are maintaining a data collection on behalf of other users, or even just for yourself, it may be useful to keep an up-to-date HTML summary of your repository in an accessible location. Users can refer to this summary to see which data are in the repository and some details about them.
+
+Here is a `bb_summary` of the example data source definitions that are provided as part of the bowerbird package:
 
 ```{r echo=FALSE,message=FALSE,warning=FALSE,results="asis"}
 devtools::load_all()##library(bowerbird)

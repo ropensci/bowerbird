@@ -1,5 +1,7 @@
 #' Fingerprint the files associated with a data source
 #'
+#' The \code{bb_fingerprint} function, given a data repository configuration, will return the timestamp of download and hashes of all files associated with its data sources. This is intended as a general helper for tracking data provenance: for all of these files, we have information on where they came from (the data source ID), when they were downloaded, and a hash so that later versions of those files can be compared to detect changes. See also \code{vignette("data_provenance")}.
+#'
 #' @param config bb_config: configuration as returned by \code{\link{bb_config}}
 #' @param hash string: algorithm to use to calculate file hashes: "md5", "sha1", or "none". Note that file hashing can be slow for large file collections
 #'
@@ -11,6 +13,7 @@
 #'   bb_fingerprint(cf)
 #' }
 #'
+#' @seealso \code{vignette("data_provenance")}
 #' @export
 bb_fingerprint <- function(config,hash="sha1") {
     assert_that(is(config,"bb_config"))
