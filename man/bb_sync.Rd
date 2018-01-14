@@ -9,15 +9,18 @@ bb_sync(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE)
 \arguments{
 \item{config}{bb_config: configuration as returned by \code{\link{bb_config}}}
 
-\item{create_root}{logical: should the data root directory be created if it does not exist?}
+\item{create_root}{logical: should the data root directory be created if it does not exist? If this is \code{FALSE} (default) and the data root directory does not exist, an error will be generated}
 
-\item{verbose}{logical: if TRUE, provide additional progress output}
+\item{verbose}{logical: if \code{TRUE}, provide additional progress output}
 
-\item{catch_errors}{logical: if TRUE, catch errors and continue the synchronisation process}
+\item{catch_errors}{logical: if \code{TRUE}, catch errors and continue the synchronisation process. The sync process works through data sources sequentially, and so if \code{catch_errors} is \code{FALSE}, then an error during the synchronisation of one data source will prevent all subsequent data sources from synchronising}
 }
 \value{
-a tibble with the name, id, source_url, and sync success status of each data source (multiple source_urls within a data source will appear in separate rows)
+a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}
 }
 \description{
-For sync purposes, each row in the config's data_sources table is expanded on source_url, so that there is one row per unique data_source/source_url combination. Hence the returned tibble from \code{bb_sync} may have more rows than \code{bb_data_sources(config)}.
+This function takes a bowerbird configuration object and synchronizes each of the data sources defined within it. Data will be downloaded if they are not present on the local machine, or if the configuration has been set to update local files.
+}
+\details{
+Note that when \code{bb_sync} is run, the \code{local_file_root} directory must exist or \code{create_root=TRUE} must be specified (i.e. \code{bb_sync(...,create_root=TRUE)}). If \code{create_root=FALSE} and the directory does not exist, \code{bb_sync} will fail with an error.
 }
