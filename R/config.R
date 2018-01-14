@@ -158,6 +158,10 @@ allowed_settings <- function() c("wget_global_flags","http_proxy","ftp_proxy","l
 
 #' Gets or sets a bowerbird configuration object's data sources
 #'
+#' Gets or sets the data sources contained in a bowerbird configuration object.
+#'
+#' Note that an assignment along the lines of \code{bb_data_sources(cf) <- new_sources} replaces all of the sources in the configuration with the \code{new_sources}. If you wish to modify the existing sources then read them, modify as needed, and then rewrite the whole lot back into the configuration object.
+#'
 #' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
 #' @param value data.frame: new data sources to set (e.g. as returned by \code{bb_example_sources}
 #'
@@ -166,9 +170,17 @@ allowed_settings <- function() c("wget_global_flags","http_proxy","ftp_proxy","l
 #' @seealso \code{\link{bb_config}}
 #'
 #' @examples
+#' ## create a configuration and add data sources
 #' cf <- bb_config(local_file_root="/your/data/directory")
 #' cf <- bb_add(cf,bb_example_sources())
+#'
+#' ## examine the sources contained in cf
 #' bb_data_sources(cf)
+#'
+#' ## replace the sources with different ones
+#' \dontrun{
+#' bb_data_sources(cf) <- new_sources
+#' }
 #'
 #' @export
 bb_data_sources <- function(config) {
@@ -203,18 +215,16 @@ bb_settings_to_cols <- function(obj) {
 
 #' Return the local directory of each data source in a configuration
 #'
-#' Files from each data source are stored locally in the associated directory.
+#'  Return the local directory of each data source in a configuration. Files from each data source are stored locally in the associated directory.
 #'
 #' @param config bb_config: configuration as returned by \code{\link{bb_config}}
 #'
 #' @return character vector of directories
 #'
 #' @examples
-#' \dontrun{
-#'   cf <- bb_config("/my/file/root") %>%
-#'     bb_add(bb_example_sources())
-#'   bb_data_source_dir(cf)
-#' }
+#' cf <- bb_config("/my/file/root") %>%
+#'   bb_add(bb_example_sources())
+#' bb_data_source_dir(cf)
 #'
 #' @export
 bb_data_source_dir <- function(config) {
@@ -232,7 +242,9 @@ bb_data_source_dir <- function(config) {
 }
 
 
-#' Produce summary of bowerbird configuration
+#' Produce a summary of a bowerbird configuration
+#'
+#' This function produces a summary of a bowerbird configuation in HTML or Rmarkdown format. If you are maintaining a data collection on behalf of other users, or even just for yourself, it may be useful to keep an up-to-date HTML summary of your repository in an accessible location. Users can refer to this summary to see which data are in the repository and some details about them.
 #'
 #' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
 #' @param file string: path to file to write summary to. A temporary file is used by default

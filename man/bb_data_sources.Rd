@@ -18,12 +18,23 @@ bb_data_sources(config) <- value
 tibble
 }
 \description{
-Gets or sets a bowerbird configuration object's data sources
+Gets or sets the data sources contained in a bowerbird configuration object.
+}
+\details{
+Note that an assignment along the lines of \code{bb_data_sources(cf) <- new_sources} replaces all of the sources in the configuration with the \code{new_sources}. If you wish to modify the existing sources then read them, modify as needed, and then rewrite the whole lot back into the configuration object.
 }
 \examples{
+## create a configuration and add data sources
 cf <- bb_config(local_file_root="/your/data/directory")
 cf <- bb_add(cf,bb_example_sources())
+
+## examine the sources contained in cf
 bb_data_sources(cf)
+
+## replace the sources with different ones
+\dontrun{
+bb_data_sources(cf) <- new_sources
+}
 
 }
 \seealso{

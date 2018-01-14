@@ -2,7 +2,7 @@
 % Please edit documentation in R/config.R
 \name{bb_summary}
 \alias{bb_summary}
-\title{Produce summary of bowerbird configuration}
+\title{Produce a summary of a bowerbird configuration}
 \usage{
 bb_summary(config, file = tempfile(fileext = ".html"), format = "html",
   inc_license = TRUE, inc_auth = TRUE, inc_size = TRUE,
@@ -29,7 +29,7 @@ bb_summary(config, file = tempfile(fileext = ".html"), format = "html",
 path to the summary file in HTML or Rmarkdown format
 }
 \description{
-Produce summary of bowerbird configuration
+This function produces a summary of a bowerbird configuation in HTML or Rmarkdown format. If you are maintaining a data collection on behalf of other users, or even just for yourself, it may be useful to keep an up-to-date HTML summary of your repository in an accessible location. Users can refer to this summary to see which data are in the repository and some details about them.
 }
 \examples{
 \dontrun{
