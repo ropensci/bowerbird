@@ -19,7 +19,7 @@ bb_sync(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE)
 a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}
 }
 \description{
-This function takes a bowerbird configuration object and synchronizes each of the data sources defined within it. Data will be downloaded if they are not present on the local machine, or if the configuration has been set to update local files.
+This function takes a bowerbird configuration object and synchronizes each of the data sources defined within it. Data files will be downloaded if they are not present on the local machine, or if the configuration has been set to update local files.
 }
 \details{
 Note that when \code{bb_sync} is run, the \code{local_file_root} directory must exist or \code{create_root=TRUE} must be specified (i.e. \code{bb_sync(...,create_root=TRUE)}). If \code{create_root=FALSE} and the directory does not exist, \code{bb_sync} will fail with an error.
