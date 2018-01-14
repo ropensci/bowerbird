@@ -154,6 +154,7 @@ For the benefit of other users, we might also add the `description`, `collection
 - `description` provides a plain-language description of the data set, so that users can get an idea of what it contains (for full details they can consult the `doc_url` link that you already provided)
 - `collection_size` is the approximate disk space (in GB) used by the data collection. Some collections are very large! This parameter obviously gives an indication of the storage space required, but also the download size (noting though that some data sources deliver compressed files, so the download size might be much smaller)
 - `data_group` is a descriptive or thematic group name that this data set belongs to. This can also help users find data sources of interest to them
+- `access_function` can be used to suggest to users an appropriate function to read these data files. In this case the files can be read by the `raster` function (from the `raster` package).
 
 So our full data source definition now looks like:
 
@@ -169,6 +170,7 @@ src1 <- bb_source(
     method=list("bb_handler_wget"),
     postprocess=list("bb_unzip"),
     collection_size=0.4,
+	access_function="raster::raster",
     data_group="Topography")
 ```
 

@@ -332,7 +332,7 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
         if (inc_path) cat("\nLocal file system paths: ",temp,"\n",file=rmd_file,append=TRUE,sep="")
         if (inc_access_function) {
             thisfun <- config$access_function[k]
-            if (is.null(thisfun) || is.na(thisfun) || !nzchar(thisfun)) { thisfun <- "none registered" }
+            if (is.null(thisfun) || is.na(thisfun) || !nzchar(thisfun)) { thisfun <- "none suggested" }
             cat("\nAssociated access functions: ",thisfun,"\n",file=rmd_file,append=TRUE)
         }
     }

@@ -21,7 +21,7 @@
 #' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
 #' @param user string: username, if required
 #' @param password string: password, if required
-#' @param access_function string: name of the R function that can be used to read these data
+#' @param access_function string: can be used to suggest to users an appropriate function to read these data files. Provide the name of an R function or even a code snippet
 #' @param data_group string: the name of the group to which this data source belongs. Useful for arranging sources in terms of thematic areas
 #' @param collection_size numeric: approximate disk space (in GB) used by the data collection, if known. If the data are supplied as compressed files, this size should reflect the disk space used after decompression. If the data_source definition contains multiple source_url entries, this size should reflect the overall disk space used by all combined
 #' @param warn_empty_auth logical: if \code{TRUE}, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided. Set this to \code{FALSE} if you are defining a data source for others to use with their own credentials: they will typically call your data source constructor and then modify the \code{user} and \code{password} components

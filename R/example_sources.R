@@ -39,7 +39,7 @@ bb_example_sources <- function() {
             license="Please cite",
             method=list("bb_handler_wget",recursive=TRUE,level=1),
             postprocess=NULL,
-            access_function="readsst",
+            access_function="raster::raster",
             collection_size=0.9,
             data_group="Sea surface temperature"),
         bb_source(
@@ -66,7 +66,7 @@ bb_example_sources <- function() {
             authentication_note="Copernicus Marine login required, see http://marine.copernicus.eu/services-portfolio/register-now/",
             user="",
             password="",
-            access_function="readssh",
+            access_function="raster::raster",
             collection_size=310,
             data_group="Altimetry",warn_empty_auth=FALSE),
         bb_source(
