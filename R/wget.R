@@ -2,7 +2,7 @@
 #'
 #' This is a general handler function that is suitable for a range of data sets. This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
 #'
-#' This handler function makes calls to the \code{wget} utility via the \code{\link{bb_wget}} function. All arguments provided here are passed through to \code{\link{bb_wget}}.
+#' This handler function makes calls to the \code{wget} utility via the \code{\link{bb_wget}} function. Arguments provided to \code{bb_handler_wget} are passed through to \code{\link{bb_wget}}.
 #'
 #' @param ... : parameters passed to \code{\link{bb_wget}}
 #'
@@ -109,11 +109,11 @@ bb_handler_wget_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,...)
 
 #' Make a wget call
 #'
-#' This function is an R wrapper to the command-line \code{wget} utility, which is called using either the \code{exec_wait} or the \code{exec_internal} function from the sys package. Almost all of the parameters to \code{bb_wget} are translated into command-line flags to \code{wget}. Call \code{bb_wget("help")} to get more information about wget's command line flags. Command-line flags without equivalent \code{bb_wget} function parameters can be passed via the \code{extra_flags} parameter.
+#' This function is an R wrapper to the command-line \code{wget} utility, which is called using either the \code{exec_wait} or the \code{exec_internal} function from the sys package. Almost all of the parameters to \code{bb_wget} are translated into command-line flags to \code{wget}. Call \code{bb_wget("help")} to get more information about wget's command line flags. If required, command-line flags without equivalent \code{bb_wget} function parameters can be passed via the \code{extra_flags} parameter.
 #'
 #' @param url string: the URL to retrieve
 #' @param recursive logical: if true, turn on recursive retrieving
-#' @param level integer >=0: recursively download to this maximum depth level. Only applicable if \code{recursive} is TRUE. Specify 0 for infinite recursion. See \url{https://www.gnu.org/software/wget/manual/wget.html#Recursive-Download} for more information about wget's recursive downloading
+#' @param level integer >=0: recursively download to this maximum depth level. Only applicable if \code{recursive=TRUE}. Specify 0 for infinite recursion. See \url{https://www.gnu.org/software/wget/manual/wget.html#Recursive-Download} for more information about wget's recursive downloading
 #' @param wait numeric >=0: wait this number of seconds between successive retrievals. This option may help with servers that block multiple successive requests, by introducing a delay between requests
 #' @param accept character: character vector with one or more entries. Each entry specifies a comma-separated list of filename suffixes or patterns to accept. Note that if any of the wildcard characters '*', '?', '[', or ']' appear in an element of accept, it will be treated as a filename pattern, rather than a filename suffix. In this case, you have to enclose the pattern in quotes, for example \code{accept="\"*.csv\""}
 #' @param accept_regex character: character vector with one or more entries. Each entry provides a regular expression that is applied to the complete URL. Matching URLs will be accepted for download
@@ -125,20 +125,20 @@ bb_handler_wget_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,...)
 #' @param user string: username used to authenticate to the remote server
 #' @param password string: password used to authenticate to the remote server
 #' @param output_file string: save wget's output messages to this file
-#' @param robots_off logical: by default wget considers itself to be a robot, and therefore won't recurse into areas of a site that are excluded to robots. This can cause problems with servers that exclude robots (accidentally or deliberately) from parts of their sites containing data that we want to retrieve. Setting \code{robots_off} to TRUE will add a "-e robots=off" flag, which instructs wget to behave as a human user, not a robot. See \url{https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion
-#' @param timestamping logical: if TRUE, don't re-retrieve a remote file unless it is newer than the local copy (or there is no local copy)
+#' @param robots_off logical: by default wget considers itself to be a robot, and therefore won't recurse into areas of a site that are excluded to robots. This can cause problems with servers that exclude robots (accidentally or deliberately) from parts of their sites containing data that we want to retrieve. Setting \code{robots_off=TRUE} will add a "-e robots=off" flag, which instructs wget to behave as a human user, not a robot. See \url{https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion
+#' @param timestamping logical: if \code{TRUE}, don't re-retrieve a remote file unless it is newer than the local copy (or there is no local copy)
 #' @param no_if_modified_since logical: applies when retrieving recursively with timestamping (i.e. only downloading files that have changed since last download, which is achieved using \code{bb_config(...,clobber=1)}). The default method for timestamping is to issue an "If-Modified-Since" header on the request, which instructs the remote server not to return the file if it has not changed since the specified date. Some servers do not support this header. In these cases, trying using \code{no_if_modified_since=TRUE}, which will instead send a preliminary HEAD request to ascertain the date of the remote file
-#' @param no_clobber logical: if TRUE, skip downloads that would overwrite existing local files
-#' @param no_parent logical: if TRUE, do not ever ascend to the parent directory when retrieving recursively. This is TRUE by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded
-#' @param no_check_certificate logical: if TRUE, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution
-#' @param relative logical: if TRUE, only follow relative links. This can sometimes be useful for restricting what is downloaded in recursive mode
+#' @param no_clobber logical: if \code{TRUE}, skip downloads that would overwrite existing local files
+#' @param no_parent logical: if \code{TRUE}, do not ever ascend to the parent directory when retrieving recursively. This is \code{TRUE} by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded
+#' @param no_check_certificate logical: if \code{TRUE}, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution
+#' @param relative logical: if \code{TRUE}, only follow relative links. This can sometimes be useful for restricting what is downloaded in recursive mode
 #' @param adjust_extension logical: if a file of type 'application/xhtml+xml' or 'text/html' is downloaded and the URL does not end with .htm or .html, this option will cause the suffix '.html' to be appended to the local filename. This can be useful when mirroring a remote site that has file URLs that conflict with directories (e.g. http://somewhere.org/this/page which has further content below it, say at http://somewhere.org/this/page/more. If "somewhere.org/this/page" is saved as a file with that name, that name can't also be used as the local directory name in which to store the lower-level content. Setting \code{adjust_extension=TRUE} will cause the page to be saved as "somewhere.org/this/page.html", thus resolving the conflict
-#' @param retr_symlinks logical: if TRUE, follow symbolic links during recursive download. Note that this will only follow symlinks to files, NOT to directories
+#' @param retr_symlinks logical: if \code{TRUE}, follow symbolic links during recursive download. Note that this will only follow symlinks to files, NOT to directories
 #' @param extra_flags character: character vector of additional command-line flags to pass to wget
 #' @param verbose logical: print trace output?
-#' @param capture_stdout logical: if TRUE, return 'stdout' and 'stderr' output in the returned object (see exec_internal from the sys package). Otherwise send these outputs to the console
-#' @param quiet logical: if TRUE, suppress wget's output
-#' @param debug logical: if TRUE, wget will print lots of debugging information. If wget is not behaving as expected, try setting this to TRUE
+#' @param capture_stdout logical: if \code{TRUE}, return 'stdout' and 'stderr' output in the returned object (see exec_internal from the sys package). Otherwise send these outputs to the console
+#' @param quiet logical: if \code{TRUE}, suppress wget's output
+#' @param debug logical: if \code{TRUE}, wget will print lots of debugging information. If wget is not behaving as expected, try setting this to \code{TRUE}
 #'
 #' @return the result of the system call (or if \code{bb_wget("--help")} was called, a message will be issued). The returned object will have components 'status' and (if \code{capture_stdout} was \code{TRUE}) 'stdout' and 'stderr'
 #'
@@ -241,11 +241,12 @@ bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex
 }
 
 
-#' Helper function to install wget
+#' Install wget
 #'
-#' Currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+#' This is a helper function to install wget. Currently it only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
 #'
 #' @references https://eternallybored.org/misc/wget/current/wget.exe
+#' @param force logical: force reinstallation if wget already exists
 #'
 #' @return the path to the installed executable
 #'
@@ -257,9 +258,25 @@ bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex
 #' @seealso \code{\link{bb_find_wget}}
 #'
 #' @export
-bb_install_wget <- function() {
-    if (get_os()!="windows")
-        stop("bb_install_wget only supports windows platforms")
+bb_install_wget <- function(force=FALSE) {
+    assert_that(is.flag(force))
+    if (!force) {
+        existing_wget <- bb_find_wget(install=FALSE,error=FALSE)
+        if (!is.null(existing_wget)) {
+            message("wget already exists and force is FALSE, not reinstalling")
+            return(existing_wget)
+        }
+    }
+    my_os <- get_os()
+    if (my_os!="windows") {
+        errmsg <- paste0("bb_install_wget only supports windows platforms.\n You will need to install wget yourself and ensure that it is on the system path.",
+                         switch(my_os,
+                                "osx"="\n On OSX use \"brew install wget\" or \"brew install --with-libressl wget\" if you get SSL-related errors.\n If you do not have brew installed, see https://brew.sh/ (note: you will need admin privileges to install brew).",
+                                "unix"=,
+                                "linux"="\n On Linux use e.g. \"sudo apt install wget\" on Debian/Ubuntu, or \"sudo yum install wget\" on Fedora/CentOS.\n Note: you will need admin privileges for this.",
+                                ""))
+        stop(errmsg)
+    }
     ## NOTE, could also use e.g. https://github.com/r-lib/rappdirs to find this directory
     path <- Sys.getenv("APPDATA")
     if (dir_exists(path)) {
@@ -272,23 +289,23 @@ bb_install_wget <- function() {
         if (!err) {
             file.path(path,"wget.exe")
         } else {
-            stop("Sorry, could not install wget")
+            stop("Sorry, wget install failed.\n You will need to install wget yourself and ensure that it is on the system path.")
         }
     } else {
-        stop("Sorry, could not find the user APPDATA directory to install wget into")
+        stop("Sorry, wget install failed (could not find the user APPDATA directory to install into).\n You will need to install wget yourself and ensure that it is on the system path.")
     }
 }
 
-#' Find the wget executable, and optionally install it if it is not found
+#' Find the wget executable
 #'
-#' Installation (if required) currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+#' This function will return the path to the wget executable if it can be found on the local system, and optionally install it if it is not found. Installation (if required) currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
 #'
 #' @references https://eternallybored.org/misc/wget/current/wget.exe
 #'
 #' @param install logical: attempt to install the executable if it is not found? (Windows only)
-#' @param error logical: if wget is not found, raise an error if wget is not found. If FALSE, do not raise an error but return NULL
+#' @param error logical: if wget is not found, raise an error. If \code{FALSE}, do not raise an error but return NULL
 #'
-#' @return the path to the wget executable, or (if error is FALSE) NULL if it was not found
+#' @return the path to the wget executable, or (if error is \code{FALSE}) NULL if it was not found
 #'
 #' @examples
 #' \dontrun{
@@ -320,10 +337,10 @@ bb_find_wget <- function(install=FALSE,error=TRUE) {
     } else {
         bb_opts <- list()
     }
-    my_os <- get_os()
     if (wget_test("wget")) {
         myexe <- unname(Sys.which("wget"))
     } else {
+        my_os <- get_os()
         if (my_os=="windows") {
             myexe <- file.path(Sys.getenv("APPDATA"),"bowerbird","wget.exe")
             if (!wget_test(myexe)) {
@@ -433,6 +450,7 @@ flags_to_charvec <- function(fl) {
     }
 }
 
+## internal: turn a wget exit code into a meaningful message
 decode_wget_exit_status <- function(status) {
     ## see https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
     out <- "unknown status code"

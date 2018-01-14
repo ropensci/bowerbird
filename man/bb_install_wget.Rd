@@ -2,15 +2,18 @@
 % Please edit documentation in R/wget.R
 \name{bb_install_wget}
 \alias{bb_install_wget}
-\title{Helper function to install wget}
+\title{Install wget}
 \usage{
-bb_install_wget()
+bb_install_wget(force = FALSE)
+}
+\arguments{
+\item{force}{logical: force reinstallation if wget already exists}
 }
 \value{
 the path to the installed executable
 }
 \description{
-Currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+This is a helper function to install wget. Currently it only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
 }
 \examples{
 \dontrun{

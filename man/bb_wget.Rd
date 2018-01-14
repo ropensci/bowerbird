@@ -18,7 +18,7 @@ bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
 
 \item{recursive}{logical: if true, turn on recursive retrieving}
 
-\item{level}{integer >=0: recursively download to this maximum depth level. Only applicable if \code{recursive} is TRUE. Specify 0 for infinite recursion. See \url{https://www.gnu.org/software/wget/manual/wget.html#Recursive-Download} for more information about wget's recursive downloading}
+\item{level}{integer >=0: recursively download to this maximum depth level. Only applicable if \code{recursive=TRUE}. Specify 0 for infinite recursion. See \url{https://www.gnu.org/software/wget/manual/wget.html#Recursive-Download} for more information about wget's recursive downloading}
 
 \item{wait}{numeric >=0: wait this number of seconds between successive retrievals. This option may help with servers that block multiple successive requests, by introducing a delay between requests}
 
@@ -42,39 +42,39 @@ bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
 
 \item{output_file}{string: save wget's output messages to this file}
 
-\item{robots_off}{logical: by default wget considers itself to be a robot, and therefore won't recurse into areas of a site that are excluded to robots. This can cause problems with servers that exclude robots (accidentally or deliberately) from parts of their sites containing data that we want to retrieve. Setting \code{robots_off} to TRUE will add a "-e robots=off" flag, which instructs wget to behave as a human user, not a robot. See \url{https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion}
+\item{robots_off}{logical: by default wget considers itself to be a robot, and therefore won't recurse into areas of a site that are excluded to robots. This can cause problems with servers that exclude robots (accidentally or deliberately) from parts of their sites containing data that we want to retrieve. Setting \code{robots_off=TRUE} will add a "-e robots=off" flag, which instructs wget to behave as a human user, not a robot. See \url{https://www.gnu.org/software/wget/manual/wget.html#Robot-Exclusion} for more information about robot exclusion}
 
-\item{timestamping}{logical: if TRUE, don't re-retrieve a remote file unless it is newer than the local copy (or there is no local copy)}
+\item{timestamping}{logical: if \code{TRUE}, don't re-retrieve a remote file unless it is newer than the local copy (or there is no local copy)}
 
 \item{no_if_modified_since}{logical: applies when retrieving recursively with timestamping (i.e. only downloading files that have changed since last download, which is achieved using \code{bb_config(...,clobber=1)}). The default method for timestamping is to issue an "If-Modified-Since" header on the request, which instructs the remote server not to return the file if it has not changed since the specified date. Some servers do not support this header. In these cases, trying using \code{no_if_modified_since=TRUE}, which will instead send a preliminary HEAD request to ascertain the date of the remote file}
 
-\item{no_clobber}{logical: if TRUE, skip downloads that would overwrite existing local files}
+\item{no_clobber}{logical: if \code{TRUE}, skip downloads that would overwrite existing local files}
 
-\item{no_parent}{logical: if TRUE, do not ever ascend to the parent directory when retrieving recursively. This is TRUE by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded}
+\item{no_parent}{logical: if \code{TRUE}, do not ever ascend to the parent directory when retrieving recursively. This is \code{TRUE} by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded}
 
-\item{no_check_certificate}{logical: if TRUE, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution}
+\item{no_check_certificate}{logical: if \code{TRUE}, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution}
 
-\item{relative}{logical: if TRUE, only follow relative links. This can sometimes be useful for restricting what is downloaded in recursive mode}
+\item{relative}{logical: if \code{TRUE}, only follow relative links. This can sometimes be useful for restricting what is downloaded in recursive mode}
 
 \item{adjust_extension}{logical: if a file of type 'application/xhtml+xml' or 'text/html' is downloaded and the URL does not end with .htm or .html, this option will cause the suffix '.html' to be appended to the local filename. This can be useful when mirroring a remote site that has file URLs that conflict with directories (e.g. http://somewhere.org/this/page which has further content below it, say at http://somewhere.org/this/page/more. If "somewhere.org/this/page" is saved as a file with that name, that name can't also be used as the local directory name in which to store the lower-level content. Setting \code{adjust_extension=TRUE} will cause the page to be saved as "somewhere.org/this/page.html", thus resolving the conflict}
 
-\item{retr_symlinks}{logical: if TRUE, follow symbolic links during recursive download. Note that this will only follow symlinks to files, NOT to directories}
+\item{retr_symlinks}{logical: if \code{TRUE}, follow symbolic links during recursive download. Note that this will only follow symlinks to files, NOT to directories}
 
 \item{extra_flags}{character: character vector of additional command-line flags to pass to wget}
 
 \item{verbose}{logical: print trace output?}
 
-\item{capture_stdout}{logical: if TRUE, return 'stdout' and 'stderr' output in the returned object (see exec_internal from the sys package). Otherwise send these outputs to the console}
+\item{capture_stdout}{logical: if \code{TRUE}, return 'stdout' and 'stderr' output in the returned object (see exec_internal from the sys package). Otherwise send these outputs to the console}
 
-\item{quiet}{logical: if TRUE, suppress wget's output}
+\item{quiet}{logical: if \code{TRUE}, suppress wget's output}
 
-\item{debug}{logical: if TRUE, wget will print lots of debugging information. If wget is not behaving as expected, try setting this to TRUE}
+\item{debug}{logical: if \code{TRUE}, wget will print lots of debugging information. If wget is not behaving as expected, try setting this to \code{TRUE}}
 }
 \value{
 the result of the system call (or if \code{bb_wget("--help")} was called, a message will be issued). The returned object will have components 'status' and (if \code{capture_stdout} was \code{TRUE}) 'stdout' and 'stderr'
 }
 \description{
-This function is an R wrapper to the command-line \code{wget} utility, which is called using either the \code{exec_wait} or the \code{exec_internal} function from the sys package. Almost all of the parameters to \code{bb_wget} are translated into command-line flags to \code{wget}. Call \code{bb_wget("help")} to get more information about wget's command line flags. Command-line flags without equivalent \code{bb_wget} function parameters can be passed via the \code{extra_flags} parameter.
+This function is an R wrapper to the command-line \code{wget} utility, which is called using either the \code{exec_wait} or the \code{exec_internal} function from the sys package. Almost all of the parameters to \code{bb_wget} are translated into command-line flags to \code{wget}. Call \code{bb_wget("help")} to get more information about wget's command line flags. If required, command-line flags without equivalent \code{bb_wget} function parameters can be passed via the \code{extra_flags} parameter.
 }
 \examples{
 \dontrun{
