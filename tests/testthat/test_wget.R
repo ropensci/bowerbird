@@ -2,7 +2,7 @@ context("wget stuff")
 
 test_that("wget_install works and bb_find_wget finds something", {
     if (.Platform$OS.type!="windows") {
-        expect_error(bb_install_wget(),"only supports windows platforms") ## only supported for Windows platforms
+        expect_error(bb_install_wget(force=TRUE),"only supports windows platforms") ## only supported for Windows platforms (use force=TRUE in case test platform already has wget)
         expect_true(is.string(bb_find_wget())) ## should still be able to find system-installed wget
     } else {
         wge <- bb_install_wget()
