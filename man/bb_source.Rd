@@ -38,7 +38,7 @@ bb_source(id, name, description = NA_character_, doc_url, source_url,
 
 \item{password}{string: password, if required}
 
-\item{access_function}{string: name of the R function that can be used to read these data}
+\item{access_function}{string: can be used to suggest to users an appropriate function to read these data files. Provide the name of an R function or even a code snippet}
 
 \item{data_group}{string: the name of the group to which this data source belongs. Useful for arranging sources in terms of thematic areas}
 
