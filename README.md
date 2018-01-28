@@ -66,7 +66,7 @@ my_source <- subset(bb_example_sources(),id=="aus-election-house-2016")
 cf <- bb_add(cf,my_source)
 ```
 
-Once the configuration has been defined and the data source added to it, we can run the sync process. We set `verbose=TRUE` so that we see additional progress output:
+Once the configuration has been defined and the data source added to it, we can run the sync process. We set `verbose=TRUE` here so that we see additional progress output:
 
 ``` r
 status <- bb_sync(cf,verbose=TRUE)
