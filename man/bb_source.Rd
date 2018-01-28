@@ -16,7 +16,7 @@ bb_source(id, name, description = NA_character_, doc_url, source_url,
 
 \item{name}{string: (required) a unique name for the data source. This should be a human-readable but still concise name}
 
-\item{description}{string: a plain-language description of the data source, providedso that users can get an idea of what the data source contains (for full details they can consult the \code{doc_url} link)}
+\item{description}{string: a plain-language description of the data source, provided so that users can get an idea of what the data source contains (for full details they can consult the \code{doc_url} link)}
 
 \item{doc_url}{string: (required) URL to the metadata record or other documentation of the data source}
 
