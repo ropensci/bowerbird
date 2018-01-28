@@ -162,12 +162,12 @@ allowed_settings <- function() c("wget_global_flags","http_proxy","ftp_proxy","l
 #'
 #' Note that an assignment along the lines of \code{bb_data_sources(cf) <- new_sources} replaces all of the sources in the configuration with the \code{new_sources}. If you wish to modify the existing sources then read them, modify as needed, and then rewrite the whole lot back into the configuration object.
 #'
-#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config})
-#' @param value data.frame: new data sources to set (e.g. as returned by \code{bb_example_sources}
+#' @param config bb_config: a bowerbird configuration (as returned by \code{\link{bb_config}})
+#' @param value data.frame: new data sources to set (e.g. as returned by \code{\link{bb_example_sources}})
 #'
-#' @return tibble
+#' @return a tibble with columns as specified by \code{\link{bb_source}}
 #'
-#' @seealso \code{\link{bb_config}}
+#' @seealso \code{\link{bb_config}}, \code{\link{bb_source}}, \code{\link{bb_example_sources}}
 #'
 #' @examples
 #' ## create a configuration and add data sources

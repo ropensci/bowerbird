@@ -7,7 +7,7 @@
 bb_example_sources()
 }
 \value{
-tibble
+a tibble with columns as specified by \code{\link{bb_source}}
 }
 \description{
 These example sources are useful as data sources in their own right, but are primarily provided as demonstrations of how to define data sources. See also \code{vignette("bowerbird")} for further examples and discussion.

@@ -47,7 +47,7 @@ bb_source(id, name, description = NA_character_, doc_url, source_url,
 \item{warn_empty_auth}{logical: if \code{TRUE}, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided. Set this to \code{FALSE} if you are defining a data source for others to use with their own credentials: they will typically call your data source constructor and then modify the \code{user} and \code{password} components}
 }
 \value{
-tibble
+a tibble with columns as per the function arguments (excluding \code{warn_empty_auth})
 }
 \description{
 This function is used to define a data source, which can then be added to a bowerbird data repository configuration. Passing the configuration object to \code{bb_sync} will trigger a download of all of the data sources in that configuration.

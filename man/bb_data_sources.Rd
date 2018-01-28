@@ -10,12 +10,12 @@ bb_data_sources(config)
 bb_data_sources(config) <- value
 }
 \arguments{
-\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config})}
+\item{config}{bb_config: a bowerbird configuration (as returned by \code{\link{bb_config}})}
 
-\item{value}{data.frame: new data sources to set (e.g. as returned by \code{bb_example_sources}}
+\item{value}{data.frame: new data sources to set (e.g. as returned by \code{\link{bb_example_sources}})}
 }
 \value{
-tibble
+a tibble with columns as specified by \code{\link{bb_source}}
 }
 \description{
 Gets or sets the data sources contained in a bowerbird configuration object.
@@ -38,5 +38,5 @@ bb_data_sources(cf) <- new_sources
 
 }
 \seealso{
-\code{\link{bb_config}}
+\code{\link{bb_config}}, \code{\link{bb_source}}, \code{\link{bb_example_sources}}
 }

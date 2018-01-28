@@ -13,7 +13,7 @@
 #' }
 #' @references See the \code{doc_url} and \code{citation} field in each row of the returned tibble for references associated with these particular data sources
 #'
-#' @return tibble
+#' @return a tibble with columns as specified by \code{\link{bb_source}}
 #'
 #' @seealso \code{\link{bb_config}}, \code{\link{bb_handler_wget}}, \code{\link{bb_handler_oceandata}}, \code{\link{bb_handler_earthdata}}
 #'

@@ -26,7 +26,7 @@
 #' @param collection_size numeric: approximate disk space (in GB) used by the data collection, if known. If the data are supplied as compressed files, this size should reflect the disk space used after decompression. If the data_source definition contains multiple source_url entries, this size should reflect the overall disk space used by all combined
 #' @param warn_empty_auth logical: if \code{TRUE}, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided. Set this to \code{FALSE} if you are defining a data source for others to use with their own credentials: they will typically call your data source constructor and then modify the \code{user} and \code{password} components
 #'
-#' @return tibble
+#' @return a tibble with columns as per the function arguments (excluding \code{warn_empty_auth})
 #'
 #' @seealso \code{\link{bb_config}}, \code{\link{bb_sync}}, \code{vignette("bowerbird")}
 #'
