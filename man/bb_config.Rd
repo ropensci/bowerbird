@@ -45,5 +45,5 @@ Note that the \code{local_file_root} directory need not actually exist when the 
 
 }
 \seealso{
-\code{\link{bb_source}}
+\code{\link{bb_source}}, \code{\link{bb_sync}}
 }

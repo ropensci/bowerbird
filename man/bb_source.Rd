@@ -102,5 +102,5 @@ bb_sync(cf)
 
 }
 \seealso{
-\code{\link{bb_config}}, \code{vignette("bowerbird")}
+\code{\link{bb_config}}, \code{\link{bb_sync}}, \code{vignette("bowerbird")}
 }

@@ -28,7 +28,7 @@
 #'
 #' @return tibble
 #'
-#' @seealso \code{\link{bb_config}}, \code{vignette("bowerbird")}
+#' @seealso \code{\link{bb_config}}, \code{\link{bb_sync}}, \code{vignette("bowerbird")}
 #'
 #' @examples
 #'

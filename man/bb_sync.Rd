@@ -24,3 +24,6 @@ This function takes a bowerbird configuration object and synchronizes each of th
 \details{
 Note that when \code{bb_sync} is run, the \code{local_file_root} directory must exist or \code{create_root=TRUE} must be specified (i.e. \code{bb_sync(...,create_root=TRUE)}). If \code{create_root=FALSE} and the directory does not exist, \code{bb_sync} will fail with an error.
 }
+\seealso{
+\code{\link{bb_config}}, \code{\link{bb_source}}
+}

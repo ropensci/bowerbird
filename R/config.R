@@ -14,7 +14,7 @@
 #'
 #' @return configuration object
 #'
-#' @seealso \code{\link{bb_source}}
+#' @seealso \code{\link{bb_source}}, \code{\link{bb_sync}}
 #'
 #' @examples
 #' \dontrun{

@@ -11,6 +11,8 @@
 #'
 #' @return a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}
 #'
+#' @seealso \code{\link{bb_config}}, \code{\link{bb_source}}
+#'
 #' @export
 bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE) {
     ## general synchronization handler
