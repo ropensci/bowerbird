@@ -13,10 +13,10 @@
 #' @seealso \code{\link{bb_source}}, \code{\link{bb_config}}, \code{\link{bb_cleanup}}
 #' @examples
 #' \dontrun{
-#'   ## decompress .zip files after synchronisation but keep zip files intact
+#'   ## decompress .zip files after synchronization but keep zip files intact
 #'   my_source <- bb_source(...,postprocess=list("bb_unzip"))
 #'
-#'   ## decompress .zip files after synchronisation and delete zip files
+#'   ## decompress .zip files after synchronization and delete zip files
 #'   my_source <- bb_source(...,postprocess=list(list("bb_unzip",delete=TRUE)))
 #' }
 #'
@@ -30,8 +30,8 @@ bb_decompress <- function(method,delete=FALSE,...) {
 
 
 # @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
-# @param file_list_before data.frame: files present in the directory before synchronising, as returned by \code{file.info}. (This is not required if \code{delete} is TRUE)
-# @param file_list_after data.frame: files present in the directory after synchronising, as returned by \code{file.info}. (This is not required if \code{delete} is TRUE)
+# @param file_list_before data.frame: files present in the directory before synchronizing, as returned by \code{file.info}. (This is not required if \code{delete} is TRUE)
+# @param file_list_after data.frame: files present in the directory after synchronizing, as returned by \code{file.info}. (This is not required if \code{delete} is TRUE)
 # @param verbose logical: if TRUE, provide additional progress output
 # @param method string: one of "unzip","gunzip","bunzip2","decompress"
 # @param delete logical: delete the zip files after extracting their contents?
@@ -269,7 +269,7 @@ bb_uncompress <- function(...) bb_decompress(...,method="uncompress")
 #'
 #' @examples
 #' \dontrun{
-#'   ## remove .asc files after synchronisation
+#'   ## remove .asc files after synchronization
 #'   my_source <- bb_source(...,postprocess=list(list("bb_cleanup",pattern="\\.asc$")))
 #' }
 #'
@@ -283,8 +283,8 @@ bb_cleanup <- function(pattern,recursive=FALSE,ignore_case=FALSE,...) {
 
 
 # @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
-# @param file_list_before data.frame: files present in the directory before synchronising, as returned by \code{file.info}
-# @param file_list_after data.frame: files present in the directory after synchronising, as returned by \code{file.info}
+# @param file_list_before data.frame: files present in the directory before synchronizing, as returned by \code{file.info}
+# @param file_list_after data.frame: files present in the directory after synchronizing, as returned by \code{file.info}
 # @param verbose logical: if TRUE, provide additional progress output
 # @param pattern string: regular expression, passed to \code{file.info}
 # @param recursive logical: should the cleanup recurse into subdirectories?

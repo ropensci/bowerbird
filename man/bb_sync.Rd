@@ -2,7 +2,7 @@
 % Please edit documentation in R/sync.R
 \name{bb_sync}
 \alias{bb_sync}
-\title{Run a bowerbird data repository synchronisation}
+\title{Run a bowerbird data repository synchronization}
 \usage{
 bb_sync(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE)
 }
@@ -13,7 +13,7 @@ bb_sync(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE)
 
 \item{verbose}{logical: if \code{TRUE}, provide additional progress output}
 
-\item{catch_errors}{logical: if \code{TRUE}, catch errors and continue the synchronisation process. The sync process works through data sources sequentially, and so if \code{catch_errors} is \code{FALSE}, then an error during the synchronisation of one data source will prevent all subsequent data sources from synchronising}
+\item{catch_errors}{logical: if \code{TRUE}, catch errors and continue the synchronization process. The sync process works through data sources sequentially, and so if \code{catch_errors} is \code{FALSE}, then an error during the synchronization of one data source will prevent all subsequent data sources from synchronizing}
 }
 \value{
 a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}

@@ -1,4 +1,4 @@
-#' Run a bowerbird data repository synchronisation
+#' Run a bowerbird data repository synchronization
 #'
 #' This function takes a bowerbird configuration object and synchronizes each of the data sources defined within it. Data files will be downloaded if they are not present on the local machine, or if the configuration has been set to update local files.
 #'
@@ -7,7 +7,7 @@
 #' @param config bb_config: configuration as returned by \code{\link{bb_config}}
 #' @param create_root logical: should the data root directory be created if it does not exist? If this is \code{FALSE} (default) and the data root directory does not exist, an error will be generated
 #' @param verbose logical: if \code{TRUE}, provide additional progress output
-#' @param catch_errors logical: if \code{TRUE}, catch errors and continue the synchronisation process. The sync process works through data sources sequentially, and so if \code{catch_errors} is \code{FALSE}, then an error during the synchronisation of one data source will prevent all subsequent data sources from synchronising
+#' @param catch_errors logical: if \code{TRUE}, catch errors and continue the synchronization process. The sync process works through data sources sequentially, and so if \code{catch_errors} is \code{FALSE}, then an error during the synchronization of one data source will prevent all subsequent data sources from synchronizing
 #'
 #' @return a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}
 #'

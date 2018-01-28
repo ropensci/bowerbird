@@ -36,10 +36,10 @@ If the data source delivers compressed files, you will most likely want to decom
 }
 \examples{
 \dontrun{
-  ## decompress .zip files after synchronisation but keep zip files intact
+  ## decompress .zip files after synchronization but keep zip files intact
   my_source <- bb_source(...,postprocess=list("bb_unzip"))
 
-  ## decompress .zip files after synchronisation and delete zip files
+  ## decompress .zip files after synchronization and delete zip files
   my_source <- bb_source(...,postprocess=list(list("bb_unzip",delete=TRUE)))
 }
 

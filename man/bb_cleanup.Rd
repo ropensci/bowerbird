@@ -26,7 +26,7 @@ This function can be used to remove unwanted files after a data source has been 
 }
 \examples{
 \dontrun{
-  ## remove .asc files after synchronisation
+  ## remove .asc files after synchronization
   my_source <- bb_source(...,postprocess=list(list("bb_cleanup",pattern="\\\\.asc$")))
 }
 

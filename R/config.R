@@ -1,6 +1,6 @@
 #' Initialize a bowerbird configuration
 #'
-#' The configuration object controls the behaviour of the bowerbird synchronization process, run via \code{bb_sync(my_config)}. The configuration object defines the data sources that will be synchronized, where the data files from those sources will be stored, and a range of options controlling how the synchronisation process is conducted. The parameters provided here are repository-wide settings, and will affect all data sources that are subsequently added to the configuration.
+#' The configuration object controls the behaviour of the bowerbird synchronization process, run via \code{bb_sync(my_config)}. The configuration object defines the data sources that will be synchronized, where the data files from those sources will be stored, and a range of options controlling how the synchronization process is conducted. The parameters provided here are repository-wide settings, and will affect all data sources that are subsequently added to the configuration.
 #'
 #' Note that the \code{local_file_root} directory need not actually exist when the configuration object is created, but when \code{bb_sync} is run, either the directory must exist or \code{create_root=TRUE} must be passed (i.e. \code{bb_sync(...,create_root=TRUE)}).
 #'
@@ -9,7 +9,7 @@
 #' @param http_proxy string: URL of HTTP proxy to use e.g. 'http://your.proxy:8080' (NULL for no proxy)
 #' @param ftp_proxy string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)
 #' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)
-#' @param skip_downloads logical: if \code{TRUE}, \code{bb_sync} will do a dry run of the synchronisation process but without actually downloading files. For data sources using method bb_handler_wget, this means that the wget calls will not be executed, so e.g. any recursion handled by wget itself will not be simulated
+#' @param skip_downloads logical: if \code{TRUE}, \code{bb_sync} will do a dry run of the synchronization process but without actually downloading files. For data sources using method bb_handler_wget, this means that the wget calls will not be executed, so e.g. any recursion handled by wget itself will not be simulated
 #' @param warn_large_downloads numeric: if non-negative, \code{bb_sync} will ask the user for confirmation to download any data source of size greater than this number (in GB). A value of zero will trigger confirmation on every data source. A negative or NULL value will not prompt for confirmation. Note that this only applies when R is being used interactively. The expected download size is taken from the \code{collection_size} parameter of the data source, and so its accuracy is dependent on the accuracy of the data source definition
 #'
 #' @return configuration object

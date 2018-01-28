@@ -43,7 +43,7 @@ bb_handler_oceandata <- function(search,dtype,...) {
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,search,dtype=NULL) {
-    ## oceandata synchronisation handler
+    ## oceandata synchronization handler
 
     ## oceandata provides a file search interface, e.g.:
     ## wget -q --post-data="cksum=1&search=A2002*DAY_CHL_chlor*9km*" -O - https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi

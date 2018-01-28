@@ -28,7 +28,7 @@ bb_source(id, name, description = NA_character_, doc_url, source_url,
 
 \item{comment}{string: comments about the data source. If only part of the original data collection is mirrored, mention that here}
 
-\item{method}{list (required): a list object that defines the function used to synchronise this data source. The first element of the list is the function name (as a string or function). Additional list elements can be used to specify additional parameters to pass to that function. Note that \code{bb_sync} automatically passes the data repository configuration object as the first parameter to the method handler function. If the handler function uses wget (e.g. \code{bb_handler_wget}), these extra parameters are passed through to the \code{bb_wget} function}
+\item{method}{list (required): a list object that defines the function used to synchronize this data source. The first element of the list is the function name (as a string or function). Additional list elements can be used to specify additional parameters to pass to that function. Note that \code{bb_sync} automatically passes the data repository configuration object as the first parameter to the method handler function. If the handler function uses wget (e.g. \code{bb_handler_wget}), these extra parameters are passed through to the \code{bb_wget} function}
 
 \item{postprocess}{list: each element of \code{postprocess} defines a postprocessing step to be run after the main synchronization has happened. Each element of this list can be a function or string function name, or a list in the style of \code{list(fun,arg1=val1,arg2=val2)} where \code{fun} is the function to be called and \code{arg1} and \code{arg2} are additional parameters to pass to that function}
 
