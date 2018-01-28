@@ -5,7 +5,15 @@
 #' @param config bb_config: configuration as returned by \code{\link{bb_config}}
 #' @param hash string: algorithm to use to calculate file hashes: "md5", "sha1", or "none". Note that file hashing can be slow for large file collections
 #'
-#' @return tibble
+#' @return a tibble with columns:
+#' \itemize{
+#'   \item filename - the full path and filename of the file
+#'   \item data_source_id - the identifier of the associated data source (as per the \code{id} argument to \code{bb_source})
+#'   \item size - the file size
+#'   \item last_modified - last modified date of the file
+#'   \item hash - the hash of the file (unless \code{hash="none"} was specified)
+#' }
+#'
 #' @examples
 #' \dontrun{
 #'   cf <- bb_config("/my/file/root") %>%
@@ -47,7 +55,7 @@ do_fingerprint <- function(this_dataset,hash,settings) {
     myfiles <- list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE) ## full.names TRUE so that names are relative to current working directory
     file_list <- file.info(myfiles)
     ##file_list <- file_list %>% mutate_(filename=~myfiles,data_source_id=~this_dataset$id) %>% select_(~filename,~data_source_id,~size,~mtime) %>% rename_(last_modified=~mtime)
-    file_list$filename <- myfiles
+    file_list$filename <- file.path(this_dataset$local_file_root,myfiles) ## absolute paths
     file_list$data_source_id <- this_dataset$id
     file_list$last_modified <- file_list$mtime
     file_list <- file_list[,c("filename","data_source_id","size","last_modified")]
