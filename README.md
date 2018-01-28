@@ -53,7 +53,8 @@ Build up a configuration by first defining global options such as the destinatio
 
 ``` r
 library(bowerbird)
-cf <- bb_config(local_file_root="~/your/data/directory")
+my_directory <- "~/my/data/directory"
+cf <- bb_config(local_file_root=my_directory)
 ```
 
 Bowerbird must then be told which data sources to synchronize. Let's use data from the Australian 2016 federal election, which is provided as one of the example data sources:
@@ -65,13 +66,23 @@ my_source <- subset(bb_example_sources(),id=="aus-election-house-2016")
 cf <- bb_add(cf,my_source)
 ```
 
-Once the configuration has been defined and the data source added to it, run the sync process:
+Once the configuration has been defined and the data source added to it, we can run the sync process. We set `verbose=TRUE` so that we see additional progress output:
 
 ``` r
-status <- bb_sync(cf)
+status <- bb_sync(cf,verbose=TRUE)
 ```
 
-Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download.
+Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. The files in this data set have been stored in a data-source-specific subdirectory of our local file root:
+
+``` r
+bb_data_source_dir(cf)
+```
+
+The contents of that directory:
+
+``` r
+list.files(bb_data_source_dir(cf),recursive=TRUE,full.names=TRUE)
+```
 
 At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the `clobber` parameter set to 0 ("do not overwrite existing files") or 1 ("overwrite only if the remote file is newer than the local copy") then the sync process will run more quickly because it will not need to re-download any data files.
 

@@ -24,6 +24,45 @@ This function takes a bowerbird configuration object and synchronizes each of th
 \details{
 Note that when \code{bb_sync} is run, the \code{local_file_root} directory must exist or \code{create_root=TRUE} must be specified (i.e. \code{bb_sync(...,create_root=TRUE)}). If \code{create_root=FALSE} and the directory does not exist, \code{bb_sync} will fail with an error.
 }
+\examples{
+\dontrun{
+  ## Choose a location to store files on the local file system.
+  ## Normally this would be an explicit choice by the user, but here
+  ## we just use a temporary directory for example purposes.
+
+  td <- tempdir()
+  cf <- bb_config(local_file_root=td)
+
+  ## Bowerbird must then be told which data sources to synchronize.
+  ## Let's use data from the Australian 2016 federal election, which is provided as one
+  ## of the example data sources:
+
+  my_source <- subset(bb_example_sources(),id=="aus-election-house-2016")
+
+  ## Add this data source to the configuration:
+
+  cf <- bb_add(cf,my_source)
+
+  ## Once the configuration has been defined and the data source added to it,
+  ## we can run the sync process.
+  ## We set \\code{verbose=TRUE} so that we see additional progress output:
+
+  status <- bb_sync(cf,verbose=TRUE)
+
+  ## The files in this data set have been stored in a data-source specific
+  ## subdirectory of our local file root:
+  bb_data_source_dir(cf)
+
+  ## The contents of that directory:
+
+  list.files(bb_data_source_dir(cf),recursive=TRUE,full.names=TRUE)
+
+  ## We can run this at any later time and our repository will update if the source has changed:
+
+  status2 <- bb_sync(cf)
+}
+
+}
 \seealso{
 \code{\link{bb_config}}, \code{\link{bb_source}}
 }
