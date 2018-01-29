@@ -100,6 +100,17 @@ list.files(bb_data_source_dir(cf),recursive=TRUE,full.names=TRUE)
 
 At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the `clobber` parameter set to 0 ("do not overwrite existing files") or 1 ("overwrite only if the remote file is newer than the local copy") then the sync process will run more quickly because it will not need to re-download any data files.
 
+## Users: level of usage and expected knowledge
+
+Users can interact with bowerbird at several levels, with increasing levels of complexity:
+
+1. **Using bowerbird with data source definitions that have been written by someone else**. This is fairly straightforward. The trickiest part might be ensuring that `wget` is installed (particularly on Mac machines).
+
+1. **Writing your own data source definitions so that you can download data from a new data provider, but using an existing handler such as `bb_handler_wget`**. This is a little more complicated. You will need reasonable knowledge of how your data provider disseminates its files (including e.g. the source URL from which data files are to be downloaded, and how the data repository is structured). Be prepared to fiddle with `wget` settings to accommomdate provider-specific requirements (e.g. controlling recursion behaviour). The "Defining data sources" section below provides guidance and examples on writing data source definitions.
+
+1. **Writing your own handler function for data providers that do not play nicely with the packaged handlers (`bb_handler_wget`, `bb_handler_oceandata`, `bb_handler_earthdata`)**. This is the trickiest, and at the time of writing we have not provided much guidance on how to do this. See the "Writing new data source handlers" section, below.
+
+It is expected that the majority of users will fall into one of the first two categories.
 
 ## Defining data sources
 
