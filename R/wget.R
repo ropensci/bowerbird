@@ -74,10 +74,10 @@ bb_handler_wget_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,...)
         if (!"quiet" %in% names(this_flags)) this_flags <- c(this_flags,list(quiet=TRUE))
     }
 
-    if (!is.null(cfrow$skip_downloads) && cfrow$skip_downloads) {
+    if (!is.null(cfrow$dry_run) && cfrow$dry_run) {
         if (verbose) {
             temp <- vapply(seq_len(length(this_flags)),function(z)paste0(names(this_flags)[z],"=",this_flags[z]),FUN.VALUE="",USE.NAMES=FALSE)
-            cat(sprintf(" skip_downloads is TRUE, not executing: wget %s %s\n",paste(temp,collapse=" "),cfrow$source_url))
+            cat(sprintf(" dry_run is TRUE, not executing: wget %s %s\n",paste(temp,collapse=" "),cfrow$source_url))
         }
         ok <- TRUE
     } else {
@@ -263,8 +263,8 @@ bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex
 #'
 #' @export
 bb_install_wget <- function(force=FALSE,use_appdata_dir=FALSE) {
-    assert_that(is.flag(force))
-    assert_that(is.flag(use_appdata_dir))
+    assert_that(is.flag(force),!is.na(force))
+    assert_that(is.flag(use_appdata_dir),!is.na(use_appdata_dir))
     if (!force) {
         existing_wget <- bb_find_wget(install=FALSE,error=FALSE)
         if (!is.null(existing_wget)) {
