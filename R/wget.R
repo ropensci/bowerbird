@@ -243,23 +243,28 @@ bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex
 
 #' Install wget
 #'
-#' This is a helper function to install wget. Currently it only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+#' This is a helper function to install wget. Currently it only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/ and saved to either a temporary directory or your user appdata directory (see the \code{use_appdata_dir} parameter).
 #'
-#' @references https://eternallybored.org/misc/wget/current/wget.exe
+#' @references https://eternallybored.org/misc/wget/
 #' @param force logical: force reinstallation if wget already exists
+#' @param use_appdata_dir logical: by default, \code{bb_install_wget} will install wget into a temporary directory, which does not persist between R sessions. If you want a persistent installation, specify \code{use_appdata_dir=TRUE} to install wget into your appdata directory (on Windows, typically something like C:\Users\username\AppData\Roaming\)
 #'
 #' @return the path to the installed executable
 #'
 #' @examples
 #' \dontrun{
 #'   bb_install_wget()
+#'
+#'   ## confirm that it worked:
+#'   bb_wget("help")
 #' }
 #'
 #' @seealso \code{\link{bb_find_wget}}
 #'
 #' @export
-bb_install_wget <- function(force=FALSE) {
+bb_install_wget <- function(force=FALSE,use_appdata_dir=FALSE) {
     assert_that(is.flag(force))
+    assert_that(is.flag(use_appdata_dir))
     if (!force) {
         existing_wget <- bb_find_wget(install=FALSE,error=FALSE)
         if (!is.null(existing_wget)) {
@@ -278,16 +283,29 @@ bb_install_wget <- function(force=FALSE) {
         stop(errmsg)
     }
     ## NOTE, could also use e.g. https://github.com/r-lib/rappdirs to find this directory
-    path <- Sys.getenv("APPDATA")
+    path <- if (use_appdata_dir) Sys.getenv("APPDATA") else tempdir()
     if (dir_exists(path)) {
         path <- file.path(path,"bowerbird")
         if (!dir_exists(path)) dir.create(path)
         if (!dir_exists(path)) stop("could not create directory ",path," to store the wget executable")
-        err <- download.file("https://eternallybored.org/misc/wget/current/wget.exe",
+        ## there used to be a convenient URL to the latest wget version: https://eternallybored.org/misc/wget/current/wget.exe
+        ## as of Jan-2018 this does not seem to exist any more, so we point to specific version here instead
+        ## Do we want 32 or 64 bit exe? Default to 32, since 32-bit wget will run on 64-bit windows if it has to
+        bits <- tryCatch(if (.Machine$sizeof.pointer==8) 64 else 32,error=function(e) 32)
+        ## 8-byte address space is 64-bit. Note that we're actually detecting the R address space here, not the OS address space. But I don't think there's a reliable way of detecting the machine architecture
+        wgurl <- paste0("https://eternallybored.org/misc/wget/1.19.4/",bits,"/wget.exe")
+        err <- download.file(wgurl,
                       destfile=file.path(path,"wget.exe"),
                       mode="wb")
         if (!err) {
-            file.path(path,"wget.exe")
+            myexe <- file.path(path,"wget.exe")
+            ## update the bowerbird options so that we'll find it next time we try
+            bb_opts <- getOption("bowerbird")
+            if (is.null(bb_opts)) bb_opts <- list()
+            bb_opts$wget_exe <- myexe
+            options(bowerbird=bb_opts)
+            ## return the path to the wget executable
+            myexe
         } else {
             stop("Sorry, wget install failed.\n You will need to install wget yourself and ensure that it is on the system path.")
         }
@@ -298,9 +316,9 @@ bb_install_wget <- function(force=FALSE) {
 
 #' Find the wget executable
 #'
-#' This function will return the path to the wget executable if it can be found on the local system, and optionally install it if it is not found. Installation (if required) currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+#' This function will return the path to the wget executable if it can be found on the local system, and optionally install it if it is not found. Installation (if required) currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/ installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
 #'
-#' @references https://eternallybored.org/misc/wget/current/wget.exe
+#' @references https://eternallybored.org/misc/wget/
 #'
 #' @param install logical: attempt to install the executable if it is not found? (Windows only)
 #' @param error logical: if wget is not found, raise an error. If \code{FALSE}, do not raise an error but return NULL

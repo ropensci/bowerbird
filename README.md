@@ -38,7 +38,7 @@ You will also need to have the third-party utility `wget` available, because Bow
 
 ### Windows
 
-On Windows you can use the `bb_install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from <https://eternallybored.org/misc/wget/current/wget.exe>) and make sure it is on your system path.
+On Windows you can use the `bb_install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from <https://eternallybored.org/misc/wget/>) and make sure it is on your system path.
 
 ### Mac
 

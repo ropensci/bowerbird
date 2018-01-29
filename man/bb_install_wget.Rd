@@ -4,25 +4,30 @@
 \alias{bb_install_wget}
 \title{Install wget}
 \usage{
-bb_install_wget(force = FALSE)
+bb_install_wget(force = FALSE, use_appdata_dir = FALSE)
 }
 \arguments{
 \item{force}{logical: force reinstallation if wget already exists}
+
+\item{use_appdata_dir}{logical: by default, \code{bb_install_wget} will install wget into a temporary directory, which does not persist between R sessions. If you want a persistent installation, specify \code{use_appdata_dir=TRUE} to install wget into your appdata directory (on Windows, typically something like C:\Users\username\AppData\Roaming\)}
 }
 \value{
 the path to the installed executable
 }
 \description{
-This is a helper function to install wget. Currently it only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+This is a helper function to install wget. Currently it only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/ and saved to either a temporary directory or your user appdata directory (see the \code{use_appdata_dir} parameter).
 }
 \examples{
 \dontrun{
   bb_install_wget()
+
+  ## confirm that it worked:
+  bb_wget("help")
 }
 
 }
 \references{
-https://eternallybored.org/misc/wget/current/wget.exe
+https://eternallybored.org/misc/wget/
 }
 \seealso{
 \code{\link{bb_find_wget}}

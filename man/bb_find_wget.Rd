@@ -15,7 +15,7 @@ bb_find_wget(install = FALSE, error = TRUE)
 the path to the wget executable, or (if error is \code{FALSE}) NULL if it was not found
 }
 \description{
-This function will return the path to the wget executable if it can be found on the local system, and optionally install it if it is not found. Installation (if required) currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/current/wget.exe and installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
+This function will return the path to the wget executable if it can be found on the local system, and optionally install it if it is not found. Installation (if required) currently only works on Windows platforms. The wget.exe executable will be downloaded from https://eternallybored.org/misc/wget/ installed into your appdata directory (typically something like C:/Users/username/AppData/Roaming/)
 }
 \examples{
 \dontrun{
@@ -25,7 +25,7 @@ This function will return the path to the wget executable if it can be found on 
 
 }
 \references{
-https://eternallybored.org/misc/wget/current/wget.exe
+https://eternallybored.org/misc/wget/
 }
 \seealso{
 \code{\link{bb_install_wget}}
