@@ -9,7 +9,7 @@ bb_install_wget(force = FALSE, use_appdata_dir = FALSE)
 \arguments{
 \item{force}{logical: force reinstallation if wget already exists}
 
-\item{use_appdata_dir}{logical: by default, \code{bb_install_wget} will install wget into a temporary directory, which does not persist between R sessions. If you want a persistent installation, specify \code{use_appdata_dir=TRUE} to install wget into your appdata directory (on Windows, typically something like C:\Users\username\AppData\Roaming\)}
+\item{use_appdata_dir}{logical: by default, \code{bb_install_wget} will install wget into a temporary directory, which does not persist between R sessions. If you want a persistent installation, specify \code{use_appdata_dir=TRUE} to install wget into your appdata directory (on Windows, typically something like C:/Users/username/AppData/Roaming/)}
 }
 \value{
 the path to the installed executable
