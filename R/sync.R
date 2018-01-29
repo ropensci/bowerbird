@@ -114,7 +114,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
     this_att <- bb_settings(this_dataset)
     this_collection_size <- bb_data_sources(this_dataset)$collection_size
     if (interactive() && !is.null(this_collection_size) && !is.na(this_collection_size) && !is.null(confirm_downloads_larger_than) && this_collection_size>confirm_downloads_larger_than) {
-        go_ahead <- menu(c("Yes","No"),title=sprintf("This data set is %.1f GB in size: are you sure you want to download it?",this_collection_size))
+        go_ahead <- menu(c("Yes","No"),title=sprintf("%s\nThis data set is %.1f GB in size: are you sure you want to download it?",bb_data_sources(this_dataset)$name,this_collection_size))
         if (go_ahead!=1) {
             if (verbose) cat(sprintf("\n dataset synchronization aborted: %s\n",bb_data_sources(this_dataset)$name))
             return(NA)
