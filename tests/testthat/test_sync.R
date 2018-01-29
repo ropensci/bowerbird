@@ -8,6 +8,23 @@ test_that("bb_sync works with dry run on bb_handler_wget",{
     bb_sync(cf,catch_errors=FALSE,confirm_downloads_larger_than=NULL,dry_run=TRUE)
 })
 
+test_that("bb_sync fails when given an empty config",{
+    cf <- bb_config(local_file_root="/does/not/matter")
+    expect_warning(bb_sync(cf,catch_errors=FALSE),"config has no data sources")
+})
+
+test_that("bb_sync behaves correctly when root does not exist",{
+    td <- tempfile(pattern="dir") ## use this as a dir name
+    ## it should not yet exist
+    if (!dir.exists(td) && !file.exists(td)) {
+        cf <- bb_config(local_file_root=td)
+        cf <- cf %>% bb_add(bb_example_sources()[1,])
+        expect_error(bb_sync(cf,catch_errors=FALSE,confirm_downloads_larger_than=NULL,dry_run=TRUE),"does not exist")
+        ## ok if we tell bb_sync to create it
+        blah <- bb_sync(cf,catch_errors=FALSE,confirm_downloads_larger_than=NULL,dry_run=TRUE,create_root=TRUE)
+    }
+})
+
 test_that("bb_sync is quiet when asked",{
     skip_on_cran()
     temp_root <- tempdir()
