@@ -77,7 +77,7 @@ bb_handler_wget_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,...)
     if (!is.null(cfrow$dry_run) && cfrow$dry_run) {
         if (verbose) {
             temp <- vapply(seq_len(length(this_flags)),function(z)paste0(names(this_flags)[z],"=",this_flags[z]),FUN.VALUE="",USE.NAMES=FALSE)
-            cat(sprintf(" dry_run is TRUE, not executing: wget %s %s\n",paste(temp,collapse=" "),cfrow$source_url))
+            cat(sprintf(" dry_run is TRUE, not executing bb_wget with parameters: url=\"%s\", %s\n",cfrow$source_url,paste(temp,collapse=", ")))
         }
         ok <- TRUE
     } else {
