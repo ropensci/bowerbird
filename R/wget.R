@@ -276,9 +276,9 @@ bb_install_wget <- function(force=FALSE,use_appdata_dir=FALSE) {
     if (my_os!="windows") {
         errmsg <- paste0("bb_install_wget only supports windows platforms.\n You will need to install wget yourself and ensure that it is on the system path.",
                          switch(my_os,
-                                "osx"="\n On OSX use \"brew install wget\" or \"brew install --with-libressl wget\" if you get SSL-related errors.\n If you do not have brew installed, see https://brew.sh/ (note: you will need admin privileges to install brew).",
+                                "osx"="\n On OSX use \"brew install wget\" or try \"brew install --with-libressl wget\" if you get SSL-related errors.\n If you do not have brew installed, see https://brew.sh/ (note: you will need admin privileges to install brew).",
                                 "unix"=,
-                                "linux"="\n On Linux use e.g. \"sudo apt install wget\" on Debian/Ubuntu, or \"sudo yum install wget\" on Fedora/CentOS.\n Note: you will need admin privileges for this.",
+                                "linux"="\n On Linux use e.g. \"sudo apt install wget\" on Debian/Ubuntu, or \"sudo yum install wget\" on Fedora/CentOS (note: you will need admin privileges for this).",
                                 ""))
         stop(errmsg)
     }
@@ -379,9 +379,9 @@ bb_find_wget <- function(install=FALSE,error=TRUE) {
             }
             if (error) {
                 switch(my_os,
-                       "osx"=stop("could not find the wget executable.\n You will need to install wget yourself and ensure that it is on the system path.\n Use \"brew install wget\" or \"brew install --with-libressl wget\" if you get SSL-related errors.\n If you do not have brew installed, see https://brew.sh/ (note: you will need admin privileges to install brew)."),
+                       "osx"=stop("could not find the wget executable.\n You will need to install wget yourself and ensure that it is on the system path.\n Use \"brew install wget\" or try \"brew install --with-libressl wget\" if you get SSL-related errors.\n If you do not have brew installed, see https://brew.sh/ (note: you will need admin privileges to install brew)."),
                        "unix"=,
-                       "linux"=stop("could not find the wget executable.\n You will need to install wget yourself and ensure that it is on the system path.\n Use e.g. \"sudo apt install wget\" on Debian/Ubuntu, or \"sudo yum install wget\" on Fedora/CentOS.\n Note: you will need admin privileges for this."),
+                       "linux"=stop("could not find the wget executable.\n You will need to install wget yourself and ensure that it is on the system path.\n Use e.g. \"sudo apt install wget\" on Debian/Ubuntu, or \"sudo yum install wget\" on Fedora/CentOS (note: you will need admin privileges for this)."),
                        stop("could not find the wget executable.\n You will need to install wget yourself and ensure that it is on the system path.")
                )
             }
