@@ -69,6 +69,10 @@ test_that("config validation works",{
 test_that("bb_settings works",{
     cf <- bb_config(local_file_root="/your/data/directory")
     sets <- bb_settings(cf)
+    ## the names of the settings here should match the allowed names
+    ## except that dry_run is allowed as a setting, but it is set in bb_sync not in bb_config, so it won't be set here
+    ## set it now
+    sets$dry_run <- FALSE
     expect_true(setequal(names(sets),bowerbird:::allowed_settings()))
     expect_null(sets$http_proxy)
     ## change a setting

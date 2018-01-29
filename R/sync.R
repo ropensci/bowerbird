@@ -9,6 +9,7 @@
 #' @param verbose logical: if \code{TRUE}, provide additional progress output
 #' @param catch_errors logical: if \code{TRUE}, catch errors and continue the synchronization process. The sync process works through data sources sequentially, and so if \code{catch_errors} is \code{FALSE}, then an error during the synchronization of one data source will prevent all subsequent data sources from synchronizing
 #' @param confirm_downloads_larger_than numeric or NULL: if non-negative, \code{bb_sync} will ask the user for confirmation to download any data source of size greater than this number (in GB). A value of zero will trigger confirmation on every data source. A negative or NULL value will not prompt for confirmation. Note that this only applies when R is being used interactively. The expected download size is taken from the \code{collection_size} parameter of the data source, and so its accuracy is dependent on the accuracy of the data source definition
+#' @param dry_run logical: if \code{TRUE}, \code{bb_sync} will do a dry run of the synchronization process without actually downloading files. This may be helpful for testing, but note that calls to wget will not be executed, so e.g. any recursion handled by wget itself will not be simulated
 #'
 #' @return a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}
 #'
@@ -54,11 +55,12 @@
 #' }
 #'
 #' @export
-bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,confirm_downloads_larger_than=0.1) {
+bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,confirm_downloads_larger_than=0.1,dry_run=FALSE) {
     ## general synchronization handler
     assert_that(is(config,"bb_config"))
     assert_that(is.flag(create_root),!is.na(create_root))
     assert_that(is.flag(verbose),!is.na(verbose))
+    assert_that(is.flag(dry_run),!is.na(dry_run))
     if (!is.null(confirm_downloads_larger_than)) {
         assert_that(is.numeric(confirm_downloads_larger_than),!is.na(confirm_downloads_larger_than))
         if (confirm_downloads_larger_than<0) confirm_downloads_larger_than <- Inf
@@ -70,6 +72,10 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
         warning("config has no data sources: nothing for bb_sync to do")
         return(invisible(NULL))
     }
+    ## propagate dry_run info into the settings stored in config, so that it percolates through to handlers
+    st <- bb_settings(config)
+    st$dry_run <- dry_run
+    bb_settings(config) <- st
     bb_validate(config)
     ## check that wget can be found (this will also set it in the options)
     tmp <- bb_find_wget()

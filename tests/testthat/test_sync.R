@@ -3,9 +3,9 @@ context("sync")
 test_that("bb_sync works with dry run on bb_handler_wget",{
     skip_on_cran()
     temp_root <- tempdir()
-    cf <- bb_config(local_file_root=temp_root,skip_downloads=TRUE)
+    cf <- bb_config(local_file_root=temp_root)
     cf <- cf %>% bb_add(bb_example_sources()[1,])
-    bb_sync(cf,catch_errors=FALSE,confirm_downloads_larger_than=NULL)
+    bb_sync(cf,catch_errors=FALSE,confirm_downloads_larger_than=NULL,dry_run=TRUE)
 })
 
 test_that("bb_sync is quiet when asked",{

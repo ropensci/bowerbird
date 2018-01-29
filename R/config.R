@@ -9,7 +9,6 @@
 #' @param http_proxy string: URL of HTTP proxy to use e.g. 'http://your.proxy:8080' (NULL for no proxy)
 #' @param ftp_proxy string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)
 #' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)
-#' @param skip_downloads logical: if \code{TRUE}, \code{bb_sync} will do a dry run of the synchronization process but without actually downloading files. For data sources using method bb_handler_wget, this means that the wget calls will not be executed, so e.g. any recursion handled by wget itself will not be simulated
 #'
 #' @return configuration object
 #'
@@ -27,10 +26,9 @@
 #' }
 #'
 #' @export
-bb_config <- function(local_file_root,wget_global_flags=list(restrict_file_names="windows",progress="dot:giga"),http_proxy=NULL,ftp_proxy=NULL,clobber=1,skip_downloads=FALSE) {
+bb_config <- function(local_file_root,wget_global_flags=list(restrict_file_names="windows",progress="dot:giga"),http_proxy=NULL,ftp_proxy=NULL,clobber=1) {
     assert_that(is.string(local_file_root))
     assert_that(clobber %in% c(0,1,2))
-    assert_that(is.flag(skip_downloads),!is.na(skip_downloads))
     assert_that(is.list(wget_global_flags))
     structure(
         list(data_sources=tibble(),
@@ -39,8 +37,7 @@ bb_config <- function(local_file_root,wget_global_flags=list(restrict_file_names
                  http_proxy=http_proxy,
                  ftp_proxy=ftp_proxy,
                  local_file_root=local_file_root,
-                 clobber=clobber,
-                 skip_downloads=skip_downloads)),
+                 clobber=clobber)),
         class="bb_config")
 }
 
@@ -145,7 +142,7 @@ bb_settings <- function(config) {
 }
 
 ## internal: the list of recognized config settings
-allowed_settings <- function() c("wget_global_flags","http_proxy","ftp_proxy","local_file_root","clobber","skip_downloads")
+allowed_settings <- function() c("wget_global_flags","http_proxy","ftp_proxy","local_file_root","clobber","dry_run")
 
 
 #' Gets or sets a bowerbird configuration object's data sources

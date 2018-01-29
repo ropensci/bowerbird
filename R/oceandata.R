@@ -127,7 +127,7 @@ bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE
         }
         if (download_this) {
             dummy <- config
-            ## note that if skip_downloads is TRUE, it will be passed through to bb_handler_wget here
+            ## note that if dry_run is TRUE, it will be passed through to bb_handler_wget here
             ##dummy$method_flags <- paste("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
             temp <- bb_data_sources(dummy)
             temp$method <- list(list("bb_handler_wget",recursive=TRUE,extra_flags=c("--timeout=1800","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories")))
