@@ -307,8 +307,8 @@ src4 <- bb_source(
     name="Oceandata test file",
     id="oceandata-test",
     description="Monthly, 9km remote-sensed sea surface temperature from the MODIS Terra satellite",
-    doc_url= "http://oceancolor.gsfc.nasa.gov/",
-    citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
+    doc_url= "https://oceancolor.gsfc.nasa.gov/",
+    citation="See https://oceancolor.gsfc.nasa.gov/cms/citations",
     license="Please cite",
     method=list("bb_handler_oceandata",search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
     data_group="Sea surface temperature")
