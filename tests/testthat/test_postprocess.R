@@ -16,7 +16,7 @@ test_that("decompressing zip files works",{
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp,"example_data.zip")))
@@ -41,7 +41,7 @@ test_that("decompressing gzipped files works",{
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp,"example_data_was_gzipped.csv.gz")))
@@ -66,7 +66,7 @@ test_that("decompressing bzipped files works",{
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp,"example_data_was_bzipped.csv.bz2")))
@@ -91,7 +91,7 @@ test_that("decompressing Z-compressed files works",{
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp,"20170822.nc.Z")))
@@ -115,7 +115,7 @@ test_that("cleanup postprocessing works",{
     )
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_false(file.exists(file.path(fp,"example_data_was_zipped.csv")))

@@ -18,7 +18,7 @@ test_that("bb_handler_oceandata works",{
     temp_root <- tempdir()
     ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODIST/Mapped$",bb_data_source_dir(ocf)))
-    bb_sync(ocf)
+    bb_sync(ocf,confirm_downloads_larger_than=NULL)
     fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc" ## relative file name
     expect_true(file.exists(file.path(temp_root,fnm)))
     fi <- file.info(file.path(temp_root,fnm))

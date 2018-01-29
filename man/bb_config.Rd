@@ -6,7 +6,7 @@
 \usage{
 bb_config(local_file_root, wget_global_flags = list(restrict_file_names =
   "windows", progress = "dot:giga"), http_proxy = NULL, ftp_proxy = NULL,
-  clobber = 1, skip_downloads = FALSE, warn_large_downloads = 0.1)
+  clobber = 1, skip_downloads = FALSE)
 }
 \arguments{
 \item{local_file_root}{string: location of data repository on local file system}
@@ -20,8 +20,6 @@ bb_config(local_file_root, wget_global_flags = list(restrict_file_names =
 \item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)}
 
 \item{skip_downloads}{logical: if \code{TRUE}, \code{bb_sync} will do a dry run of the synchronization process but without actually downloading files. For data sources using method bb_handler_wget, this means that the wget calls will not be executed, so e.g. any recursion handled by wget itself will not be simulated}
-
-\item{warn_large_downloads}{numeric: if non-negative, \code{bb_sync} will ask the user for confirmation to download any data source of size greater than this number (in GB). A value of zero will trigger confirmation on every data source. A negative or NULL value will not prompt for confirmation. Note that this only applies when R is being used interactively. The expected download size is taken from the \code{collection_size} parameter of the data source, and so its accuracy is dependent on the accuracy of the data source definition}
 }
 \value{
 configuration object

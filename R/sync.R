@@ -8,6 +8,7 @@
 #' @param create_root logical: should the data root directory be created if it does not exist? If this is \code{FALSE} (default) and the data root directory does not exist, an error will be generated
 #' @param verbose logical: if \code{TRUE}, provide additional progress output
 #' @param catch_errors logical: if \code{TRUE}, catch errors and continue the synchronization process. The sync process works through data sources sequentially, and so if \code{catch_errors} is \code{FALSE}, then an error during the synchronization of one data source will prevent all subsequent data sources from synchronizing
+#' @param confirm_downloads_larger_than numeric or NULL: if non-negative, \code{bb_sync} will ask the user for confirmation to download any data source of size greater than this number (in GB). A value of zero will trigger confirmation on every data source. A negative or NULL value will not prompt for confirmation. Note that this only applies when R is being used interactively. The expected download size is taken from the \code{collection_size} parameter of the data source, and so its accuracy is dependent on the accuracy of the data source definition
 #'
 #' @return a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}
 #'
@@ -53,11 +54,18 @@
 #' }
 #'
 #' @export
-bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE) {
+bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,confirm_downloads_larger_than=0.1) {
     ## general synchronization handler
     assert_that(is(config,"bb_config"))
     assert_that(is.flag(create_root),!is.na(create_root))
     assert_that(is.flag(verbose),!is.na(verbose))
+    if (!is.null(confirm_downloads_larger_than)) {
+        assert_that(is.numeric(confirm_downloads_larger_than),!is.na(confirm_downloads_larger_than))
+        if (confirm_downloads_larger_than<0) confirm_downloads_larger_than <- Inf
+    } else {
+        confirm_downloads_larger_than <- Inf
+    }
+
     if (nrow(bb_data_sources(config))<1) {
         warning("config has no data sources: nothing for bb_sync to do")
         return(invisible(NULL))
@@ -76,7 +84,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE) {
     bb_data_sources(config) <- do.call(rbind,lapply(seq_len(nrow(temp)),function(z){ out <- temp[rep(z,ns[z]),]; out$source_url <- temp$source_url[[z]]; out}))
     if (catch_errors) {
         sync_wrapper <- function(di) {
-            tryCatch(do_sync_repo(bb_subset(config,di),create_root,verbose,settings),
+            tryCatch(do_sync_repo(this_dataset=bb_subset(config,di),create_root=create_root,verbose=verbose,settings=settings,confirm_downloads_larger_than=confirm_downloads_larger_than),
                 error=function(e) {
                     message("There was a problem synchronizing the dataset: ",bb_data_sources(config)$name[di],".\nThe error message was: ",e$message)
                     FALSE
@@ -85,21 +93,21 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE) {
         }
         sync_ok <- vapply(seq_len(nrow(bb_data_sources(config))),sync_wrapper,FUN.VALUE=TRUE)
     } else {
-        sync_ok <- vapply(seq_len(nrow(bb_data_sources(config))),function(di) do_sync_repo(bb_subset(config,di),create_root,verbose,settings),FUN.VALUE=TRUE)
+        sync_ok <- vapply(seq_len(nrow(bb_data_sources(config))),function(di) do_sync_repo(this_dataset=bb_subset(config,di),create_root=create_root,verbose=verbose,settings=settings,confirm_downloads_larger_than=confirm_downloads_larger_than),FUN.VALUE=TRUE)
     }
     temp <- bb_data_sources(config)
     tibble(name=temp$name,id=temp$id,source_url=temp$source_url,status=sync_ok)
 }
 
 
-do_sync_repo <- function(this_dataset,create_root,verbose,settings) {
+do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downloads_larger_than) {
     assert_that(is(this_dataset,"bb_config"))
     on.exit({ restore_settings(settings) })
     if (nrow(bb_data_sources(this_dataset))!=1)
         stop("expecting single-row data set")
     this_att <- bb_settings(this_dataset)
     this_collection_size <- bb_data_sources(this_dataset)$collection_size
-    if (interactive() && !is.null(this_collection_size) && !is.na(this_collection_size) && !is.null(this_att$warn_large_downloads) && this_collection_size>this_att$warn_large_downloads) {
+    if (interactive() && !is.null(this_collection_size) && !is.na(this_collection_size) && !is.null(confirm_downloads_larger_than) && this_collection_size>confirm_downloads_larger_than) {
         go_ahead <- menu(c("Yes","No"),title=sprintf("This data set is %.1f GB in size: are you sure you want to download it?",this_collection_size))
         if (go_ahead!=1) {
             if (verbose) cat(sprintf("\n dataset synchronization aborted: %s\n",bb_data_sources(this_dataset)$name))

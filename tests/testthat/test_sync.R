@@ -3,9 +3,9 @@ context("sync")
 test_that("bb_sync works with dry run on bb_handler_wget",{
     skip_on_cran()
     temp_root <- tempdir()
-    cf <- bb_config(local_file_root=temp_root,skip_downloads=TRUE,warn_large_downloads=-1)
+    cf <- bb_config(local_file_root=temp_root,skip_downloads=TRUE)
     cf <- cf %>% bb_add(bb_example_sources()[1,])
-    bb_sync(cf,catch_errors=FALSE)
+    bb_sync(cf,catch_errors=FALSE,confirm_downloads_larger_than=NULL)
 })
 
 test_that("bb_sync is quiet when asked",{
@@ -22,7 +22,7 @@ test_that("bb_sync is quiet when asked",{
         method=list("bb_handler_wget",recursive=TRUE,no_check_certificate=TRUE,level=1),
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd") ## just some file to download
     cf <- cf %>% bb_add(myds)
-    expect_silent(bb_sync(cf,verbose=FALSE))
+    expect_silent(bb_sync(cf,verbose=FALSE,confirm_downloads_larger_than=NULL))
 })
 
 test_that("bb_sync works on oceandata",{
@@ -42,7 +42,7 @@ test_that("bb_sync works on oceandata",{
         data_group="Sea surface temperature")
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),ods)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fnm <- file.path(temp_root,"oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc")
     expect_true(file.exists(fnm))
@@ -54,7 +54,7 @@ test_that("bb_sync errors on a source that is missing required authentication in
     skip_on_cran()
     mysrc <- subset(bb_example_sources(),name=="Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2")
     cf <- bb_config(local_file_root=tempdir()) %>% bb_add(mysrc)
-    expect_error(bb_sync(cf),"requires authentication") ## error at the bb_validate stage, because user and password have not been set
+    expect_error(bb_sync(cf,confirm_downloads_larger_than=NULL),"requires authentication") ## error at the bb_validate stage, because user and password have not been set
 
     ## would also get error at the handler stage, for the same reason
     expect_error(do.call(bb_handler_earthdata,c(list(cf),bb_data_sources(cf)$method[[1]][-1])),"requires user and password")
@@ -75,7 +75,7 @@ test_that("bb_sync works with a sink() call in place",{
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd") ## just some file to download
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),myds)
-    bb_sync(cf,verbose=TRUE)
+    bb_sync(cf,verbose=TRUE,confirm_downloads_larger_than=NULL)
     sink()
     op <- readLines(sinkfile)
     ## sink file should contain direct cat output "Synchronizing dataset: test"

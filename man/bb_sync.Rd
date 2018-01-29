@@ -4,7 +4,8 @@
 \alias{bb_sync}
 \title{Run a bowerbird data repository synchronization}
 \usage{
-bb_sync(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE)
+bb_sync(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE,
+  confirm_downloads_larger_than = 0.1)
 }
 \arguments{
 \item{config}{bb_config: configuration as returned by \code{\link{bb_config}}}
@@ -14,6 +15,8 @@ bb_sync(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE)
 \item{verbose}{logical: if \code{TRUE}, provide additional progress output}
 
 \item{catch_errors}{logical: if \code{TRUE}, catch errors and continue the synchronization process. The sync process works through data sources sequentially, and so if \code{catch_errors} is \code{FALSE}, then an error during the synchronization of one data source will prevent all subsequent data sources from synchronizing}
+
+\item{confirm_downloads_larger_than}{numeric or NULL: if non-negative, \code{bb_sync} will ask the user for confirmation to download any data source of size greater than this number (in GB). A value of zero will trigger confirmation on every data source. A negative or NULL value will not prompt for confirmation. Note that this only applies when R is being used interactively. The expected download size is taken from the \code{collection_size} parameter of the data source, and so its accuracy is dependent on the accuracy of the data source definition}
 }
 \value{
 a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}

@@ -16,7 +16,7 @@ test_that("bb_fingerprint does something sensible",{
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fgpr <- bb_fingerprint(cf)
     expect_named(fgpr,c("filename","data_source_id","size","last_modified","hash"))
