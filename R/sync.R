@@ -91,11 +91,12 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
     if (catch_errors) {
         sync_wrapper <- function(di) {
             tryCatch(do_sync_repo(this_dataset=bb_subset(config,di),create_root=create_root,verbose=verbose,settings=settings,confirm_downloads_larger_than=confirm_downloads_larger_than),
-                error=function(e) {
-                    message("There was a problem synchronizing the dataset: ",bb_data_sources(config)$name[di],".\nThe error message was: ",e$message)
-                    FALSE
-                }
-                )
+                     error=function(e) {
+                         msg <- paste0("There was a problem synchronizing the dataset: ",bb_data_sources(config)$name[di],".\nThe error message was: ",e$message)
+                         if (verbose) cat(msg,"\n") else warning(msg)
+                         FALSE
+                     }
+                     )
         }
         sync_ok <- vapply(seq_len(nrow(bb_data_sources(config))),sync_wrapper,FUN.VALUE=TRUE)
     } else {
