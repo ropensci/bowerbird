@@ -30,7 +30,6 @@
 bb_handler_oceandata <- function(search,dtype,...) {
     assert_that(is.string(search),nzchar(search))
     if (!missing(dtype)) {
-        cat("dt:",str(dtype),"\n")
         if (!is.null(dtype)) assert_that(is.string(dtype),nzchar(dtype))
     } else {
         dtype <- NULL
