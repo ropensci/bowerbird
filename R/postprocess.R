@@ -114,6 +114,7 @@ do_decompress_files <- function(method,files,overwrite=TRUE,verbose=FALSE) {
                           },
                             error=function(e) {
                                 ## an error here might be because of an incompletely-downloaded file. Is there something more sensible to do in this case?
+                                ## but don't treat as a full blown error, since we'll want to proceed with the remaining zip files
                                 if (verbose) cat(sprintf("  %s failed to unzip (it may be incompletely-downloaded?)\n Error message was: %s",thisf,e))
                             })
                    if (identical(method,"unzip_delete")) {

@@ -235,6 +235,7 @@ bb_wget <- function(url,recursive=TRUE,level=1,wait=0,accept,reject,accept_regex
         }
         out$status_text <- decode_wget_exit_status(out$status)
         if ((is.na(out$status) || out$status>0) && verbose)
+            ## echo the error message but don't throw it as a full blown error
             cat(sprintf(" bb_wget exited with status code %d indicating an error (%s)\n",out$status,out$status_text))
         out
     }
