@@ -42,7 +42,7 @@ On Windows you can use the `bb_install_wget()` function to install it. Otherwise
 
 ### Mac
 
-Use `brew install wget` or `brew install --with-libressl wget` if you get SSL-related errors. If you do not have brew installed, see <https://brew.sh/>.
+Use `brew install wget` or try `brew install --with-libressl wget` if you get SSL-related errors. If you do not have brew installed, see <https://brew.sh/>.
 
 Usage overview
 --------------
