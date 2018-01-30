@@ -107,7 +107,9 @@ bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/",myfiles$filename[idx]) ## full URL
         this_fullfile <- oceandata_url_mapper(this_url) ## where local copy will go
         if (is.null(this_fullfile)) {
-            warning(sprintf("skipping oceandata URL (%s): cannot determine the local path to store the file",this_url))
+            msg <- sprintf("skipping oceandata URL (%s): cannot determine the local path to store the file",this_url)
+            if (verbose) cat(msg,"\n")
+            warning(msg)
             next
         }
         this_exists <- file.exists(this_fullfile)
@@ -344,8 +346,8 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
     }
     this_year <- substr(url_parts$date,1,4)
     if (is.na(url_parts$type)) {
-        warning("unrecognized URL pattern",this_url,", ignoring")
-        out <- NULL
+        ## no type provided? we can't proceed with the download, anyway
+        stop("cannot ascertain file type from oceancolor URL: ",this_url)
     } else {
         switch(url_parts$type,
                L3m={
