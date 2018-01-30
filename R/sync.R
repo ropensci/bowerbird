@@ -78,7 +78,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
     bb_settings(config) <- st
     bb_validate(config)
     ## check that wget can be found (this will also set it in the options)
-    tmp <- bb_find_wget()
+    tmp <- bb_find_wget(install=FALSE,error=TRUE)
     ## save some current settings: path and proxy env values
     settings <- save_current_settings()
     on.exit({ restore_settings(settings) })
