@@ -374,7 +374,7 @@ bb_find_wget <- function(install=FALSE,error=TRUE) {
                 }
             }
         } else {
-            if (install && my_os!="windows") {
+            if (install) {
                 warning("install=TRUE only currently works on Windows platforms, ignoring")
             }
             if (error) {
