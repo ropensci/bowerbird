@@ -13,7 +13,7 @@ bb_handler_wget(...)
 TRUE on success
 }
 \description{
-This is a general handler function that is suitable for a range of data sets. This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
+This is a general handler function that is suitable for a range of data sets. This function is not intended to be called directly, but rather is specified as a \code{method} option in \code{\link{bb_source}}.
 }
 \details{
 This handler function makes calls to the \code{wget} utility via the \code{\link{bb_wget}} function. Arguments provided to \code{bb_handler_wget} are passed through to \code{\link{bb_wget}}.

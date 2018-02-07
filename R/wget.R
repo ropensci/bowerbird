@@ -1,6 +1,6 @@
 #' Mirror an external data source using the wget utility
 #'
-#' This is a general handler function that is suitable for a range of data sets. This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
+#' This is a general handler function that is suitable for a range of data sets. This function is not intended to be called directly, but rather is specified as a \code{method} option in \code{\link{bb_source}}.
 #'
 #' This handler function makes calls to the \code{wget} utility via the \code{\link{bb_wget}} function. Arguments provided to \code{bb_handler_wget} are passed through to \code{\link{bb_wget}}.
 #'
@@ -26,7 +26,7 @@
 #'
 #' @export
 bb_handler_wget <- function(...) {
-    do.call(bb_handler_wget_inner,list(...))
+    bb_handler_wget_inner(...)
 }
 
 # @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source

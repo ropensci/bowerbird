@@ -13,7 +13,7 @@ bb_handler_earthdata(...)
 TRUE on success
 }
 \description{
-This is a handler function to be used with data sets from NASA's Earthdata system. This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
+This is a handler function to be used with data sets from NASA's Earthdata system. This function is not intended to be called directly, but rather is specified as a \code{method} option in \code{\link{bb_source}}.
 }
 \details{
 This function uses \code{\link{bb_wget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_wget}} parameters.
