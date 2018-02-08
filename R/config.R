@@ -59,7 +59,10 @@ bb_config <- function(local_file_root,wget_global_flags=list(restrict_file_names
 #' @export
 bb_subset <- function(config,idx) {
     assert_that(is(config,"bb_config"))
-    bb_data_sources(config) <- bb_data_sources(config)[idx,]##config$data_sources <- config$data_sources[idx,]
+    temp <- bb_data_sources(config)[idx,]
+    ## if we indexed past the end of this tibble, we'll have rows that are all NA or NULL - discard these
+    temp <- temp[!apply(temp,1,function(z)all(vapply(z,function(w)is.null(w) || is.na(w),FUN.VALUE=TRUE))),]
+    bb_data_sources(config) <- temp
     config
 }
 
