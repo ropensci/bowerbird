@@ -100,7 +100,7 @@ test_that("decompressing Z-compressed files works",{
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp,"20170822.nc.Z")))
     expect_true(file.exists(file.path(fp,"20170822.nc")))
-    expect_true(file.info(file.path(fp,"20170822.nc"))$size>1e4)
+    expect_equal(file.info(file.path(fp,"20170822.nc"))$size,840508)
 })
 
 
