@@ -133,7 +133,7 @@ bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE
             temp <- bb_data_sources(dummy)
             temp$method <- list(list("bb_handler_wget",recursive=TRUE,extra_flags=c("--timeout=1800","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories")))
             ##temp$method_flags <- list(list(recursive=TRUE,extra_flags=c("--timeout=1800","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories")))
-            temp$source_url <- this_url
+            temp$source_url <- list(this_url)
             bb_data_sources(dummy) <- temp
             out <- out && do.call(bb_handler_wget,c(list(dummy,verbose=verbose),temp$method[[1]][-1]))
         } else {
