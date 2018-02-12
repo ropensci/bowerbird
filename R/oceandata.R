@@ -90,6 +90,9 @@ bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE
             qry <- paste0(qry,"&dtype=",dtype)
         ##if (get_os()=="windows") qry <- paste0("\"",qry,"\"") ## not sure if need these on windows or not!!
         myfiles <- bb_wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",recursive=FALSE,extra_flags=c("-q",qry,"-O","-"),capture_stdout=TRUE,verbose=verbose)
+   cat("search status: ",myfiles$status,"\n")
+   cat("search stdout: ",rawToChar(myfiles$stdout),"\n")
+
         if (myfiles$status==0) break
         tries <- tries+1
     }
@@ -97,6 +100,9 @@ bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE
     myfiles <- strsplit(rawToChar(myfiles$stdout),"\n")[[1]]
     ## catch "Sorry No Files Matched Your Query"
     if (any(grepl("no files matched your query",myfiles,ignore.case=TRUE))) stop("No files matched the supplied oceancolour data file search query (",search,")")
+    ## also bail out if we don't see the "Your query generated xx results" message
+    if (!any(grepl("Your query generated .* results",myfiles,ignore.case=TRUE))) stop("error with oceancolour data file search: could not retrieve file list (query: ",search,")")
+
     myfiles <- myfiles[-c(1,2)] ## get rid of header line and blank line that follows it
     myfiles <- as_tibble(do.call(rbind,lapply(myfiles,function(z)strsplit(z,"[[:space:]]+")[[1]]))) ## split checksum and file name from each line
     colnames(myfiles) <- c("checksum","filename")
