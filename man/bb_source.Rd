@@ -4,9 +4,8 @@
 \alias{bb_source}
 \title{Define a data source}
 \usage{
-bb_source(id, name, description = NA_character_, reference, source_url,
-  citation, license, comment = NA_character_, method = bb_handler_wget,
-  method_flags = character(), postprocess,
+bb_source(id, name, description = NA_character_, doc_url, source_url,
+  citation, license, comment = NA_character_, method, postprocess,
   authentication_note = NA_character_, user = NA_character_,
   password = NA_character_, access_function = NA_character_,
   data_group = NA_character_, collection_size = NA,
@@ -17,9 +16,9 @@ bb_source(id, name, description = NA_character_, reference, source_url,
 
 \item{name}{string: (required) a unique name for the data source. This should be a human-readable but still concise name}
 
-\item{description}{string: a description of the data source}
+\item{description}{string: a plain-language description of the data source, provided so that users can get an idea of what the data source contains (for full details they can consult the \code{doc_url} link)}
 
-\item{reference}{string: (required) URL to the metadata record or home page of the data source}
+\item{doc_url}{string: (required) URL to the metadata record or other documentation of the data source}
 
 \item{source_url}{character vector: one or more source URLs. Required for \code{bb_handler_wget}, although some \code{method} functions might not require one}
 
@@ -29,11 +28,9 @@ bb_source(id, name, description = NA_character_, reference, source_url,
 
 \item{comment}{string: comments about the data source. If only part of the original data collection is mirrored, mention that here}
 
-\item{method}{function, call, or symbol: (required) the function that handles the synchronisation process for this data source}
+\item{method}{list (required): a list object that defines the function used to synchronize this data source. The first element of the list is the function name (as a string or function). Additional list elements can be used to specify additional parameters to pass to that function. Note that \code{bb_sync} automatically passes the data repository configuration object as the first parameter to the method handler function. If the handler function uses wget (e.g. \code{bb_handler_wget}), these extra parameters are passed through to the \code{bb_wget} function}
 
-\item{method_flags}{character vector: flags to pass to the method. If method is \code{bb_handler_wget}, these are wget flags. Run \code{bb_wget("--help")} to get help on these flags}
-
-\item{postprocess}{function, call, symbol, or list thereof: functions to apply after synchronisation has completed. If NULL or an empty list, no postprocessing will be applied}
+\item{postprocess}{list: each element of \code{postprocess} defines a postprocessing step to be run after the main synchronization has happened. Each element of this list can be a function or string function name, or a list in the style of \code{list(fun,arg1=val1,arg2=val2)} where \code{fun} is the function to be called and \code{arg1} and \code{arg2} are additional parameters to pass to that function}
 
 \item{authentication_note}{string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)}
 
@@ -41,41 +38,69 @@ bb_source(id, name, description = NA_character_, reference, source_url,
 
 \item{password}{string: password, if required}
 
-\item{access_function}{string: name of the R function that can be used to read these data}
+\item{access_function}{string: can be used to suggest to users an appropriate function to read these data files. Provide the name of an R function or even a code snippet}
 
 \item{data_group}{string: the name of the group to which this data source belongs. Useful for arranging sources in terms of thematic areas}
 
 \item{collection_size}{numeric: approximate disk space (in GB) used by the data collection, if known. If the data are supplied as compressed files, this size should reflect the disk space used after decompression. If the data_source definition contains multiple source_url entries, this size should reflect the overall disk space used by all combined}
 
-\item{warn_empty_auth}{logical: if TRUE, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided}
+\item{warn_empty_auth}{logical: if \code{TRUE}, issue a warning if the data source requires authentication (authentication_note is not NA) but user and password have not been provided. Set this to \code{FALSE} if you are defining a data source for others to use with their own credentials: they will typically call your data source constructor and then modify the \code{user} and \code{password} components}
 }
 \value{
-tibble
+a tibble with columns as per the function arguments (excluding \code{warn_empty_auth})
 }
 \description{
-Define a data source
+This function is used to define a data source, which can then be added to a bowerbird data repository configuration. Passing the configuration object to \code{bb_sync} will trigger a download of all of the data sources in that configuration.
+}
+\details{
+The \code{method} parameter defines the handler function used to synchronize this data source, and any extra parameters that need to be passed to it.
+
+Parameters marked as "required" are the minimal set needed to define a data source. Other parameters are either not relevant to all data sources (e.g. \code{postprocess}, \code{user}, \code{password}) or provide metadata to users that is not strictly necessary to allow the data source to be synchronized (e.g. \code{description}, \code{access_function}, \code{data_group}). Note that three of the "required" parameters (namely \code{citation}, \code{license}, and \code{doc_url}) are not strictly needed by the synchronization code, but are treated as "required" because of their fundamental importance to reproducible science.
+
+See \code{vignette("bowerbird")} for more examples and discussion of defining data sources.
 }
 \examples{
+
+## a minimal definition for the GSHHG coastline data set:
+
+my_source <- bb_source(
+   id="gshhg_coastline",
+   name="GSHHG coastline data",
+   doc_url= "http://www.soest.hawaii.edu/pwessel/gshhg",
+   citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
+     High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
+   source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
+   license="LGPL",
+   method=list("bb_handler_wget",recursive=TRUE,level=1,accept="*bin*.zip,README.TXT"))
+
+## a more complete definition, which unzips the files after downloading and also
+##  provides an indication of the size of the dataset
 
 my_source <- bb_source(
    id="gshhg_coastline",
    name="GSHHG coastline data",
    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
-   reference= "http://www.soest.hawaii.edu/pwessel/gshhg",
+   doc_url= "http://www.soest.hawaii.edu/pwessel/gshhg",
    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
-   license="",
-   comment="",
-   method=quote(bb_handler_wget),
-   method_flags=c("--recursive","--level=1","--accept=*bin*.zip,README.TXT"),
-   postprocess=quote(bb_unzip),
+   license="LGPL",
+   method=list("bb_handler_wget",recursive=TRUE,level=1,accept="*bin*.zip,README.TXT"),
+   postprocess=list("bb_unzip"),
    collection_size=0.6)
 
+## define a data repository configuration
 cf <- bb_config("/my/repo/root")
+
+## add this source to the repository
 cf <- bb_add(cf,my_source)
+
+\dontrun{
+## sync the repo
+bb_sync(cf)
+}
 
 }
 \seealso{
-\code{\link{bb_config}}
+\code{\link{bb_config}}, \code{\link{bb_sync}}, \code{vignette("bowerbird")}
 }

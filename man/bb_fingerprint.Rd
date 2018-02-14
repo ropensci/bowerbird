@@ -4,20 +4,25 @@
 \alias{bb_fingerprint}
 \title{Fingerprint the files associated with a data source}
 \usage{
-bb_fingerprint(config, hash = "sha1", verbose = TRUE)
+bb_fingerprint(config, hash = "sha1")
 }
 \arguments{
 \item{config}{bb_config: configuration as returned by \code{\link{bb_config}}}
 
 \item{hash}{string: algorithm to use to calculate file hashes: "md5", "sha1", or "none". Note that file hashing can be slow for large file collections}
-
-\item{verbose}{logical: if TRUE, provide additional progress output}
 }
 \value{
-tibble
+a tibble with columns:
+\itemize{
+  \item filename - the full path and filename of the file
+  \item data_source_id - the identifier of the associated data source (as per the \code{id} argument to \code{bb_source})
+  \item size - the file size
+  \item last_modified - last modified date of the file
+  \item hash - the hash of the file (unless \code{hash="none"} was specified)
+}
 }
 \description{
-Fingerprint the files associated with a data source
+The \code{bb_fingerprint} function, given a data repository configuration, will return the timestamp of download and hashes of all files associated with its data sources. This is intended as a general helper for tracking data provenance: for all of these files, we have information on where they came from (the data source ID), when they were downloaded, and a hash so that later versions of those files can be compared to detect changes. See also \code{vignette("data_provenance")}.
 }
 \examples{
 \dontrun{
@@ -26,4 +31,7 @@ Fingerprint the files associated with a data source
   bb_fingerprint(cf)
 }
 
+}
+\seealso{
+\code{vignette("data_provenance")}
 }

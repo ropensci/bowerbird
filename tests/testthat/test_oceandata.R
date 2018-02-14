@@ -6,28 +6,23 @@ test_that("bb_handler_oceandata works",{
         id="bilbobaggins",
         name="Oceandata test",
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
-        reference= "http://oceancolor.gsfc.nasa.gov/",
-        citation="See http://oceancolor.gsfc.nasa.gov/cms/citations",
+        doc_url= "https://oceancolor.gsfc.nasa.gov/",
+        citation="See https://oceancolor.gsfc.nasa.gov/cms/citations",
         source_url="",
         license="Please cite",
         comment="",
-        method=bb_handler_oceandata,
-        method_flags=c("search=T20000322000060.L3m_MO_SST_sst_9km.nc"),
+        method=list("bb_handler_oceandata",search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=NULL,
         access_function="",
         data_group="Sea surface temperature")
     temp_root <- tempdir()
-    ocf <- bb_add(bb_config(local_file_root="irrelevant_here"),ods)
-    expect_equal(bb_data_source_dir(ocf),"irrelevant_here/oceandata.sci.gsfc.nasa.gov/MODIST/Mapped")
-    cwd <- getwd()
-    setwd(temp_root)
-    bb_handler_oceandata(ocf)
+    ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODIST/Mapped$",bb_data_source_dir(ocf)))
+    bb_sync(ocf,confirm_downloads_larger_than=NULL)
     fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc" ## relative file name
-    expect_true(file.exists(fnm))
     expect_true(file.exists(file.path(temp_root,fnm)))
-    fi <- file.info(fnm)
+    fi <- file.info(file.path(temp_root,fnm))
     expect_gt(fi$size,6e6)
-    setwd(cwd)
 })
 
 test_that("url mapper works", {

@@ -4,32 +4,33 @@
 \alias{bb_cleanup}
 \title{Postprocessing: remove unwanted files}
 \usage{
-bb_cleanup(config, pattern, recursive = FALSE, ignore_case = FALSE, ...)
+bb_cleanup(pattern, recursive = FALSE, ignore_case = FALSE, ...)
 }
 \arguments{
-\item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source}
-
 \item{pattern}{string: regular expression, passed to \code{file.info}}
 
 \item{recursive}{logical: should the cleanup recurse into subdirectories?}
 
 \item{ignore_case}{logical: should pattern matching be case-insensitive?}
 
-\item{...}{: additional arguments (currently ignored)}
+\item{...}{: extra parameters passed automatically by \code{bb_sync}}
 }
 \value{
 TRUE on success
 }
 \description{
-This function is not intended to be called directly, but instead can be specified as a postprocessing step to apply to a data source.
+A function for removing unwanted files after downloading. This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
+}
+\details{
+This function can be used to remove unwanted files after a data source has been synchronized. The \code{pattern} specifies a regular expression that is passed to \code{file.info} to find matching files, which are then deleted. Note that only files in the data source's own directory (i.e. its subdirectory of the \code{local_file_root} specified in \code{bb_config}) are subject to deletion. But, beware! Some data sources may share directories, which can lead to unexpected file deletion. Be as specific as you can with the \code{pattern} parameter.
 }
 \examples{
 \dontrun{
-  ## remove .asc files after synchronisation
-  my_source <- bb_source(...,postprocess=quote(bb_cleanup(pattern="\\\\.asc$")))
+  ## remove .asc files after synchronization
+  my_source <- bb_source(...,postprocess=list(list("bb_cleanup",pattern="\\\\.asc$")))
 }
 
 }
 \seealso{
-\code{\link{bb_source}} \code{\link{bb_config}} \code{\link{bb_decompress}}
+\code{\link{bb_source}}, \code{\link{bb_config}}, \code{\link{bb_decompress}}
 }

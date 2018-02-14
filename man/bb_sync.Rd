@@ -2,22 +2,72 @@
 % Please edit documentation in R/sync.R
 \name{bb_sync}
 \alias{bb_sync}
-\title{Run a bowerbird data repository synchronisation}
+\title{Run a bowerbird data repository synchronization}
 \usage{
-bb_sync(config, create_root = FALSE, verbose = TRUE, catch_errors = TRUE)
+bb_sync(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE,
+  confirm_downloads_larger_than = 0.1, dry_run = FALSE)
 }
 \arguments{
 \item{config}{bb_config: configuration as returned by \code{\link{bb_config}}}
 
-\item{create_root}{logical: should the data root directory be created if it does not exist?}
+\item{create_root}{logical: should the data root directory be created if it does not exist? If this is \code{FALSE} (default) and the data root directory does not exist, an error will be generated}
 
-\item{verbose}{logical: if TRUE, provide additional progress output}
+\item{verbose}{logical: if \code{TRUE}, provide additional progress output}
 
-\item{catch_errors}{logical: if TRUE, catch errors and continue the synchronisation process}
+\item{catch_errors}{logical: if \code{TRUE}, catch errors and continue the synchronization process. The sync process works through data sources sequentially, and so if \code{catch_errors} is \code{FALSE}, then an error during the synchronization of one data source will prevent all subsequent data sources from synchronizing}
+
+\item{confirm_downloads_larger_than}{numeric or NULL: if non-negative, \code{bb_sync} will ask the user for confirmation to download any data source of size greater than this number (in GB). A value of zero will trigger confirmation on every data source. A negative or NULL value will not prompt for confirmation. Note that this only applies when R is being used interactively. The expected download size is taken from the \code{collection_size} parameter of the data source, and so its accuracy is dependent on the accuracy of the data source definition}
+
+\item{dry_run}{logical: if \code{TRUE}, \code{bb_sync} will do a dry run of the synchronization process without actually downloading files. This may be helpful for testing, but note that calls to wget will not be executed, so e.g. any recursion handled by wget itself will not be simulated}
 }
 \value{
-a tibble with the name, id, source_url, and sync success status of each data source (multiple source_urls within a data source will appear in separate rows)
+a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}
 }
 \description{
-For sync purposes, each row in the config's data_sources table is expanded on source_url, so that there is one row per unique data_source/source_url combination. Hence the returned tibble from \code{bb_sync} may have more rows than \code{bb_data_sources(config)}.
+This function takes a bowerbird configuration object and synchronizes each of the data sources defined within it. Data files will be downloaded if they are not present on the local machine, or if the configuration has been set to update local files.
+}
+\details{
+Note that when \code{bb_sync} is run, the \code{local_file_root} directory must exist or \code{create_root=TRUE} must be specified (i.e. \code{bb_sync(...,create_root=TRUE)}). If \code{create_root=FALSE} and the directory does not exist, \code{bb_sync} will fail with an error.
+}
+\examples{
+\dontrun{
+  ## Choose a location to store files on the local file system.
+  ## Normally this would be an explicit choice by the user, but here
+  ## we just use a temporary directory for example purposes.
+
+  td <- tempdir()
+  cf <- bb_config(local_file_root=td)
+
+  ## Bowerbird must then be told which data sources to synchronize.
+  ## Let's use data from the Australian 2016 federal election, which is provided as one
+  ## of the example data sources:
+
+  my_source <- subset(bb_example_sources(),id=="aus-election-house-2016")
+
+  ## Add this data source to the configuration:
+
+  cf <- bb_add(cf,my_source)
+
+  ## Once the configuration has been defined and the data source added to it,
+  ## we can run the sync process.
+  ## We set \\code{verbose=TRUE} so that we see additional progress output:
+
+  status <- bb_sync(cf,verbose=TRUE)
+
+  ## The files in this data set have been stored in a data-source specific
+  ## subdirectory of our local file root:
+  bb_data_source_dir(cf)
+
+  ## The contents of that directory:
+
+  list.files(bb_data_source_dir(cf),recursive=TRUE,full.names=TRUE)
+
+  ## We can run this at any later time and our repository will update if the source has changed:
+
+  status2 <- bb_sync(cf)
+}
+
+}
+\seealso{
+\code{\link{bb_config}}, \code{\link{bb_source}}
 }

@@ -7,17 +7,16 @@ test_that("decompressing zip files works",{
         name="Bowerbird test data",
         id="bbtest-v0.1",
         description="These are just some trivial test files provided with the bowerbird package.",
-        reference="https://github.com/AustralianAntarcticDivision/bowerbird",
+        doc_url="https://github.com/AustralianAntarcticDivision/bowerbird",
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/example_data.zip",##"https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/example_data.zip",
         license="MIT",
-        method=quote(bb_handler_wget),
-        method_flags=c("--recursive","--level=1","-e","robots=off"),
-        postprocess=quote(bb_unzip))
+        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
+        postprocess=list("bb_unzip"))
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp,"example_data.zip")))
@@ -33,17 +32,16 @@ test_that("decompressing gzipped files works",{
         name="Bowerbird test data",
         id="bbtest-v0.1",
         description="These are just some trivial test files provided with the bowerbird package.",
-        reference="https://github.com/AustralianAntarcticDivision/bowerbird",
+        doc_url="https://github.com/AustralianAntarcticDivision/bowerbird",
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/example_data_was_gzipped.csv.gz",##"https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/example_data_was_gzipped.csv.gz",
         license="MIT",
-        method=quote(bb_handler_wget),
-        method_flags=c("--recursive","--level=1","-e","robots=off"),
-        postprocess=quote(bb_gunzip))
+        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
+        postprocess=list("bb_gunzip"))
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp,"example_data_was_gzipped.csv.gz")))
@@ -59,17 +57,16 @@ test_that("decompressing bzipped files works",{
         name="Bowerbird test data",
         id="bbtest-v0.1",
         description="These are just some trivial test files provided with the bowerbird package.",
-        reference="https://github.com/AustralianAntarcticDivision/bowerbird",
+        doc_url="https://github.com/AustralianAntarcticDivision/bowerbird",
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/example_data_was_bzipped.csv.bz2",##"https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/example_data_was_bzipped.csv.bz2",
         license="MIT",
-        method=quote(bb_handler_wget),
-        method_flags=c("--recursive","--level=1","-e","robots=off"),
-        postprocess=quote(bb_bunzip2))
+        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
+        postprocess=list("bb_bunzip2"))
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp,"example_data_was_bzipped.csv.bz2")))
@@ -85,17 +82,16 @@ test_that("decompressing Z-compressed files works",{
         name="Bowerbird test data",
         id="bbtest-v0.1",
         description="These are just some trivial test files provided with the bowerbird package.",
-        reference="https://github.com/AustralianAntarcticDivision/bowerbird",
+        doc_url="https://github.com/AustralianAntarcticDivision/bowerbird",
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/20170822.nc.Z",##"https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/20170822.nc.Z",
         license="MIT",
-        method=quote(bb_handler_wget),
-        method_flags=c("--recursive","--level=1","-e","robots=off"),
-        postprocess=quote(bb_uncompress))
+        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
+        postprocess=list("bb_uncompress"))
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp,"20170822.nc.Z")))
@@ -103,5 +99,24 @@ test_that("decompressing Z-compressed files works",{
     expect_equal(file.info(file.path(fp,"20170822.nc"))$size,840508)
 })
 
+test_that("cleanup postprocessing works",{
+    skip_on_cran()
+    skip_on_appveyor() ## fails for unknown reasons
+    my_source <- bb_source(
+        name="Bowerbird test data",
+        id="bbtest-v0.1",
+        description="These are just some trivial test files provided with the bowerbird package.",
+        doc_url="https://github.com/AustralianAntarcticDivision/bowerbird",
+        citation="No citation needed.",
+        source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/example_data.zip",##"https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/example_data.zip",
+        license="MIT",
+        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
+        postprocess=list("bb_unzip",list("bb_cleanup",pattern="\\.csv$"))
+    )
+    temp_root <- tempdir()
+    cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
-
+    fp <- bb_data_source_dir(cf)
+    expect_false(file.exists(file.path(fp,"example_data_was_zipped.csv")))
+})

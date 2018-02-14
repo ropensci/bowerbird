@@ -7,17 +7,16 @@ test_that("bb_fingerprint does something sensible",{
         name="Bowerbird test data",
         id="bbtest-v0.1",
         description="These are just some trivial test files provided with the bowerbird package.",
-        reference="https://github.com/AustralianAntarcticDivision/bowerbird",
+        doc_url="https://github.com/AustralianAntarcticDivision/bowerbird",
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/example_data_was_gzipped.csv.gz",##https://github.com/AustralianAntarcticDivision/bowerbird/raw/master/inst/extdata/example_data_was_gzipped.csv.gz",
         license="MIT",
-        method=quote(bb_handler_wget),
-        method_flags=c("--recursive","--level=1","--no-check-certificate","-e","robots=off"),
-        postprocess=quote(bb_gunzip))
+        method=list("bb_handler_wget",recursive=TRUE,level=1,no_check_certificate=TRUE,robots_off=TRUE),
+        postprocess=list("bb_gunzip"))
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fgpr <- bb_fingerprint(cf)
     expect_named(fgpr,c("filename","data_source_id","size","last_modified","hash"))

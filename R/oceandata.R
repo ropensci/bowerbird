@@ -1,15 +1,48 @@
-#' Handler for oceandata data sources
+#' Handler for Oceandata data sets
+#'
+#' This is a handler function to be used with data sets from NASA's Oceandata system. This function is not intended to be called directly, but rather is specified as a \code{method} option in \code{\link{bb_source}}.
+#'
+#' Oceandata uses standardized file naming conventions (see https://oceancolor.gsfc.nasa.gov/docs/format/), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the \code{search} argument. Note that the \code{bb_handler_oceandata} does not take need `source_url` to be specified in the \code{bb_source} call.
 #'
 #' @references https://oceandata.sci.gsfc.nasa.gov/
-#' @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
-#' @param verbose logical: if TRUE, provide additional progress output
-#' @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
+#' @param search string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)
+#' @param dtype string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)
+#' @param ... : extra parameters passed automatically by \code{bb_sync}
 #'
-#' @return the directory if local_dir_only is TRUE, otherwise TRUE on success
+#' @return TRUE on success
+#'
+#' @examples
+#'
+#' my_source <- bb_source(
+#'   name="Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a",
+#'   id="SeaWiFS_L3m_MO_CHL_chlor_a_9km",
+#'   description="Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at
+#'     9km spatial resolution",
+#'   doc_url="https://oceancolor.gsfc.nasa.gov/",
+#'   citation="See https://oceancolor.gsfc.nasa.gov/citations",
+#'   license="Please cite",
+#'   method=list("bb_handler_oceandata",search="S*L3m_MO_CHL_chlor_a_9km.nc"),
+#'   postprocess=NULL,
+#'   collection_size=7.2,
+#'   data_group="Ocean colour")
 #'
 #' @export
-bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
-    ## oceandata synchronisation handler
+bb_handler_oceandata <- function(search,dtype,...) {
+    assert_that(is.string(search),nzchar(search))
+    if (!missing(dtype)) {
+        if (!is.null(dtype)) assert_that(is.string(dtype),nzchar(dtype))
+    } else {
+        dtype <- NULL
+    }
+    do.call(bb_handler_oceandata_inner,list(...,search=search,dtype=dtype))
+}
+
+
+# @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
+# @param verbose logical: if TRUE, provide additional progress output
+# @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
+bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,search,dtype=NULL) {
+    ## oceandata synchronization handler
 
     ## oceandata provides a file search interface, e.g.:
     ## wget -q --post-data="cksum=1&search=A2002*DAY_CHL_chlor*9km*" -O - https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi
@@ -24,18 +57,21 @@ bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
 
     assert_that(is(config,"bb_config"))
     assert_that(nrow(bb_data_sources(config))==1)
-    assert_that(is.list(bb_data_sources(config)$method_flags))
-    assert_that(is.character(bb_data_sources(config)$method_flags[[1]]))
-    assert_that(is.flag(verbose))
-    assert_that(is.flag(local_dir_only))
+    ##assert_that(is.list(bb_data_sources(config)$method_flags))
+    ##assert_that(is.character(bb_data_sources(config)$method_flags[[1]]))
+    assert_that(is.flag(verbose),!is.na(verbose))
+    assert_that(is.flag(local_dir_only),!is.na(local_dir_only))
+    assert_that(is.string(search),nzchar(search))
+    if (!is.null(dtype)) assert_that(is.string(dtype),nzchar(dtype))
 
-    method_flags <- bb_data_sources(config)$method_flags[[1]]
+    ##method_flags <- bb_data_sources(config)$method_flags[[1]]
+    ##assert_that(!is.null(method_flags$search),is.string(method_flags$search),nzchar(method_flags$search))
     this_att <- bb_settings(config)
     if (local_dir_only) {
         ## highest-level dir
         out <- "oceandata.sci.gsfc.nasa.gov"
         ## refine by platform
-        this_search_spec <- sub("search=","",method_flags)
+        this_search_spec <- search##sub("search=","",method_flags)
         this_platform <- oceandata_platform_map(substr(this_search_spec,1,1))
         if (nchar(this_platform)>0) out <- file.path(out,this_platform)
         if (grepl("L3m",this_search_spec)) {
@@ -48,33 +84,38 @@ bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
     tries <- 0
     while (tries<3) {
         ## sometimes this takes a couple of attempts!
-        if (FALSE) {
-            ## system2 code
-            myfiles <- bb_wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",paste0("-q --post-data=\"cksum=1&",method_flags,"\" -O -"),stdout=TRUE)
-            if (is.null(attr(myfiles,"status")) || length(myfiles)>0) break
-        } else {
-            ## sys code, nb don't quote args, will break on unix
-            myfiles <- bb_wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",c("-q",paste0("--post-data=cksum=1&",method_flags),"-O","-"),capture_stdout=TRUE)
-            if (myfiles$status==0) break
-        }
+        ## sys code, nb don't quote args, will break on unix
+        qry <- paste0("--post-data=cksum=1&search=",search)
+        if (!is.null(dtype))
+            qry <- paste0(qry,"&dtype=",dtype)
+        ##if (get_os()=="windows") qry <- paste0("\"",qry,"\"") ## not sure if need these on windows or not!!
+        myfiles <- bb_wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",recursive=FALSE,extra_flags=c("-q",qry,"-O","-"),capture_stdout=TRUE,verbose=verbose)
+   cat("search status: ",myfiles$status,"\n")
+   cat("search stdout: ",rawToChar(myfiles$stdout),"\n")
+
+        if (myfiles$status==0) break
         tries <- tries+1
     }
-    ##if (!is.null(attr(myfiles,"status")) && attr(myfiles,"status")!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",method_flags,")")
-    if (myfiles$status!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",method_flags,")")
+    if (myfiles$status!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",search,")")
     myfiles <- strsplit(rawToChar(myfiles$stdout),"\n")[[1]]
     ## catch "Sorry No Files Matched Your Query"
-    if (any(grepl("no files matched your query",myfiles,ignore.case=TRUE))) stop("No files matched the supplied oceancolour data file search query (",method_flags,")")
+    if (any(grepl("no files matched your query",myfiles,ignore.case=TRUE))) stop("No files matched the supplied oceancolour data file search query (",search,")")
+    ## also bail out if we don't see the "Your query generated xx results" message
+    if (!any(grepl("Your query generated .* results",myfiles,ignore.case=TRUE))) stop("error with oceancolour data file search: could not retrieve file list (query: ",search,")")
+
     myfiles <- myfiles[-c(1,2)] ## get rid of header line and blank line that follows it
-    myfiles <- tbl_df(do.call(rbind,lapply(myfiles,function(z)strsplit(z,"[[:space:]]+")[[1]]))) ## split checksum and file name from each line
+    myfiles <- as_tibble(do.call(rbind,lapply(myfiles,function(z)strsplit(z,"[[:space:]]+")[[1]]))) ## split checksum and file name from each line
     colnames(myfiles) <- c("checksum","filename")
-    myfiles <- myfiles %>% dplyr::arrange_(~filename)
+    myfiles <- myfiles[order(myfiles$filename),]
     ## for each file, download if needed and store in appropriate directory
     out <- TRUE
     for (idx in seq_len(nrow(myfiles))) {
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/",myfiles$filename[idx]) ## full URL
         this_fullfile <- oceandata_url_mapper(this_url) ## where local copy will go
         if (is.null(this_fullfile)) {
-            warning(sprintf("skipping oceandata URL (%s): cannot determine the local path to store the file",this_url))
+            msg <- sprintf("skipping oceandata URL (%s): cannot determine the local path to store the file",this_url)
+            if (verbose) cat(msg,"\n")
+            warning(msg)
             next
         }
         this_exists <- file.exists(this_fullfile)
@@ -93,13 +134,14 @@ bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
         }
         if (download_this) {
             dummy <- config
-            ## note that if skip_downloads is TRUE, it will be passed through to bb_handler_wget here
+            ## note that if dry_run is TRUE, it will be passed through to bb_handler_wget here
             ##dummy$method_flags <- paste("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
             temp <- bb_data_sources(dummy)
-            temp$method_flags <- list(c("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories"))
+            temp$method <- list(list("bb_handler_wget",recursive=TRUE,extra_flags=c("--timeout=1800","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories")))
+            ##temp$method_flags <- list(list(recursive=TRUE,extra_flags=c("--timeout=1800","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories")))
             temp$source_url <- this_url
             bb_data_sources(dummy) <- temp
-            out <- out && bb_handler_wget(dummy,verbose=verbose)
+            out <- out && do.call(bb_handler_wget,c(list(dummy,verbose=verbose),temp$method[[1]][-1]))
         } else {
             if (this_exists) {
                 if (verbose) cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))
@@ -119,7 +161,7 @@ bb_handler_oceandata <- function(config,verbose=FALSE,local_dir_only=FALSE) {
 # @param error_no_match logical: should an error be thrown if the abbrev is not matched?
 # @references \url{https://oceandata.sci.gsfc.nasa.gov/}
 # @return Either the platform name string corresponding to the abbreviation, if \code{abbrev} supplied, or a data.frame of all abbreviations and platform name strings if \code{abbrev} is missing
-# @seealso \code{\link{oceandata_timeperiod_map}} \code{\link{oceandata_parameter_map}}
+# @seealso \code{\link{oceandata_timeperiod_map}}, \code{\link{oceandata_parameter_map}}
 # @export
 oceandata_platform_map <- function(abbrev,error_no_match=FALSE) {
     rawtext <- "abbrev,platform
@@ -153,7 +195,7 @@ V,VIIRS"
 # @param abbrev string: the time period abbreviation from the URL (e.g. "DAY" for daily, "SCSP" for seasonal spring climatology)
 # @param error_no_match logical: should an error be thrown if the abbrev is not matched?
 # @return Either the time period string corresponding to the abbreviation, if \code{abbrev} supplied, or a data.frame of all abbreviations and time period strings if \code{abbrev} is missing
-# @seealso \code{\link{oceandata_platform_map}} \code{\link{oceandata_parameter_map}}
+# @seealso \code{\link{oceandata_platform_map}}, \code{\link{oceandata_parameter_map}}
 # @export
 oceandata_timeperiod_map <- function(abbrev,error_no_match=FALSE) {
     rawtext <- "abbrev,time_period
@@ -281,7 +323,7 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
     ## [yyyy] only for 8Day,Daily,Rolling_32_Day
     ## Binned files (L3b) should become oceandata.sci.gsfc.nasa.gov/platform/L3BIN/yyyy/ddd/basename
     assert_that(is.string(this_url))
-    assert_that(is.flag(path_only))
+    assert_that(is.flag(path_only),!is.na(path_only))
     assert_that(is.string(sep))
     if (grepl("\\.L3m_",this_url)) {
         ## mapped file
@@ -310,8 +352,8 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
     }
     this_year <- substr(url_parts$date,1,4)
     if (is.na(url_parts$type)) {
-        warning("unrecognized URL pattern",this_url,", ignoring")
-        out <- NULL
+        ## no type provided? we can't proceed with the download, anyway
+        stop("cannot ascertain file type from oceancolor URL: ",this_url)
     } else {
         switch(url_parts$type,
                L3m={
