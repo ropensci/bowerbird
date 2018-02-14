@@ -37,7 +37,7 @@ library(devtools)
 install_github("AustralianAntarcticDivision/bowerbird",build_vignettes=TRUE)
 ```
 
-You will also need to have the third-party utility `wget` available, because Bowerbird uses this to do the heavy lifting of recursively downloading files from data providers. Note that installing `wget` may require admin privileges on your local machine.
+You will also need to have the third-party utility `wget` available, because bowerbird uses this to do the heavy lifting of recursively downloading files from data providers. Note that installing `wget` may require admin privileges on your local machine.
 
 ### Linux
 
