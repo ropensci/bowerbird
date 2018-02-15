@@ -3,7 +3,9 @@ Type: Package
 Title: Keep a Collection of Sparkly Data Resources
 Version: 0.7.0
 Authors@R: c(person("Ben","Raymond",email="ben.raymond@aad.gov.au",role=c("aut","cre")),
-	   person("Michael","Sumner",role="aut"))
+	   person("Michael","Sumner",role="aut"),
+	   person("Miles","McBain",email="miles.mcbain@gmail.com",role=c("rev","ctb")),
+	   person("Leah","Wasser",role=c("rev","ctb")))
 Description: Tools to get and maintain a data repository from third-party data
     providers.
 URL: https://github.com/AustralianAntarcticDivision/bowerbird
