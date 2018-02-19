@@ -54,7 +54,6 @@ do_fingerprint <- function(this_dataset,hash,settings) {
     this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(this_dataset$source_url))
     myfiles <- list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE) ## full.names TRUE so that names are relative to current working directory
     file_list <- file.info(myfiles)
-    ##file_list <- file_list %>% mutate_(filename=~myfiles,data_source_id=~this_dataset$id) %>% select_(~filename,~data_source_id,~size,~mtime) %>% rename_(last_modified=~mtime)
     file_list$filename <- file.path(this_dataset$local_file_root,myfiles) ## absolute paths
     file_list$data_source_id <- this_dataset$id
     file_list$last_modified <- file_list$mtime

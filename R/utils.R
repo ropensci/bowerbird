@@ -21,7 +21,6 @@ is_nonempty_string <- function(z) is.string(z) && nzchar(z)
 ## check method (which may be function, call, or symbol) matches expected function
 check_method_is <- function(method,expected) {
     assert_that(is.function(expected))
-    ##identical(get_function_from_method(method),expected)
     identical(match.fun(method),expected)
 }
 
@@ -31,47 +30,6 @@ is_a_fun <- function(z) {
     try({match.fun(z); out <- TRUE},silent=TRUE)
     out
 }
-
-## get actual function from method (which may be function, call, or symbol)
-##get_function_from_method <- function(method) {
-##    assert_that(is.function(method) || is.call(method) || is.symbol(method) || is.string(method))
-##    if (is.function(method)) {
-##        return(method)
-##    } else if (is.call(method)) {
-##        if (all.names(method)[1]=="quote") {
-##            ## call was constructed as e.g. enquote(whatever)
-##            return(eval(method))
-##        } else {
-##            ## call was constructed as e.g. quote(whatever())
-##            return(get_function_from_method(all.names(method)[1])) ## check using name of called function
-##        }
-##    } else if (is.string(method)) {
-##        ## passed as function name
-##        if (exists(method,mode="function")) return(get(method))
-##    } else {
-##        ## symbol/name, by e.g. quote(whatever)
-##        if (exists(deparse(method),mode="function")) return(eval(method))
-##    }
-##    stop("could not extract the underlying method function")
-##}
-
-## isn't there a better way to do this?
-## qfun is a quoted function with arguments already provided, e.g. quote(fun(var=arg))
-## we want to add some extra args (xargs, named list)
-## not used any more
-##inject_args <- function(qfun,xargs,extras_first=TRUE) {
-##    assert_that(is.flag(extras_first),!is.na(extras_first))
-##    ## xargs is the named list of extra arguments to add
-##    if (extras_first) {
-##        arglist <- xargs
-##        if (length(qfun)>1) for (k in seq_len(length(qfun))[-1]) arglist <- c(arglist,qfun[[k]])
-##    } else {
-##        arglist <- list()
-##        if (length(qfun)>1) for (k in seq_len(length(qfun))[-1]) arglist <- c(arglist,qfun[[k]])
-##        arglist <- c(arglist,xargs)
-##    }
-##    arglist ## call this as e.g. do.call(all.names(qfun)[1],arglist)
-##}
 
 save_current_settings <- function() {
     return(list(working_dir=getwd(), ## current working directory
@@ -95,8 +53,6 @@ directory_from_url <- function(this_url) {
     ## this_url can be character or list of char
     this_url <- sub("^(http|https|ftp)://","",unlist(this_url))
     this_url <- sub(":","+",this_url) ## port
-    ## discard anything after the last trailing slash if it includes asterisks (is a file mask)
-    ##sub("/[^/]*\\*[^/]*$","/",this_url)
     ## discard anything at all after the last trailing slash
     this_url <- sub("/[^/]*$","/",this_url)
     this_url[grepl("[^/\\]$",this_url)] <- paste0(this_url[grepl("[^/\\]$",this_url)],"/") ## enforce trailing slash (?)

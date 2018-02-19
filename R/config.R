@@ -82,7 +82,6 @@ bb_subset <- function(config,idx) {
 #' @export
 bb_add <- function(config,source) {
     assert_that(is(config,"bb_config"))
-    ##bb_data_sources(config) <- dplyr::bind_rows(bb_data_sources(config),source)
     bb_data_sources(config) <- rbind(bb_data_sources(config),source)
     config
 }
@@ -135,12 +134,6 @@ bb_settings <- function(config) {
         value <- value[names(value) %in% allowed_settings()]
     }
     config$settings <- value
-    #### replace just the specified element
-    ##if (length(value)>0) {
-    ##    old_settings <- config$settings
-    ##    new_settings <- c(value,old_settings[!names(old_settings) %in% value])
-    ##    config$settings <- new_settings
-    ##}
     config
 }
 
@@ -276,12 +269,6 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
     cat("\nLast updated: ",format(Sys.time()),"\n",file=rmd_file,append=TRUE)
 
     config <- bb_settings_to_cols(config)
-
-    ##config <- config %>% group_by_(~data_group,~name) %>%
-    ##    mutate_(local_file_paths=~paste(file.path(local_file_root,directory_from_url(source_url)),collapse=", ")) %>%
-    ##    ungroup() %>%
-    ##    select_(~-source_url,~-method,~-postprocess) %>%
-    ##    unique()
 
     config$local_file_paths <- vapply(seq_len(nrow(config)),function(z) {
         temp <- directory_from_url(config$source_url[[z]])

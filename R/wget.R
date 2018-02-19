@@ -67,7 +67,6 @@ bb_handler_wget_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,...)
     ## add user, password flags
     if (!is.na(cfrow$user) && nchar(cfrow$user)>0) this_flags <- c(this_flags,list(user=cfrow$user))
     if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- c(this_flags,list(password=cfrow$password))
-    ##if (cfrow$wait>0) this_flags <- c(this_flags,"--wait=",cfrow$wait)
 
     if (!verbose) {
         ## suppress wget's own output

@@ -51,27 +51,23 @@ bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE
     ## returns list of files and SHA1 checksum for each file
     ## each file can be retrieved from https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/filename
 
-    ## expect that config$data_sources$method_flags will contain the search and dtype components of the post string
+    ## expect that config$data_sources$method list will contain the search and dtype components of the post string
     ##  i.e. "search=...&dtype=..." in "dtype=L3m&addurl=1&results_as_file=1&search=A2002*DAY_CHL_chlor*9km*"
     ##  or just include the data type in the search pattern e.g. "search=A2002*L3m_DAY_CHL_chlor*9km*
 
     assert_that(is(config,"bb_config"))
     assert_that(nrow(bb_data_sources(config))==1)
-    ##assert_that(is.list(bb_data_sources(config)$method_flags))
-    ##assert_that(is.character(bb_data_sources(config)$method_flags[[1]]))
     assert_that(is.flag(verbose),!is.na(verbose))
     assert_that(is.flag(local_dir_only),!is.na(local_dir_only))
     assert_that(is.string(search),nzchar(search))
     if (!is.null(dtype)) assert_that(is.string(dtype),nzchar(dtype))
 
-    ##method_flags <- bb_data_sources(config)$method_flags[[1]]
-    ##assert_that(!is.null(method_flags$search),is.string(method_flags$search),nzchar(method_flags$search))
     this_att <- bb_settings(config)
     if (local_dir_only) {
         ## highest-level dir
         out <- "oceandata.sci.gsfc.nasa.gov"
         ## refine by platform
-        this_search_spec <- search##sub("search=","",method_flags)
+        this_search_spec <- search
         this_platform <- oceandata_platform_map(substr(this_search_spec,1,1))
         if (nchar(this_platform)>0) out <- file.path(out,this_platform)
         if (grepl("L3m",this_search_spec)) {
@@ -88,11 +84,7 @@ bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE
         qry <- paste0("--post-data=cksum=1&search=",search)
         if (!is.null(dtype))
             qry <- paste0(qry,"&dtype=",dtype)
-        ##if (get_os()=="windows") qry <- paste0("\"",qry,"\"") ## not sure if need these on windows or not!!
         myfiles <- bb_wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",recursive=FALSE,extra_flags=c("-q",qry,"-O","-"),capture_stdout=TRUE,verbose=verbose)
-        ##cat("search status: ",myfiles$status,"\n")
-        ##cat("search stdout: ",rawToChar(myfiles$stdout),"\n")
-
         if (myfiles$status==0) break
         tries <- tries+1
     }
@@ -135,10 +127,8 @@ bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE
         if (download_this) {
             dummy <- config
             ## note that if dry_run is TRUE, it will be passed through to bb_handler_wget here
-            ##dummy$method_flags <- paste("--timeout=1800","--recursive","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories",sep=" ")
             temp <- bb_data_sources(dummy)
             temp$method <- list(list("bb_handler_wget",recursive=TRUE,extra_flags=c("--timeout=1800","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories")))
-            ##temp$method_flags <- list(list(recursive=TRUE,extra_flags=c("--timeout=1800","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories")))
             temp$source_url <- this_url
             bb_data_sources(dummy) <- temp
             out <- out && do.call(bb_handler_wget,c(list(dummy,verbose=verbose),temp$method[[1]][-1]))

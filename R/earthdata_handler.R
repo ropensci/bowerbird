@@ -62,10 +62,8 @@ bb_handler_earthdata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE
     ## create this file
     if (!file.exists(cookies_file)) cat("",file=cookies_file)
     on.exit(file.remove(cookies_file))
-    ##mflags <- list(...)##flags_to_charvec(dummy$method_flags)
     ## must use --auth-no-challenge else the server redirects to the html login page, rather than accepting the provided credentials
     dummy$method <- list(list("bb_handler_wget",...,extra_flags=c("--http-user",dummy$user,"--http-password",dummy$password,"--auth-no-challenge","--load-cookies",cookies_file,"--save-cookies",cookies_file,"--keep-session-cookies"),reject="index.html*",robots_off=TRUE))
-    ##dummy$method_flags <- list(c(mflags,"--http-user",dummy$user,"--http-password",dummy$password,"--auth-no-challenge","--load-cookies",cookies_file,"--save-cookies",cookies_file,"--keep-session-cookies","--reject=index.html*","-e","robots=off"))
     dummy$user <- NA_character_
     dummy$password <- NA_character_
     bb_data_sources(config) <- dummy
