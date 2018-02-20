@@ -1,5 +1,7 @@
 ---
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -12,7 +14,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-[![Travis-CI Build Status](https://travis-ci.org/AustralianAntarcticDivision/bowerbird.svg?branch=master)](https://travis-ci.org/AustralianAntarcticDivision/bowerbird)
+[![Travis-CI Build Status](http://badges.herokuapp.com/travis/AustralianAntarcticDivision/bowerbird?branch=master&env=BUILD_NAME=trusty_release&label=linux)](https://travis-ci.org/AustralianAntarcticDivision/bowerbird)
+[![Build Status](http://badges.herokuapp.com/travis/AustralianAntarcticDivision/bowerbird?branch=master&env=BUILD_NAME=osx_release&label=osx)](https://travis-ci.org/AustralianAntarcticDivision/bowerbird) 
 [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/5idrimyx0uuv6liu?svg=true)](https://ci.appveyor.com/project/raymondben/bowerbird)
 [![codecov](https://codecov.io/gh/AustralianAntarcticDivision/bowerbird/branch/master/graph/badge.svg)](https://codecov.io/gh/AustralianAntarcticDivision/bowerbird)
 
