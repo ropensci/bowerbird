@@ -13,6 +13,21 @@ vignette: >
 
 # Bowerbird
 
+### Table of contents
+
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#installing">Installing</a></li>
+<li><a href="#usage-overview">Usage overview</a></li>
+<li><a href="#users-level-of-usage-and-expected-knowledge">Users: level of usage and expected knowledge</a></li>
+<li><a href="#defining-data-sources">Defining data sources</a></li>
+<li><a href="#nuances">Nuances</a></li>
+<li><a href="#developer-notes">Developer notes</a></li>
+<li><a href="#data-source-summary">Data source summary</a></li>
+</ul>
+
+## Overview
+
 Often it's desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be better to have local copies. This is particularly common in environmental and other sciences that deal with large data sets (e.g. satellite or global climate model products). Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
 
 Bowerbird can be used in several different modes:
@@ -100,7 +115,7 @@ Users can interact with bowerbird at several levels, with increasing levels of c
 
 1. **Using bowerbird with data source definitions that have been written by someone else**. This is fairly straightforward. The trickiest part might be ensuring that `wget` is installed (particularly on Mac machines).
 
-1. **Writing your own data source definitions so that you can download data from a new data provider, but using an existing handler such as `bb_handler_wget`**. This is a little more complicated. You will need reasonable knowledge of how your data provider disseminates its files (including e.g. the source URL from which data files are to be downloaded, and how the data repository is structured). Be prepared to fiddle with `wget` settings to accommomdate provider-specific requirements (e.g. controlling recursion behaviour). The "Defining data sources" section below provides guidance and examples on writing data source definitions.
+1. **Writing your own data source definitions so that you can download data from a new data provider, but using an existing handler such as `bb_handler_wget`**. This is a little more complicated. You will need reasonable knowledge of how your data provider disseminates its files (including e.g. the source URL from which data files are to be downloaded, and how the data repository is structured). Be prepared to fiddle with `wget` settings to accommodate provider-specific requirements (e.g. controlling recursion behaviour). The "Defining data sources" section below provides guidance and examples on writing data source definitions.
 
 1. **Writing your own handler function for data providers that do not play nicely with the packaged handlers (`bb_handler_wget`, `bb_handler_oceandata`, `bb_handler_earthdata`)**. This is the trickiest, and at the time of writing we have not provided much guidance on how to do this. See the "Writing new data source handlers" section, below.
 

@@ -7,6 +7,37 @@ Bowerbird
 
 <img align="right" src="https://rawgit.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/bowerbird.svg" />
 
+### Table of contents
+
+<ul>
+<li>
+<a href="#overview">Overview</a>
+</li>
+<li>
+<a href="#installing">Installing</a>
+</li>
+<li>
+<a href="#usage-overview">Usage overview</a>
+</li>
+<li>
+<a href="#users-level-of-usage-and-expected-knowledge">Users: level of usage and expected knowledge</a>
+</li>
+<li>
+<a href="#defining-data-sources">Defining data sources</a>
+</li>
+<li>
+<a href="#nuances">Nuances</a>
+</li>
+<li>
+<a href="#developer-notes">Developer notes</a>
+</li>
+<li>
+<a href="#data-source-summary">Data source summary</a>
+</li>
+</ul>
+Overview
+--------
+
 Often it's desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be better to have local copies. This is particularly common in environmental and other sciences that deal with large data sets (e.g. satellite or global climate model products). Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
 
 Bowerbird can be used in several different modes:
