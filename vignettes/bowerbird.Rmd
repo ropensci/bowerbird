@@ -25,6 +25,7 @@ vignette: >
 <li><a href="#developer-notes">Developer notes</a></li>
 <li><a href="#data-source-summary">Data source summary</a></li>
 </ul>
+&nbsp;
 
 ## Overview
 
