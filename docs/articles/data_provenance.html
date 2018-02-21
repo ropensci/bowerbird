@@ -5,11 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data provenance • bowerbird</title>
+<title>Data provenance â€¢ bowerbird</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
-<!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../jquery.sticky-kit.min.js"></script><script src="../pkgdown.js"></script><!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
+<script src="../jquery.sticky-kit.min.js"></script><script src="../pkgdown.js"></script><meta property="og:title" content="Data provenance">
+<meta property="og:description" content="">
+<meta name="twitter:card" content="summary">
+<!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
@@ -75,7 +78,7 @@
       <h1>Data provenance</h1>
                         <h4 class="author">Ben Raymond, Michael Sumner</h4>
             
-            <h4 class="date">2018-02-19</h4>
+            <h4 class="date">2018-02-21</h4>
           </div>
 
     
@@ -90,10 +93,10 @@
 <a href="#which-files-were-used-in-an-analysis" class="anchor"></a>Which files were used in an analysis</h2>
 <p>Say we have a bowerbird config:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bowerbird)
-cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="st">"/some/local/path"</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(<span class="kw"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span>())</code></pre></div>
+cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="st">"/some/local/path"</span>) %&gt;%<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(<span class="kw"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span>())</code></pre></div>
 <p>We can ask bowerbird where these files are stored locally:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">source_dirs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_data_source_dir.html">bb_data_source_dir</a></span>(cf)
-knitr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/knitr/topics/kable">kable</a></span>(<span class="kw">data.frame</span>(<span class="dt">name=</span>cf<span class="op">$</span>data_sources<span class="op">$</span>name,<span class="dt">source_dir=</span>source_dirs))</code></pre></div>
+knitr::<span class="kw">kable</span>(<span class="kw">data.frame</span>(<span class="dt">name=</span>cf$data_sources$name,<span class="dt">source_dir=</span>source_dirs))</code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">name</th>
@@ -102,15 +105,15 @@ knitr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentati
 <tbody>
 <tr class="odd">
 <td align="left">NOAA OI SST V2</td>
-<td align="left">/some/local/path/ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/</td>
+<td align="left">/some/local/path/ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2</td>
 </tr>
 <tr class="even">
 <td align="left">Australian Election 2016 House of Representatives data</td>
-<td align="left">/some/local/path/results.aec.gov.au/20499/Website/</td>
+<td align="left">/some/local/path/results.aec.gov.au/20499/Website</td>
 </tr>
 <tr class="odd">
 <td align="left">CMEMS global gridded SSH reprocessed (1993-ongoing)</td>
-<td align="left">/some/local/path/ftp.sltac.cls.fr/Core/SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047/dataset-duacs-rep-global-merged-allsat-phy-l4-v3/</td>
+<td align="left">/some/local/path/ftp.sltac.cls.fr/Core/SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047/dataset-duacs-rep-global-merged-allsat-phy-l4-v3</td>
 </tr>
 <tr class="even">
 <td align="left">Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a</td>
@@ -118,11 +121,11 @@ knitr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentati
 </tr>
 <tr class="odd">
 <td align="left">Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2</td>
-<td align="left">/some/local/path/daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/</td>
+<td align="left">/some/local/path/daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2</td>
 </tr>
 <tr class="even">
 <td align="left">Bathymetry of Lake Superior</td>
-<td align="left">/some/local/path/www.ngdc.noaa.gov/mgg/greatlakes/superior/data/</td>
+<td align="left">/some/local/path/www.ngdc.noaa.gov/mgg/greatlakes/superior/data</td>
 </tr>
 </tbody>
 </table>
