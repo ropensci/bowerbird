@@ -126,8 +126,9 @@ It is expected that the majority of users will fall into one of the first two ca
 
 ### Prepackaged data source definitions
 
-A few example data source definitions are provided as part of the bowerbird package --- see `bb_example_sources()` (these are also listed at the bottom of this document). Other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant)) provide themed sets of data sources that can be used with bowerbird.
+A few example data source definitions are provided as part of the bowerbird package --- see `bb_example_sources()` (these are also listed at the bottom of this document).
 
+Other packages provide data source definitions that can be used with bowerbird. The [blueant](https://github.com/AustralianAntarcticDivision/blueant) package provides a suite of bowerbird data source definitions themed around Southern Ocean and Antarctic data, and includes a range of oceanographic, meteorological, topographic, and other environmental data sets.
 
 ### Defining your own data sources
 
