@@ -31,3 +31,6 @@ Suggests:
     covr
 Remotes: jimhester/archive
 VignetteBuilder: knitr
+X-schema.org-applicationCategory: Antarctic/Southern Ocean
+X-schema.org-keywords: ropensci, Antarctic, Southern Ocean, data, environmental, satellite, climate
+X-schema.org-isPartOf: https://ropensci.org, https://scar.org
