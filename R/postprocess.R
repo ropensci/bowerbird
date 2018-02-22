@@ -262,6 +262,7 @@ bb_uncompress <- function(...) bb_decompress(...,method="uncompress")
 #' @param pattern string: regular expression, passed to \code{file.info}
 #' @param recursive logical: should the cleanup recurse into subdirectories?
 #' @param ignore_case logical: should pattern matching be case-insensitive?
+#' @param all_files logical: should the cleanup include hidden files?
 #' @param ... : extra parameters passed automatically by \code{bb_sync}
 #'
 #' @return TRUE on success
@@ -275,11 +276,12 @@ bb_uncompress <- function(...) bb_decompress(...,method="uncompress")
 #' }
 #'
 #' @export
-bb_cleanup <- function(pattern,recursive=FALSE,ignore_case=FALSE,...) {
+bb_cleanup <- function(pattern,recursive=FALSE,ignore_case=FALSE,all_files=FALSE,...) {
     assert_that(is.string(pattern))
     assert_that(is.flag(recursive),!is.na(recursive))
     assert_that(is.flag(ignore_case),!is.na(ignore_case))
-    do.call(bb_cleanup_inner,list(...,pattern=pattern,recursive=recursive,ignore_case=ignore_case))
+    assert_that(is.flag(all_files),!is.na(all_files))
+    do.call(bb_cleanup_inner,list(...,pattern=pattern,recursive=recursive,ignore_case=ignore_case,all_files=all_files))
 }
 
 
@@ -293,10 +295,10 @@ bb_cleanup <- function(pattern,recursive=FALSE,ignore_case=FALSE,...) {
 #
 # @return TRUE on success
 #
-bb_cleanup_inner <- function(config,file_list_before,file_list_after,verbose=FALSE,pattern,recursive=FALSE,ignore_case=FALSE) {
+bb_cleanup_inner <- function(config,file_list_before,file_list_after,verbose=FALSE,pattern,recursive=FALSE,ignore_case=FALSE,all_files=FALSE) {
     assert_that(is(config,"bb_config"))
     assert_that(nrow(bb_data_sources(config))==1)
-    to_delete <- list.files(path=bb_data_source_dir(config),pattern=pattern,recursive=recursive,ignore.case=ignore_case,full.names=TRUE)
+    to_delete <- list.files(path=bb_data_source_dir(config),pattern=pattern,recursive=recursive,ignore.case=ignore_case,all.files=all_files,full.names=TRUE)
     if (verbose) {
         if (length(to_delete)>0) {
             if (verbose) cat(sprintf(" cleaning up files: %s\n",paste(to_delete,collapse=",")))

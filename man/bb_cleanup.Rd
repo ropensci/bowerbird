@@ -4,7 +4,8 @@
 \alias{bb_cleanup}
 \title{Postprocessing: remove unwanted files}
 \usage{
-bb_cleanup(pattern, recursive = FALSE, ignore_case = FALSE, ...)
+bb_cleanup(pattern, recursive = FALSE, ignore_case = FALSE,
+  all_files = FALSE, ...)
 }
 \arguments{
 \item{pattern}{string: regular expression, passed to \code{file.info}}
@@ -12,6 +13,8 @@ bb_cleanup(pattern, recursive = FALSE, ignore_case = FALSE, ...)
 \item{recursive}{logical: should the cleanup recurse into subdirectories?}
 
 \item{ignore_case}{logical: should pattern matching be case-insensitive?}
+
+\item{all_files}{logical: should the cleanup include hidden files?}
 
 \item{...}{: extra parameters passed automatically by \code{bb_sync}}
 }
