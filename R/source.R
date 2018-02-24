@@ -82,9 +82,9 @@ bb_source <- function(id,name,description=NA_character_,doc_url,source_url,citat
     if (warn_empty_auth && (!is.na(authentication_note) && (na_or_empty(user) || na_or_empty(password)))) {
         warning(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s",name,authentication_note))
     }
-    if (missing(license) || !is_nonempty_string(license) || missing(citation) || !is_nonempty_string(citation))
+    if (missing(license) || is.null(license) || missing(citation) || is.null(citation))
         stop("Please provide license and citation information for the data source, so that users properly acknowledge it")
-    if (missing(doc_url) || !is_nonempty_string(doc_url))
+    if (missing(doc_url) || is.null(doc_url))
         stop("Please provide a doc_url (a URL to the data source's metadata record or home page")
 
     if (missing(source_url) || is.null(source_url)) source_url <- NA_character_
@@ -127,4 +127,119 @@ bb_source <- function(id,name,description=NA_character_,doc_url,source_url,citat
         access_function=if (assert_that(is.string(access_function))) access_function,
         data_group=if (assert_that(is.string(data_group))) data_group,
         collection_size=if (assert_that(is.numeric(collection_size) || is.na(collection_size))) collection_size)
+}
+
+
+#' Modify a data source
+#'
+#' This is a helper function designed to make it easier to modify an already-defined data source. Generally, parameters passed here will replace existing entries in \code{src} if they exist, or will be added if not. The \code{method} and \code{postprocess} parameters are slightly different: see Details, below.
+#'
+#' With the exception of the \code{method} and \code{postprocess} parameters, any parameter provided here will entirely replace its equivalent in the \code{src} object. Pass a new value of \code{NULL} to remove an existing parameter.
+#'
+#' The \code{method} and \code{postprocess} parameters are lists, and modification for these takes place at the list-element level: any element of the new list will replace its equivalent element in the list in src. If the src list does not contain that element, it will be added. To illustrate, say that we have created a data source with:
+#'
+#' \code{src <- bb_source(method=list("bb_handler_wget",parm1=value1,parm2=value2),...)}
+#'
+#' Calling
+#'
+#' \code{bb_modify_source(src,method=list(parm1=newvalue1))}
+#'
+#' will result in a new \code{method} value of \code{list("bb_handler_wget",parm1=newvalue1,parm2=value2)}
+#'
+#' Modifying \code{postprocess} elements is similar. Note that it is not currently possible to entirely remove a postprocess component using this function. If you need to do so, you'll need to do it manually.
+#'
+#' @param src data.frame or tibble: a single-row data source (as returned by \code{bb_source})
+#' @param ... : parameters as for \code{bb_source}
+#'
+#' @return as for \code{bb_source}: a tibble with columns as per the \code{bb_source} function arguments (excluding \code{warn_empty_auth})
+#'
+#' @seealso \code{\link{bb_source}}
+#'
+#' @examples
+#'
+#' ## this pre-defined source requires a username and password
+#' src <- subset(bb_example_sources(),id=="10.5067/EYICLBOAAJOU")
+#'
+#' ## add username and password
+#' src <- bb_modify_source(src,user="myusername",password="mypassword")
+#'
+#' ## or using the pipe operator
+#' src <- subset(bb_example_sources(),id=="10.5067/EYICLBOAAJOU") %>%
+#'   bb_modify_source(user="myusername",password="mypassword")
+#'
+#' ## remove the existing "data_group" component
+#' src %>% bb_modify_source(data_group=NULL)
+#'
+#' ## change just the 'level' setting of an existing method definition
+#' src %>% bb_modify_source(method=list(level=3))
+#'
+#' ## remove the 'level' component of an existing method definition
+#' src %>% bb_modify_source(method=list(level=NULL))
+#'
+#' @export
+bb_modify_source <- function(src,...) {
+    parms <- list(...)
+    pnames <- names(parms)
+    ## check that the parameters passed here are expected
+    chk <- setdiff(pnames,c("id","name","description","doc_url","source_url","citation","license","comment","method","postprocess","authentication_note","user","password","access_function","data_group","collection_size","warn_empty_auth"))
+    if (length(chk)>0) stop("unexpected input parameters: ",paste(chk,collapse=", "),". See help('bb_source') for allowed parameters")
+    ## construct list of new parameters to pass to bb_source
+    ## do this so that checks in bb_source get applied to the new parameter values
+    ## simple parameters (strings, etc) are taken from parms if provided, otherwise from src
+    new_or_old <- function(prm) if (prm %in% pnames) parms[[prm]] else src[[prm]]
+    newparms <- list()
+    for (p in c("id","name","description","doc_url","citation","license","comment","authentication_note","user","password","access_function","data_group","collection_size"))
+        newparms[[p]] <- new_or_old(p)
+    ## source_url is a character vector, but stored in src as a list containing that vector
+    newparms$source_url <- if ("source_url" %in% pnames) parms$source_url else src$source_url[[1]]
+    ## method is a list-col in src, of the form list("handler_function_name",parm1=value1)
+    if ("method" %in% pnames) {
+        assert_that(is.list(parms$method))
+        newmeth <- src$method[[1]] ## start from this
+        modmeth <- parms$method ## modify using this
+        nmm <- names(modmeth)
+        if (is.null(nmm)) {
+            ## none of the elements of modmeth are named
+            names(modmeth) <- rep("",length(modmeth))
+        }
+        not_named <- !nzchar(names(modmeth))
+        ## expect at most one non-named element: this is the handler function name
+        if (sum(not_named)==1) {
+            newmeth[[1]] <- modmeth[[which(not_named)]]
+        } else if (sum(not_named)>1) {
+            stop("not expecting multiple un-named elements in method parameter")
+        }
+        modmeth <- modmeth[which(!not_named)]
+        for (k in names(modmeth)) {
+            newmeth[[k]] <- modmeth[[k]]
+        }
+        newparms$method <- newmeth
+    } else {
+        newparms$method <- src$method[[1]]
+    }
+    ## src$postprocess is also a list
+    ## each element is a list of the form list("function_name",parm1=value1) [parm1 etc are optional, provided if that function needs parameters passed]
+    ## parms$postprocess is a list BUT elements can be just "function_name", or list("function_name",parm1=value1)
+    if ("postprocess" %in% pnames) {
+        assert_that(is.list(parms$postprocess))
+        newpp <- src$postprocess[[1]] ## start with this
+        newpp_funs <- vapply(newpp,function(z)z[[1]],FUN.VALUE="",USE.NAMES=FALSE)
+        modpp <- parms$postprocess
+        for (ppi in seq_len(length(modpp))) {
+            if (is.string(modpp[[ppi]]) && length(modpp[[ppi]])==1) modpp[[ppi]] <- list(modpp[[ppi]]) ## change "function_name" element to list("function_name")
+            thisfun <- modpp[[ppi]][[1]]
+            if (any(thisfun %in% newpp_funs)) {
+                ## this function already exists in newpp
+                ## so replace the existing list element
+                newpp[[which(thisfun==newpp_funs)]] <- modpp[[ppi]]
+            } else {
+                newpp <- c(newpp,modpp[ppi])
+            }
+        }
+        newparms$postprocess <- newpp
+    } else {
+        newparms$postprocess <- src$postprocess[[1]]
+    }
+    if ("warn_empty_auth" %in% pnames) newparms$warn_empty_auth <- parms$warn_empty_auth
+    do.call(bb_source,newparms)
 }

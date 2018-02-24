@@ -307,6 +307,9 @@ mysrc <- src3
 mysrc$user <- "theirusername"
 mysrc$password <- "theirpassword"
 
+## or, do the same with the pipe operator and bb_modify_source
+mysrc <- src3 %>% bb_modify_source(user="theirusername",password="theirpassword")
+
 ## then proceed as per usual
 cf <- bb_add(cf,mysrc)
 ```
@@ -413,11 +416,10 @@ mysrc$user <- "yourusername"
 mysrc$password <- "yourpassword"
 cf <- bb_add(cf,mysrc)
 
-## or, using dplyr
-library(dplyr)
-mysrc <- bb_example_sources() %>%
-  filter(name=="CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
-  mutate(user="yourusername",password="yourpassword")
+## or, using the pipe operator
+mysrc <- subset(bb_example_sources(),
+  name=="CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
+  bb_modify_source(user="yourusername",password="yourpassword")
 cf <- cf %>% bb_add(mysrc)
 ```
 
@@ -425,14 +427,15 @@ cf <- cf %>% bb_add(mysrc)
 
 Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the `bb_handler_wget` method, you can restrict what is downloaded by modifying the arguments passed through the data source's `method` parameter, particularly the `accept`, `reject`, `accept_regex`, and `reject_regex` options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.
 
-Say a particular data provider uses predictable file name patterns that include the year information. It would be fairly easy to restrict ourselves to only the 2017 data:
+Say a particular data provider uses predictable file name patterns that include the year information. It would be fairly easy to restrict ourselves to only the 2017 data using the `accept` option. Here we use the `bb_modify_source` helper function to do so:
 
 ```{r eval=FALSE}
-library(dplyr)
-mysrc <- bb_example_sources() %>%
-  filter(name=="CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
-  mutate(user="yourusername",password="yourpassword")
-mysrc$method[[1]]$accept <- "*l4_2017*"
+mysrc <- subset(bb_example_sources(),
+  name=="CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
+
+  bb_modify_source(user="yourusername",password="yourpassword",
+    method=list(accept="*l4_2017*"))
+
 cf <- cf %>% bb_add(mysrc)
 ```
 
