@@ -82,12 +82,12 @@ bb_source <- function(id,name,description=NA_character_,doc_url,source_url,citat
     if (warn_empty_auth && (!is.na(authentication_note) && (na_or_empty(user) || na_or_empty(password)))) {
         warning(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s",name,authentication_note))
     }
-    if (missing(license) || missing(citation))
+    if (missing(license) || !is_nonempty_string(license) || missing(citation) || !is_nonempty_string(citation))
         stop("Please provide license and citation information for the data source, so that users properly acknowledge it")
-    if (missing(doc_url))
+    if (missing(doc_url) || !is_nonempty_string(doc_url))
         stop("Please provide a doc_url (a URL to the data source's metadata record or home page")
 
-    if (missing(source_url)) source_url <- NA_character_
+    if (missing(source_url) || is.null(source_url)) source_url <- NA_character_
     source_url <- source_url[nzchar(source_url) & !is.na(source_url)] ## drop empty and NA strings
     if (length(source_url)<1) {
         if (check_method_is(method[[1]],bb_handler_wget)) stop("method 'bb_handler_wget' requires at least one non-empty source URL")
