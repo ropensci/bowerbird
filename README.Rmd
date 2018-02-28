@@ -14,26 +14,26 @@ knitr::opts_chunk$set(
 )
 ```
 
-[![Travis-CI Build Status](http://badges.herokuapp.com/travis/AustralianAntarcticDivision/bowerbird?branch=master&env=BUILD_NAME=trusty_release&label=linux)](https://travis-ci.org/AustralianAntarcticDivision/bowerbird)
-[![Build Status](http://badges.herokuapp.com/travis/AustralianAntarcticDivision/bowerbird?branch=master&env=BUILD_NAME=osx_release&label=osx)](https://travis-ci.org/AustralianAntarcticDivision/bowerbird) 
+[![Travis-CI Build Status](http://badges.herokuapp.com/travis/ropensci/bowerbird?branch=master&env=BUILD_NAME=trusty_release&label=linux)](https://travis-ci.org/ropensci/bowerbird)
+[![Build Status](http://badges.herokuapp.com/travis/ropensci/bowerbird?branch=master&env=BUILD_NAME=osx_release&label=osx)](https://travis-ci.org/ropensci/bowerbird) 
 [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/5idrimyx0uuv6liu?svg=true)](https://ci.appveyor.com/project/raymondben/bowerbird)
-[![codecov](https://codecov.io/gh/AustralianAntarcticDivision/bowerbird/branch/master/graph/badge.svg)](https://codecov.io/gh/AustralianAntarcticDivision/bowerbird)
+[![codecov](https://codecov.io/gh/ropensci/bowerbird/branch/master/graph/badge.svg)](https://codecov.io/gh/ropensci/bowerbird)
 [![](https://badges.ropensci.org/139_status.svg)](https://github.com/ropensci/onboarding/issues/139)
 
 # Bowerbird
 
-<img align="right" src="https://rawgit.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/bowerbird.svg" />
+<img align="right" src="https://rawgit.com/ropensci/bowerbird/master/inst/extdata/bowerbird.svg" />
 
 Often it's desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be better to have local copies. This is particularly common in environmental and other sciences that deal with large data sets (e.g. satellite or global climate model products). Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.
 
-A comprehensive introduction to bowerbird can be found at https://australianantarcticdivision.github.io/bowerbird/articles/bowerbird.html, along with full package documentation.
+A comprehensive introduction to bowerbird can be found at https://ropensci.github.io/bowerbird/articles/bowerbird.html, along with full package documentation.
 
 ## Installing
 
 ```{r eval=FALSE}
 install.packages("devtools")
 library(devtools)
-install_github("AustralianAntarcticDivision/bowerbird",build_vignettes=TRUE)
+install_github("ropensci/bowerbird",build_vignettes=TRUE)
 ```
 
 You will also need to have the third-party utility `wget` available, because bowerbird uses this to do the heavy lifting of recursively downloading files from data providers. Note that installing `wget` may require admin privileges on your local machine.
