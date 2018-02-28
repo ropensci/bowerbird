@@ -88,7 +88,7 @@ test_that("bb_sync works with a sink() call in place",{
         doc_url= "http://some.where.org/",
         citation="blah",
         license="blah",
-        method=list("bb_handler_wget",recursive=TRUE,no_check_certificate=TRUE,level=1),
+        method=list("bb_handler_wget",recursive=TRUE,level=1,extra_flags="--secure-protocol=TLSv1_2"),
         source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd") ## just some file to download
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),myds)
