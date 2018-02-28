@@ -1,6 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-[![Travis-CI Build Status](http://badges.herokuapp.com/travis/ropensci/bowerbird?branch=master&env=BUILD_NAME=trusty_release&label=linux)](https://travis-ci.org/ropensci/bowerbird) [![Build Status](http://badges.herokuapp.com/travis/ropensci/bowerbird?branch=master&env=BUILD_NAME=osx_release&label=osx)](https://travis-ci.org/ropensci/bowerbird) [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/5idrimyx0uuv6liu?svg=true)](https://ci.appveyor.com/project/raymondben/bowerbird) [![codecov](https://codecov.io/gh/ropensci/bowerbird/branch/master/graph/badge.svg)](https://codecov.io/gh/ropensci/bowerbird) [![](https://badges.ropensci.org/139_status.svg)](https://github.com/ropensci/onboarding/issues/139)
+[![Travis-CI Build Status](http://badges.herokuapp.com/travis/ropensci/bowerbird?branch=master&env=BUILD_NAME=trusty_release&label=linux)](https://travis-ci.org/ropensci/bowerbird) [![Build Status](http://badges.herokuapp.com/travis/ropensci/bowerbird?branch=master&env=BUILD_NAME=osx_release&label=osx)](https://travis-ci.org/ropensci/bowerbird) [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/5idrimyx0uuv6liu?svg=true)](https://ci.appveyor.com/project/ropensci/bowerbird) [![codecov](https://codecov.io/gh/ropensci/bowerbird/branch/master/graph/badge.svg)](https://codecov.io/gh/ropensci/bowerbird) [![](https://badges.ropensci.org/139_status.svg)](https://github.com/ropensci/onboarding/issues/139)
 
 Bowerbird
 =========
