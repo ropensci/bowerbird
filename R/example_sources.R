@@ -15,7 +15,7 @@
 #'
 #' @return a tibble with columns as specified by \code{\link{bb_source}}
 #'
-#' @seealso \code{\link{bb_config}}, \code{\link{bb_handler_wget}}, \code{\link{bb_handler_oceandata}}, \code{\link{bb_handler_earthdata}}
+#' @seealso \code{\link{bb_config}}, \code{\link{bb_handler_wget}}, \code{\link{bb_handler_oceandata}}, \code{\link{bb_handler_earthdata}}, \code{\link{bb_source_us_buildings}}
 #'
 #' @examples
 #' \dontrun{
@@ -109,4 +109,52 @@ bb_example_sources <- function() {
             collection_size=0.03,
             data_group="Topography")
     )
+}
+
+
+#' Example bowerbird data source: Microsoft US Buildings
+#'
+#' This function constructs a data source definition for the Microsoft US Buildings data set. This data set contains 124,885,597 computer generated building footprints in all 50 US states. NOTE: currently, the downloaded zip files will not be unzipped automatically. Work in progress.
+#'
+#' @references \url{https://github.com/Microsoft/USBuildingFootprints}
+#'
+#' @param states character: (optional) one or more US state names for which to download data. If missing, data from all states will be downloaded. See the reference page for valid state names
+#'
+#' @return a tibble with columns as specified by \code{\link{bb_source}}
+#'
+#' @seealso \code{\link{bb_example_sources}}, \code{\link{bb_config}}, \code{\link{bb_handler_wget}}
+#'
+#' @examples
+#' \dontrun{
+#' ## define a configuration and add this buildings data source to it
+#' ##  only including data for the District of Columbia and Hawaii
+#' cf <- bb_config(tempdir()) %>%
+#'   bb_add(bb_source_us_buildings(states = c("District of Columbia", "Hawaii")))
+#'
+#' ## synchronize (download) the data
+#' bb_sync(cf)
+#' }
+#'
+#' @export
+bb_source_us_buildings <- function(states) {
+    if (!missing(states)) {
+        assert_that(is.character(states))
+        if (any(!nzchar(states) | is.na(states))) stop("states must be a character vector of non-empty, non-NA strings")
+        states <- gsub("[[:space:]]+", "", states) ## collapse whitespaces
+        my_regex <- paste0("(", paste(states, collapse = "|"), ")")
+    } else {
+        my_regex <- ".+"
+    }
+    bb_source(name = "US Building Footprints",
+              id = "Microsoft/USBuildingFootprints",
+              description = "This dataset contains 124,885,597 computer generated building footprints in all 50 US states (figures correct as of 2-Jul-2018). These data are freely available to download and use. Building footprints have been digitized from Bing aerial imagery, using a modified ResNet34 neural network for semantic segmentation followed by polygonization of building pixel blobs into polygons.",
+              doc_url = "https://github.com/Microsoft/USBuildingFootprints",
+              source_url = "https://github.com/Microsoft/USBuildingFootprints",
+              license = "Data in this repository are licensed by Microsoft under the Open Data Commons Open Database License (ODbL)",
+              citation = "Please cite",
+              method = list("bb_handler_wget", recursive = TRUE, level = 2, accept_regex = paste0("usbuildings/", my_regex, "\\.zip$"), robots_off = TRUE, extra_flags = "--span-hosts"),
+              comment="The collection size of 35GB applies to the complete data set (all states).",
+              postprocess=list("bb_unzip"),
+              collection_size=35,
+              data_group="Built environment")
 }
