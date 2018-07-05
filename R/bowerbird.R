@@ -7,14 +7,17 @@
 #' @docType package
 #' @references \url{https://github.com/AustralianAntarcticDivision/bowerbird}
 #' @importFrom assertthat assert_that is.flag is.string
+#' @importFrom httr content GET write_disk
 #' @importFrom magrittr %>%
 #' @importFrom methods is
 #' @importFrom openssl sha1 md5
 #' @importFrom stringr regex str_detect str_match str_split str_trim
 #' @importFrom R.utils bunzip2 gunzip
 #' @importFrom rmarkdown render
+#' @importFrom rvest html_nodes html_attr
 #' @importFrom stats na.omit
 #' @importFrom sys exec_wait exec_internal
 #' @importFrom tibble as_tibble tibble
 #' @importFrom utils download.file menu read.table str unzip
+#' @importFrom xml2 read_html
 NULL

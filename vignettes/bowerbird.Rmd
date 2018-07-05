@@ -83,7 +83,7 @@ cf <- bb_config(local_file_root=my_directory)
 Bowerbird must then be told which data sources to synchronize. Let's use data from the Australian 2016 federal election, which is provided as one of the example data sources:
 
 ```{r eval=FALSE}
-my_source <- subset(bb_example_sources(),id=="aus-election-house-2016")
+my_source <- bb_example_sources("Australian Election 2016 House of Representatives data")
 
 ## add this data source to the configuration
 cf <- bb_add(cf,my_source)
@@ -411,14 +411,13 @@ The `bb_cleanup` postprocessing option can be used to remove unwanted files afte
 Some data providers require users to log in. The `authentication_note` column in the configuration table should indicate when this is the case, including a reference (e.g. the URL via which an account can be obtained). For these sources, you will need to provide your user name and password, e.g.:
 
 ```{r eval=FALSE}
-mysrc <- subset(bb_example_sources(),name=="CMEMS global gridded SSH reprocessed (1993-ongoing)")
+mysrc <- bb_example_sources("CMEMS global gridded SSH reprocessed (1993-ongoing)")
 mysrc$user <- "yourusername"
 mysrc$password <- "yourpassword"
 cf <- bb_add(cf,mysrc)
 
 ## or, using the pipe operator
-mysrc <- subset(bb_example_sources(),
-  name=="CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
+mysrc <- bb_example_sources("CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
   bb_modify_source(user="yourusername",password="yourpassword")
 cf <- cf %>% bb_add(mysrc)
 ```
@@ -430,9 +429,7 @@ Sometimes you might only want part of a data collection. Perhaps you only want a
 Say a particular data provider uses predictable file name patterns that include the year information. It would be fairly easy to restrict ourselves to only the 2017 data using the `accept` option. Here we use the `bb_modify_source` helper function to do so:
 
 ```{r eval=FALSE}
-mysrc <- subset(bb_example_sources(),
-  name=="CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
-
+mysrc <- bb_example_sources("CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
   bb_modify_source(user="yourusername",password="yourpassword",
     method=list(accept="*l4_2017*"))
 

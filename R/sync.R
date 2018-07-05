@@ -28,7 +28,7 @@
 #'   ## Let's use data from the Australian 2016 federal election, which is provided as one
 #'   ## of the example data sources:
 #'
-#'   my_source <- subset(bb_example_sources(),id=="aus-election-house-2016")
+#'   my_source <- bb_example_sources("Australian Election 2016 House of Representatives data")
 #'
 #'   ## Add this data source to the configuration:
 #'
@@ -78,7 +78,9 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
     bb_settings(config) <- st
     bb_validate(config)
     ## check that wget can be found (this will also set it in the options)
-    tmp <- bb_find_wget(install=FALSE,error=TRUE)
+    ## but don't do this if we are only using the bb_handler_rget method, since it doens't need wget
+    if (!all(vapply(bb_data_sources(config)$method, function(z)grepl("handler_rget", z[[1]][[1]]), FUN.VALUE = TRUE, USE.NAMES = FALSE)))
+        tmp <- bb_find_wget(install=FALSE,error=TRUE)
     ## save some current settings: path and proxy env values
     settings <- save_current_settings()
     on.exit({ restore_settings(settings) })
@@ -139,7 +141,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
     setwd(this_att$local_file_root)
 
     ## set proxy env vars
-    if (any(c("ftp_proxy","http_proxy") %in% names(this_att))) {
+    if (!is.null(this_att$ftp_proxy) || !is.null(this_att$http_proxy)) {
         if (verbose) cat(sprintf(" setting proxy variables ... "))
         if ("http_proxy" %in% names(this_att) && !is.null(this_att$http_proxy)) {
             Sys.setenv(http_proxy=this_att$http_proxy)
@@ -174,32 +176,55 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
     }
     ## run the method
     mth <- match.fun(bb_data_sources(this_dataset)$method[[1]][[1]])
-    ok <- do.call(mth,c(list(config=this_dataset,verbose=verbose),bb_data_sources(this_dataset)$method[[1]][-1]))
+    method_loot <- do.call(mth, c(list(config = this_dataset, verbose = verbose), bb_data_sources(this_dataset)$method[[1]][-1]))
+    if (!is.list(method_loot)) method_loot <- list(ok = method_loot) ## older wget-based method handlers just return a status flag, newer (using bb_rget) return a list
+    ok <- method_loot$ok
     ## postprocessing
     if (length(pp)>0) {
         if (is.na(ok) || !ok) {
             if (verbose) cat(" download failed or was interrupted: not running post-processing step\n")
         } else {
-            ## build file list
-            if (verbose) cat(sprintf(" building post-download file list of %s ... ",this_path_no_trailing_sep))
-            file_list_after <- file.info(list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE))
-            if (file.exists(this_path_no_trailing_sep)) {
-                ## in some cases this points directly to a file
-                temp <- file.info(this_path_no_trailing_sep)
-                temp <- temp[!temp$isdir,]
-                if (nrow(temp)>0) { file_list_after <- rbind(file_list_after,temp) }
+            if (is.null(method_loot$download_files)) {
+                ## the method handler didn't return a list of files (likely a wget-based handler
+                ## so we'll figure it out for ourselves: build list of files in our directory
+                ## NOTE that this won't work if the data source downloaded files from a different server, because those files
+                ## won't be in this_path_no_trailing_sep. In those cases the bb_rget based method needs to be used
+                if (verbose) cat(sprintf(" building post-download file list of %s ... ", this_path_no_trailing_sep))
+                file_list_after <- file.info(list.files(path = this_path_no_trailing_sep, recursive = TRUE, full.names = TRUE))
+                if (file.exists(this_path_no_trailing_sep)) {
+                    ## in some cases this points directly to a file
+                    temp <- file.info(this_path_no_trailing_sep)
+                    temp <- temp[!temp$isdir, ]
+                    if (nrow(temp)>0) { file_list_after <- rbind(file_list_after, temp) }
+                }
+                if (verbose) cat(sprintf("done.\n"))
+            } else {
+                ## the handler has returned a list of files it found
+                ## these may have been downloaded, or may have existed previously
+                ## ultimately we should re-hash the postprocessing interface to better cope with this, but in the meantime we'll just coerce our list
+                ## of files into something that the existing postprocessors will understand
+                ## note that file paths returned by the handler are relative to the local_file_root
+                ## if we are doing a dry run, no postprocessing
+                if (!is.null(bb_settings(this_dataset)$dry_run) && !is.na(bb_settings(this_dataset)$dry_run) && bb_settings(this_dataset)$dry_run) {
+                    file_list_before <- c()
+                    file_list_after <- c()
+                } else {
+                    ## all files go into both file_list_after and file_list_before
+                    file_list_before <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$download_files$file))
+                    ## the ones that were downloaded need to be marked as changed in file_list_after
+                    file_list_after <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$download_files$file[method_loot$download_files$was_downloaded]))
+                    if (nrow(file_list_after) > 0) file_list_after$size <- 0 ## just modify the size of these, that is enough to have them flagged as changed in the postprocessors
+                    file_list_after <- rbind(file_list_after, file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$download_files$file[!method_loot$download_files$was_downloaded])))
+                }
             }
-            if (verbose) cat(sprintf("done.\n"))
-
             for (i in seq_len(length(pp))) {
                 ## postprocessing steps are passed as functions or calls
-                qq <- pp[[i]]
                 qq <- match.fun(pp[[i]][[1]]) ## the function to call
                 qq_args <- pp[[i]][-1]
-                do.call(qq,c(list(config=this_dataset,file_list_before=file_list_before,file_list_after=file_list_after,verbose=verbose),qq_args))
+                do.call(qq, c(list(config = this_dataset, file_list_before = file_list_before, file_list_after = file_list_after, verbose = verbose), qq_args))
             }
         }
     }
-    if (verbose) cat(sprintf("\n%s dataset synchronization complete: %s\n",base::date(),bb_data_sources(this_dataset)$name))
+    if (verbose) cat(sprintf("\n%s dataset synchronization complete: %s\n", base::date(), bb_data_sources(this_dataset)$name))
     ok
 }

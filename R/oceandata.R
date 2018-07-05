@@ -168,9 +168,10 @@ V,VIIRS"
     if (missing(abbrev)) {
         allp
     } else {
+        assert_that(is.string(abbrev))
         out <- allp$platform[allp$abbrev==abbrev]
         if (error_no_match & length(out)<1) {
-            stop("oceandata URL platform token ",abbrev," not recognized")
+            stop("oceandata platform \"", abbrev, "\" not recognized")
         }
         out
     }
@@ -210,6 +211,7 @@ SCWI,Seasonal_Climatology"
     if (missing(abbrev)) {
         alltp
     } else {
+        assert_that(is.string(abbrev))
         out <- alltp$time_period[alltp$abbrev==abbrev]
         if (error_no_match & length(out)<1) {
             stop("oceandata URL timeperiod token ",abbrev," not recognized")
@@ -286,7 +288,7 @@ oceandata_parameter_map <- function(platform,urlparm,error_no_match=FALSE) {
             out <- as.character(NULL)
         }
         if (error_no_match & length(out)<1) {
-            stop("oceandata URL parameter token ",urlparm," not recognized for platform ",platform)
+            stop("oceandata parameter \"",urlparm,"\" not recognized for platform ",platform)
         }
         out
     } else {
@@ -383,3 +385,54 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
 
 
 
+## WC,8D_Climatology
+## 8D,8Day
+## YR,Annual
+## CU,Cumulative
+## DAY,Daily
+## MO,Monthly
+## MC,Monthly_Climatology
+## R32,Rolling_32_Day
+## SNSP,Seasonal
+## SNSU,Seasonal
+## SNAU,Seasonal
+## SNWI,Seasonal
+## SCSP,Seasonal_Climatology
+## SCSU,Seasonal_Climatology
+## SCAU,Seasonal_Climatology
+## SCWI,Seasonal_Climatology"
+
+##oceandata_source <- function(platform, parameter, processing_level, time_resolution, spatial_resolution, years) {
+##    ## platform
+##    assert_that(is.string(platform))
+##    plat_str <- oceandata_platform_map(platform) ## full platform name, also checks that platform is recognized
+##    ## parameter
+##    parm_str <- oceandata_parameter_map(platform, parameter)
+##    ## processing level
+##    assert_that(is.string(processing_level))
+##    processing_level <- match.arg(processing_level, c("L3m", "L3b", "L2"))
+##    ## readable processing level string
+##    pl_str <- switch(processing_level,
+##                     "L3m"="Level-3 mapped",
+##                     "L3b"="Level-3 binned",
+##                     "L2"="Level 2",
+##                     "unknown processing level")
+##    ## time res
+##    tr_str <- oceandata_timeperiod_map(time_resolution)
+##    ## spatial res
+##    assert_that(is.string(spatial_resolution))
+##    spatial_resolution <- match.arg(tolower(spatial_resolution), c("9km", "4km"))
+##
+##        name=paste("Oceandata", plat_str, pl_str, tr_str, spatial_resolution, parameter),
+##        id=paste(plat_str, processing_level, time_resolution, parm_str, spatial_resolution, sep="_"),
+##        description="8-day remote-sensing chlorophyll-a from the MODIS Aqua satellite at 9km spatial resolution",
+##        doc_url="http://oceancolor.gsfc.nasa.gov/",
+##        citation="See https://oceancolor.gsfc.nasa.gov/citations",
+##        license="Please cite",
+##        method=list("bb_handler_oceandata", search="A*L3m_8D_CHL_chlor_a_9km.nc"),
+##        postprocess=NULL,
+##        collection_size=8,
+##        comment="Collection size is approximately 500MB per year",
+##        data_group="Ocean colour"),
+##
+##}

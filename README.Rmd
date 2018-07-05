@@ -66,7 +66,7 @@ cf <- bb_config(local_file_root=my_directory)
 Bowerbird must then be told which data sources to synchronize. Let's use data from the Australian 2016 federal election, which is provided as one of the example data sources:
 
 ```{r eval=FALSE}
-my_source <- subset(bb_example_sources(),id=="aus-election-house-2016")
+my_source <- bb_example_sources("Australian Election 2016 House of Representatives data")
 
 ## add this data source to the configuration
 cf <- bb_add(cf,my_source)

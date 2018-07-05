@@ -218,8 +218,8 @@ find_changed_files <- function(file_list_before,file_list_after,filename_pattern
     ## expect both file_list_before and file_list_after to be a data.frame from file.info()
     ## detect changes on basis of ctime and size attributes
     ## returns names only
-    changed_files <- setdiff(rownames(file_list_after),rownames(file_list_before)) ## anything that has appeared afterwards
-    for (thisf in intersect(rownames(file_list_after),rownames(file_list_before))) {
+    changed_files <- setdiff(rownames(file_list_after), rownames(file_list_before)) ## anything that has appeared afterwards
+    for (thisf in intersect(rownames(file_list_after), rownames(file_list_before))) {
         ## files in both
         thisfile_after <- file_list_after[rownames(file_list_after)==thisf,]
         thisfile_before <- file_list_before[rownames(file_list_before)==thisf,]
@@ -227,7 +227,7 @@ find_changed_files <- function(file_list_before,file_list_after,filename_pattern
             changed_files <- c(changed_files,thisf)
         }
     }
-    changed_files <- changed_files[str_detect(changed_files,filename_pattern)]
+    changed_files <- changed_files[str_detect(changed_files, filename_pattern)]
     if (is.null(changed_files)) {
         c()
     } else {

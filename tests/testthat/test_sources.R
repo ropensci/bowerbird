@@ -180,7 +180,7 @@ test_that("authentication checks work",{
 
 test_that("bb_modify_source works",{
     ## use this one
-    src <- subset(bb_example_sources(),id=="SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047")
+    src <- bb_example_sources("SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047")
     ## check src is as expected
     expect_identical(src$method[[1]],list("bb_handler_wget",recursive=TRUE,level=3))
     expect_identical(src$postprocess[[1]],list(list("bb_gunzip")))

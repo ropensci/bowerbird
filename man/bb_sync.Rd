@@ -42,7 +42,7 @@ Note that when \code{bb_sync} is run, the \code{local_file_root} directory must 
   ## Let's use data from the Australian 2016 federal election, which is provided as one
   ## of the example data sources:
 
-  my_source <- subset(bb_example_sources(),id=="aus-election-house-2016")
+  my_source <- bb_example_sources("Australian Election 2016 House of Representatives data")
 
   ## Add this data source to the configuration:
 
