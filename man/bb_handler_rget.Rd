@@ -19,22 +19,28 @@ This is a general handler function that is suitable for a range of data sets. Th
 This handler function makes calls to the \code{\link{bb_rget}} function. Arguments provided to \code{bb_handler_rget} are passed through to \code{\link{bb_rget}}.
 }
 \examples{
-
 my_source <- bb_source(
-   id = "gshhg_coastline",
-   name = "GSHHG coastline data",
-   description = "A Global Self-consistent, Hierarchical, High-resolution Geography Database",
-   doc_url = "http://www.soest.hawaii.edu/pwessel/gshhg",
-   citation = "Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
-     High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
-   source_url = "ftp://ftp.soest.hawaii.edu/gshhg/*",
-   license = "LGPL",
-   method = list("bb_handler_rget", recursive = TRUE, level = 1,
-                 accept_download = "bin.+\\\\.zip|README.TXT"),
-   postprocess = list("bb_unzip"),
-   collection_size = 0.6)
+   name = "Australian Election 2016 House of Representatives data",
+   id = "aus-election-house-2016",
+   description = "House of Representatives results from the 2016 Australian election.",
+   doc_url = "http://results.aec.gov.au/",
+   citation = "Copyright Commonwealth of Australia 2017. As far as practicable, material for
+               which the copyright is owned by a third party will be clearly labelled. The
+               AEC has made all reasonable efforts to ensure that this material has been
+               reproduced on this website with the full consent of the copyright owners.",
+   source_url = "http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm",
+   license = "CC-BY",
+   method = list("bb_handler_rget", level = 1, accept_download = "csv$"),
+   collection_size = 0.01)
+
+cf <- bb_config("/my/data/directory")
+cf <- bb_add(cf, my_source)
+
+\dontrun{
+bb_sync(cf, verbose = TRUE)
+}
 
 }
 \seealso{
-\code{\link{bb_rget}}, \code{\link{bb_source}}
+\code{\link{bb_rget}}, \code{\link{bb_source}}, \code{\link{bb_sync}}
 }

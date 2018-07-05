@@ -2,7 +2,7 @@
 % Please edit documentation in R/rget.R
 \name{bb_rget}
 \alias{bb_rget}
-\title{A wget-like recursive download utility}
+\title{A recursive download utility}
 \usage{
 bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
   reject_follow = character(),
@@ -18,7 +18,7 @@ bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
 
 \item{wait}{numeric >=0: wait this number of seconds between successive retrievals. This option may help with servers that block multiple successive requests, by introducing a delay between requests}
 
-\item{accept_follow}{character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs matching all entries will be followed during the spidering process}
+\item{accept_follow}{character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs matching all entries will be followed during the spidering process. Note that the first URL (provided via the \code{url} parameter) will always be visited, unless it matches the download criteria}
 
 \item{reject_follow}{character: as for \code{accept_follow}, but specifying URL regular expressions to reject}
 
@@ -43,7 +43,7 @@ bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
 \item{dry_run}{logical: if \code{TRUE}, spider the remote site and work out which files would be downloaded, but don't download them}
 }
 \value{
-a list with components 'ok' (TRUE/FALSE) and 'download_files'
+a list with components 'ok' (TRUE/FALSE) and 'files'
 }
 \description{
 This function provides similar, but simplified, functionality to the the command-line \code{wget} utility. It is based on the \code{rvest} package.

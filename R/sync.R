@@ -184,7 +184,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
         if (is.na(ok) || !ok) {
             if (verbose) cat(" download failed or was interrupted: not running post-processing step\n")
         } else {
-            if (is.null(method_loot$download_files)) {
+            if (is.null(method_loot$files)) {
                 ## the method handler didn't return a list of files (likely a wget-based handler
                 ## so we'll figure it out for ourselves: build list of files in our directory
                 ## NOTE that this won't work if the data source downloaded files from a different server, because those files
@@ -210,11 +210,11 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
                     file_list_after <- c()
                 } else {
                     ## all files go into both file_list_after and file_list_before
-                    file_list_before <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$download_files$file))
+                    file_list_before <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files$file))
                     ## the ones that were downloaded need to be marked as changed in file_list_after
-                    file_list_after <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$download_files$file[method_loot$download_files$was_downloaded]))
+                    file_list_after <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files$file[method_loot$files$was_downloaded]))
                     if (nrow(file_list_after) > 0) file_list_after$size <- 0 ## just modify the size of these, that is enough to have them flagged as changed in the postprocessors
-                    file_list_after <- rbind(file_list_after, file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$download_files$file[!method_loot$download_files$was_downloaded])))
+                    file_list_after <- rbind(file_list_after, file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files$file[!method_loot$files$was_downloaded])))
                 }
             }
             for (i in seq_len(length(pp))) {

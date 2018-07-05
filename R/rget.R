@@ -8,22 +8,29 @@
 #'
 #' @return TRUE on success
 #'
-#' @seealso \code{\link{bb_rget}}, \code{\link{bb_source}}
-#' @examples
+#' @seealso \code{\link{bb_rget}}, \code{\link{bb_source}}, \code{\link{bb_sync}}
 #'
+#' @examples
 #' my_source <- bb_source(
-#'    id = "gshhg_coastline",
-#'    name = "GSHHG coastline data",
-#'    description = "A Global Self-consistent, Hierarchical, High-resolution Geography Database",
-#'    doc_url = "http://www.soest.hawaii.edu/pwessel/gshhg",
-#'    citation = "Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
-#'      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
-#'    source_url = "ftp://ftp.soest.hawaii.edu/gshhg/*",
-#'    license = "LGPL",
-#'    method = list("bb_handler_rget", recursive = TRUE, level = 1,
-#'                  accept_download = "bin.+\\.zip|README.TXT"),
-#'    postprocess = list("bb_unzip"),
-#'    collection_size = 0.6)
+#'    name = "Australian Election 2016 House of Representatives data",
+#'    id = "aus-election-house-2016",
+#'    description = "House of Representatives results from the 2016 Australian election.",
+#'    doc_url = "http://results.aec.gov.au/",
+#'    citation = "Copyright Commonwealth of Australia 2017. As far as practicable, material for
+#'                which the copyright is owned by a third party will be clearly labelled. The
+#'                AEC has made all reasonable efforts to ensure that this material has been
+#'                reproduced on this website with the full consent of the copyright owners.",
+#'    source_url = "http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm",
+#'    license = "CC-BY",
+#'    method = list("bb_handler_rget", level = 1, accept_download = "csv$"),
+#'    collection_size = 0.01)
+#'
+#' cf <- bb_config("/my/data/directory")
+#' cf <- bb_add(cf, my_source)
+#'
+#' \dontrun{
+#' bb_sync(cf, verbose = TRUE)
+#' }
 #'
 #' @export
 bb_handler_rget <- function(...) {
@@ -70,7 +77,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 }
 
 
-#' A wget-like recursive download utility
+#' A recursive download utility
 #'
 #' This function provides similar, but simplified, functionality to the the command-line \code{wget} utility. It is based on the \code{rvest} package.
 #'
@@ -79,7 +86,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param url string: the URL to retrieve
 #' @param level integer >=0: recursively download to this maximum depth level. Specify 0 for no recursion
 #' @param wait numeric >=0: wait this number of seconds between successive retrievals. This option may help with servers that block multiple successive requests, by introducing a delay between requests
-#' @param accept_follow character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs matching all entries will be followed during the spidering process
+#' @param accept_follow character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs matching all entries will be followed during the spidering process. Note that the first URL (provided via the \code{url} parameter) will always be visited, unless it matches the download criteria
 #' @param reject_follow character: as for \code{accept_follow}, but specifying URL regular expressions to reject
 #' @param accept_download character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. Matching URLs will be accepted for download
 #' @param reject_download character: as for \code{accept_regex}, but specifying URL regular expressions to reject
@@ -92,7 +99,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param debug logical: if \code{TRUE}, will print additional debugging information. If bb_rget is not behaving as expected, try setting this to \code{TRUE}
 #' @param dry_run logical: if \code{TRUE}, spider the remote site and work out which files would be downloaded, but don't download them
 #'
-#' @return a list with components 'ok' (TRUE/FALSE) and 'download_files'
+#' @return a list with components 'ok' (TRUE/FALSE) and 'files'
 #'
 # @export
 bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = c("\\.(asc|csv|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"), reject_download = character(), user, password, clobber = 1, no_check_certificate = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE) {
@@ -135,18 +142,17 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
         ## download each file, or not depending on clobber behaviour
         ## if doing a dry run no download, but do enumerate the list of files that would be downloaded
         downloads <- tibble(url = unique(rec$download_queue), file = NA_character_, was_downloaded = FALSE)
-        if (dry_run) {
-            if (verbose && length(rec$download_queue) > 0) {
-                cat(sprintf(" dry_run is TRUE, bb_rget is not downloading the following files:\n %s\n", paste(rec$download_queue, collapse="\n ")))
-            }
-        } else {
-            ## download each file
-            ## keep track of which were actually downloaded
-            for (df in downloads$url) {
-                mydir <- directory_from_url(df)
+        if (dry_run && verbose && length(rec$download_queue) > 0) {
+            cat(sprintf(" dry_run is TRUE, bb_rget is not downloading the following files:\n %s\n", paste(rec$download_queue, collapse="\n ")))
+        }
+        ## download each file
+        ## keep track of which were actually downloaded
+        for (df in downloads$url) {
+            mydir <- sub("[\\/]$", "", directory_from_url(df)) ## no trailing filesep
+            fname <- file.path(mydir, basename(df))
+            downloads$file[downloads$url == df] <- fname
+            if (!dry_run) {
                 if (!dir.exists(mydir)) dir.create(mydir, recursive = TRUE)
-                fname <- file.path(mydir, basename(df))
-                downloads$file[downloads$url == df] <- fname
                 do_download <- clobber >= 1 || (!file.exists(fname))
                 ## if clobber == 1, we set the if-modified-since option, so we can ask for download and it will not re-download unless needed
                 if (do_download) {
@@ -181,6 +187,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
         }
         ok <- TRUE
     }, error = function(e) {
+        ok <<- FALSE
         if (verbose) {
             ## echo the error message but don't throw it as a full blown error
             ## what happens when download is interrupted
@@ -188,7 +195,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             cat(sprintf(" bb_rget exited with an error (%s)\n", e$message))
         }
     })
-    list(ok = ok, download_files = downloads)
+    list(ok = ok, files = downloads)
 }
 
 spider <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0) {
@@ -201,41 +208,58 @@ spider <- function(to_visit, visited = character(), download_queue = character()
     next_level_to_visit <- character()
     first_req <- TRUE
     for (url in to_visit) {
-        if (first_req && current_level < 1) {
-            first_req <- FALSE
+        ## first check that this isn't a download file
+        is_dl <- TRUE
+        for (rgx in opts$accept_download) is_dl <- is_dl & grepl(rgx, url)
+        for (rgx in opts$reject_download) is_dl <- is_dl & !grepl(rgx, url)
+        if (is_dl) {
+            ## don't visit it, add to download queue
+            download_queue <- c(download_queue, url)
         } else {
-            if (opts$wait > 0) Sys.sleep(opts$wait)
-        }
-        if (opts$verbose) cat(sprintf(" visiting %s ...\n", url))
-        httr::with_config(opts$curl_config, {
+            if (first_req && current_level < 1) {
+                first_req <- FALSE
+            } else {
+                if (opts$wait > 0) Sys.sleep(opts$wait)
+            }
+            if (opts$verbose) cat(sprintf(" visiting %s ...\n", url))
             ##cat(str(options("httr_config")))
-            x <- read_html(content(GET(url), as = "text"))
+            x <- tryCatch(httr::with_config(opts$curl_config, read_html(content(GET(url), as = "text"))), error = function (e) {
+                ## not valid HTML?
+                NULL
+            })
+
+            ## for FTP, see also https://gist.github.com/aaronwolen/3987414, https://github.com/brry/rdwd/blob/master/R/indexFTP.R
+            ##with_config(httr::config(dirlistonly = 1L), y <- GET(url)) ## perhaps ftp_use_epsv = TRUE
+            ##strsplit(content(y, as = "text"), "[\r\n]+")
+
             ##x <- read_html(url) ## doesn't seem to honour the ssl_verifypeer option
             if (opts$verbose && opts$show_progress) cat("\n")
-        })
-        ## should we also be writing this file to disk?
-        ## get all links as absolute URLs, discarding anchors (fragments)
-        all_links <- unique(na.omit(vapply(html_nodes(x, "a"), function(z) clean_and_filter_url(xml2::url_absolute(html_attr(z, "href"), url)), FUN.VALUE = "", USE.NAMES = FALSE)))
-        follow_idx <- rep(TRUE, length(all_links))
-        for (rgx in opts$accept_follow) follow_idx <- follow_idx & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-        for (rgx in opts$reject_follow) follow_idx <- follow_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-        follow_links <- all_links[follow_idx]
-        download_idx <- rep(TRUE, length(all_links))
-        for (rgx in opts$accept_download) download_idx <- download_idx & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-        for (rgx in opts$reject_download) download_idx <- download_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-        download_links <- all_links[download_idx]
-        download_links <- download_links[!download_links %in% download_queue]
-        if (opts$verbose) cat(sprintf(" %d download links", length(download_links)))
-        if (current_level < (opts$level - 1)) { ## -1 because we will download files linked from these pages, and those files will be current_level + 2
-            follow_links <- setdiff(follow_links, download_links) ## can't be in both, treat as download?
-            follow_links <- follow_links[!follow_links %in% visited] ## discard any already visited
-            if (opts$verbose) cat(sprintf(", %d links to visit", length(follow_links)))
-            next_level_to_visit <- c(next_level_to_visit, follow_links) ## add to list to visit at next recursion level
+            if (!is.null(x)) {
+                ## if this url matches download criteria, should we also be writing this file to disk?
+                ## get all links as absolute URLs, discarding anchors (fragments)
+                all_links <- unique(na.omit(vapply(html_nodes(x, "a"), function(z) clean_and_filter_url(xml2::url_absolute(html_attr(z, "href"), url)), FUN.VALUE = "", USE.NAMES = FALSE)))
+                follow_idx <- rep(TRUE, length(all_links))
+                for (rgx in opts$accept_follow) follow_idx <- follow_idx & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                for (rgx in opts$reject_follow) follow_idx <- follow_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                follow_links <- all_links[follow_idx]
+                download_idx <- rep(TRUE, length(all_links))
+                for (rgx in opts$accept_download) download_idx <- download_idx & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                for (rgx in opts$reject_download) download_idx <- download_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                download_links <- all_links[download_idx]
+                download_links <- download_links[!download_links %in% download_queue]
+                if (opts$verbose) cat(sprintf(" %d download links", length(download_links)))
+                if (current_level < (opts$level - 1)) { ## -1 because we will download files linked from these pages, and those files will be current_level + 2
+                    follow_links <- setdiff(follow_links, download_links) ## can't be in both, treat as download?
+                    follow_links <- follow_links[!follow_links %in% visited] ## discard any already visited
+                    if (opts$verbose) cat(sprintf(", %d links to visit", length(follow_links)))
+                    next_level_to_visit <- c(next_level_to_visit, follow_links) ## add to list to visit at next recursion level
+                }
+                ##    lh <- lapply(all_links, httr::HEAD)
+                ## all download_links to download_queue for later downloading
+                download_queue <- c(download_queue, download_links)
+            }
+            if (opts$verbose) cat(" ... done\n")
         }
-        ##    lh <- lapply(all_links, httr::HEAD)
-        ## all download_links to download_queue for later downloading
-        download_queue <- c(download_queue, download_links)
-        if (opts$verbose) cat(" ... done\n")
     }
     visited <- c(visited, to_visit)
     ## recurse to next level
