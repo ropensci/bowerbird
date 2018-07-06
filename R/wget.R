@@ -101,7 +101,7 @@ bb_handler_wget_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,...)
             ok <- !syscall_obj$status ## status code of 0 means OK
         }
     }
-    ok
+    tibble(ok = ok, files = list(NULL), msg = "")
 }
 
 

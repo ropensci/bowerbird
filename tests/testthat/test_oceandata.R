@@ -18,7 +18,7 @@ test_that("bb_handler_oceandata works",{
     temp_root <- tempdir()
     ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODIST/Mapped$",bb_data_source_dir(ocf)))
-    bb_sync(ocf,confirm_downloads_larger_than=NULL)
+    bb_sync(ocf, confirm_downloads_larger_than = NULL)
     fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc" ## relative file name
     expect_true(file.exists(file.path(temp_root,fnm)))
     fi <- file.info(file.path(temp_root,fnm))
@@ -42,4 +42,26 @@ test_that("url mapper works", {
     expect_identical(bowerbird:::oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A20140012014008.L3b_8D_PAR.main.bz2",path_only=TRUE),"oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/2014/001/")
     expect_identical(bowerbird:::oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc",path_only=TRUE),"oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/")
     expect_identical(bowerbird:::oceandata_url_mapper("https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc",path_only=TRUE),"oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/")
+})
+
+test_that("bb_handler_oceandata works when no files match",{
+    skip_on_appveyor() ## failing on AppVeyor for unknown reasons
+    ods <- bb_source(
+        id="bilbobaggins",
+        name="Oceandata test",
+        description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
+        doc_url= "https://oceancolor.gsfc.nasa.gov/",
+        citation="See https://oceancolor.gsfc.nasa.gov/cms/citations",
+        source_url="",
+        license="Please cite",
+        comment="",
+        method=list("bb_handler_oceandata",search="Tblahblahblah20000322000060.L3m_MO_SST_sst_9km.nc"),
+        postprocess=NULL,
+        access_function="",
+        data_group="Sea surface temperature")
+    temp_root <- tempdir()
+    ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
+    expect_error(bb_sync(ocf, confirm_downloads_larger_than = NULL, catch_errors = FALSE), "No files matched")
+    expect_warning(chk <- bb_sync(ocf, confirm_downloads_larger_than = NULL), "No files matched")
+    expect_false(chk$status)
 })

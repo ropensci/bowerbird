@@ -95,16 +95,17 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
                      error=function(e) {
                          msg <- paste0("There was a problem synchronizing the dataset: ",bb_data_sources(config)$name[di],".\nThe error message was: ",e$message)
                          if (verbose) cat(msg,"\n") else warning(msg)
-                         FALSE
+                         tibble(ok = FALSE, files = list(tibble()), message = e$message)
                      }
                      )
         }
-        sync_ok <- vapply(seq_len(nrow(bb_data_sources(config))),sync_wrapper,FUN.VALUE=TRUE)
+        sync_ok <- lapply(seq_len(nrow(bb_data_sources(config))), sync_wrapper)
     } else {
-        sync_ok <- vapply(seq_len(nrow(bb_data_sources(config))),function(di) do_sync_repo(this_dataset=bb_subset(config,di),create_root=create_root,verbose=verbose,settings=settings,confirm_downloads_larger_than=confirm_downloads_larger_than),FUN.VALUE=TRUE)
+        sync_ok <- lapply(seq_len(nrow(bb_data_sources(config))), function(di) do_sync_repo(this_dataset = bb_subset(config, di), create_root = create_root, verbose = verbose, settings = settings, confirm_downloads_larger_than = confirm_downloads_larger_than))
     }
+    sync_ok <- do.call(rbind, sync_ok)
     temp <- bb_data_sources(config)
-    tibble(name=temp$name,id=temp$id,source_url=temp$source_url,status=sync_ok)
+    tibble(name = temp$name, id = temp$id, source_url = temp$source_url, status = sync_ok$ok, files = sync_ok$files)
 }
 
 
@@ -177,14 +178,14 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
     ## run the method
     mth <- match.fun(bb_data_sources(this_dataset)$method[[1]][[1]])
     method_loot <- do.call(mth, c(list(config = this_dataset, verbose = verbose), bb_data_sources(this_dataset)$method[[1]][-1]))
-    if (!is.list(method_loot)) method_loot <- list(ok = method_loot) ## older wget-based method handlers just return a status flag, newer (using bb_rget) return a list
+    if (!is.list(method_loot)) method_loot <- list(ok = method_loot, files = NULL) ## older wget-based method handlers just return a status flag, newer (using bb_rget) return a list
     ok <- method_loot$ok
     ## postprocessing
     if (length(pp)>0) {
         if (is.na(ok) || !ok) {
             if (verbose) cat(" download failed or was interrupted: not running post-processing step\n")
         } else {
-            if (is.null(method_loot$files)) {
+            if (is.null(method_loot$files[[1]])) {
                 ## the method handler didn't return a list of files (likely a wget-based handler
                 ## so we'll figure it out for ourselves: build list of files in our directory
                 ## NOTE that this won't work if the data source downloaded files from a different server, because those files
@@ -210,11 +211,11 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
                     file_list_after <- c()
                 } else {
                     ## all files go into both file_list_after and file_list_before
-                    file_list_before <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files$file))
+                    file_list_before <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files[[1]]$file))
                     ## the ones that were downloaded need to be marked as changed in file_list_after
-                    file_list_after <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files$file[method_loot$files$was_downloaded]))
+                    file_list_after <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files[[1]]$file[method_loot$files[[1]]$was_downloaded]))
                     if (nrow(file_list_after) > 0) file_list_after$size <- 0 ## just modify the size of these, that is enough to have them flagged as changed in the postprocessors
-                    file_list_after <- rbind(file_list_after, file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files$file[!method_loot$files$was_downloaded])))
+                    file_list_after <- rbind(file_list_after, file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files[[1]]$file[!method_loot$files[[1]]$was_downloaded])))
                 }
             }
             for (i in seq_len(length(pp))) {
@@ -226,5 +227,5 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
         }
     }
     if (verbose) cat(sprintf("\n%s dataset synchronization complete: %s\n", base::date(), bb_data_sources(this_dataset)$name))
-    ok
+    tibble(ok = ok, files = list(method_loot$files[[1]]))
 }

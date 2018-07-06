@@ -108,16 +108,16 @@ bb_example_sources <- function(sources) {
     }
     if (missing(sources) || any(c("Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a", "SeaWiFS_L3m_MO_CHL_chlor_a_9km") %in% sources)) {
         out <- c(out, list(bb_source(
-                          name="Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a",
-                          id="SeaWiFS_L3m_MO_CHL_chlor_a_9km",
-                          description="Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at 9km spatial resolution",
-                          doc_url="https://oceancolor.gsfc.nasa.gov/",
-                          citation="See https://oceancolor.gsfc.nasa.gov/citations",
-                          license="Please cite",
-                          method=list("bb_handler_oceandata",search="S*L3m_MO_CHL_chlor_a_9km.nc"),
-                          postprocess=NULL,
-                          collection_size=7.2,
-                          data_group="Ocean colour")))
+                          name = "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a",
+                          id = "SeaWiFS_L3m_MO_CHL_chlor_a_9km",
+                          description = "Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at 9km spatial resolution",
+                          doc_url = "https://oceancolor.gsfc.nasa.gov/",
+                          citation = "See https://oceancolor.gsfc.nasa.gov/citations",
+                          license = "Please cite",
+                          method = list("bb_handler_oceandata", search = "S*L3m_MO_CHL_chlor_a_9km.nc"),
+                          postprocess = NULL,
+                          collection_size = 7.2,
+                          data_group = "Ocean colour")))
     }
     if (missing(sources) || any(c("Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2", "10.5067/EYICLBOAAJOU") %in% sources)) {
         out <- c(out, list(bb_source(

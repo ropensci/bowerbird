@@ -33,7 +33,8 @@ my_source <- bb_source(
    method = list("bb_handler_rget", level = 1, accept_download = "csv$"),
    collection_size = 0.01)
 
-cf <- bb_config("/my/data/directory")
+my_data_dir <- tempdir()
+cf <- bb_config(my_data_dir)
 cf <- bb_add(cf, my_source)
 
 \dontrun{

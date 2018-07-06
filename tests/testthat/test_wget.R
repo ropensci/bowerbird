@@ -13,8 +13,8 @@ test_that("wget_install works and bb_find_wget finds something", {
 
 test_that("wget help works", {
     blah <- capture_messages(bb_wget("--help"))
-    ## should see the phrase "Mail bug reports and suggestions to <bug-wget@gnu.org>" in the output
-    expect_true(grepl("bug reports and suggestions",blah,ignore.case=TRUE))
+    ## should see phrase like "GNU Wget 1.19.5, a non-interactive network retriever." in the output
+    expect_true(grepl("network retriever",blah,ignore.case=TRUE))
 })
 
 test_that("internal flags_to_charvec function behaves",{

@@ -11,18 +11,44 @@ test_that("decompressing zip files works",{
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data.zip",
         license="MIT",
-        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
+        method=list("bb_handler_rget", level = 0),
         postprocess=list("bb_unzip"))
 
     temp_root <- tempdir()
-    cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf,confirm_downloads_larger_than=NULL)
+    cf <- bb_add(bb_config(local_file_root = temp_root, clobber = 2), my_source)
+    bb_sync(cf, confirm_downloads_larger_than = NULL)
 
     fp <- bb_data_source_dir(cf)
-    expect_true(file.exists(file.path(fp,"example_data.zip")))
-    expect_true(file.exists(file.path(fp,"example_data_was_zipped.csv")))
-    x <- read.csv(file.path(fp,"example_data_was_zipped.csv"))
-    expect_named(x,c("a","b","c"))
+    expect_true(file.exists(file.path(fp, "example_data.zip")))
+    expect_true(file.exists(file.path(fp, "example_data_was_zipped.csv")))
+    x <- read.csv(file.path(fp, "example_data_was_zipped.csv"))
+    expect_named(x, c("a", "b", "c"))
+})
+
+## same thing, using wget
+test_that("decompressing zip files works (wget)",{
+    skip_on_cran()
+    skip_on_appveyor() ## fails for unknown reasons
+    my_source <- bb_source(
+        name="Bowerbird test data",
+        id="bbtest-v0.1",
+        description="These are just some trivial test files provided with the bowerbird package.",
+        doc_url="https://github.com/ropensci/bowerbird",
+        citation="No citation needed.",
+        source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data.zip",
+        license="MIT",
+        method=list("bb_handler_wget", recursive = TRUE, level = 1, robots_off = TRUE),
+        postprocess=list("bb_unzip"))
+
+    temp_root <- tempdir()
+    cf <- bb_add(bb_config(local_file_root = temp_root, clobber = 2), my_source)
+    bb_sync(cf, confirm_downloads_larger_than = NULL)
+
+    fp <- bb_data_source_dir(cf)
+    expect_true(file.exists(file.path(fp, "example_data.zip")))
+    expect_true(file.exists(file.path(fp, "example_data_was_zipped.csv")))
+    x <- read.csv(file.path(fp, "example_data_was_zipped.csv"))
+    expect_named(x, c("a", "b", "c"))
 })
 
 test_that("decompressing gzipped files works",{

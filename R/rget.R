@@ -25,7 +25,8 @@
 #'    method = list("bb_handler_rget", level = 1, accept_download = "csv$"),
 #'    collection_size = 0.01)
 #'
-#' cf <- bb_config("/my/data/directory")
+#' my_data_dir <- tempdir()
+#' cf <- bb_config(my_data_dir)
 #' cf <- bb_add(cf, my_source)
 #'
 #' \dontrun{
@@ -125,18 +126,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     ## opts to pass to child function
     opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress) ##robots_off = robots_off,
     ## curl options
-    ## user and password
-    ##username                   CURLOPT_USERNAME   string
-    ##userpwd                    CURLOPT_USERPWD   string
-    ##password                   CURLOPT_PASSWORD   string
-    opts$curl_config <- if (debug) httr::verbose() else httr::config() ## curl's verbose output is intense, save it for debug = TRUE
-    if (show_progress) opts$curl_config$options <- c(opts$curl_config$options, httr::progress()$options)
-    if (no_check_certificate) {
-            temp <- opts$curl_config$options
-            temp$ssl_verifypeer = 0L
-            ##temp$ssl_verifyhost = 0L ## does not seem to work
-            opts$curl_config$options <- temp
-    }
+    opts$curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password)
     ok <- FALSE
     msg <- "" ## error or other messages
     downloads <- tibble(url = character(), file = character(), was_downloaded = logical())
@@ -206,7 +196,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             cat(sprintf(" bb_rget exited with an error (%s)\n", e$message))
         }
     })
-    list(ok = ok, files = downloads, message = msg)
+    tibble(ok = ok, files = list(downloads), message = msg)
 }
 
 spider <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0) {
@@ -290,3 +280,20 @@ clean_and_filter_url <- function(url, accept_schemes = c("https", "http", "ftp")
     if (temp$scheme %in% accept_schemes) httr::build_url(temp) else NA_character_
 }
 
+
+build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_certificate = FALSE, user, password) {
+    ## curl options
+    ## user and password
+    ##username                   CURLOPT_USERNAME   string
+    ##userpwd                    CURLOPT_USERPWD   string
+    ##password                   CURLOPT_PASSWORD   string
+    out <- if (!is.null(debug) && debug) httr::verbose() else httr::config() ## curl's verbose output is intense, save it for debug = TRUE
+    if (!is.null(show_progress) && show_progress) out$options <- c(out$options, httr::progress()$options)
+    if (!is.null(no_check_certificate) && no_check_certificate) {
+            temp <- out$options
+            temp$ssl_verifypeer = 0L
+            ##temp$ssl_verifyhost = 0L ## does not seem to work
+            out$options <- temp
+    }
+    out
+}

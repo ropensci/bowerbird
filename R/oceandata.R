@@ -27,25 +27,26 @@
 #'   data_group="Ocean colour")
 #'
 #' @export
-bb_handler_oceandata <- function(search,dtype,...) {
-    assert_that(is.string(search),nzchar(search))
+bb_handler_oceandata <- function(search, dtype, ...) {
+    assert_that(is.string(search), nzchar(search))
     if (!missing(dtype)) {
-        if (!is.null(dtype)) assert_that(is.string(dtype),nzchar(dtype))
+        if (!is.null(dtype)) assert_that(is.string(dtype), nzchar(dtype))
     } else {
         dtype <- NULL
     }
-    do.call(bb_handler_oceandata_inner,list(...,search=search,dtype=dtype))
+    do.call(bb_handler_oceandata_inner, list(..., search = search, dtype = dtype))
 }
 
 
 # @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,search,dtype=NULL) {
+bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, dtype = NULL, stop_on_download_error = FALSE) {
     ## oceandata synchronization handler
 
     ## oceandata provides a file search interface, e.g.:
     ## wget -q --post-data="cksum=1&search=A2002*DAY_CHL_chlor*9km*" -O - https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi
+    ## wget -q --post-data="cksum=1&search=S*L3m_MO_CHL_chlor_a_9km.nc" -O - https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi
     ## or
     ## wget -q --post-data="dtype=L3b&cksum=1&search=A2014*DAY_CHL.*" -O - https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi
     ## returns list of files and SHA1 checksum for each file
@@ -55,12 +56,13 @@ bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE
     ##  i.e. "search=...&dtype=..." in "dtype=L3m&addurl=1&results_as_file=1&search=A2002*DAY_CHL_chlor*9km*"
     ##  or just include the data type in the search pattern e.g. "search=A2002*L3m_DAY_CHL_chlor*9km*
 
-    assert_that(is(config,"bb_config"))
-    assert_that(nrow(bb_data_sources(config))==1)
-    assert_that(is.flag(verbose),!is.na(verbose))
-    assert_that(is.flag(local_dir_only),!is.na(local_dir_only))
-    assert_that(is.string(search),nzchar(search))
-    if (!is.null(dtype)) assert_that(is.string(dtype),nzchar(dtype))
+    assert_that(is(config, "bb_config"))
+    assert_that(nrow(bb_data_sources(config)) == 1)
+    assert_that(is.flag(verbose), !is.na(verbose))
+    assert_that(is.flag(local_dir_only), !is.na(local_dir_only))
+    assert_that(is.string(search), nzchar(search))
+    if (!is.null(dtype)) assert_that(is.string(dtype), nzchar(dtype))
+    assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
 
     this_att <- bb_settings(config)
     if (local_dir_only) {
@@ -78,67 +80,93 @@ bb_handler_oceandata_inner <- function(config,verbose=FALSE,local_dir_only=FALSE
         return(file.path(this_att$local_file_root,out))
     }
     tries <- 0
+    ## don't show progress for the file index
+    my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = this_att$user, password = this_att$password)
+    if (verbose) cat("Downloading file list ... \n")
     while (tries<3) {
-        ## sometimes this takes a couple of attempts!
-        ## sys code, nb don't quote args, will break on unix
-        qry <- paste0("--post-data=cksum=1&search=",search)
-        if (!is.null(dtype))
-            qry <- paste0(qry,"&dtype=",dtype)
-        myfiles <- bb_wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",recursive=FALSE,extra_flags=c("-q",qry,"-O","-"),capture_stdout=TRUE,verbose=verbose)
-        if (myfiles$status==0) break
+#        ## sometimes this takes a couple of attempts!
+#        ## sys code, nb don't quote args, will break on unix
+#        qry <- paste0("--post-data=cksum=1&search=",search)
+#        if (!is.null(dtype))
+#            qry <- paste0(qry,"&dtype=",dtype)
+#        myfiles <- bb_wget("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi",recursive=FALSE,extra_flags=c("-q",qry,"-O","-"),capture_stdout=TRUE,verbose=verbose)
+        myfiles <- httr::with_config(my_curl_config, httr::POST("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi", body = list(cksum = 1, search = search, if (!is.null(dtype)) dtype = dtype)))
+#        if (myfiles$status==0) break
+        if (!httr::http_error(myfiles)) break
         tries <- tries+1
     }
-    if (myfiles$status!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",search,")")
-    myfiles <- strsplit(rawToChar(myfiles$stdout),"\n")[[1]]
+#    if (myfiles$status!=0) stop("error with oceancolour data file search: could not retrieve file list (query: ",search,")")
+    if (httr::http_error(myfiles)) stop("error with oceancolour data file search: could not retrieve file list (query: ", search, ")")
+                                        #    myfiles <- strsplit(rawToChar(myfiles$stdout),"\n")[[1]]
+    myfiles <- httr::content(myfiles, as = "text")
+    myfiles <- strsplit(myfiles,"\n")[[1]]
     ## catch "Sorry No Files Matched Your Query"
-    if (any(grepl("no files matched your query",myfiles,ignore.case=TRUE))) stop("No files matched the supplied oceancolour data file search query (",search,")")
+    if (any(grepl("no files matched your query", myfiles, ignore.case = TRUE))) stop("No files matched the supplied oceancolour data file search query (", search, ")")
     ## also bail out if we don't see the "Your query generated xx results" message
     if (!any(grepl("Your query generated .* results",myfiles,ignore.case=TRUE))) stop("error with oceancolour data file search: could not retrieve file list (query: ",search,")")
-
-    myfiles <- myfiles[-c(1,2)] ## get rid of header line and blank line that follows it
-    myfiles <- as_tibble(do.call(rbind,lapply(myfiles,function(z)strsplit(z,"[[:space:]]+")[[1]]))) ## split checksum and file name from each line
-    colnames(myfiles) <- c("checksum","filename")
-    myfiles <- myfiles[order(myfiles$filename),]
+    myfiles <- myfiles[-c(1, 2)] ## get rid of header line and blank line that follows it
+    myfiles <- as_tibble(do.call(rbind, lapply(myfiles, function(z) strsplit(z, "[[:space:]]+")[[1]]))) ## split checksum and file name from each line
+    colnames(myfiles) <- c("checksum", "filename")
+    myfiles <- myfiles[order(myfiles$filename), ]
+    if (verbose) cat(sprintf("\n%d file%s to download\n", nrow(myfiles), if (nrow(myfiles)>1) "s" else ""))
     ## for each file, download if needed and store in appropriate directory
-    out <- TRUE
+    ok <- TRUE
+    downloads <- tibble(url = NA_character_, file = myfiles$filename, was_downloaded = FALSE)
+    my_curl_config <- build_curl_config(debug = FALSE, show_progress = verbose, user = this_att$user, password = this_att$password)
     for (idx in seq_len(nrow(myfiles))) {
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/",myfiles$filename[idx]) ## full URL
+        downloads$url[idx] <- this_url
         this_fullfile <- oceandata_url_mapper(this_url) ## where local copy will go
+        if (verbose) cat(sprintf("Downloading: %s ... \n", this_url))
         if (is.null(this_fullfile)) {
             msg <- sprintf("skipping oceandata URL (%s): cannot determine the local path to store the file",this_url)
             if (verbose) cat(msg,"\n")
             warning(msg)
             next
         }
+        downloads$file[idx] <- this_fullfile
         this_exists <- file.exists(this_fullfile)
         download_this <- !this_exists
-        if (this_att$clobber==0) {
+        if (this_att$clobber < 1) {
             ## don't clobber existing
-        } else if (this_att$clobber==1) {
+        } else if (this_att$clobber == 1) {
             ## replace existing if server copy newer than local copy
             ## use checksum rather than dates for this
             if (this_exists) {
-                existing_checksum <- file_hash(this_fullfile,"sha1")
-                download_this <- existing_checksum!=myfiles$checksum[idx]
+                existing_checksum <- file_hash(this_fullfile, "sha1")
+                download_this <- existing_checksum != myfiles$checksum[idx]
             }
         } else {
             download_this <- TRUE
         }
         if (download_this) {
-            dummy <- config
-            ## note that if dry_run is TRUE, it will be passed through to bb_handler_wget here
-            temp <- bb_data_sources(dummy)
-            temp$method <- list(list("bb_handler_wget",recursive=TRUE,extra_flags=c("--timeout=1800","--directory-prefix",oceandata_url_mapper(this_url,path_only=TRUE),"--cut-dirs=2","--no-host-directories")))
-            temp$source_url <- this_url
-            bb_data_sources(dummy) <- temp
-            out <- out && do.call(bb_handler_wget,c(list(dummy,verbose=verbose),temp$method[[1]][-1]))
+            if (FALSE) {
+                dummy <- config
+                ## note that if dry_run is TRUE, it will be passed through to bb_handler_wget here
+                temp <- bb_data_sources(dummy)
+                temp$method <- list(list("bb_handler_wget", recursive = TRUE, extra_flags = c("--timeout=1800", "--directory-prefix", oceandata_url_mapper(this_url, path_only = TRUE), "--cut-dirs=2", "--no-host-directories")))
+                temp$source_url <- this_url
+                bb_data_sources(dummy) <- temp
+                temp <- do.call(bb_handler_wget,c(list(dummy,verbose=verbose),temp$method[[1]][-1]))
+                ok <- ok && temp$ok
+                downloads$was_downloaded[idx] <- TRUE
+            } else {
+                if (!dir.exists(dirname(this_fullfile))) dir.create(dirname(this_fullfile), recursive = TRUE)
+                req <- httr::with_config(my_curl_config, httr::GET(this_url, write_disk(path = this_fullfile, overwrite = TRUE)))
+                if (httr::http_error(req)) {
+                    myfun <- if (stop_on_download_error) stop else warning
+                    myfun("Error downloading ", this_url, ": ", httr::http_status(req)$message)
+                } else {
+                    downloads$was_downloaded[idx] <- TRUE
+                }
+            }
         } else {
             if (this_exists) {
                 if (verbose) cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))
             }
         }
     }
-    out
+    list(ok = ok, files = downloads, message = "")
 }
 
 
