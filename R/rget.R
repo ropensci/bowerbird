@@ -202,10 +202,6 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
 spider <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0) {
     to_visit <- to_visit[!to_visit %in% visited]
     if (length(to_visit) < 1) return(list(visited = visited, download_queue = download_queue))
-#    httr_opts <- httr_options()
-#    on.exit(httr::set_config(httr_opts))
-#    httr::set_config(opts$curl_config)
-#    cat(str(options("httr_config")))
     next_level_to_visit <- character()
     first_req <- TRUE
     for (url in to_visit) {
@@ -282,18 +278,17 @@ clean_and_filter_url <- function(url, accept_schemes = c("https", "http", "ftp")
 
 
 build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_certificate = FALSE, user, password) {
-    ## curl options
-    ## user and password
-    ##username                   CURLOPT_USERNAME   string
-    ##userpwd                    CURLOPT_USERPWD   string
-    ##password                   CURLOPT_PASSWORD   string
     out <- if (!is.null(debug) && debug) httr::verbose() else httr::config() ## curl's verbose output is intense, save it for debug = TRUE
     if (!is.null(show_progress) && show_progress) out$options <- c(out$options, httr::progress()$options)
     if (!is.null(no_check_certificate) && no_check_certificate) {
-            temp <- out$options
-            temp$ssl_verifypeer = 0L
-            ##temp$ssl_verifyhost = 0L ## does not seem to work
-            out$options <- temp
+            out$optionsp$ssl_verifypeer = 0L
+            ##out$options$ssl_verifyhost = 0L ## does not seem to work
+    }
+    if (!missing(user)) {
+        out$options$username <- user
+    }
+    if (!missing(password)) {
+        out$options$password <- password
     }
     out
 }
