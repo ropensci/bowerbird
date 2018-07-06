@@ -98,11 +98,12 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param show_progress logical: if \code{TRUE}, show download progress
 #' @param debug logical: if \code{TRUE}, will print additional debugging information. If bb_rget is not behaving as expected, try setting this to \code{TRUE}
 #' @param dry_run logical: if \code{TRUE}, spider the remote site and work out which files would be downloaded, but don't download them
+#' @param stop_on_download_error logical: if \code{TRUE}, the download process will stop if any file download fails. If \code{FALSE}, the process will issue a warning and continue to the next file to download
 #'
-#' @return a list with components 'ok' (TRUE/FALSE) and 'files'
+#' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 # @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = c("\\.(asc|csv|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"), reject_download = character(), user, password, clobber = 1, no_check_certificate = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = c("\\.(asc|csv|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"), reject_download = character(), user, password, clobber = 1, no_check_certificate = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE) {
     ## TO ADD: no_parent probably wise
     assert_that(is.string(url))
     assert_that(is.numeric(level), level >= 0)
@@ -120,6 +121,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(is.flag(verbose), !is.na(verbose))
     assert_that(is.flag(debug), !is.na(debug))
     assert_that(is.flag(dry_run), !is.na(dry_run))
+    assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
     ## opts to pass to child function
     opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress) ##robots_off = robots_off,
     ## curl options
@@ -136,6 +138,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             opts$curl_config$options <- temp
     }
     ok <- FALSE
+    msg <- "" ## error or other messages
     downloads <- tibble(url = character(), file = character(), was_downloaded = logical())
     tryCatch({
         rec <- spider(to_visit = url, opts = opts)
@@ -170,24 +173,32 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                     ## this is all very inelegant
                     dlf <- tempfile()
                     file.copy(fname, dlf)
-                    httr::with_config(myopts, httr::GET(df, write_disk(path = dlf, overwrite = TRUE)))
-                    ## now if the file wasn't re-downloaded, dlf will be zero bytes
-                    if (file.exists(dlf) && file.info(dlf)$size > 0) {
-                        ## file was updated
-                        downloads$was_downloaded[downloads$url == df] <- TRUE
-                        if (file.exists(fname)) file.remove(fname)
-                        file.rename(dlf, fname)
-                        if (verbose) cat(if (show_progress) "\n", "done.\n")
+                    req <- httr::with_config(myopts, httr::GET(df, write_disk(path = dlf, overwrite = TRUE)))
+                    if (httr::http_error(req)) {
+                        ## don't throw error on download
+                        myfun <- if (stop_on_download_error) stop else warning
+                        myfun("Error downloading ", df, ": ", httr::http_status(req)$message)
                     } else {
-                        file.remove(dlf)
-                        if (verbose) cat(if (show_progress) "\n", "file unchanged on server, not downloading.\n")
+                        ## now if the file wasn't re-downloaded, dlf will be zero bytes
+                        if (file.exists(dlf) && file.info(dlf)$size > 0) {
+                            ## file was updated
+                            downloads$was_downloaded[downloads$url == df] <- TRUE
+                            if (file.exists(fname)) file.remove(fname)
+                            file.rename(dlf, fname)
+                            if (verbose) cat(if (show_progress) "\n", "done.\n")
+                        } else {
+                            file.remove(dlf)
+                            if (verbose) cat(if (show_progress) "\n", "file unchanged on server, not downloading.\n")
+                        }
                     }
                 }
             }
         }
         ok <- TRUE
     }, error = function(e) {
-        ok <<- FALSE
+        ## if download was aborted, use NA for ok
+        ok <<- if (grepl("callback aborted", e$message, ignore.case = TRUE)) NA else FALSE
+        msg <<- e$message
         if (verbose) {
             ## echo the error message but don't throw it as a full blown error
             ## what happens when download is interrupted
@@ -195,7 +206,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             cat(sprintf(" bb_rget exited with an error (%s)\n", e$message))
         }
     })
-    list(ok = ok, files = downloads)
+    list(ok = ok, files = downloads, message = msg)
 }
 
 spider <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0) {
@@ -223,16 +234,20 @@ spider <- function(to_visit, visited = character(), download_queue = character()
             }
             if (opts$verbose) cat(sprintf(" visiting %s ...\n", url))
             ##cat(str(options("httr_config")))
-            x <- tryCatch(httr::with_config(opts$curl_config, read_html(content(GET(url), as = "text"))), error = function (e) {
+            x <- httr::with_config(opts$curl_config, GET(url))
+            x <- tryCatch(read_html(content(x, as = "text")), error = function (e) {
                 ## not valid HTML?
-                NULL
+                if (current_level < 1 && grepl("^ftp", url, ignore.case = TRUE)) {
+                    ## this was the as-provided URL, and it doesn't deliver HTML
+                    ## not supported yet
+                    stop("rget currently only supports ftp:// urls if they deliver a valid HTML response")
+                    ## for FTP, see also https://gist.github.com/aaronwolen/3987414, https://github.com/brry/rdwd/blob/master/R/indexFTP.R
+                    ##with_config(httr::config(dirlistonly = 1L), y <- GET(url)) ## perhaps ftp_use_epsv = TRUE
+                    ##strsplit(content(y, as = "text"), "[\r\n]+")
+                } else {
+                    NULL
+                }
             })
-
-            ## for FTP, see also https://gist.github.com/aaronwolen/3987414, https://github.com/brry/rdwd/blob/master/R/indexFTP.R
-            ##with_config(httr::config(dirlistonly = 1L), y <- GET(url)) ## perhaps ftp_use_epsv = TRUE
-            ##strsplit(content(y, as = "text"), "[\r\n]+")
-
-            ##x <- read_html(url) ## doesn't seem to honour the ssl_verifypeer option
             if (opts$verbose && opts$show_progress) cat("\n")
             if (!is.null(x)) {
                 ## if this url matches download criteria, should we also be writing this file to disk?
@@ -255,8 +270,10 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                     next_level_to_visit <- c(next_level_to_visit, follow_links) ## add to list to visit at next recursion level
                 }
                 ##    lh <- lapply(all_links, httr::HEAD)
-                ## all download_links to download_queue for later downloading
-                download_queue <- c(download_queue, download_links)
+                if (current_level < opts$level) {
+                    ## ad download_links to download_queue for later downloading, so long as they are within our recursion limit
+                    download_queue <- c(download_queue, download_links)
+                }
             }
             if (opts$verbose) cat(" ... done\n")
         }

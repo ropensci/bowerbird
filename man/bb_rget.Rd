@@ -9,7 +9,7 @@ bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
   accept_download = c("\\\\.(asc|csv|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"),
   reject_download = character(), user, password, clobber = 1,
   no_check_certificate = FALSE, verbose = FALSE, show_progress = verbose,
-  debug = FALSE, dry_run = FALSE)
+  debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
@@ -41,9 +41,11 @@ bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
 \item{debug}{logical: if \code{TRUE}, will print additional debugging information. If bb_rget is not behaving as expected, try setting this to \code{TRUE}}
 
 \item{dry_run}{logical: if \code{TRUE}, spider the remote site and work out which files would be downloaded, but don't download them}
+
+\item{stop_on_download_error}{logical: if \code{TRUE}, the download process will stop if any file download fails. If \code{FALSE}, the process will issue a warning and continue to the next file to download}
 }
 \value{
-a list with components 'ok' (TRUE/FALSE) and 'files'
+a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 }
 \description{
 This function provides similar, but simplified, functionality to the the command-line \code{wget} utility. It is based on the \code{rvest} package.
