@@ -76,12 +76,11 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
         do.call(bb_handler_wget,c(list(config,verbose=verbose),dummy$method[[1]][-1]))
     } else {
         this_att <- bb_settings(config)
-        my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = dummy$user, password = dummy$password)
+        my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = dummy$user, password = dummy$password, enforce_basic_auth = TRUE)
         ## and some more configs specifically for earthdata
         my_curl_config$options$followlocation <- 1
         my_curl_config$options$cookiefile <- cookies_file ## reads cookies from here
         my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
-        my_curl_config$options$httpauth <- 1L # force basic authentication, equivalent to wget's --auth-no-challenge flag
         with_config(my_curl_config, do.call(bb_handler_rget, c(list(config, verbose = verbose), dummy$method[[1]][-1])))
         ##with_config(my_curl_config, bb_rget("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/", level = 1, dry_run = TRUE, verbose = TRUE))
     }

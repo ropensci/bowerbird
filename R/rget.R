@@ -305,7 +305,7 @@ is_nonparent_url <- function(url, parent) {
 }
 
 
-build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_certificate = FALSE, user, password) {
+build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_certificate = FALSE, user, password, enforce_basic_auth = FALSE) {
     out <- if (!is.null(debug) && debug) httr::verbose() else httr::config() ## curl's verbose output is intense, save it for debug = TRUE
     if (!is.null(show_progress) && show_progress) out$options <- c(out$options, httr::progress()$options)
     if (!is.null(no_check_certificate) && no_check_certificate) {
@@ -318,5 +318,6 @@ build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_cer
     if (!missing(password)) {
         out$options$password <- password
     }
+    if (enforce_basic_auth) out$options$httpauth <- 1L # force basic authentication
     out
 }
