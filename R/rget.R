@@ -248,7 +248,7 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                 if (opts$relative) all_links <- all_links[vapply(all_links, is_relative_url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
                 ## get all links as absolute URLs, discarding anchors (fragments)
                 all_links <- vapply(all_links, function(z) clean_and_filter_url(xml2::url_absolute(z, url)), FUN.VALUE = "", USE.NAMES = FALSE)
-                if (opts$no_parent) all_links <- all_links[vapply(all_links, is_descendant_url, parent = url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
+                if (opts$no_parent) all_links <- all_links[vapply(all_links, is_nonparent_url, parent = url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
                 follow_idx <- rep(TRUE, length(all_links))
                 for (rgx in opts$accept_follow) follow_idx <- follow_idx & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 for (rgx in opts$reject_follow) follow_idx <- follow_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
@@ -287,8 +287,13 @@ clean_and_filter_url <- function(url, accept_schemes = c("https", "http", "ftp")
 }
 
 is_relative_url <- function(url) is.null(httr::parse_url(url)$hostname)
-is_descendant_url <- function(url, parent) {
+is_nonparent_url <- function(url, parent) {
+    ## accept url if it is a descendant of parent, or is from a different host
+    ## note that both need to be absolute URLs
     if (!nzchar(parent) || !nzchar(url)) return(FALSE)
+    parhost <- httr::parse_url(parent)$hostname
+    urlhost <- httr::parse_url(url)$hostname
+    if (!is.null(urlhost) && !is.null(parhost) && urlhost != parhost) return(TRUE)
     ## url is a descendant of parent if its starting fragment is the parent url
     ## note that this only works if e.g. "../"'s have been removed from url and parent
     if (grepl("../", url, fixed = TRUE) || grepl("../", parent, fixed = TRUE)) {
