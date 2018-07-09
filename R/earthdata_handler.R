@@ -40,22 +40,25 @@ bb_handler_earthdata <- function(...) {
 # @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-# @param use_wget logical: TRUE use wget, FALSE use rget
+# @param use_wget logical: TRUE use wget (deprecated), FALSE use rget
 bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, use_wget = FALSE, ...) {
-    assert_that(is(config,"bb_config"))
-    assert_that(nrow(bb_data_sources(config))==1)
-    assert_that(is.flag(verbose),!is.na(verbose))
-    assert_that(is.flag(local_dir_only),!is.na(local_dir_only))
+    assert_that(is(config, "bb_config"))
+    assert_that(nrow(bb_data_sources(config)) == 1)
+    assert_that(is.flag(verbose), !is.na(verbose))
+    assert_that(is.flag(local_dir_only), !is.na(local_dir_only))
     assert_that(is.flag(use_wget), !is.na(use_wget))
 
-    ## the earthdata-recommended way to use wget requires a .netrc file with username and password
     ## see e.g. https://wiki.earthdata.nasa.gov/display/EL/How+To+Access+Data+With+cURL+And+Wget
     ## note preauthorization needed: https://wiki.earthdata.nasa.gov/display/EL/How+To+Pre-authorize+an+application
-
     ## https://nsidc.org/support/faq/what-options-are-available-bulk-downloading-data-https-earthdata-login-enabled
 
-    if (local_dir_only)
-        return(bb_handler_wget(config,verbose=verbose,local_dir_only=TRUE,...))
+    if (local_dir_only) {
+        if (use_wget) {
+            return(bb_handler_wget(config, verbose = verbose, local_dir_only = TRUE, ...))
+        } else {
+            return(bb_handler_rget(config, verbose = verbose, local_dir_only = TRUE, ...))
+        }
+    }
 
     dummy <- bb_data_sources(config)
     if (na_or_empty(dummy$user) || na_or_empty(dummy$password))
@@ -82,6 +85,5 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
         my_curl_config$options$cookiefile <- cookies_file ## reads cookies from here
         my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
         with_config(my_curl_config, do.call(bb_handler_rget, c(list(config, verbose = verbose), dummy$method[[1]][-1])))
-        ##with_config(my_curl_config, bb_rget("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/", level = 1, dry_run = TRUE, verbose = TRUE))
     }
 }
