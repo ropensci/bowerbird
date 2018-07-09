@@ -31,5 +31,5 @@ bb_sync(cf)
 \url{https://github.com/Microsoft/USBuildingFootprints}
 }
 \seealso{
-\code{\link{bb_example_sources}}, \code{\link{bb_config}}, \code{\link{bb_handler_wget}}
+\code{\link{bb_example_sources}}, \code{\link{bb_config}}, \code{\link{bb_handler_rget}}
 }

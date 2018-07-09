@@ -20,13 +20,13 @@
 #' @seealso \code{\link{bb_config}}, \code{\link{bb_handler_wget}}, \code{\link{bb_handler_oceandata}}, \code{\link{bb_handler_earthdata}}, \code{\link{bb_source_us_buildings}}
 #'
 #' @examples
-#' \dontrun{
 #' ## define a configuration and add the 2016 election data source to it
-#' cf <- bb_config("/my/file/root") %>%
-#'   bb_add(bb_example_sources("aus-election-house-2016"))
+#' cf <- bb_config("/my/file/root") %> bb_add(
+#'    bb_example_sources("Australian Election 2016 House of Representatives data"))
 #'
-#' ## synchronize (download) the data
-#' bb_sync(cf)
+#' \dontrun{
+#'   ## synchronize (download) the data
+#'   bb_sync(cf)
 #' }
 #' @export
 bb_example_sources <- function(sources) {
@@ -136,7 +136,7 @@ bb_example_sources <- function(sources) {
                           collection_size=0.02,
                           data_group="Sea ice",warn_empty_auth=FALSE)))
     }
-    if (missing(sources) || any(c("Bathymetry of Lake Superior", "greatlakes-superior-bathymetry") %in% sources)) {
+    if (!missing(sources) && any(c("Bathymetry of Lake Superior wget", "greatlakes-superior-bathymetry wget") %in% sources)) {
         out <- c(out, list(bb_source(
                           name="Bathymetry of Lake Superior",
                           id="greatlakes-superior-bathymetry",
@@ -147,6 +147,21 @@ bb_example_sources <- function(sources) {
                           license="https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright",
                           method=list("bb_handler_wget",recursive=TRUE,level=2,accept_regex="/netcdf/",reject="index.html*"),
                           comment="Only the netcdf format data are retrieved here - adjust the accept_regex parameter in the method argument to get other formats",
+                          postprocess=list("bb_gunzip"),
+                          collection_size=0.03,
+                          data_group="Topography")))
+    }
+    if (missing(sources) || any(c("Bathymetry of Lake Superior", "greatlakes-superior-bathymetry") %in% sources)) {
+        out <- c(out, list(bb_source(
+                          name = "Bathymetry of Lake Superior",
+                          id = "greatlakes-superior-bathymetry",
+                          description = "A draft version of the Lake Superior Bathymetry was compiled as a component of a NOAA project to rescue Great Lakes lake floor geological and geophysical data, and make it more accessible to the public. No time frame has been set for completing bathymetric contours of Lake Superior, though a 3 arc-second (~90 meter cell size) grid is available.",
+                          doc_url = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html",
+                          source_url = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior/data/",
+                          citation="Publisher: DOC/NOAA/NESDIS/NCEI > National Centers for Environmental Information, NESDIS, NOAA, U.S. Department of Commerce",
+                          license = "https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright",
+                          method=list("bb_handler_rget", level = 2, accept_follow="/netcdf/"),
+                          comment="Only the netcdf format data are retrieved here - adjust the accept_follow parameter in the method argument to get other formats",
                           postprocess=list("bb_gunzip"),
                           collection_size=0.03,
                           data_group="Topography")))
@@ -165,7 +180,7 @@ bb_example_sources <- function(sources) {
 #'
 #' @return a tibble with columns as specified by \code{\link{bb_source}}
 #'
-#' @seealso \code{\link{bb_example_sources}}, \code{\link{bb_config}}, \code{\link{bb_handler_wget}}
+#' @seealso \code{\link{bb_example_sources}}, \code{\link{bb_config}}, \code{\link{bb_handler_rget}}
 #'
 #' @examples
 #' \dontrun{
