@@ -28,7 +28,7 @@ Example data sources:
 }
 \examples{
 ## define a configuration and add the 2016 election data source to it
-cf <- bb_config("/my/file/root") \%> bb_add(
+cf <- bb_config("/my/file/root") \%>\% bb_add(
    bb_example_sources("Australian Election 2016 House of Representatives data"))
 
 \dontrun{
