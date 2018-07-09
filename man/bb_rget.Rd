@@ -8,8 +8,9 @@ bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
   reject_follow = character(),
   accept_download = c("\\\\.(asc|csv|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"),
   reject_download = character(), user, password, clobber = 1,
-  no_check_certificate = FALSE, verbose = FALSE, show_progress = verbose,
-  debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE)
+  no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE,
+  verbose = FALSE, show_progress = verbose, debug = FALSE,
+  dry_run = FALSE, stop_on_download_error = FALSE)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
@@ -32,7 +33,11 @@ bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
 
 \item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files}
 
+\item{no_parent}{logical: if \code{TRUE}, do not ever ascend to the parent directory when retrieving recursively. This is \code{TRUE} by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded}
+
 \item{no_check_certificate}{logical: if \code{TRUE}, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution}
+
+\item{relative}{logical: if \code{TRUE}, only follow relative links. This can be useful for restricting what is downloaded in recursive mode}
 
 \item{verbose}{logical: print trace output?}
 

@@ -94,7 +94,9 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param user string: username used to authenticate to the remote server
 #' @param password string: password used to authenticate to the remote server
 #' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files
+#' @param no_parent logical: if \code{TRUE}, do not ever ascend to the parent directory when retrieving recursively. This is \code{TRUE} by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded
 #' @param no_check_certificate logical: if \code{TRUE}, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution
+#' @param relative logical: if \code{TRUE}, only follow relative links. This can be useful for restricting what is downloaded in recursive mode
 #' @param verbose logical: print trace output?
 #' @param show_progress logical: if \code{TRUE}, show download progress
 #' @param debug logical: if \code{TRUE}, will print additional debugging information. If bb_rget is not behaving as expected, try setting this to \code{TRUE}
@@ -104,7 +106,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 # @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = c("\\.(asc|csv|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"), reject_download = character(), user, password, clobber = 1, no_check_certificate = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = c("\\.(asc|csv|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE) {
     ## TO ADD: no_parent probably wise
     assert_that(is.string(url))
     assert_that(is.numeric(level), level >= 0)
@@ -117,14 +119,16 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     if (missing(password)) password <- NA_character_
     assert_that(is.string(password))
     assert_that(clobber %in% c(0, 1, 2))
+    assert_that(is.flag(no_parent),!is.na(no_parent))
     assert_that(is.flag(no_check_certificate), !is.na(no_check_certificate))
+    assert_that(is.flag(relative), !is.na(relative))
     assert_that(is.numeric(wait))
     assert_that(is.flag(verbose), !is.na(verbose))
     assert_that(is.flag(debug), !is.na(debug))
     assert_that(is.flag(dry_run), !is.na(dry_run))
     assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
     ## opts to pass to child function
-    opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress) ##robots_off = robots_off,
+    opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent) ##robots_off = robots_off,
     ## curl options
     opts$curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password)
     ok <- FALSE
@@ -200,6 +204,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
 }
 
 spider <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0) {
+    ## TODO: check that opts has the names we expect
     to_visit <- to_visit[!to_visit %in% visited]
     if (length(to_visit) < 1) return(list(visited = visited, download_queue = download_queue))
     next_level_to_visit <- character()
@@ -237,8 +242,13 @@ spider <- function(to_visit, visited = character(), download_queue = character()
             if (opts$verbose && opts$show_progress) cat("\n")
             if (!is.null(x)) {
                 ## if this url matches download criteria, should we also be writing this file to disk?
+                ## grab all link hrefs
+                all_links <- unique(na.omit(vapply(html_nodes(x, "a"), function(z) html_attr(z, "href"), FUN.VALUE = "", USE.NAMES = FALSE)))
+                ## discard non-relative links, if opts$relative
+                if (opts$relative) all_links <- all_links[vapply(all_links, is_relative_url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
                 ## get all links as absolute URLs, discarding anchors (fragments)
-                all_links <- unique(na.omit(vapply(html_nodes(x, "a"), function(z) clean_and_filter_url(xml2::url_absolute(html_attr(z, "href"), url)), FUN.VALUE = "", USE.NAMES = FALSE)))
+                all_links <- vapply(all_links, function(z) clean_and_filter_url(xml2::url_absolute(z, url)), FUN.VALUE = "", USE.NAMES = FALSE)
+                if (opts$no_parent) all_links <- all_links[vapply(all_links, is_descendant_url, parent = url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
                 follow_idx <- rep(TRUE, length(all_links))
                 for (rgx in opts$accept_follow) follow_idx <- follow_idx & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 for (rgx in opts$reject_follow) follow_idx <- follow_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
@@ -274,6 +284,19 @@ clean_and_filter_url <- function(url, accept_schemes = c("https", "http", "ftp")
     temp <- httr::parse_url(url)
     temp$fragment <- NULL ## discard fragment
     if (temp$scheme %in% accept_schemes) httr::build_url(temp) else NA_character_
+}
+
+is_relative_url <- function(url) is.null(httr::parse_url(url)$hostname)
+is_descendant_url <- function(url, parent) {
+    if (!nzchar(parent) || !nzchar(url)) return(FALSE)
+    ## url is a descendant of parent if its starting fragment is the parent url
+    ## note that this only works if e.g. "../"'s have been removed from url and parent
+    if (grepl("../", url, fixed = TRUE) || grepl("../", parent, fixed = TRUE)) {
+        warning("url or parent contain '../', no_parent may not work correctly")
+        FALSE
+    } else {
+        tolower(substr(url, 1, nchar(parent))) == tolower(parent)
+    }
 }
 
 
