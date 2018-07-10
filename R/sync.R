@@ -78,8 +78,8 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
     bb_settings(config) <- st
     bb_validate(config)
     ## check that wget can be found (this will also set it in the options)
-    ## but don't do this if we are only using the bb_handler_rget method, since it doens't need wget
-    if (!all(vapply(bb_data_sources(config)$method, function(z)grepl("handler_rget", z[[1]][[1]]), FUN.VALUE = TRUE, USE.NAMES = FALSE)))
+    ## but don't do this unless we are using the bb_handler_wget or ghrsst methods, since the others (rget, oceandata, earthdata) don't need wget
+    if (any(vapply(bb_data_sources(config)$method, function(z)grepl("wget|ghrsst", z[[1]][[1]]), FUN.VALUE = TRUE, USE.NAMES = FALSE)))
         tmp <- bb_find_wget(install=FALSE,error=TRUE)
     ## save some current settings: path and proxy env values
     settings <- save_current_settings()
@@ -116,7 +116,8 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
         stop("expecting single-row data set")
     this_att <- bb_settings(this_dataset)
     this_collection_size <- bb_data_sources(this_dataset)$collection_size
-    if (interactive() && !is.null(this_collection_size) && !is.na(this_collection_size) && !is.null(confirm_downloads_larger_than) && this_collection_size>confirm_downloads_larger_than) {
+    dry_run <- !is.null(bb_settings(this_dataset)$dry_run) && !is.na(bb_settings(this_dataset)$dry_run) && bb_settings(this_dataset)$dry_run
+    if (interactive() && !dry_run && !is.null(this_collection_size) && !is.na(this_collection_size) && !is.null(confirm_downloads_larger_than) && this_collection_size>confirm_downloads_larger_than) {
         go_ahead <- menu(c("Yes","No"),title=sprintf("%s\nThis data set is %.1f GB in size: are you sure you want to download it?",bb_data_sources(this_dataset)$name,this_collection_size))
         if (go_ahead!=1) {
             if (verbose) cat(sprintf("\n dataset synchronization aborted: %s\n",bb_data_sources(this_dataset)$name))
@@ -178,7 +179,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
     ## run the method
     mth <- match.fun(bb_data_sources(this_dataset)$method[[1]][[1]])
     method_loot <- do.call(mth, c(list(config = this_dataset, verbose = verbose), bb_data_sources(this_dataset)$method[[1]][-1]))
-    if (!is.list(method_loot)) method_loot <- list(ok = method_loot, files = NULL) ## older wget-based method handlers just return a status flag, newer (using bb_rget) return a list
+    if (!is.data.frame(method_loot)) method_loot <- tibble(ok = method_loot, files = NULL) ## older wget-based method handlers just return a status flag, newer (using bb_rget) return a tibble
     ok <- method_loot$ok
     ## postprocessing
     if (length(pp)>0) {
@@ -206,7 +207,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
                 ## of files into something that the existing postprocessors will understand
                 ## note that file paths returned by the handler are relative to the local_file_root
                 ## if we are doing a dry run, no postprocessing
-                if (!is.null(bb_settings(this_dataset)$dry_run) && !is.na(bb_settings(this_dataset)$dry_run) && bb_settings(this_dataset)$dry_run) {
+                if (dry_run) {
                     file_list_before <- c()
                     file_list_after <- c()
                 } else {
