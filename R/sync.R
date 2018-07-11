@@ -78,8 +78,8 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
     bb_settings(config) <- st
     bb_validate(config)
     ## check that wget can be found (this will also set it in the options)
-    ## but don't do this unless we are using the bb_handler_wget or ghrsst methods, since the others (rget, oceandata, earthdata) don't need wget
-    if (any(vapply(bb_data_sources(config)$method, function(z)grepl("wget|ghrsst", z[[1]][[1]]), FUN.VALUE = TRUE, USE.NAMES = FALSE)))
+    ## but don't do this unless we are using the bb_handler_wget method, since the others (rget, oceandata, earthdata) don't need wget
+    if (any(vapply(bb_data_sources(config)$method, function(z)grepl("wget", z[[1]][[1]]), FUN.VALUE = TRUE, USE.NAMES = FALSE)))
         tmp <- bb_find_wget(install=FALSE,error=TRUE)
     ## save some current settings: path and proxy env values
     settings <- save_current_settings()
