@@ -97,7 +97,4 @@ test_that("bb_sync works with a sink() call in place",{
     op <- readLines(sinkfile)
     ## sink file should contain direct cat output "Synchronizing dataset: test"
     expect_true(any(grepl("Synchronizing dataset: test",op)))
-    ## sink file should also contain wget output, e.g. "FINISHED"
-    expect_true(any(grepl("FINISHED",op)))
-    if (!any(grepl("FINISHED",op)))     cat(op)
 })

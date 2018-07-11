@@ -182,7 +182,7 @@ test_that("bb_modify_source works",{
     ## use this one
     src <- bb_example_sources("SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047")
     ## check src is as expected
-    expect_identical(src$method[[1]],list("bb_handler_wget",recursive=TRUE,level=3))
+    expect_identical(src$method[[1]],list("bb_handler_rget", level = 3))
     expect_identical(src$postprocess[[1]],list(list("bb_gunzip")))
 
     expect_error(src %>% bb_modify_source(bilbo="baggins",frodo="also baggins"),"unexpected input parameters")
@@ -206,9 +206,10 @@ test_that("bb_modify_source works",{
     expect_error(src %>% bb_modify_source(user="me",password="blah",method=list("notafunction",a=1)),"resolves to a function")
     temp <- src %>% bb_modify_source(user="me",password="blah",method=list("bb_handler_oceandata",a=1))
     ## this should replace the method function name, and add a=1, but leave the existing recursive and level elements
-    expect_identical(temp$method[[1]],list("bb_handler_oceandata",recursive=TRUE,level=3,a=1))
+    expect_identical(temp$method[[1]],list("bb_handler_oceandata",level=3,a=1))
     temp <- src %>% bb_modify_source(user="me",password="blah",method=list("bb_handler_wget",level=NULL)) ## should remove the level element
-    expect_identical(temp$method[[1]],list("bb_handler_wget",recursive=TRUE))
+    expect_equal(length(temp$method[[1]]), 1)
+    expect_equal(temp$method[[1]][[1]], "bb_handler_wget")
 
     ## warn_empty_auth behaviour
     expect_warning(src %>% bb_modify_source(),"requires authentication")
