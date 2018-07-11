@@ -62,7 +62,7 @@ test_that("decompressing gzipped files works",{
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data_was_gzipped.csv.gz",
         license="MIT",
-        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
+        method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_gunzip"))
 
     temp_root <- tempdir()
@@ -87,7 +87,7 @@ test_that("decompressing bzipped files works",{
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data_was_bzipped.csv.bz2",
         license="MIT",
-        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
+        method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_bunzip2"))
 
     temp_root <- tempdir()
@@ -112,7 +112,7 @@ test_that("decompressing Z-compressed files works",{
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/20170822.nc.Z",
         license="MIT",
-        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
+        method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_uncompress"))
 
     temp_root <- tempdir()
@@ -136,7 +136,7 @@ test_that("cleanup postprocessing works",{
         citation="No citation needed.",
         source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data.zip",
         license="MIT",
-        method=list("bb_handler_wget",recursive=TRUE,level=1,robots_off=TRUE),
+        method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_unzip",list("bb_cleanup",pattern="\\.csv$"))
     )
     temp_root <- tempdir()

@@ -2,10 +2,10 @@
 #'
 #' This is a handler function to be used with data sets from NASA's Earthdata system. This function is not intended to be called directly, but rather is specified as a \code{method} option in \code{\link{bb_source}}.
 #'
-#' This function uses \code{\link{bb_wget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_wget}} parameters.
+#' This function uses \code{\link{bb_rget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_rget}} parameters.
 #'
 #' @references https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login
-#' @param ... : parameters passed to \code{\link{bb_wget}}
+#' @param ... : parameters passed to \code{\link{bb_rget}}
 #'
 #' @return TRUE on success
 #'

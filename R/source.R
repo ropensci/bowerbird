@@ -12,11 +12,11 @@
 #' @param name string: (required) a unique name for the data source. This should be a human-readable but still concise name
 #' @param description string: a plain-language description of the data source, provided so that users can get an idea of what the data source contains (for full details they can consult the \code{doc_url} link)
 #' @param doc_url string: (required) URL to the metadata record or other documentation of the data source
-#' @param source_url character vector: one or more source URLs. Required for \code{bb_handler_wget}, although some \code{method} functions might not require one
+#' @param source_url character vector: one or more source URLs. Required for \code{bb_handler_rget}, although some \code{method} functions might not require one
 #' @param citation string: (required) details of the citation for the data source
 #' @param license string: (required) description of the license. For standard licenses (e.g. creative commons) include the license descriptor ("CC-BY", etc)
 #' @param comment string: comments about the data source. If only part of the original data collection is mirrored, mention that here
-#' @param method list (required): a list object that defines the function used to synchronize this data source. The first element of the list is the function name (as a string or function). Additional list elements can be used to specify additional parameters to pass to that function. Note that \code{bb_sync} automatically passes the data repository configuration object as the first parameter to the method handler function. If the handler function uses wget (e.g. \code{bb_handler_wget}), these extra parameters are passed through to the \code{bb_wget} function
+#' @param method list (required): a list object that defines the function used to synchronize this data source. The first element of the list is the function name (as a string or function). Additional list elements can be used to specify additional parameters to pass to that function. Note that \code{bb_sync} automatically passes the data repository configuration object as the first parameter to the method handler function. If the handler function uses bb_rget (e.g. \code{bb_handler_rget}), these extra parameters are passed through to the \code{bb_rget} function
 #' @param postprocess list: each element of \code{postprocess} defines a postprocessing step to be run after the main synchronization has happened. Each element of this list can be a function or string function name, or a list in the style of \code{list(fun,arg1=val1,arg2=val2)} where \code{fun} is the function to be called and \code{arg1} and \code{arg2} are additional parameters to pass to that function
 #' @param authentication_note string: if authentication is required in order to access this data source, make a note of the process (include a URL to the registration page, if possible)
 #' @param user string: username, if required
@@ -35,36 +35,36 @@
 #' ## a minimal definition for the GSHHG coastline data set:
 #'
 #' my_source <- bb_source(
-#'    id="gshhg_coastline",
-#'    name="GSHHG coastline data",
-#'    doc_url= "http://www.soest.hawaii.edu/pwessel/gshhg",
-#'    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
+#'    id = "gshhg_coastline",
+#'    name = "GSHHG coastline data",
+#'    doc_url = "http://www.soest.hawaii.edu/pwessel/gshhg",
+#'    citation = "Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
 #'      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
-#'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
-#'    license="LGPL",
-#'    method=list("bb_handler_wget",recursive=TRUE,level=1,accept="*bin*.zip,README.TXT"))
+#'    source_url = "ftp://ftp.soest.hawaii.edu/gshhg/",
+#'    license = "LGPL",
+#'    method = list("bb_handler_rget",level = 1, accept_download = "README|bin.*\\.zip$"))
 #'
 #' ## a more complete definition, which unzips the files after downloading and also
 #' ##  provides an indication of the size of the dataset
 #'
 #' my_source <- bb_source(
-#'    id="gshhg_coastline",
-#'    name="GSHHG coastline data",
-#'    description="A Global Self-consistent, Hierarchical, High-resolution Geography Database",
-#'    doc_url= "http://www.soest.hawaii.edu/pwessel/gshhg",
-#'    citation="Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
+#'    id = "gshhg_coastline",
+#'    name = "GSHHG coastline data",
+#'    description = "A Global Self-consistent, Hierarchical, High-resolution Geography Database",
+#'    doc_url = "http://www.soest.hawaii.edu/pwessel/gshhg",
+#'    citation = "Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
 #'      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996",
-#'    source_url="ftp://ftp.soest.hawaii.edu/gshhg/*",
-#'    license="LGPL",
-#'    method=list("bb_handler_wget",recursive=TRUE,level=1,accept="*bin*.zip,README.TXT"),
-#'    postprocess=list("bb_unzip"),
-#'    collection_size=0.6)
+#'    source_url = "ftp://ftp.soest.hawaii.edu/gshhg/*",
+#'    license = "LGPL",
+#'    method = list("bb_handler_rget", level = 1, accept_download = "README|bin.*\\.zip$"),
+#'    postprocess = list("bb_unzip"),
+#'    collection_size = 0.6)
 #'
 #' ## define a data repository configuration
 #' cf <- bb_config("/my/repo/root")
 #'
 #' ## add this source to the repository
-#' cf <- bb_add(cf,my_source)
+#' cf <- bb_add(cf, my_source)
 #'
 #' \dontrun{
 #' ## sync the repo
@@ -91,6 +91,7 @@ bb_source <- function(id,name,description=NA_character_,doc_url,source_url,citat
     source_url <- source_url[nzchar(source_url) & !is.na(source_url)] ## drop empty and NA strings
     if (length(source_url)<1) {
         if (check_method_is(method[[1]],bb_handler_wget)) stop("method 'bb_handler_wget' requires at least one non-empty source URL")
+        if (check_method_is(method[[1]],bb_handler_rget)) stop("method 'bb_handler_rget' requires at least one non-empty source URL")
         source_url <- NA_character_
     }
     if (missing(postprocess) || is.null(postprocess)) {
@@ -138,13 +139,13 @@ bb_source <- function(id,name,description=NA_character_,doc_url,source_url,citat
 #'
 #' The \code{method} and \code{postprocess} parameters are lists, and modification for these takes place at the list-element level: any element of the new list will replace its equivalent element in the list in src. If the src list does not contain that element, it will be added. To illustrate, say that we have created a data source with:
 #'
-#' \code{src <- bb_source(method=list("bb_handler_wget",parm1=value1,parm2=value2),...)}
+#' \code{src <- bb_source(method=list("bb_handler_rget", parm1 = value1, parm2 = value2), ...)}
 #'
 #' Calling
 #'
-#' \code{bb_modify_source(src,method=list(parm1=newvalue1))}
+#' \code{bb_modify_source(src, method = list(parm1 = newvalue1))}
 #'
-#' will result in a new \code{method} value of \code{list("bb_handler_wget",parm1=newvalue1,parm2=value2)}
+#' will result in a new \code{method} value of \code{list("bb_handler_rget", parm1 = newvalue1, parm2 = value2)}
 #'
 #' Modifying \code{postprocess} elements is similar. Note that it is not currently possible to entirely remove a postprocess component using this function. If you need to do so, you'll need to do it manually.
 #'

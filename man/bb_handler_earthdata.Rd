@@ -7,7 +7,7 @@
 bb_handler_earthdata(...)
 }
 \arguments{
-\item{...}{: parameters passed to \code{\link{bb_wget}}}
+\item{...}{: parameters passed to \code{\link{bb_rget}}}
 }
 \value{
 TRUE on success
@@ -16,7 +16,7 @@ TRUE on success
 This is a handler function to be used with data sets from NASA's Earthdata system. This function is not intended to be called directly, but rather is specified as a \code{method} option in \code{\link{bb_source}}.
 }
 \details{
-This function uses \code{\link{bb_wget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_wget}} parameters.
+This function uses \code{\link{bb_rget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_rget}} parameters.
 }
 \examples{
 \dontrun{

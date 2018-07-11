@@ -17,7 +17,7 @@ bb_config(local_file_root, wget_global_flags = list(restrict_file_names =
 
 \item{ftp_proxy}{string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)}
 
-\item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files. For data sources that use method 'wget', an appropriate flag will be added to the wget call according to the clobber setting ("--no-clobber" to not overwrite existing files, "--timestamping" to overwrite if the remote file is newer than the local copy)}
+\item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files}
 }
 \value{
 configuration object

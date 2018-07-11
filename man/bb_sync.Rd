@@ -18,7 +18,7 @@ bb_sync(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE,
 
 \item{confirm_downloads_larger_than}{numeric or NULL: if non-negative, \code{bb_sync} will ask the user for confirmation to download any data source of size greater than this number (in GB). A value of zero will trigger confirmation on every data source. A negative or NULL value will not prompt for confirmation. Note that this only applies when R is being used interactively. The expected download size is taken from the \code{collection_size} parameter of the data source, and so its accuracy is dependent on the accuracy of the data source definition}
 
-\item{dry_run}{logical: if \code{TRUE}, \code{bb_sync} will do a dry run of the synchronization process without actually downloading files. This may be helpful for testing, but note that calls to wget will not be executed, so e.g. any recursion handled by wget itself will not be simulated}
+\item{dry_run}{logical: if \code{TRUE}, \code{bb_sync} will do a dry run of the synchronization process without actually downloading files}
 }
 \value{
 a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}

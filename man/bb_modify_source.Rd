@@ -22,13 +22,13 @@ With the exception of the \code{method} and \code{postprocess} parameters, any p
 
 The \code{method} and \code{postprocess} parameters are lists, and modification for these takes place at the list-element level: any element of the new list will replace its equivalent element in the list in src. If the src list does not contain that element, it will be added. To illustrate, say that we have created a data source with:
 
-\code{src <- bb_source(method=list("bb_handler_wget",parm1=value1,parm2=value2),...)}
+\code{src <- bb_source(method=list("bb_handler_rget", parm1 = value1, parm2 = value2), ...)}
 
 Calling
 
-\code{bb_modify_source(src,method=list(parm1=newvalue1))}
+\code{bb_modify_source(src, method = list(parm1 = newvalue1))}
 
-will result in a new \code{method} value of \code{list("bb_handler_wget",parm1=newvalue1,parm2=value2)}
+will result in a new \code{method} value of \code{list("bb_handler_rget", parm1 = newvalue1, parm2 = value2)}
 
 Modifying \code{postprocess} elements is similar. Note that it is not currently possible to entirely remove a postprocess component using this function. If you need to do so, you'll need to do it manually.
 }

@@ -56,6 +56,14 @@ test_that("empty/missing/NA source_urls get dealt with correctly",{
         description="xxx",
         doc_url="xxx",
         citation="blah",
+        license="",
+        method=list("bb_handler_rget")),"requires at least one non-empty source URL")
+    expect_error(bb_source(
+        id="xxx",
+        name="xxx",
+        description="xxx",
+        doc_url="xxx",
+        citation="blah",
         source_url="",
         license="",
         method=list(bb_handler_wget)),"requires at least one non-empty source URL")
