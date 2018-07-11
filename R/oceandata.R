@@ -166,7 +166,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             }
         }
     }
-    list(ok = ok, files = downloads, message = "")
+    tibble(ok = ok, files = list(downloads), message = "")
 }
 
 
