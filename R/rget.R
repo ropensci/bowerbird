@@ -82,14 +82,15 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #'
 #' This function provides similar, but simplified, functionality to the the command-line \code{wget} utility. It is based on the \code{rvest} package.
 #'
-#' NOTE: this is still highly experimental.
+#' NOTE: this is still somewhat experimental.
 #'
 #' @param url string: the URL to retrieve
 #' @param level integer >=0: recursively download to this maximum depth level. Specify 0 for no recursion
 #' @param wait numeric >=0: wait this number of seconds between successive retrievals. This option may help with servers that block users making too many requests in a short period of time
 #' @param accept_follow character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs matching all entries will be followed during the spidering process. Note that the first URL (provided via the \code{url} parameter) will always be visited, unless it matches the download criteria
 #' @param reject_follow character: as for \code{accept_follow}, but specifying URL regular expressions to reject
-#' @param accept_download character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. Matching URLs will be accepted for download
+#' @param accept_download character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs that match all entries will be accepted for download
+#' @param accept_download_extra character: character vector with one or more entries. If provided, URLs will be accepted for download if they match all entries in \code{accept_download} OR all entries in \code{accept_download_extra}. This is a convenient method to add one or more extra download types, without needing to re-specify the defaults in \code{accept_download}
 #' @param reject_download character: as for \code{accept_regex}, but specifying URL regular expressions to reject
 #' @param user string: username used to authenticate to the remote server
 #' @param password string: password used to authenticate to the remote server
@@ -107,13 +108,14 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 # @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = c("\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = c("README|\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml|tif|tiff)$"), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename) {
     ## TO ADD: no_parent probably wise
     assert_that(is.string(url))
     assert_that(is.numeric(level), level >= 0)
     assert_that(is.character(accept_follow))
     assert_that(is.character(reject_follow))
     assert_that(is.character(accept_download))
+    assert_that(is.character(accept_download_extra))
     assert_that(is.character(reject_download))
     if (missing(user)) user <- NA_character_
     assert_that(is.string(user))
@@ -130,7 +132,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
     if (!missing(force_local_filename)) assert_that(is.string(force_local_filename))
     ## opts to pass to child function
-    opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, debug = debug) ##robots_off = robots_off,
+    opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, debug = debug) ##robots_off = robots_off,
     ## curl options
     opts$curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password)
     ok <- FALSE
@@ -138,7 +140,12 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     downloads <- tibble(url = character(), file = character(), was_downloaded = logical())
     tryCatch({
         if (missing(force_local_filename)) {
-            rec <- spider(to_visit = url, opts = opts)
+            is_ftp <- grepl("^ftp", url)
+            if (is_ftp && missing(accept_follow)) {
+                ## modify accept_follow, unless user has already overridden the defaults
+                opts$accept_follow <- "[^\\.]" ## anything without a .
+            }
+            rec <- spider(to_visit = url, opts = opts, ftp = is_ftp)
             ## download each file, or not depending on clobber behaviour
             ## if doing a dry run no download, but do enumerate the list of files that would be downloaded
             downloads <- tibble(url = unique(rec$download_queue), file = NA_character_, was_downloaded = FALSE)
@@ -215,16 +222,21 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     tibble(ok = ok, files = list(downloads), message = msg)
 }
 
-spider <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0) {
+## ftp logical: if TRUE, use ftp
+spider <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0, ftp = FALSE) {
     ## TODO: check that opts has the names we expect
+    if (ftp) opts$curl_config$options$dirlistonly <- 1L
     to_visit <- to_visit[!to_visit %in% visited]
     if (length(to_visit) < 1) return(list(visited = visited, download_queue = download_queue))
     next_level_to_visit <- character()
     first_req <- TRUE
     for (url in to_visit) {
         ## first check that this isn't a download file
-        is_dl <- TRUE
-        for (rgx in opts$accept_download) is_dl <- is_dl & grepl(rgx, url)
+        temp1 <- length(opts$accept_download) > 0
+        for (rgx in opts$accept_download) temp1 <- temp1 & grepl(rgx, url)
+        temp2 <- length(opts$accept_download_extra) > 0
+        for (rgx in opts$accept_download_extra) temp2 <- temp2 & grepl(rgx, url)
+        is_dl <- temp1 || temp2
         for (rgx in opts$reject_download) is_dl <- is_dl & !grepl(rgx, url)
         if (is_dl) {
             ## don't visit it, add to download queue
@@ -236,44 +248,81 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                 if (opts$wait > 0) Sys.sleep(opts$wait)
             }
             if (opts$verbose) cat(sprintf(" visiting %s ...\n", url))
-            x <- httr::with_config(opts$curl_config, GET(url))
-            x <- tryCatch(read_html(content(x, as = "text")), error = function (e) {
-                ## not valid HTML?
-                if (current_level < 1 && grepl("^ftp", url, ignore.case = TRUE)) {
-                    ## this was the as-provided URL, and it doesn't deliver HTML
-                    ## not supported yet
-                    stop("rget currently only supports ftp:// urls if they deliver a valid HTML response")
-                    ## for FTP, see also https://gist.github.com/aaronwolen/3987414, https://github.com/brry/rdwd/blob/master/R/indexFTP.R
-                    ##with_config(httr::config(dirlistonly = 1L), y <- GET(url)) ## perhaps ftp_use_epsv = TRUE
-                    ##strsplit(content(y, as = "text"), "[\r\n]+")
-                } else {
+            if (ftp) {
+                ## ftp is a bit funny - when recursing, we can't be sure if a link is a file or a directory
+                ## we have added trailing slashes, but if it was actually a file this will throw an error
+                ## also, suppress warnings else we get warnings about reading directory contents etc
+                x <- tryCatch(suppressWarnings(httr::with_config(opts$curl_config, GET(url))), error = function(e) {
+                    if (grepl("directory", e$message)) {
+                        ## was probably a 'Server denied you to change to the given directory' message, ignore it
+                        if (opts$verbose) cat(" (ignoring error: ", e$message, ") ... done\n")
+                        NULL
+                    } else {
+                        stop(e$message)
+                    }
+                })
+                if (is.null(x)) next
+            } else {
+                x <- httr::with_config(opts$curl_config, GET(url))
+            }
+            ## TODO check for error?
+            if (ftp) {
+                x <- tryCatch(content(x, as = "text"), error = function (e) {
+                    stop("error: ", e$message)
+                })
+            } else {
+                x <- tryCatch(read_html(content(x, as = "text")), error = function (e) {
+                    ## not valid HTML?
                     NULL
-                }
-            })
+                    #if (current_level < 1 && grepl("^ftp", url, ignore.case = TRUE)) {
+                    #    ## this was the as-provided URL, and it doesn't deliver HTML
+                    #    ## not supported yet
+                    #    cat("recalling spider with ftp = TRUE\n")
+                    #    return(spider(to_visit, visited = character(), download_queue = character(), opts = opts, current_level = 0, ftp = TRUE))
+                    #    stop("rget currently only supports ftp:// urls if they deliver a valid HTML response")
+                    #} else {
+                    #    NULL
+                    #}
+                })
+            }
             if (opts$verbose && opts$show_progress) cat("\n")
             if (!is.null(x)) {
                 ## if this url matches download criteria, should we also be writing this file to disk?
                 ## grab all link hrefs
-                all_links <- unique(na.omit(vapply(html_nodes(x, "a"), function(z) html_attr(z, "href"), FUN.VALUE = "", USE.NAMES = FALSE)))
+                if (ftp) {
+                    all_links <- strsplit(x, "[\r\n]+")[[1]]
+                    #cat("all links:")
+                    #cat(all_links)
+                    #cat("\n")
+                } else {
+                    all_links <- unique(na.omit(vapply(html_nodes(x, "a"), function(z) html_attr(z, "href"), FUN.VALUE = "", USE.NAMES = FALSE)))
+                }
                 ## discard non-relative links, if opts$relative
                 if (opts$relative) all_links <- all_links[vapply(all_links, is_relative_url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
                 ## get all links as absolute URLs, discarding anchors (fragments)
                 all_links <- vapply(all_links, function(z) clean_and_filter_url(xml2::url_absolute(z, url)), FUN.VALUE = "", USE.NAMES = FALSE)
                 if (opts$no_parent) all_links <- all_links[vapply(all_links, is_nonparent_url, parent = url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
-                follow_idx <- rep(TRUE, length(all_links))
+                follow_idx <- rep(length(opts$accept_follow) > 0, length(all_links))
                 for (rgx in opts$accept_follow) follow_idx <- follow_idx & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 for (rgx in opts$reject_follow) follow_idx <- follow_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 follow_links <- all_links[follow_idx]
-                download_idx <- rep(TRUE, length(all_links))
-                for (rgx in opts$accept_download) download_idx <- download_idx & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                temp1 <- rep(length(opts$accept_download) > 0, length(all_links))
+                for (rgx in opts$accept_download) temp1 <- temp1 & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                temp2 <- rep(length(opts$accept_download_extra) > 0, length(all_links))
+                for (rgx in opts$accept_download_extra) temp2 <- temp2 & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                download_idx <- temp1 | temp2
                 for (rgx in opts$reject_download) download_idx <- download_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 download_links <- all_links[download_idx]
                 download_links <- download_links[!download_links %in% download_queue]
-                if (opts$verbose) cat(sprintf(" %d download links", length(download_links)))
                 if (current_level < (opts$level - 1)) { ## -1 because we will download files linked from these pages, and those files will be current_level + 2
+                    if (opts$verbose) cat(sprintf(" %d download links", length(download_links)))
                     follow_links <- setdiff(follow_links, download_links) ## can't be in both, treat as download?
+                    if (ftp) {
+                        ## links won't have trailing /, add it
+                        follow_links <- sub("/*$", "/", follow_links)
+                    }
                     follow_links <- follow_links[!follow_links %in% visited] ## discard any already visited
-                    if (opts$verbose) cat(sprintf(", %d links to visit", length(follow_links)))
+                    if (opts$verbose) cat(sprintf(", %d links to visit", length(follow_links))) ## parent links might be included here, but excluded when attempt to visit at next recursion level
                     next_level_to_visit <- c(next_level_to_visit, follow_links) ## add to list to visit at next recursion level
                 }
                 ##    lh <- lapply(all_links, httr::HEAD)
@@ -287,7 +336,7 @@ spider <- function(to_visit, visited = character(), download_queue = character()
     }
     visited <- c(visited, to_visit)
     ## recurse to next level
-    spider(next_level_to_visit, visited = visited, download_queue = download_queue, opts = opts, current_level = current_level + 1)
+    spider(next_level_to_visit, visited = visited, download_queue = download_queue, opts = opts, current_level = current_level + 1, ftp = ftp)
 }
 
 clean_and_filter_url <- function(url, accept_schemes = c("https", "http", "ftp")) {

@@ -6,11 +6,12 @@
 \usage{
 bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
   reject_follow = character(),
-  accept_download = c("\\\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"),
-  reject_download = character(), user, password, clobber = 1,
-  no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE,
-  verbose = FALSE, show_progress = verbose, debug = FALSE,
-  dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename)
+  accept_download = c("README|\\\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml|tif|tiff)$"),
+  accept_download_extra = character(), reject_download = character(), user,
+  password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE,
+  relative = FALSE, verbose = FALSE, show_progress = verbose,
+  debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE,
+  force_local_filename)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
@@ -23,7 +24,9 @@ bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
 
 \item{reject_follow}{character: as for \code{accept_follow}, but specifying URL regular expressions to reject}
 
-\item{accept_download}{character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. Matching URLs will be accepted for download}
+\item{accept_download}{character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs that match all entries will be accepted for download}
+
+\item{accept_download_extra}{character: character vector with one or more entries. If provided, URLs will be accepted for download if they match all entries in \code{accept_download} OR all entries in \code{accept_download_extra}. This is a convenient method to add one or more extra download types, without needing to re-specify the defaults in \code{accept_download}}
 
 \item{reject_download}{character: as for \code{accept_regex}, but specifying URL regular expressions to reject}
 
@@ -58,5 +61,5 @@ a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other
 This function provides similar, but simplified, functionality to the the command-line \code{wget} utility. It is based on the \code{rvest} package.
 }
 \details{
-NOTE: this is still highly experimental.
+NOTE: this is still somewhat experimental.
 }
