@@ -71,7 +71,7 @@ bb_example_sources <- function(sources) {
                           citation = "Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
                           source_url = "http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm",
                           license = "CC-BY",
-                          method = list("bb_handler_rget", level = 1, accept_download = "csv$"),
+                          method = list("bb_handler_rget", level = 1, accept_download = "csv$", no_parent = FALSE),
                           collection_size=0.01,
                           data_group="Electoral")))
     }
