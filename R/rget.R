@@ -107,7 +107,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #'
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
-# @export
+#' @export
 bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename) {
     ## TO ADD: no_parent probably wise
     assert_that(is.string(url))
@@ -172,7 +172,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                 do_download <- clobber >= 1 || (!file.exists(fname))
                 ## if clobber == 1, we set the if-modified-since option, so we can ask for download and it will not re-download unless needed
                 if (do_download) {
-                    if (verbose) cat(sprintf("downloading file: %s ...\n", df))
+                    if (verbose) cat(sprintf(" downloading file: %s ... ", df), if (show_progress) "\n")
                     myopts <- opts$curl_config ## curl options for this particular file, may be modified below depending on clobber
                     if (file.exists(fname)) {
                         if (clobber == 1) {

@@ -24,7 +24,9 @@ matrix:
           env:
            - BUILD_NAME=osx_release
            - DETAILS="osx release build"
-          brew_packages: libarchive
+          brew_packages:
+            - libarchive
+            - libgit2
 
 # set NOT_CRAN to true to ensure that skip_on_cran tests are run here
 env:
