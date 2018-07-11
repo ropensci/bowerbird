@@ -89,7 +89,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param wait numeric >=0: wait this number of seconds between successive retrievals. This option may help with servers that block users making too many requests in a short period of time
 #' @param accept_follow character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs matching all entries will be followed during the spidering process. Note that the first URL (provided via the \code{url} parameter) will always be visited, unless it matches the download criteria
 #' @param reject_follow character: as for \code{accept_follow}, but specifying URL regular expressions to reject
-#' @param accept_download character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs that match all entries will be accepted for download
+#' @param accept_download character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs that match all entries will be accepted for download. By default the \code{accept_download} parameter is that returned by \code{bb_rget_default_downloads}: use \code{bb_rget_default_downloads()} to see what that is
 #' @param accept_download_extra character: character vector with one or more entries. If provided, URLs will be accepted for download if they match all entries in \code{accept_download} OR all entries in \code{accept_download_extra}. This is a convenient method to add one or more extra download types, without needing to re-specify the defaults in \code{accept_download}
 #' @param reject_download character: as for \code{accept_regex}, but specifying URL regular expressions to reject
 #' @param user string: username used to authenticate to the remote server
@@ -108,7 +108,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 # @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = c("README|\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml|tif|tiff)$"), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename) {
     ## TO ADD: no_parent probably wise
     assert_that(is.string(url))
     assert_that(is.numeric(level), level >= 0)
@@ -360,10 +360,16 @@ is_nonparent_url <- function(url, parent) {
         warning("url or parent contain '../', no_parent may not work correctly")
         FALSE
     } else {
+        if (!grepl("/$", parent)) parent <- dirname(parent) ## strip trailing filename
         tolower(substr(url, 1, nchar(parent))) == tolower(parent)
     }
 }
 
+
+
+#' @rdname bb_rget
+#' @export
+bb_rget_default_downloads <- function() "README|\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml|tif|tiff)$"
 
 build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_certificate = FALSE, user, password, enforce_basic_auth = FALSE) {
     out <- if (!is.null(debug) && debug) httr::verbose() else httr::config() ## curl's verbose output is intense, save it for debug = TRUE

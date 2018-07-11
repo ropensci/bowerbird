@@ -2,16 +2,19 @@
 % Please edit documentation in R/rget.R
 \name{bb_rget}
 \alias{bb_rget}
+\alias{bb_rget_default_downloads}
 \title{A recursive download utility}
 \usage{
 bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
   reject_follow = character(),
-  accept_download = c("README|\\\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml|tif|tiff)$"),
+  accept_download = bb_rget_default_downloads(),
   accept_download_extra = character(), reject_download = character(), user,
   password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE,
   relative = FALSE, verbose = FALSE, show_progress = verbose,
   debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE,
   force_local_filename)
+
+bb_rget_default_downloads()
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
@@ -24,7 +27,7 @@ bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
 
 \item{reject_follow}{character: as for \code{accept_follow}, but specifying URL regular expressions to reject}
 
-\item{accept_download}{character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs that match all entries will be accepted for download}
+\item{accept_download}{character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs that match all entries will be accepted for download. By default the \code{accept_download} parameter is that returned by \code{bb_rget_default_downloads}: use \code{bb_rget_default_downloads()} to see what that is}
 
 \item{accept_download_extra}{character: character vector with one or more entries. If provided, URLs will be accepted for download if they match all entries in \code{accept_download} OR all entries in \code{accept_download_extra}. This is a convenient method to add one or more extra download types, without needing to re-specify the defaults in \code{accept_download}}
 
