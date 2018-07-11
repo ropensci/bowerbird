@@ -9,7 +9,7 @@
 #'   \item "CMEMS global gridded SSH reprocessed (1993-ongoing)" - a data source that requires a username and password
 #'   \item "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a" - an example data source that uses the \code{bb_handler_oceandata} method
 #'   \item "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2" - an example data source that uses the \code{bb_handler_earthdata} method
-#'   \item "Bathymetry of Lake Superior" - another example that passes extra flags to the \code{bb_handler_wget} call in order to restrict what is downloaded
+#'   \item "Bathymetry of Lake Superior" - another example that passes extra flags to the \code{bb_handler_rget} call in order to restrict what is downloaded
 #' }
 #'
 #' @param sources character: names or identifiers of one or more sources to return. See Details for the list of example sources and a brief explanation of each
@@ -17,7 +17,7 @@
 #'
 #' @return a tibble with columns as specified by \code{\link{bb_source}}
 #'
-#' @seealso \code{\link{bb_config}}, \code{\link{bb_handler_wget}}, \code{\link{bb_handler_oceandata}}, \code{\link{bb_handler_earthdata}}, \code{\link{bb_source_us_buildings}}
+#' @seealso \code{\link{bb_config}}, \code{\link{bb_handler_rget}}, \code{\link{bb_handler_oceandata}}, \code{\link{bb_handler_earthdata}}, \code{\link{bb_source_us_buildings}}
 #'
 #' @examples
 #' ## define a configuration and add the 2016 election data source to it
@@ -90,21 +90,21 @@ bb_example_sources <- function(sources) {
     }
     if (missing(sources) || any(c("CMEMS global gridded SSH reprocessed (1993-ongoing)", "SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047") %in% sources)) {
         out <- c(out, list(bb_source(
-                          name="CMEMS global gridded SSH reprocessed (1993-ongoing)",
-                          id="SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047",
-                          description="For the Global Ocean - Multimission altimeter satellite gridded sea surface heights and derived variables computed with respect to a twenty-year mean. Previously distributed by Aviso+, no change in the scientific content. All the missions are homogenized with respect to a reference mission which is currently OSTM/Jason-2.\nVARIABLES\n- sea_surface_height_above_sea_level (SSH)\n- surface_geostrophic_eastward_sea_water_velocity_assuming_sea_level_for_geoid (UVG)\n- surface_geostrophic_northward_sea_water_velocity_assuming_sea_level_for_geoid (UVG)\n- sea_surface_height_above_geoid (SSH)\n- surface_geostrophic_eastward_sea_water_velocity (UVG)\n- surface_geostrophic_northward_sea_water_velocity (UVG)",
-                          doc_url="http://cmems-resources.cls.fr/?option=com_csw&view=details&tab=info&product_id=SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047",
-                          citation="In case of any publication, the Licensee will ensure credit the Copernicus Marine Service in the following manner: \"This study has been conducted using E.U. Copernicus Marine Service Information\"",
-                          source_url=c("ftp://ftp.sltac.cls.fr/Core/SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047/dataset-duacs-rep-global-merged-allsat-phy-l4-v3/"),
-                          license="See http://marine.copernicus.eu/services-portfolio/service-commitments-and-licence/",
-                          method=list("bb_handler_wget",recursive=TRUE,level=3),
-                          postprocess=list("bb_gunzip"),
-                          authentication_note="Copernicus Marine login required, see http://marine.copernicus.eu/services-portfolio/register-now/",
-                          user="",
-                          password="",
-                          access_function="raster::raster",
-                          collection_size=310,
-                          data_group="Altimetry",warn_empty_auth=FALSE)))
+                          name = "CMEMS global gridded SSH reprocessed (1993-ongoing)",
+                          id = "SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047",
+                          description = "For the Global Ocean - Multimission altimeter satellite gridded sea surface heights and derived variables computed with respect to a twenty-year mean. Previously distributed by Aviso+, no change in the scientific content. All the missions are homogenized with respect to a reference mission which is currently OSTM/Jason-2.\nVARIABLES\n- sea_surface_height_above_sea_level (SSH)\n- surface_geostrophic_eastward_sea_water_velocity_assuming_sea_level_for_geoid (UVG)\n- surface_geostrophic_northward_sea_water_velocity_assuming_sea_level_for_geoid (UVG)\n- sea_surface_height_above_geoid (SSH)\n- surface_geostrophic_eastward_sea_water_velocity (UVG)\n- surface_geostrophic_northward_sea_water_velocity (UVG)",
+                         doc_url = "http://marine.copernicus.eu/services-portfolio/access-to-products/?option=com_csw&view=details&product_id=SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047",
+                          citation = "In case of any publication, the Licensee will ensure credit the Copernicus Marine Service in the following manner: \"This study has been conducted using E.U. Copernicus Marine Service Information\"",
+                          source_url = c("ftp://ftp.sltac.cls.fr/Core/SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047/dataset-duacs-rep-global-merged-allsat-phy-l4-v3/"),
+                          license = "See http://marine.copernicus.eu/services-portfolio/service-commitments-and-licence/",
+                          method = list("bb_handler_rget", level = 3),
+                          postprocess = list("bb_gunzip"),
+                          authentication_note = "Copernicus Marine login required, see http://marine.copernicus.eu/services-portfolio/register-now/",
+                          user = "",
+                          password = "",
+                          access_function = "raster::raster",
+                          collection_size = 310,
+                          data_group = "Altimetry", warn_empty_auth = FALSE)))
     }
     if (missing(sources) || any(c("Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a", "SeaWiFS_L3m_MO_CHL_chlor_a_9km") %in% sources)) {
         out <- c(out, list(bb_source(
@@ -121,20 +121,20 @@ bb_example_sources <- function(sources) {
     }
     if (missing(sources) || any(c("Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2", "10.5067/EYICLBOAAJOU") %in% sources)) {
         out <- c(out, list(bb_source(
-                          name="Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2",
-                          id="10.5067/EYICLBOAAJOU",
-                          description="NSIDC provides this data set to aid in the investigations of the variability and trends of sea ice cover. Ice cover in these data are indicated by sea ice concentration: the percentage of the ocean surface covered by ice. The ice-covered area indicates how much ice is present; it is the total area of a pixel multiplied by the ice concentration in that pixel. Ice persistence is the percentage of months over the data set time period that ice existed at a location. The ice-extent indicates whether ice is present; here, ice is considered to exist in a pixel if the sea ice concentration exceeds 15 percent. This data set provides users with data about total ice-covered areas, sea ice extent, ice persistence, and monthly climatologies of sea ice concentrations.",
-                          doc_url="https://nsidc.org/data/NSIDC-0192/versions/2",
-                          citation="Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2. [Indicate subset used]. Boulder, Colorado USA. NASA National Snow and Ice Data Center Distributed Active Archive Center. doi: http://dx.doi.org/10.5067/EYICLBOAAJOU. [Date Accessed].",
-                          source_url=c("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"),
-                          license="Please cite, see http://nsidc.org/about/use_copyright.html",
-                          authentication_note="Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login . Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
-                          method=list("bb_handler_earthdata", level = 4, relative = TRUE, accept_download = "\\.(s|n|png|txt)$"),
-                          user="",
-                          password="",
-                          postprocess=NULL,
-                          collection_size=0.02,
-                          data_group="Sea ice",warn_empty_auth=FALSE)))
+                          name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2",
+                          id = "10.5067/EYICLBOAAJOU",
+                          description = "NSIDC provides this data set to aid in the investigations of the variability and trends of sea ice cover. Ice cover in these data are indicated by sea ice concentration: the percentage of the ocean surface covered by ice. The ice-covered area indicates how much ice is present; it is the total area of a pixel multiplied by the ice concentration in that pixel. Ice persistence is the percentage of months over the data set time period that ice existed at a location. The ice-extent indicates whether ice is present; here, ice is considered to exist in a pixel if the sea ice concentration exceeds 15 percent. This data set provides users with data about total ice-covered areas, sea ice extent, ice persistence, and monthly climatologies of sea ice concentrations.",
+                          doc_url = "https://nsidc.org/data/NSIDC-0192/versions/2",
+                          citation = "Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2. [Indicate subset used]. Boulder, Colorado USA. NASA National Snow and Ice Data Center Distributed Active Archive Center. doi: http://dx.doi.org/10.5067/EYICLBOAAJOU. [Date Accessed].",
+                          source_url = c("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"),
+                          license = "Please cite, see http://nsidc.org/about/use_copyright.html",
+                          authentication_note = "Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login . Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
+                          method = list("bb_handler_earthdata", level = 4, relative = TRUE, accept_download = "\\.(s|n|png|txt)$"),
+                          user = "",
+                          password = "",
+                          postprocess = NULL,
+                          collection_size = 0.02,
+                          data_group = "Sea ice", warn_empty_auth = FALSE)))
     }
     if (!missing(sources) && any(c("Bathymetry of Lake Superior wget", "greatlakes-superior-bathymetry wget") %in% sources)) {
         out <- c(out, list(bb_source(

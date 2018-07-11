@@ -23,7 +23,7 @@ Example data sources:
   \item "CMEMS global gridded SSH reprocessed (1993-ongoing)" - a data source that requires a username and password
   \item "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a" - an example data source that uses the \code{bb_handler_oceandata} method
   \item "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2" - an example data source that uses the \code{bb_handler_earthdata} method
-  \item "Bathymetry of Lake Superior" - another example that passes extra flags to the \code{bb_handler_wget} call in order to restrict what is downloaded
+  \item "Bathymetry of Lake Superior" - another example that passes extra flags to the \code{bb_handler_rget} call in order to restrict what is downloaded
 }
 }
 \examples{
@@ -40,5 +40,5 @@ cf <- bb_config("/my/file/root") \%>\% bb_add(
 See the \code{doc_url} and \code{citation} field in each row of the returned tibble for references associated with these particular data sources
 }
 \seealso{
-\code{\link{bb_config}}, \code{\link{bb_handler_wget}}, \code{\link{bb_handler_oceandata}}, \code{\link{bb_handler_earthdata}}, \code{\link{bb_source_us_buildings}}
+\code{\link{bb_config}}, \code{\link{bb_handler_rget}}, \code{\link{bb_handler_oceandata}}, \code{\link{bb_handler_earthdata}}, \code{\link{bb_source_us_buildings}}
 }
