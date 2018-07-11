@@ -36,21 +36,6 @@ library(devtools)
 install_github("ropensci/bowerbird",build_vignettes=TRUE)
 ```
 
-You will also need to have the third-party utility `wget` available, because bowerbird uses this to do the heavy lifting of recursively downloading files from data providers. Note that installing `wget` may require admin privileges on your local machine.
-
-### Linux
-
-`wget` is typically installed by default on Linux. Otherwise use your package manager to install it, e.g. `sudo apt install wget` on Ubuntu/Debian or `sudo yum install wget` on Fedora/CentOS.
-
-### Windows
-
-On Windows you can use the `bb_install_wget()` function to install it. Otherwise download `wget` yourself (e.g. from https://eternallybored.org/misc/wget/) and make sure it is on your system path.
-
-### Mac
-
-Use `brew install wget` or try `brew install --with-libressl wget` if you get SSL-related errors. If you do not have brew installed, see https://brew.sh/.
-
-
 ## Usage overview
 
 ### Configuration
@@ -60,7 +45,7 @@ Build up a configuration by first defining global options such as the destinatio
 ```{r eval=FALSE}
 library(bowerbird)
 my_directory <- "~/my/data/directory"
-cf <- bb_config(local_file_root=my_directory)
+cf <- bb_config(local_file_root = my_directory)
 ```
 
 Bowerbird must then be told which data sources to synchronize. Let's use data from the Australian 2016 federal election, which is provided as one of the example data sources:
@@ -69,25 +54,19 @@ Bowerbird must then be told which data sources to synchronize. Let's use data fr
 my_source <- bb_example_sources("Australian Election 2016 House of Representatives data")
 
 ## add this data source to the configuration
-cf <- bb_add(cf,my_source)
+cf <- bb_add(cf, my_source)
 ```
 
-Once the configuration has been defined and the data source added to it, we can run the sync process. We set `verbose=TRUE` here so that we see additional progress output:
+Once the configuration has been defined and the data source added to it, we can run the sync process. We set `verbose = TRUE` here so that we see additional progress output:
 
 ```{r eval=FALSE}
-status <- bb_sync(cf,verbose=TRUE)
+status <- bb_sync(cf, verbose = TRUE)
 ```
 
-Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. The files in this data set have been stored in a data-source-specific subdirectory of our local file root:
+Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. Details of the files in this data set are given in the `status$files` object:
 
 ```{r eval=FALSE}
-bb_data_source_dir(cf)
-```
-
-The contents of that directory:
-
-```{r eval=FALSE}
-list.files(bb_data_source_dir(cf),recursive=TRUE,full.names=TRUE)
+status$files
 ```
 
 At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the `clobber` parameter set to 0 ("do not overwrite existing files") or 1 ("overwrite only if the remote file is newer than the local copy") then the sync process will run more quickly because it will not need to re-download any data files.
