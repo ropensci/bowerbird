@@ -11,7 +11,7 @@ vignette: >
 
 Bowerbird will maintain a local collection of data files, sourced from external data providers. When one does an analysis using such files, it is useful to know *which* files were used, and the *provenance* of those files. This information will assist in making analyses reproducible.
 
-Bowerbird actually knows very little about the data files that it maintains, particularly if it is using the `bb_handler_wget` method. In this case, for a given data source it typically knows the URL and flags to pass to `wget`, and some basic metadata (primarily intended to be read by the user). This is by design: the heavy lifting involved in mirroring a remote data source is generally handballed to the third-party utility `wget`. This simplifies both the bowerbird code as well as the process of writing and maintaining data sources.
+Bowerbird itself actually knows very little about the data files that it maintains, particularly if it is using the `bb_handler_rget` method. In this case, for a given data source it typically knows the URL and flags to pass to `bb_rget`, and some basic metadata (primarily intended to be read by the user). This is by design: the heavy lifting involved in mirroring a remote data source is generally handballed `bb_rget`. This simplifies both the bowerbird code as well as the process of writing and maintaining data sources.
 
 The downside of this is that bowerbird can't necessarily answer questions about data provenance in specific detail. Say that we are using data from a data source that contains many separate files, one per day, spanning many years, and we run an analysis that uses only files from the year 1999. Ideally we would like a function that could tell us exactly which files from the complete data set are needed for our particular analysis, but this is impossible without specific knowledge of how the data source is structured. Analogous situations exist with data sources that split geographic space across files, or split different parameters across files.
 
@@ -28,14 +28,14 @@ cf <- bb_config("/some/local/path") %>% bb_add(bb_example_sources())
 We can ask bowerbird where these files are stored locally:
 ```{r}
 source_dirs <- bb_data_source_dir(cf)
-knitr::kable(data.frame(name=cf$data_sources$name,source_dir=source_dirs))
+knitr::kable(data.frame(name = cf$data_sources$name, source_dir = source_dirs))
 ```
 
 The directory for each data source will contain *all* of the files associated with that data source, not just the files used in a particular analysis. (In extreme cases this directory might even contain files from other data sources, although this should only happen if multiple data sources have overlapping `source_url` paths, which ought not to be a common occurrence.)
 
 So while this directory is not the *minimal* set of files needed to reproduce an analysis, it does at least contain that set, and could be used to store those files in an online repository that assigns DOIs (such as figshare, see https://cran.r-project.org/package=rfigshare, or zenodo), or bundle into a docker image (see e.g https://github.com/o2r-project/containerit).
 
-The complete list of files within a data source's directory can be generated using a standard directory listing (e.g. `list.files(path=my_source_dir,recursive=TRUE`), but see also the `bb_fingerprint` function described below, which provides additional information about the files.
+The complete list of files within a data source's directory can be generated using a standard directory listing (e.g. `list.files(path = my_source_dir, recursive = TRUE`), but see also the `bb_fingerprint` function described below, which provides additional information about the files.
 
 ### Refining the list of files
 
