@@ -102,11 +102,12 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param debug logical: if \code{TRUE}, will print additional debugging information. If bb_rget is not behaving as expected, try setting this to \code{TRUE}
 #' @param dry_run logical: if \code{TRUE}, spider the remote site and work out which files would be downloaded, but don't download them
 #' @param stop_on_download_error logical: if \code{TRUE}, the download process will stop if any file download fails. If \code{FALSE}, the process will issue a warning and continue to the next file to download
+#' @param force_local_filename string: if provided, then the \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with this name, in a local directory determined by the \code{url}
 #'
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 # @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = c("\\.(asc|csv|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = c("\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename) {
     ## TO ADD: no_parent probably wise
     assert_that(is.string(url))
     assert_that(is.numeric(level), level >= 0)
@@ -127,26 +128,37 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(is.flag(debug), !is.na(debug))
     assert_that(is.flag(dry_run), !is.na(dry_run))
     assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
+    if (!missing(force_local_filename)) assert_that(is.string(force_local_filename))
     ## opts to pass to child function
-    opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent) ##robots_off = robots_off,
+    opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, debug = debug) ##robots_off = robots_off,
     ## curl options
     opts$curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password)
     ok <- FALSE
     msg <- "" ## error or other messages
     downloads <- tibble(url = character(), file = character(), was_downloaded = logical())
     tryCatch({
-        rec <- spider(to_visit = url, opts = opts)
-        ## download each file, or not depending on clobber behaviour
-        ## if doing a dry run no download, but do enumerate the list of files that would be downloaded
-        downloads <- tibble(url = unique(rec$download_queue), file = NA_character_, was_downloaded = FALSE)
-        if (dry_run && verbose && length(rec$download_queue) > 0) {
-            cat(sprintf(" dry_run is TRUE, bb_rget is not downloading the following files:\n %s\n", paste(rec$download_queue, collapse="\n ")))
+        if (missing(force_local_filename)) {
+            rec <- spider(to_visit = url, opts = opts)
+            ## download each file, or not depending on clobber behaviour
+            ## if doing a dry run no download, but do enumerate the list of files that would be downloaded
+            downloads <- tibble(url = unique(rec$download_queue), file = NA_character_, was_downloaded = FALSE)
+        } else {
+            ## force_local_filename is a special case: just download this one file
+            downloads <- tibble(url = url, file = force_local_filename, was_downloaded = FALSE)
+        }
+        if (dry_run && verbose && length(downloads$url) > 0) {
+            cat(sprintf(" dry_run is TRUE, bb_rget is not downloading the following files:\n %s\n", paste(downloads$url, collapse="\n ")))
         }
         ## download each file
         ## keep track of which were actually downloaded
         for (df in downloads$url) {
             mydir <- sub("[\\/]$", "", directory_from_url(df)) ## no trailing filesep
-            fname <- file.path(mydir, basename(df))
+            if (is.na(downloads$file[downloads$url == df])) {
+                fname <- file.path(mydir, basename(df))
+            } else {
+                ## filename has already been given, by force_local_filename
+                fname <- file.path(mydir, downloads$file[downloads$url == df]) ## prepend local path
+            }
             downloads$file[downloads$url == df] <- fname
             if (!dry_run) {
                 if (!dir.exists(mydir)) dir.create(mydir, recursive = TRUE)
@@ -224,7 +236,6 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                 if (opts$wait > 0) Sys.sleep(opts$wait)
             }
             if (opts$verbose) cat(sprintf(" visiting %s ...\n", url))
-            ##cat(str(options("httr_config")))
             x <- httr::with_config(opts$curl_config, GET(url))
             x <- tryCatch(read_html(content(x, as = "text")), error = function (e) {
                 ## not valid HTML?
@@ -309,13 +320,13 @@ build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_cer
     out <- if (!is.null(debug) && debug) httr::verbose() else httr::config() ## curl's verbose output is intense, save it for debug = TRUE
     if (!is.null(show_progress) && show_progress) out$options <- c(out$options, httr::progress()$options)
     if (!is.null(no_check_certificate) && no_check_certificate) {
-            out$optionsp$ssl_verifypeer = 0L
+            out$options$ssl_verifypeer = 0L
             ##out$options$ssl_verifyhost = 0L ## does not seem to work
     }
-    if (!missing(user)) {
+    if (!missing(user) && !is.null(user) && !is.na(user)) {
         out$options$username <- user
     }
-    if (!missing(password)) {
+    if (!missing(password) && !is.null(password) && !is.na(password)) {
         out$options$password <- password
     }
     if (enforce_basic_auth) out$options$httpauth <- 1L # force basic authentication

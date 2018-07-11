@@ -6,11 +6,11 @@
 \usage{
 bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
   reject_follow = character(),
-  accept_download = c("\\\\.(asc|csv|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"),
+  accept_download = c("\\\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml)$"),
   reject_download = character(), user, password, clobber = 1,
   no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE,
   verbose = FALSE, show_progress = verbose, debug = FALSE,
-  dry_run = FALSE, stop_on_download_error = FALSE)
+  dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}
@@ -48,6 +48,8 @@ bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
 \item{dry_run}{logical: if \code{TRUE}, spider the remote site and work out which files would be downloaded, but don't download them}
 
 \item{stop_on_download_error}{logical: if \code{TRUE}, the download process will stop if any file download fails. If \code{FALSE}, the process will issue a warning and continue to the next file to download}
+
+\item{force_local_filename}{string: if provided, then the \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with this name, in a local directory determined by the \code{url}}
 }
 \value{
 a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
