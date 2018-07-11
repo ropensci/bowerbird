@@ -85,7 +85,7 @@
       
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/AustralianAntarcticDivision/bowerbird">
+  <a href="https://github.com/ropensci/bowerbird">
     <span class="fa fa-github fa-lg"></span>
      
   </a>
@@ -136,7 +136,7 @@
     </tr>
     <tr>
       <th>dry_run</th>
-      <td><p>logical: if <code>TRUE</code>, <code>bb_sync</code> will do a dry run of the synchronization process without actually downloading files. This may be helpful for testing, but note that calls to wget will not be executed, so e.g. any recursion handled by wget itself will not be simulated</p></td>
+      <td><p>logical: if <code>TRUE</code>, <code>bb_sync</code> will do a dry run of the synchronization process without actually downloading files</p></td>
     </tr>
     </table>
     
@@ -166,7 +166,7 @@
   <span class='co'>## Let's use data from the Australian 2016 federal election, which is provided as one</span>
   <span class='co'>## of the example data sources:</span>
 
-  <span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'>subset</span>(<span class='fu'><a href='bb_example_sources.html'>bb_example_sources</a></span>(),<span class='no'>id</span><span class='kw'>==</span><span class='st'>"aus-election-house-2016"</span>)
+  <span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_example_sources.html'>bb_example_sources</a></span>(<span class='st'>"Australian Election 2016 House of Representatives data"</span>)
 
   <span class='co'>## Add this data source to the configuration:</span>
 

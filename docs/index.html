@@ -59,7 +59,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/AustralianAntarcticDivision/bowerbird">
+  <a href="https://github.com/ropensci/bowerbird">
     <span class="fa fa-github fa-lg"></span>
      
   </a>
@@ -85,31 +85,15 @@
 <div id="bowerbird" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#bowerbird" class="anchor"></a>Bowerbird</h1></div>
-<p><img align="right" src="https://rawgit.com/AustralianAntarcticDivision/bowerbird/master/inst/extdata/bowerbird.svg"></p>
+<p><img align="right" src="https://rawgit.com/ropensci/bowerbird/master/inst/extdata/bowerbird.svg"></p>
 <p>Often it’s desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be better to have local copies. This is particularly common in environmental and other sciences that deal with large data sets (e.g. satellite or global climate model products). Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.</p>
-<p>A comprehensive introduction to bowerbird can be found at <a href="https://australianantarcticdivision.github.io/bowerbird/articles/bowerbird.html" class="uri">https://australianantarcticdivision.github.io/bowerbird/articles/bowerbird.html</a>, along with full package documentation.</p>
+<p>A comprehensive introduction to bowerbird can be found at <a href="https://ropensci.github.io/bowerbird/articles/bowerbird.html" class="uri">https://ropensci.github.io/bowerbird/articles/bowerbird.html</a>, along with full package documentation.</p>
 <div id="installing" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installing" class="anchor"></a>Installing</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"devtools"</span>)
 <span class="kw">library</span>(devtools)
-<span class="kw">install_github</span>(<span class="st">"AustralianAntarcticDivision/bowerbird"</span>,<span class="dt">build_vignettes=</span><span class="ot">TRUE</span>)</code></pre></div>
-<p>You will also need to have the third-party utility <code>wget</code> available, because bowerbird uses this to do the heavy lifting of recursively downloading files from data providers. Note that installing <code>wget</code> may require admin privileges on your local machine.</p>
-<div id="linux" class="section level3">
-<h3 class="hasAnchor">
-<a href="#linux" class="anchor"></a>Linux</h3>
-<p><code>wget</code> is typically installed by default on Linux. Otherwise use your package manager to install it, e.g. <code>sudo apt install wget</code> on Ubuntu/Debian or <code>sudo yum install wget</code> on Fedora/CentOS.</p>
-</div>
-<div id="windows" class="section level3">
-<h3 class="hasAnchor">
-<a href="#windows" class="anchor"></a>Windows</h3>
-<p>On Windows you can use the <code><a href="reference/bb_install_wget.html">bb_install_wget()</a></code> function to install it. Otherwise download <code>wget</code> yourself (e.g. from <a href="https://eternallybored.org/misc/wget/" class="uri">https://eternallybored.org/misc/wget/</a>) and make sure it is on your system path.</p>
-</div>
-<div id="mac" class="section level3">
-<h3 class="hasAnchor">
-<a href="#mac" class="anchor"></a>Mac</h3>
-<p>Use <code>brew install wget</code> or try <code>brew install --with-libressl wget</code> if you get SSL-related errors. If you do not have brew installed, see <a href="https://brew.sh/" class="uri">https://brew.sh/</a>.</p>
-</div>
+<span class="kw">install_github</span>(<span class="st">"ropensci/bowerbird"</span>,<span class="dt">build_vignettes=</span><span class="ot">TRUE</span>)</code></pre></div>
 </div>
 <div id="usage-overview" class="section level2">
 <h2 class="hasAnchor">
@@ -120,18 +104,16 @@
 <p>Build up a configuration by first defining global options such as the destination on your local file system:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bowerbird)
 my_directory &lt;-<span class="st"> "~/my/data/directory"</span>
-cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_config.html">bb_config</a></span>(<span class="dt">local_file_root=</span>my_directory)</code></pre></div>
+cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_config.html">bb_config</a></span>(<span class="dt">local_file_root =</span> my_directory)</code></pre></div>
 <p>Bowerbird must then be told which data sources to synchronize. Let’s use data from the Australian 2016 federal election, which is provided as one of the example data sources:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_source &lt;-<span class="st"> </span><span class="kw">subset</span>(<span class="kw"><a href="reference/bb_example_sources.html">bb_example_sources</a></span>(),id==<span class="st">"aus-election-house-2016"</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_source &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_example_sources.html">bb_example_sources</a></span>(<span class="st">"Australian Election 2016 House of Representatives data"</span>)
 
 ## add this data source to the configuration
-cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_add.html">bb_add</a></span>(cf,my_source)</code></pre></div>
-<p>Once the configuration has been defined and the data source added to it, we can run the sync process. We set <code>verbose=TRUE</code> here so that we see additional progress output:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">status &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_sync.html">bb_sync</a></span>(cf,<span class="dt">verbose=</span><span class="ot">TRUE</span>)</code></pre></div>
-<p>Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. The files in this data set have been stored in a data-source-specific subdirectory of our local file root:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="reference/bb_data_source_dir.html">bb_data_source_dir</a></span>(cf)</code></pre></div>
-<p>The contents of that directory:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">list.files</span>(<span class="kw"><a href="reference/bb_data_source_dir.html">bb_data_source_dir</a></span>(cf),<span class="dt">recursive=</span><span class="ot">TRUE</span>,<span class="dt">full.names=</span><span class="ot">TRUE</span>)</code></pre></div>
+cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_add.html">bb_add</a></span>(cf, my_source)</code></pre></div>
+<p>Once the configuration has been defined and the data source added to it, we can run the sync process. We set <code>verbose = TRUE</code> here so that we see additional progress output:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">status &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_sync.html">bb_sync</a></span>(cf, <span class="dt">verbose =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<p>Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. Details of the files in this data set are given in the <code>status$files</code> object:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">status<span class="op">$</span>files</code></pre></div>
 <p>At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the <code>clobber</code> parameter set to 0 (“do not overwrite existing files”) or 1 (“overwrite only if the remote file is newer than the local copy”) then the sync process will run more quickly because it will not need to re-download any data files.</p>
 </div>
 </div>
@@ -139,7 +121,7 @@ cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_add.html
 <h2 class="hasAnchor">
 <a href="#data-source-definitions" class="anchor"></a>Data source definitions</h2>
 <p>The <a href="https://github.com/AustralianAntarcticDivision/blueant">blueant</a> package provides a suite of bowerbird data source definitions themed around Southern Ocean and Antarctic data, and includes a range of oceanographic, meteorological, topographic, and other environmental data sets.</p>
-<p><a href="https://ropensci.org"><img src="https://ropensci.org/public_images/ropensci_footer.png" alt="ropensci_footer"></a></p>
+<p><a href="https://ropensci.org"><img src="https://ropensci.org/public_images/scar_footer.png" alt="ropensci_footer"></a></p>
 </div>
 </div>
 </div>
@@ -149,9 +131,9 @@ cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_add.html
     <h2 class="hasAnchor">
 <a href="#sidebar" class="anchor"></a>Links</h2>
 <ul class="list-unstyled">
-<li>Browse source code at <br><a href="https://github.com/AustralianAntarcticDivision/bowerbird">https://​github.com/​AustralianAntarcticDivision/​bowerbird</a>
+<li>Browse source code at <br><a href="https://github.com/ropensci/bowerbird">https://​github.com/​ropensci/​bowerbird</a>
 </li>
-<li>Report a bug at <br><a href="https://github.com/AustralianAntarcticDivision/bowerbird/issues">https://​github.com/​AustralianAntarcticDivision/​bowerbird/​issues</a>
+<li>Report a bug at <br><a href="https://github.com/ropensci/bowerbird/issues">https://​github.com/​ropensci/​bowerbird/​issues</a>
 </li>
 </ul>
 <h2>License</h2>
@@ -164,10 +146,10 @@ cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_add.html
 </ul>
 <h2>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://travis-ci.org/AustralianAntarcticDivision/bowerbird"><img src="http://badges.herokuapp.com/travis/AustralianAntarcticDivision/bowerbird?branch=master&amp;env=BUILD_NAME=trusty_release&amp;label=linux" alt="Travis-CI Build Status"></a></li>
-<li><a href="https://travis-ci.org/AustralianAntarcticDivision/bowerbird"><img src="http://badges.herokuapp.com/travis/AustralianAntarcticDivision/bowerbird?branch=master&amp;env=BUILD_NAME=osx_release&amp;label=osx" alt="Build Status"></a></li>
-<li><a href="https://ci.appveyor.com/project/raymondben/bowerbird"><img src="https://ci.appveyor.com/api/projects/status/5idrimyx0uuv6liu?svg=true" alt="AppVeyor Build status"></a></li>
-<li><a href="https://codecov.io/gh/AustralianAntarcticDivision/bowerbird"><img src="https://codecov.io/gh/AustralianAntarcticDivision/bowerbird/branch/master/graph/badge.svg" alt="codecov"></a></li>
+<li><a href="https://travis-ci.org/ropensci/bowerbird"><img src="http://badges.herokuapp.com/travis/ropensci/bowerbird?branch=master&amp;env=BUILD_NAME=trusty_release&amp;label=linux" alt="Travis-CI Build Status"></a></li>
+<li><a href="https://travis-ci.org/ropensci/bowerbird"><img src="http://badges.herokuapp.com/travis/ropensci/bowerbird?branch=master&amp;env=BUILD_NAME=osx_release&amp;label=osx" alt="Build Status"></a></li>
+<li><a href="https://ci.appveyor.com/project/ropensci/bowerbird"><img src="https://ci.appveyor.com/api/projects/status/5idrimyx0uuv6liu?svg=true" alt="AppVeyor Build status"></a></li>
+<li><a href="https://codecov.io/gh/ropensci/bowerbird"><img src="https://codecov.io/gh/ropensci/bowerbird/branch/master/graph/badge.svg" alt="codecov"></a></li>
 <li><a href="https://github.com/ropensci/onboarding/issues/139"><img src="https://badges.ropensci.org/139_status.svg"></a></li>
 </ul>
 </div>

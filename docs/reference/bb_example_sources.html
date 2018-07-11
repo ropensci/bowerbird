@@ -85,7 +85,7 @@
       
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/AustralianAntarcticDivision/bowerbird">
+  <a href="https://github.com/ropensci/bowerbird">
     <span class="fa fa-github fa-lg"></span>
      
   </a>
@@ -108,8 +108,17 @@
     <p>These example sources are useful as data sources in their own right, but are primarily provided as demonstrations of how to define data sources. See also <code><a href='../articles/bowerbird.html'>vignette("bowerbird")</a></code> for further examples and discussion.</p>
     
 
-    <pre class="usage"><span class='fu'>bb_example_sources</span>()</pre>
-        
+    <pre class="usage"><span class='fu'>bb_example_sources</span>(<span class='no'>sources</span>)</pre>
+    
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>sources</th>
+      <td><p>character: names or identifiers of one or more sources to return. See Details for the list of example sources and a brief explanation of each</p></td>
+    </tr>
+    </table>
+    
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>a tibble with columns as specified by <code><a href='bb_source.html'>bb_source</a></code></p>
@@ -117,12 +126,12 @@
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>Example data sources:</p><ul>
-<li><p>"NOAA OI SST V2" - a straightforward data source that requires a simple recursive download</p></li>
+<li><p>"NOAA OI SST V2" - a straightforward data source that requires a simple one-level recursive download</p></li>
 <li><p>"Australian Election 2016 House of Representatives data" - an example of a recursive download that uses additional criteria to restrict what is downloaded</p></li>
 <li><p>"CMEMS global gridded SSH reprocessed (1993-ongoing)" - a data source that requires a username and password</p></li>
 <li><p>"Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a" - an example data source that uses the <code>bb_handler_oceandata</code> method</p></li>
 <li><p>"Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2" - an example data source that uses the <code>bb_handler_earthdata</code> method</p></li>
-<li><p>"Bathymetry of Lake Superior" - another example that passes extra flags to the <code>bb_handler_wget</code> call in order to restrict what is downloaded</p></li>
+<li><p>"Bathymetry of Lake Superior" - another example that passes extra flags to the <code>bb_handler_rget</code> call in order to restrict what is downloaded</p></li>
 </ul>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
@@ -131,22 +140,21 @@
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <p><code><a href='bb_config.html'>bb_config</a></code>, <code><a href='bb_handler_wget.html'>bb_handler_wget</a></code>, <code><a href='bb_handler_oceandata.html'>bb_handler_oceandata</a></code>, <code><a href='bb_handler_earthdata.html'>bb_handler_earthdata</a></code></p>
+    <p><code><a href='bb_config.html'>bb_config</a></code>, <code><a href='bb_handler_rget.html'>bb_handler_rget</a></code>, <code><a href='bb_handler_oceandata.html'>bb_handler_oceandata</a></code>, <code><a href='bb_handler_earthdata.html'>bb_handler_earthdata</a></code>, <code><a href='bb_source_us_buildings.html'>bb_source_us_buildings</a></code></p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='co'>## define a configuration and add the 2016 election data source to it</span>
-<span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_config.html'>bb_config</a></span>(<span class='st'>"/my/file/root"</span>) <span class='kw'>%&gt;%</span>
-  <span class='fu'><a href='bb_add.html'>bb_add</a></span>(<span class='fu'>subset</span>(<span class='fu'>bb_example_sources</span>(),<span class='no'>id</span><span class='kw'>==</span><span class='st'>"aus-election-house-2016"</span>))
-
-<span class='co'>## synchronize (download) the data</span>
-<span class='fu'><a href='bb_sync.html'>bb_sync</a></span>(<span class='no'>cf</span>)
+    <pre class="examples"><div class='input'><span class='co'>## define a configuration and add the 2016 election data source to it</span>
+<span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_config.html'>bb_config</a></span>(<span class='st'>"/my/file/root"</span>) <span class='kw'>%&gt;%</span> <span class='fu'><a href='bb_add.html'>bb_add</a></span>(
+   <span class='fu'>bb_example_sources</span>(<span class='st'>"Australian Election 2016 House of Representatives data"</span>))</div><span class='co'># NOT RUN {</span>
+  <span class='co'>## synchronize (download) the data</span>
+  <span class='fu'><a href='bb_sync.html'>bb_sync</a></span>(<span class='no'>cf</span>)
 <span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
+      <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
 

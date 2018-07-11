@@ -58,7 +58,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/AustralianAntarcticDivision/bowerbird">
+  <a href="https://github.com/ropensci/bowerbird">
     <span class="fa fa-github fa-lg"></span>
      
   </a>
@@ -78,14 +78,14 @@
       <h1>Data provenance</h1>
                         <h4 class="author">Ben Raymond, Michael Sumner</h4>
             
-            <h4 class="date">2018-02-21</h4>
+            <h4 class="date">2018-07-11</h4>
           </div>
 
     
     
 <div class="contents">
 <p>Bowerbird will maintain a local collection of data files, sourced from external data providers. When one does an analysis using such files, it is useful to know <em>which</em> files were used, and the <em>provenance</em> of those files. This information will assist in making analyses reproducible.</p>
-<p>Bowerbird actually knows very little about the data files that it maintains, particularly if it is using the <code>bb_handler_wget</code> method. In this case, for a given data source it typically knows the URL and flags to pass to <code>wget</code>, and some basic metadata (primarily intended to be read by the user). This is by design: the heavy lifting involved in mirroring a remote data source is generally handballed to the third-party utility <code>wget</code>. This simplifies both the bowerbird code as well as the process of writing and maintaining data sources.</p>
+<p>Bowerbird itself actually knows very little about the data files that it maintains, particularly if it is using the <code>bb_handler_rget</code> method. In this case, for a given data source it typically knows the URL and flags to pass to <code>bb_rget</code>, and some basic metadata (primarily intended to be read by the user). This is by design: the heavy lifting involved in mirroring a remote data source is generally handballed <code>bb_rget</code>. This simplifies both the bowerbird code as well as the process of writing and maintaining data sources.</p>
 <p>The downside of this is that bowerbird can’t necessarily answer questions about data provenance in specific detail. Say that we are using data from a data source that contains many separate files, one per day, spanning many years, and we run an analysis that uses only files from the year 1999. Ideally we would like a function that could tell us exactly which files from the complete data set are needed for our particular analysis, but this is impossible without specific knowledge of how the data source is structured. Analogous situations exist with data sources that split geographic space across files, or split different parameters across files.</p>
 <p>Despite this, bowerbird can provide some general information to assist with data provenance issues.</p>
 <div id="which-files-were-used-in-an-analysis" class="section level2">
@@ -93,10 +93,10 @@
 <a href="#which-files-were-used-in-an-analysis" class="anchor"></a>Which files were used in an analysis</h2>
 <p>Say we have a bowerbird config:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bowerbird)
-cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="st">"/some/local/path"</span>) %&gt;%<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(<span class="kw"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span>())</code></pre></div>
+cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="st">"/some/local/path"</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(<span class="kw"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span>())</code></pre></div>
 <p>We can ask bowerbird where these files are stored locally:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">source_dirs &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_data_source_dir.html">bb_data_source_dir</a></span>(cf)
-knitr::<span class="kw">kable</span>(<span class="kw">data.frame</span>(<span class="dt">name=</span>cf$data_sources$name,<span class="dt">source_dir=</span>source_dirs))</code></pre></div>
+knitr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/knitr/topics/kable">kable</a></span>(<span class="kw">data.frame</span>(<span class="dt">name =</span> cf<span class="op">$</span>data_sources<span class="op">$</span>name, <span class="dt">source_dir =</span> source_dirs))</code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">name</th>
@@ -131,7 +131,7 @@ knitr::<span class="kw">kable</span>(<span class="kw">data.frame</span>(<span cl
 </table>
 <p>The directory for each data source will contain <em>all</em> of the files associated with that data source, not just the files used in a particular analysis. (In extreme cases this directory might even contain files from other data sources, although this should only happen if multiple data sources have overlapping <code>source_url</code> paths, which ought not to be a common occurrence.)</p>
 <p>So while this directory is not the <em>minimal</em> set of files needed to reproduce an analysis, it does at least contain that set, and could be used to store those files in an online repository that assigns DOIs (such as figshare, see <a href="https://cran.r-project.org/package=rfigshare" class="uri">https://cran.r-project.org/package=rfigshare</a>, or zenodo), or bundle into a docker image (see e.g <a href="https://github.com/o2r-project/containerit" class="uri">https://github.com/o2r-project/containerit</a>).</p>
-<p>The complete list of files within a data source’s directory can be generated using a standard directory listing (e.g. <code>list.files(path=my_source_dir,recursive=TRUE</code>), but see also the <code>bb_fingerprint</code> function described below, which provides additional information about the files.</p>
+<p>The complete list of files within a data source’s directory can be generated using a standard directory listing (e.g. <code>list.files(path = my_source_dir, recursive = TRUE</code>), but see also the <code>bb_fingerprint</code> function described below, which provides additional information about the files.</p>
 <div id="refining-the-list-of-files" class="section level3">
 <h3 class="hasAnchor">
 <a href="#refining-the-list-of-files" class="anchor"></a>Refining the list of files</h3>

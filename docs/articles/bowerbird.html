@@ -58,7 +58,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/AustralianAntarcticDivision/bowerbird">
+  <a href="https://github.com/ropensci/bowerbird">
     <span class="fa fa-github fa-lg"></span>
      
   </a>
@@ -78,7 +78,7 @@
       <h1>Bowerbird</h1>
                         <h4 class="author">Ben Raymond, Michael Sumner</h4>
             
-            <h4 class="date">2018-02-21</h4>
+            <h4 class="date">2018-07-11</h4>
           </div>
 
     
@@ -139,23 +139,7 @@
 <a href="#installing" class="anchor"></a>Installing</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"devtools"</span>)
 <span class="kw">library</span>(devtools)
-<span class="kw">install_github</span>(<span class="st">"AustralianAntarcticDivision/bowerbird"</span>,<span class="dt">build_vignettes=</span><span class="ot">TRUE</span>)</code></pre></div>
-<p>You will also need to have the third-party utility <code>wget</code> available, because bowerbird uses this to do the heavy lifting of recursively downloading files from data providers. Note that installing <code>wget</code> may require admin privileges on your local machine.</p>
-<div id="linux" class="section level3">
-<h3 class="hasAnchor">
-<a href="#linux" class="anchor"></a>Linux</h3>
-<p><code>wget</code> is typically installed by default on Linux. Otherwise use your package manager to install it, e.g. <code>sudo apt install wget</code> on Ubuntu/Debian or <code>sudo yum install wget</code> on Fedora/CentOS.</p>
-</div>
-<div id="windows" class="section level3">
-<h3 class="hasAnchor">
-<a href="#windows" class="anchor"></a>Windows</h3>
-<p>On Windows you can use the <code><a href="../reference/bb_install_wget.html">bb_install_wget()</a></code> function to install it. Otherwise download <code>wget</code> yourself (e.g. from <a href="https://eternallybored.org/misc/wget/" class="uri">https://eternallybored.org/misc/wget/</a>) and make sure it is on your system path.</p>
-</div>
-<div id="mac" class="section level3">
-<h3 class="hasAnchor">
-<a href="#mac" class="anchor"></a>Mac</h3>
-<p>Use <code>brew install wget</code> or try <code>brew install --with-libressl wget</code> if you get SSL-related errors. If you do not have brew installed, see <a href="https://brew.sh/" class="uri">https://brew.sh/</a>.</p>
-</div>
+<span class="kw">install_github</span>(<span class="st">"ropensci/bowerbird"</span>,<span class="dt">build_vignettes=</span><span class="ot">TRUE</span>)</code></pre></div>
 </div>
 <div id="usage-overview" class="section level2">
 <h2 class="hasAnchor">
@@ -166,18 +150,16 @@
 <p>Build up a configuration by first defining global options such as the destination on your local file system:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bowerbird)
 my_directory &lt;-<span class="st"> "~/my/data/directory"</span>
-cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="dt">local_file_root=</span>my_directory)</code></pre></div>
+cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="dt">local_file_root =</span> my_directory)</code></pre></div>
 <p>Bowerbird must then be told which data sources to synchronize. Let’s use data from the Australian 2016 federal election, which is provided as one of the example data sources:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_source &lt;-<span class="st"> </span><span class="kw">subset</span>(<span class="kw"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span>(),id==<span class="st">"aus-election-house-2016"</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_source &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span>(<span class="st">"Australian Election 2016 House of Representatives data"</span>)
 
 ## add this data source to the configuration
-cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(cf,my_source)</code></pre></div>
-<p>Once the configuration has been defined and the data source added to it, we can run the sync process. We set <code>verbose=TRUE</code> here so that we see additional progress output:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">status &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_sync.html">bb_sync</a></span>(cf,<span class="dt">verbose=</span><span class="ot">TRUE</span>)</code></pre></div>
-<p>Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. The files in this data set have been stored in a data-source-specific subdirectory of our local file root:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/bb_data_source_dir.html">bb_data_source_dir</a></span>(cf)</code></pre></div>
-<p>The contents of that directory:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">list.files</span>(<span class="kw"><a href="../reference/bb_data_source_dir.html">bb_data_source_dir</a></span>(cf),<span class="dt">recursive=</span><span class="ot">TRUE</span>,<span class="dt">full.names=</span><span class="ot">TRUE</span>)</code></pre></div>
+cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(cf, my_source)</code></pre></div>
+<p>Once the configuration has been defined and the data source added to it, we can run the sync process. We set <code>verbose = TRUE</code> here so that we see additional progress output:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">status &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_sync.html">bb_sync</a></span>(cf, <span class="dt">verbose =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<p>Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. Details of the files in this data set are given in the <code>status$files</code> object:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">status<span class="op">$</span>files</code></pre></div>
 <p>At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the <code>clobber</code> parameter set to 0 (“do not overwrite existing files”) or 1 (“overwrite only if the remote file is newer than the local copy”) then the sync process will run more quickly because it will not need to re-download any data files.</p>
 </div>
 </div>
@@ -186,9 +168,9 @@ cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_add.h
 <a href="#users-level-of-usage-and-expected-knowledge" class="anchor"></a>Users: level of usage and expected knowledge</h2>
 <p>Users can interact with bowerbird at several levels, with increasing levels of complexity:</p>
 <ol style="list-style-type: decimal">
-<li><p><strong>Using bowerbird with data source definitions that have been written by someone else</strong>. This is fairly straightforward. The trickiest part might be ensuring that <code>wget</code> is installed (particularly on Mac machines).</p></li>
-<li><p><strong>Writing your own data source definitions so that you can download data from a new data provider, but using an existing handler such as <code>bb_handler_wget</code></strong>. This is a little more complicated. You will need reasonable knowledge of how your data provider disseminates its files (including e.g. the source URL from which data files are to be downloaded, and how the data repository is structured). Be prepared to fiddle with <code>wget</code> settings to accommodate provider-specific requirements (e.g. controlling recursion behaviour). The “Defining data sources” section below provides guidance and examples on writing data source definitions.</p></li>
-<li><p><strong>Writing your own handler function for data providers that do not play nicely with the packaged handlers (<code>bb_handler_wget</code>, <code>bb_handler_oceandata</code>, <code>bb_handler_earthdata</code>)</strong>. This is the trickiest, and at the time of writing we have not provided much guidance on how to do this. See the “Writing new data source handlers” section, below.</p></li>
+<li><p><strong>Using bowerbird with data source definitions that have been written by someone else</strong>. This is fairly straightforward.</p></li>
+<li><p><strong>Writing your own data source definitions so that you can download data from a new data provider, but using an existing handler such as <code>bb_handler_rget</code></strong>. This is a little more complicated. You will need reasonable knowledge of how your data provider disseminates its files (including e.g. the source URL from which data files are to be downloaded, and how the data repository is structured). Be prepared to fiddle with <code>rget</code> settings to accommodate provider-specific requirements (e.g. controlling recursion behaviour). The “Defining data sources” section below provides guidance and examples on writing data source definitions.</p></li>
+<li><p><strong>Writing your own handler function for data providers that do not play nicely with the packaged handlers (<code>bb_handler_rget</code>, <code>bb_handler_oceandata</code>, <code>bb_handler_earthdata</code>)</strong>. This is the trickiest, and at the time of writing we have not provided much guidance on how to do this. See the “Writing new data source handlers” section, below.</p></li>
 </ol>
 <p>It is expected that the majority of users will fall into one of the first two categories.</p>
 </div>
@@ -205,21 +187,21 @@ cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_add.h
 <h3 class="hasAnchor">
 <a href="#defining-your-own-data-sources" class="anchor"></a>Defining your own data sources</h3>
 <p>The general bowerbird workflow is to build up a configuration with one or more data sources, and pass that configuration object to the <code>bb_sync</code> function to kick off the download process. Each data source contains the details required by bowerbird to be able to fetch it, including a <em>handler</em> function that bb_sync will call to do the actual download.</p>
-<p>The <code>bb_handler_wget</code> function is a generic handler function that will be suitable for many data sources. Note that this <code>bb_handler_wget</code> function is not intended to be called directly by the user, but is specified as part of a data source specification. The <code>bb_sync</code> function calls <code>bb_handler_wget</code> during its run, passing appropriate parameters as it does so.</p>
-<p><code>bb_handler_wget</code> is a wrapper around the <code>wget</code> utility. The philosophy of bowerbird is to use <code>wget</code> as much as possible to handle web transactions. Using <code>wget</code> (and in particular its recursive download functionality) simplifies the process of writing and maintaining data source definitions. Typically, one only needs to define a data source in terms of its top-level URL and appropriate flags to pass to <code>wget</code>, along with some basic metadata (primarily intended to be read by the user).</p>
+<p>The <code>bb_handler_rget</code> function is a generic handler function that will be suitable for many data sources. Note that this <code>bb_handler_rget</code> function is not intended to be called directly by the user, but is specified as part of a data source specification. The <code>bb_sync</code> function calls <code>bb_handler_rget</code> during its run, passing appropriate parameters as it does so.</p>
+<p><code>bb_handler_rget</code> is a wrapper around <code>bb_rget</code>, which is a recursive file downloading utility. Typically, one only needs to define a data source in terms of its top-level URL and appropriate flags to pass to <code>bb_rget</code>, along with some basic metadata (primarily intended to be read by the user).</p>
 <p>Specifying a data source is done by the <code>bb_source</code> function. This can seem a little daunting, so let’s work through some examples. Most of these examples are included in <code><a href="../reference/bb_example_sources.html">bb_example_sources()</a></code>.</p>
 <div id="example-1-a-single-data-file" class="section level4">
 <h4 class="hasAnchor">
 <a href="#example-1-a-single-data-file" class="anchor"></a>Example 1: a single data file</h4>
 <p>Say we’ve found <a href="https://doi.org/10.4225/25/53D9B12E0F96E">this bathymetric data set</a> and we want to define a data source for it. It’s a single zip file that contains some ArcGIS binary grids. A minimal data source definition might look like this:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">src1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_source.html">bb_source</a></span>(
-    <span class="dt">name=</span><span class="st">"Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge"</span>,
-    <span class="dt">id=</span><span class="st">"10.4225/25/53D9B12E0F96E"</span>,
-    <span class="dt">doc_url=</span><span class="st">"https://doi.org/10.4225/25/53D9B12E0F96E"</span>,
-    <span class="dt">license=</span><span class="st">"CC-BY 4.0"</span>,
-    <span class="dt">citation=</span><span class="st">"Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra."</span>,
-    <span class="dt">source_url=</span><span class="st">"http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip"</span>,
-    <span class="dt">method=</span><span class="kw">list</span>(<span class="st">"bb_handler_wget"</span>))</code></pre></div>
+    <span class="dt">name =</span> <span class="st">"Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge"</span>,
+    <span class="dt">id =</span> <span class="st">"10.4225/25/53D9B12E0F96E"</span>,
+    <span class="dt">doc_url =</span> <span class="st">"https://doi.org/10.4225/25/53D9B12E0F96E"</span>,
+    <span class="dt">license =</span> <span class="st">"CC-BY 4.0"</span>,
+    <span class="dt">citation =</span> <span class="st">"Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra."</span>,
+    <span class="dt">source_url =</span> <span class="st">"http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip"</span>,
+    <span class="dt">method =</span> <span class="kw">list</span>(<span class="st">"bb_handler_rget"</span>))</code></pre></div>
 <p>The parameters provided here are all mandatory:</p>
 <ul>
 <li>
@@ -232,16 +214,16 @@ cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_add.h
 <code>license</code> is the license under which the data are being distributed, and is required so that users are aware of the conditions that govern the usage of the data</li>
 <li>
 <code>citation</code> gives citation details for the data source. It’s generally considered good practice to cite data providers, and indeed under some data licenses this is in fact mandatory</li>
-<li>the <code>method</code> parameter is specified as a list, where the first entry is the name of the handler function that will be used to retrieve this data set (<code>bb_handler_wget</code>, in this case)and the remaining entries are data-source-specific arguments to pass to that function (none here)</li>
+<li>the <code>method</code> parameter is specified as a list, where the first entry is the name of the handler function that will be used to retrieve this data set (<code>bb_handler_rget</code>, in this case) and the remaining entries are data-source-specific arguments to pass to that function (none here)</li>
 <li>and finally the <code>source_url</code> tells bowerbird where to go to get the data.</li>
 </ul>
 <p>Add this data source to a configuration and synchronize it:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="st">"c:/temp/data/bbtest"</span>) %&gt;%<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(src1)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="st">"c:/temp/data/bbtest"</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(src1)
 status &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_sync.html">bb_sync</a></span>(cf)</code></pre></div>
-<p>This should have caused the zip file to be downloaded the zip file to your local machine, in this case into the <code>c:/temp/data/bbtest/www.ga.gov.au/corporate_data/73697</code> directory.</p>
+<p>This should have caused the zip file to be downloaded to your local machine, in this case into the <code>c:/temp/data/bbtest/www.ga.gov.au/corporate_data/73697</code> directory.</p>
 <p>There are a few additional entries that we might consider for this data source, particularly if we are going to make it available for other users.</p>
 <p>Firstly, having the zip file locally is great, but we will need to unzip it before we can actually use it. Bowerbird can do this by specifying a <code>postprocess</code> action:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">src1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_source.html">bb_source</a></span>(..., <span class="dt">postprocess=</span><span class="kw">list</span>(<span class="st">"bb_unzip"</span>))</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">src1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_source.html">bb_source</a></span>(..., <span class="dt">postprocess =</span> <span class="kw">list</span>(<span class="st">"bb_unzip"</span>))</code></pre></div>
 <p>For the benefit of other users, we might also add the <code>description</code>, <code>collection_size</code>, and <code>data_group</code> parameters:</p>
 <ul>
 <li>
@@ -255,18 +237,18 @@ status &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_s
 </ul>
 <p>So our full data source definition now looks like:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">src1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_source.html">bb_source</a></span>(
-    <span class="dt">name=</span><span class="st">"Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge"</span>,
-    <span class="dt">id=</span><span class="st">"10.4225/25/53D9B12E0F96E"</span>,
-    <span class="dt">description=</span><span class="st">"This is a compilation of all the processed multibeam bathymetry data that are publicly available in Geoscience Australia's data holding for the Macquarie Ridge."</span>,
-    <span class="dt">doc_url=</span><span class="st">"https://doi.org/10.4225/25/53D9B12E0F96E"</span>,
-    <span class="dt">license=</span><span class="st">"CC-BY 4.0"</span>,
-    <span class="dt">citation=</span><span class="st">"Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra."</span>,
-    <span class="dt">source_url=</span><span class="st">"http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip"</span>,
-    <span class="dt">method=</span><span class="kw">list</span>(<span class="st">"bb_handler_wget"</span>),
-    <span class="dt">postprocess=</span><span class="kw">list</span>(<span class="st">"bb_unzip"</span>),
-    <span class="dt">collection_size=</span><span class="fl">0.4</span>,
-    <span class="dt">access_function=</span><span class="st">"raster::raster"</span>,
-    <span class="dt">data_group=</span><span class="st">"Topography"</span>)</code></pre></div>
+    <span class="dt">name =</span> <span class="st">"Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge"</span>,
+    <span class="dt">id =</span> <span class="st">"10.4225/25/53D9B12E0F96E"</span>,
+    <span class="dt">description =</span> <span class="st">"This is a compilation of all the processed multibeam bathymetry data that are publicly available in Geoscience Australia's data holding for the Macquarie Ridge."</span>,
+    <span class="dt">doc_url =</span> <span class="st">"https://doi.org/10.4225/25/53D9B12E0F96E"</span>,
+    <span class="dt">license =</span> <span class="st">"CC-BY 4.0"</span>,
+    <span class="dt">citation =</span> <span class="st">"Spinoccia, M., 2012. XYZ multibeam bathymetric grids of the Macquarie Ridge. Geoscience Australia, Canberra."</span>,
+    <span class="dt">source_url =</span> <span class="st">"http://www.ga.gov.au/corporate_data/73697/Macquarie_ESRI_Raster.zip"</span>,
+    <span class="dt">method =</span> <span class="kw">list</span>(<span class="st">"bb_handler_rget"</span>),
+    <span class="dt">postprocess =</span> <span class="kw">list</span>(<span class="st">"bb_unzip"</span>),
+    <span class="dt">collection_size =</span> <span class="fl">0.4</span>,
+    <span class="dt">access_function =</span> <span class="st">"raster::raster"</span>,
+    <span class="dt">data_group =</span> <span class="st">"Topography"</span>)</code></pre></div>
 </div>
 <div id="example-2-multiple-files-via-recursive-download" class="section level4">
 <h4 class="hasAnchor">
@@ -275,28 +257,24 @@ status &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_s
 <p>The primary entry point to this data set is an HTML index page, which links to a number of data files. In principle we could generate a list of all of these data files and download them one by one, but that would be tedious and prone to breaking (if the data files changed our hard-coded list would no longer be correct). Instead we can start at the HTML index and recursively download linked data files.</p>
 <p>The definition for this data source is:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">src2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_source.html">bb_source</a></span>(
-    <span class="dt">name=</span><span class="st">"Australian Election 2016 House of Representatives data"</span>,
-    <span class="dt">id=</span><span class="st">"aus-election-house-2016"</span>,
-    <span class="dt">description=</span><span class="st">"House of Representatives results from the 2016 Australian election."</span>,
-    <span class="dt">doc_url=</span><span class="st">"http://results.aec.gov.au/"</span>,
-    <span class="dt">citation=</span><span class="st">"Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners."</span>,
-    <span class="dt">source_url=</span><span class="kw">c</span>(<span class="st">"http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"</span>),
-    <span class="dt">license=</span><span class="st">"CC-BY"</span>,
-    <span class="dt">method=</span><span class="kw">list</span>(<span class="st">"bb_handler_wget"</span>,<span class="dt">recursive=</span><span class="ot">TRUE</span>,<span class="dt">level=</span><span class="dv">1</span>,<span class="dt">accept=</span><span class="st">"csv"</span>,<span class="dt">reject_regex=</span><span class="st">"Website/UserControls"</span>),
+    <span class="dt">name =</span> <span class="st">"Australian Election 2016 House of Representatives data"</span>,
+    <span class="dt">id =</span> <span class="st">"aus-election-house-2016"</span>,
+    <span class="dt">description =</span> <span class="st">"House of Representatives results from the 2016 Australian election."</span>,
+    <span class="dt">doc_url =</span> <span class="st">"http://results.aec.gov.au/"</span>,
+    <span class="dt">citation =</span> <span class="st">"Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners."</span>,
+    <span class="dt">source_url =</span> <span class="kw">c</span>(<span class="st">"http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"</span>),
+    <span class="dt">license =</span> <span class="st">"CC-BY"</span>,
+    <span class="dt">method =</span> <span class="kw">list</span>(<span class="st">"bb_handler_rget"</span>, <span class="dt">level =</span> <span class="dv">1</span>, <span class="dt">accept_download =</span> <span class="st">"</span><span class="ch">\\</span><span class="st">.csv$"</span>),
     <span class="dt">collection_size=</span><span class="fl">0.01</span>)</code></pre></div>
-<p>Most of these parameters will be familiar from the previous example, but the <code>method</code> definition is more complex. Let’s look at the entries in the <code>method</code> list (these are all parameters that get passed to the <code><a href="../reference/bb_wget.html">bb_wget()</a></code> function, so you can find more information about these via <code>help("bb_wget")</code>):</p>
+<p>Most of these parameters will be familiar from the previous example, but the <code>method</code> definition is more complex. Let’s look at the entries in the <code>method</code> list (these are all parameters that get passed to the <code><a href="../reference/bb_rget.html">bb_rget()</a></code> function):</p>
 <ul>
 <li>
-<code>recursive=TRUE</code> tells <code>wget</code> that we want to recursively download multiple files, starting from the <code>source_url</code>. The <code>source_url</code> points to a html page that contains links to csv files, and it’s the csv files that actually contain the data of interest, so we want to follow the links from the html file to the csv files</li>
+<code>level = 1</code> specifies that <code>bb_rget</code> should download recursively, but only recurse down one level (i.e. follow links found in the top-level <code>source_url</code> document, but don’t recurse any deeper. If, say, we specified <code>level = 2</code>, then <code>bb_rget</code> would follow links from the top-level document as well as links found in those linked documents.)</li>
 <li>
-<code>level=1</code> specifies that <code>wget</code> should only recurse down one level (i.e. follow links found in the top-level <code>source_url</code> document, but don’t recurse any deeper. If, say, we specified <code>level=2</code>, then <code>wget</code> would follow links from the top-level document as well as links found in those linked documents.) Recursion <code>level=1</code> is the default value, to help avoid very large but unintentional downloads</li>
-<li>
-<code>accept="csv"</code> means that we only want <code>wget</code> to retrieve csv files. Links to html files or directories will typically be followed even if they do not match the <code>accept</code> criteria, because they might contain links that are wanted</li>
-<li>
-<code>reject_regex="Website/UserControls"</code> - this one is slightly esoteric: the top-level document contains this link, but the link does not actually exist on the server. When <code>wget</code> tries to retrieve it, the remote server issues a “404 not found” error which causes our <code>bb_sync</code> process to think that is has failed! Since this link isn’t actually part of our desired data, we can just exclude it with the <code>reject_regex</code> parameter, which avoids the error.</li>
+<code>accept_download = "\\.csv$"</code> means that we only want to retrieve csv files.</li>
 </ul>
 <p>Add this data source to a configuration and synchronize it:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="st">"c:/temp/data/bbtest"</span>) %&gt;%<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(src2)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="st">"c:/temp/data/bbtest"</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(src2)
 status &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_sync.html">bb_sync</a></span>(cf)</code></pre></div>
 <p>Once again the data have been saved into a subdirectory that reflects the URL structure (<code>c:/temp/data/bbtest/results.aec.gov.au/20499/Website/Downloads</code>). If you examine that directory, you will see that it contains around 50 separate csv files, each containing a different component of the data set.</p>
 <p>You can immediately see that by using a recursive download, not only did we not need to individually specify all 50 of those data files, but if the data provider adds new files in the future the recursive download process will automatically find them (so long as they are linked from the top-level <code>source_url</code> document).</p>
@@ -315,41 +293,43 @@ status &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_s
 <p>You only need to create an Earthdata login once. If you want to download other Earthdata data sets via bowerbird, you’ll use the same credentials, but note that you may need to authorize additional applications, depending on where your extra data sets come from.</p>
 <p>Now that we have access to the data, we can write our bowerbird data source:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">src3 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_source.html">bb_source</a></span>(
-    <span class="dt">name=</span><span class="st">"Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2"</span>,
-    <span class="dt">id=</span><span class="st">"10.5067/EYICLBOAAJOU"</span>,
-    <span class="dt">description=</span><span class="st">"NSIDC provides this data set to aid in the investigations of the variability and trends of sea ice cover. Ice cover in these data are indicated by sea ice concentration: the percentage of the ocean surface covered by ice. The ice-covered area indicates how much ice is present; it is the total area of a pixel multiplied by the ice concentration in that pixel. Ice persistence is the percentage of months over the data set time period that ice existed at a location. The ice-extent indicates whether ice is present; here, ice is considered to exist in a pixel if the sea ice concentration exceeds 15 percent. This data set provides users with data about total ice-covered areas, sea ice extent, ice persistence, and monthly climatologies of sea ice concentrations."</span>,
-    <span class="dt">doc_url=</span><span class="st">"https://doi.org/10.5067/EYICLBOAAJOU"</span>,
-    <span class="dt">citation=</span><span class="st">"Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2. [Indicate subset used]. Boulder, Colorado USA. NASA National Snow and Ice Data Center Distributed Active Archive Center. doi: http://dx.doi.org/10.5067/EYICLBOAAJOU. [Date Accessed]."</span>,
-    <span class="dt">source_url=</span><span class="kw">c</span>(<span class="st">"https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"</span>),
-    <span class="dt">license=</span><span class="st">"Please cite, see http://nsidc.org/about/use_copyright.html"</span>,
-    <span class="dt">authentication_note=</span><span class="st">"Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login . Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)"</span>,
-    <span class="dt">method=</span><span class="kw">list</span>(<span class="st">"bb_handler_earthdata"</span>,<span class="dt">recursive=</span><span class="ot">TRUE</span>,<span class="dt">level=</span><span class="dv">4</span>,<span class="dt">relative=</span><span class="ot">TRUE</span>),
-    <span class="dt">user=</span><span class="st">"your_earthdata_username"</span>,
-    <span class="dt">password=</span><span class="st">"your_earthdata_password"</span>,
-    <span class="dt">collection_size=</span><span class="fl">0.02</span>,
-    <span class="dt">data_group=</span><span class="st">"Sea ice"</span>)</code></pre></div>
+    <span class="dt">name =</span> <span class="st">"Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2"</span>,
+    <span class="dt">id =</span> <span class="st">"10.5067/EYICLBOAAJOU"</span>,
+    <span class="dt">description =</span> <span class="st">"NSIDC provides this data set to aid in the investigations of the variability and trends of sea ice cover. Ice cover in these data are indicated by sea ice concentration: the percentage of the ocean surface covered by ice. The ice-covered area indicates how much ice is present; it is the total area of a pixel multiplied by the ice concentration in that pixel. Ice persistence is the percentage of months over the data set time period that ice existed at a location. The ice-extent indicates whether ice is present; here, ice is considered to exist in a pixel if the sea ice concentration exceeds 15 percent. This data set provides users with data about total ice-covered areas, sea ice extent, ice persistence, and monthly climatologies of sea ice concentrations."</span>,
+    <span class="dt">doc_url =</span> <span class="st">"https://doi.org/10.5067/EYICLBOAAJOU"</span>,
+    <span class="dt">citation =</span> <span class="st">"Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2. [Indicate subset used]. Boulder, Colorado USA. NASA National Snow and Ice Data Center Distributed Active Archive Center. doi: http://dx.doi.org/10.5067/EYICLBOAAJOU. [Date Accessed]."</span>,
+    <span class="dt">source_url =</span> <span class="kw">c</span>(<span class="st">"https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"</span>),
+    <span class="dt">license =</span> <span class="st">"Please cite, see http://nsidc.org/about/use_copyright.html"</span>,
+    <span class="dt">authentication_note =</span> <span class="st">"Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login . Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)"</span>,
+    <span class="dt">method =</span> <span class="kw">list</span>(<span class="st">"bb_handler_earthdata"</span>, <span class="dt">level =</span> <span class="dv">4</span>, <span class="dt">relative =</span> <span class="ot">TRUE</span>, <span class="dt">accept_download =</span> <span class="st">"</span><span class="ch">\\</span><span class="st">.(s|n|png|txt)$"</span>),
+    <span class="dt">user =</span> <span class="st">"your_earthdata_username"</span>,
+    <span class="dt">password =</span> <span class="st">"your_earthdata_password"</span>,
+    <span class="dt">collection_size =</span> <span class="fl">0.02</span>,
+    <span class="dt">data_group =</span> <span class="st">"Sea ice"</span>)</code></pre></div>
 <p>This is very similar to our previous examples, with these differences:</p>
 <ul>
-<li>the <code>method</code> specifies <code>bb_handler_earthdata</code> (whereas previously we used <code>bb_handler_wget</code>). The <code>bb_handler_earthdata</code> is actually very similar to <code>bb_handler_wget</code>, but it takes care of some Earthdata-specific details like authentication using your Earthdata credentials</li>
-<li>we want a <code>recursive=TRUE</code> download, because the data are arranged in subdirectories. Manual browsing of the data set indicates that we need four levels of recursion, hence <code>level=4</code>
-</li>
+<li>the <code>method</code> specifies <code>bb_handler_earthdata</code> (whereas previously we used <code>bb_handler_rget</code>). The <code>bb_handler_earthdata</code> is actually just a wrapper around <code>bb_handler_rget</code>, but it takes care of some Earthdata-specific details like authentication using your Earthdata credentials</li>
 <li>
-<code>relative=TRUE</code> means that <code>wget</code> will only follow relative links (i.e. links of the form <code>&lt;a href="/some/directory/"&gt;...&lt;/a&gt;</code>, which by definition must be on the same server as our <code>source_url</code>). Absolute links (i.e. links of the form <code>&lt;a href="http://some.other.server/some/path"&gt;...&lt;/a&gt;</code> will not be followed. This is another mechanism to prevent the recursive download from downloading stuff we don’t want.</li>
+<code>relative = TRUE</code> means that <code>bb_rget</code> will only follow relative links (i.e. links of the form <code>&lt;a href="/some/directory/"&gt;...&lt;/a&gt;</code>, which by definition must be on the same server as our <code>source_url</code>). Absolute links (i.e. links of the form <code>&lt;a href="http://some.other.server/some/path"&gt;...&lt;/a&gt;</code> will not be followed. This is another mechanism to prevent the recursive download from downloading stuff we don’t want</li>
+<li>we have specified the file types that we want via the <code>accept_download</code> parameter.</li>
 </ul>
-<p>Note that if you were providing this data source definition for other people to use, you would obviously not want to hard-code your Earthdata credentials in the <code>user</code> and <code>password</code> slots. In this case, specify the credentials as empty strings, and also include <code>warn_empty_auth=FALSE</code> in the data source definition (this suppresses the warning that <code>bb_source</code> would otherwise give you about missing credentials):</p>
+<p>Note that if you were providing this data source definition for other people to use, you would obviously not want to hard-code your Earthdata credentials in the <code>user</code> and <code>password</code> slots. In this case, specify the credentials as empty strings, and also include <code>warn_empty_auth = FALSE</code> in the data source definition (this suppresses the warning that <code>bb_source</code> would otherwise give you about missing credentials):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">src3 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_source.html">bb_source</a></span>(
-    <span class="dt">name=</span><span class="st">"Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2"</span>,
-   ... details as above...,
-    <span class="dt">user=</span><span class="st">""</span>,
-    <span class="dt">password=</span><span class="st">""</span>,
-    <span class="dt">warn_empty_auth=</span><span class="ot">FALSE</span>)</code></pre></div>
+    <span class="dt">name =</span> <span class="st">"Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2"</span>,
+    ... details as above...,
+    <span class="dt">user =</span> <span class="st">""</span>,
+    <span class="dt">password =</span> <span class="st">""</span>,
+    <span class="dt">warn_empty_auth =</span> <span class="ot">FALSE</span>)</code></pre></div>
 <p>When another user wants to use this data source, they simply insert their own credentials, e.g.:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mysrc &lt;-<span class="st"> </span>src3
-mysrc$user &lt;-<span class="st"> "theirusername"</span>
-mysrc$password &lt;-<span class="st"> "theirpassword"</span>
+mysrc<span class="op">$</span>user &lt;-<span class="st"> "theirusername"</span>
+mysrc<span class="op">$</span>password &lt;-<span class="st"> "theirpassword"</span>
+
+## or, do the same with the pipe operator and bb_modify_source
+mysrc &lt;-<span class="st"> </span>src3 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/bb_modify_source.html">bb_modify_source</a></span>(<span class="dt">user =</span> <span class="st">"theirusername"</span>, <span class="dt">password =</span> <span class="st">"theirpassword"</span>)
 
 ## then proceed as per usual
-cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(cf,mysrc)</code></pre></div>
+cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(cf, mysrc)</code></pre></div>
 </div>
 <div id="example-4-an-oceandata-source" class="section level4">
 <h4 class="hasAnchor">
@@ -358,61 +338,46 @@ cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_add.h
 <p>Oceandata uses standardized file naming conventions (see <a href="https://oceancolor.gsfc.nasa.gov/docs/format/" class="uri">https://oceancolor.gsfc.nasa.gov/docs/format/</a>), so once you know which products you want you can construct a suitable file name pattern to search for. For example, “S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the <code>search</code> argument to the <code>bb_handler_oceandata</code> handler function. Note that the <code>bb_handler_oceandata</code> does not need a <code>source_url</code> to be specified in the <code>bb_source</code> call.</p>
 <p>Here, for the sake of a small example, we’ll limit ourselves to a single file (“T20000322000060.L3m_MO_SST_sst_9km.nc”, which is sea surface temperature from the Terra satellite in February 2000):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">src4 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_source.html">bb_source</a></span>(
-    <span class="dt">name=</span><span class="st">"Oceandata test file"</span>,
-    <span class="dt">id=</span><span class="st">"oceandata-test"</span>,
-    <span class="dt">description=</span><span class="st">"Monthly, 9km remote-sensed sea surface temperature from the MODIS Terra satellite"</span>,
-    <span class="dt">doc_url=</span> <span class="st">"https://oceancolor.gsfc.nasa.gov/"</span>,
-    <span class="dt">citation=</span><span class="st">"See https://oceancolor.gsfc.nasa.gov/cms/citations"</span>,
-    <span class="dt">license=</span><span class="st">"Please cite"</span>,
-    <span class="dt">method=</span><span class="kw">list</span>(<span class="st">"bb_handler_oceandata"</span>,<span class="dt">search=</span><span class="st">"T20000322000060.L3m_MO_SST_sst_9km.nc"</span>),
-    <span class="dt">data_group=</span><span class="st">"Sea surface temperature"</span>)
+    <span class="dt">name =</span> <span class="st">"Oceandata test file"</span>,
+    <span class="dt">id =</span> <span class="st">"oceandata-test"</span>,
+    <span class="dt">description =</span> <span class="st">"Monthly, 9km remote-sensed sea surface temperature from the MODIS Terra satellite"</span>,
+    <span class="dt">doc_url =</span> <span class="st">"https://oceancolor.gsfc.nasa.gov/"</span>,
+    <span class="dt">citation =</span> <span class="st">"See https://oceancolor.gsfc.nasa.gov/cms/citations"</span>,
+    <span class="dt">license =</span> <span class="st">"Please cite"</span>,
+    <span class="dt">method =</span> <span class="kw">list</span>(<span class="st">"bb_handler_oceandata"</span>, <span class="dt">search=</span><span class="st">"T20000322000060.L3m_MO_SST_sst_9km.nc"</span>),
+    <span class="dt">data_group =</span> <span class="st">"Sea surface temperature"</span>)
 
 ## add this source to a configuration and synchronize it:
-cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="st">"c:/temp/data/bbtest"</span>) %&gt;%<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(src4)
+cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_config.html">bb_config</a></span>(<span class="st">"c:/temp/data/bbtest"</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(src4)
 status &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_sync.html">bb_sync</a></span>(cf)
 
-## and now we can see our local copy of this data file:
-<span class="kw">dir</span>(<span class="kw"><a href="../reference/bb_data_source_dir.html">bb_data_source_dir</a></span>(cf),<span class="dt">recursive=</span><span class="ot">TRUE</span>)</code></pre></div>
+## and our local copy of this data file:
+status<span class="op">$</span>files[[<span class="dv">1</span>]]<span class="op">$</span>file</code></pre></div>
 </div>
 </div>
 </div>
 <div id="nuances" class="section level2">
 <h2 class="hasAnchor">
 <a href="#nuances" class="anchor"></a>Nuances</h2>
-<p>Bowerbird hands off the complexities of recursive downloading to the <code>wget</code> utility. This allows bowerbird’s data source definitions to be fairly lightweight and more robust to changes by the data provider. However, one of the consequences of this approach is that bowerbird actually knows very little about the data files that it maintains, which can be limiting in some respects. It is not generally possible, for example, to provide the user with an indication of download progress (progress bar or similar) for a given data source because neither bowerbird nor <code>wget</code> actually know in advance how many files are in it or how big they are. Data sources do have a <code>collection_size</code> entry, to give the user some indication of the disk space required, but this is only approximate (and must be hand-coded by the data source maintainer). See the ‘Reducing download sizes’ section below for tips on retrieving only a subset of a large data source.</p>
-<div id="wget-gotchas" class="section level3">
+<p>Bowerbird hands off the complexities of recursive downloading to the <code>bb_rget</code> utility. This allows bowerbird’s data source definitions to be fairly lightweight and more robust to changes by the data provider. However, one of the consequences of this approach is that bowerbird actually knows very little about the data files that it maintains, which can be limiting in some respects. It is not generally possible, for example, to provide the user with an indication of overall download progress (progress bar or similar) for a given data source because neither bowerbird nor <code>bb_rget</code> actually know in advance how many files are in it or how big they are. Data sources do have a <code>collection_size</code> entry, to give the user some indication of the disk space required, but this is only approximate (and must be hand-coded by the data source maintainer). See the ‘Reducing download sizes’ section below for tips on retrieving only a subset of a large data source.</p>
+<div id="recursive-download" class="section level3">
 <h3 class="hasAnchor">
-<a href="#wget-gotchas" class="anchor"></a>wget gotchas</h3>
-<p><code>wget</code> is a complicated beast with many command-line options and sometimes inconsistent behaviour. The handler functions (<code>bb_handler_wget</code>, <code>bb_handler_earthdata</code>, <code>bb_handler_oceandata</code>) interact with <code>wget</code> via the intermediate <code>bb_wget</code> function, which provides an R interface to <code>wget</code>. The arguments to this function (see <code>help("bb_wget")</code>) are almost all one-to-one mappings of <code>wget</code>’s own command-line parameters. You can find more information about <code>wget</code> via the <a href="https://www.gnu.org/software/wget/manual/wget.html">wget manual</a> or one of the many online tutorials. You can also see the in-built wget help by running <code><a href="../reference/bb_wget.html">bb_wget("--help")</a></code>.</p>
-<p>Remember that any <code>wget_global_flags</code> defined via <code>bb_config</code> will be applied to every data source in addition to their specific <code>method</code> flags.</p>
-<p>The most relevant command-line <code>wget</code> command-line options are exposed through arguments to the <code>bb_wget</code> function. A few comments on <code>wget</code> behaviour and some of its command line options are provided below.</p>
-<div id="recursive-download" class="section level4">
-<h4 class="hasAnchor">
-<a href="#recursive-download" class="anchor"></a>Recursive download</h4>
+<a href="#recursive-download" class="anchor"></a>Recursive download</h3>
 <ul>
-<li>
-<code>recursive=TRUE</code> is the default for <code>bb_wget</code> — you will probably want this even if the data source doesn’t strictly require a recursive download. The synchronization process saves files relative to the <code>local_file_root</code> directory specified in <code>bb_config</code>. If <code>recursive=TRUE</code>, then wget creates a directory structure that follows the URL structure. For example, calling <code><a href="../reference/bb_wget.html">bb_wget("http://www.somewhere.org/monkey/banana/dataset.zip",recursive=TRUE)</a></code> will save the local file <code>www.somewhere.org/monkey/banana/dataset.zip</code>. Thus, <code>recursive=TRUE</code> will keep data files from different sources naturally separated into their own directories. Without this flag, you are likely to get all downloaded files saved into your <code>local_file_root</code>
-</li>
+<li>the synchronization process saves files relative to the <code>local_file_root</code> directory specified in <code>bb_config</code>. The <code>bb_rget</code> function saves files into a directory structure that follows the URL structure. For example, calling <code><a href="../reference/bb_rget.html">bb_rget("http://www.somewhere.org/monkey/banana/dataset.zip")</a></code> will save the local file <code>www.somewhere.org/monkey/banana/dataset.zip</code>. Thus, <code>bb_rget</code> will keep data files from different sources naturally separated into their own directories</li>
 </ul>
 <p>Recursion is a powerful tool but will sometimes download much more than you really wanted. There are various methods for restricting the recursion:</p>
 <ul>
-<li><p>if you want to include/exclude certain files from being downloaded, use the <code>accept</code>, <code>reject</code>, <code>accept_regex</code>, and <code>reject_regex</code> parameters. Note that <code>accept</code> and <code>reject</code> apply to file names (not the full path), and can be comma-separated lists of file name suffixes or patterns. The <code>accept_regex</code> and <code>reject_regex</code> parameters apply to the full path but can’t be comma-separated (you can specify multiple regular expressions as a character vector, e.g. <code>accept_regex=c("^foo","bar$")</code>)</p></li>
-<li><p><code>no_parent=TRUE</code> prevents <code>wget</code> from ascending to a parent directory during its recursion process, because if it did so it would likely be downloading files that are not part of the data set that we want (this is <code>TRUE</code> by default).</p></li>
+<li><p>if you want to include/exclude certain files from being downloaded, use the <code>accept_follow</code>, <code>reject_follow</code>, <code>accept_download</code>, and <code>reject_download</code> parameters. The <code>*_follow</code> parameters control which links will be followed by the recursive spidering process, whereas the <code>*_download</code> parameters control which data files will be downloaded</p></li>
+<li><p><code>no_parent = TRUE</code> prevents <code>bb_rget</code> from ascending to a parent directory during its recursion process, because if it did so it would likely be downloading files that are not part of the data set that we want (this is <code>TRUE</code> by default). In some cases, though, you might want the recursion to ascend to a parent directory, and therefore need to override the default setting</p></li>
 </ul>
-</div>
-<div id="other-wget-tips-and-tricks-including-resolving-recursive-download-issues" class="section level4">
+<div id="other-tips-and-tricks-including-resolving-recursive-download-issues" class="section level4">
 <h4 class="hasAnchor">
-<a href="#other-wget-tips-and-tricks-including-resolving-recursive-download-issues" class="anchor"></a>Other wget tips and tricks, including resolving recursive download issues</h4>
-<p>Recursive download not working as expected, or other <code>wget</code> oddities?</p>
+<a href="#other-tips-and-tricks-including-resolving-recursive-download-issues" class="anchor"></a>Other tips and tricks, including resolving recursive download issues</h4>
 <ul>
-<li><p><code>robots_off=TRUE</code>: by default wget considers itself to be a robot, and therefore won’t recurse into areas of a site that are excluded to robots. This can cause problems with servers that exclude robots (accidentally or deliberately) from parts of their sites containing data that we want to retrieve. Setting  to TRUE will add a “-e robots=off” flag, which instructs wget to behave as a human user, not a robot. See  for more information about robot exclusion</p></li>
-<li><p>as noted above, <code>no_parent=TRUE</code> by default. In some cases, though, you might want the recursion to ascend to a parent directory, and therefore need to override the default setting</p></li>
-<li><p>a known limitation of <code>wget</code> is that it will NOT follow symbolic links to directories on the remote server. If your recursive download is not descending into directories when you think it should, this might be the cause</p></li>
-<li><p><code>no_if_modified_since=TRUE</code> may be useful when downloading files that have changed since last download (i.e. using ). The default method for doing this is to issue an “If-Modified-Since” header on the request, which instructs the remote server not to return the file if it has not changed since the specified date. Some servers do not support this header. In these cases, trying using , which will instead send a preliminary HEAD request to ascertain the date of the remote file</p></li>
-<li><p><code>no_check_certificate=TRUE</code> will allow a download from a secure server to proceed even if the server’s certificate checks fail. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution</p></li>
-<li><p><code>adjust_extension</code>: if a file of type ‘application/xhtml+xml’ or ‘text/html’ is downloaded and the URL does not end with .htm or .html, setting <code>adjust_extension=TRUE</code> will cause the suffix ‘.html’ to be appended to the local filename. This can be useful when mirroring a remote site that has file URLs that conflict with directories. Say we are recursively downloading from <a href="http://somewhere.org/this/page" class="uri">http://somewhere.org/this/page</a>, which has further content below it at <a href="http://somewhere.org/this/page/more" class="uri">http://somewhere.org/this/page/more</a>. If “somewhere.org/this/page” is saved as a file with that name, that name can’t also be used as the local directory name in which to store the lower-level content. Setting  will cause the page to be saved as “somewhere.org/this/page.html”, thus resolving the conflict</p></li>
-<li><p>setting <code>wait</code> will cause <code>wget</code> to pause for this number of seconds between successive retrievals. This option may help with servers that block multiple successive requests, by introducing a delay between requests</p></li>
-<li><p>if <code>wget</code> is not behaving as expected, try adding <code>debug=TRUE</code>. This gives debugging output from <code>wget</code> itself (which is additional to the output obtained by calling <code><a href="../reference/bb_sync.html">bb_sync(...,verbose=TRUE)</a></code>).</p></li>
+<li><p><code>no_check_certificate = TRUE</code> will allow a download from a secure server to proceed even if the server’s certificate checks fail. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution</p></li>
+<li><p>setting <code>wait</code> will cause <code>bb_rget</code> to pause for this number of seconds between successive retrievals. This option may help with servers that block multiple successive requests, by introducing a delay between requests</p></li>
+<li><p>if <code>bb_rget</code> is not behaving as expected, try adding <code>debug = TRUE</code>. This gives debugging output from the underlying <code>libcurl</code> calls (which is additional to the output obtained by calling <code><a href="../reference/bb_sync.html">bb_sync(...,verbose=TRUE)</a></code>).</p></li>
 </ul>
 </div>
 </div>
@@ -443,28 +408,26 @@ status &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_s
 <h4 class="hasAnchor">
 <a href="#authentication" class="anchor"></a>Authentication</h4>
 <p>Some data providers require users to log in. The <code>authentication_note</code> column in the configuration table should indicate when this is the case, including a reference (e.g. the URL via which an account can be obtained). For these sources, you will need to provide your user name and password, e.g.:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mysrc &lt;-<span class="st"> </span><span class="kw">subset</span>(<span class="kw"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span>(),name==<span class="st">"CMEMS global gridded SSH reprocessed (1993-ongoing)"</span>)
-mysrc$user &lt;-<span class="st"> "yourusername"</span>
-mysrc$password &lt;-<span class="st"> "yourpassword"</span>
-cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(cf,mysrc)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mysrc &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span>(<span class="st">"CMEMS global gridded SSH reprocessed (1993-ongoing)"</span>)
+mysrc<span class="op">$</span>user &lt;-<span class="st"> "yourusername"</span>
+mysrc<span class="op">$</span>password &lt;-<span class="st"> "yourpassword"</span>
+cf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(cf, mysrc)
 
-## or, using dplyr
-<span class="kw">library</span>(dplyr)
-mysrc &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span>() %&gt;%
-<span class="st">  </span><span class="kw">filter</span>(name==<span class="st">"CMEMS global gridded SSH reprocessed (1993-ongoing)"</span>) %&gt;%
-<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">user=</span><span class="st">"yourusername"</span>,<span class="dt">password=</span><span class="st">"yourpassword"</span>)
-cf &lt;-<span class="st"> </span>cf %&gt;%<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(mysrc)</code></pre></div>
+## or, using the pipe operator
+mysrc &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span>(<span class="st">"CMEMS global gridded SSH reprocessed (1993-ongoing)"</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw"><a href="../reference/bb_modify_source.html">bb_modify_source</a></span>(<span class="dt">user =</span> <span class="st">"yourusername"</span>, <span class="dt">password =</span> <span class="st">"yourpassword"</span>)
+cf &lt;-<span class="st"> </span>cf <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(mysrc)</code></pre></div>
 </div>
 <div id="reducing-download-sizes" class="section level4">
 <h4 class="hasAnchor">
 <a href="#reducing-download-sizes" class="anchor"></a>Reducing download sizes</h4>
-<p>Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the <code>bb_handler_wget</code> method, you can restrict what is downloaded by modifying the arguments passed through the data source’s <code>method</code> parameter, particularly the <code>accept</code>, <code>reject</code>, <code>accept_regex</code>, and <code>reject_regex</code> options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.</p>
-<p>Say a particular data provider arranges their files in yearly directories. It would be fairly easy to restrict ourselves to, say, only the 2017 data:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
-mysrc &lt;-<span class="st"> </span>mysrc %&gt;%
-<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">method=</span><span class="kw">c</span>(method,<span class="kw">list</span>(<span class="dt">accept_regex=</span><span class="st">"/2017/"</span>)))
-cf &lt;-<span class="st"> </span>cf %&gt;%<span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(mysrc)</code></pre></div>
-<p>See the notes above for further guidance on the accept/reject flags.</p>
+<p>Sometimes you might only want part of a data collection. Perhaps you only want a few years from a long-term collection, or perhaps the data are provided in multiple formats and you only need one. If the data source uses the <code>bb_handler_rget</code> method, you can restrict what is downloaded by modifying the arguments passed through the data source’s <code>method</code> parameter, particularly the <code>accept_follow</code>, <code>reject_follow</code>, <code>accept_download</code>, and <code>reject_download</code> options. If you are modifying an existing data source configuration, you most likely want to leave the original method flags intact and just add extra flags.</p>
+<p>Say a particular data provider uses predictable file name patterns that include the year information. It would be fairly easy to restrict ourselves to only the 2017 data using the <code>accept</code> option. Here we use the <code>bb_modify_source</code> helper function to do so:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mysrc &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span>(<span class="st">"CMEMS global gridded SSH reprocessed (1993-ongoing)"</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw"><a href="../reference/bb_modify_source.html">bb_modify_source</a></span>(<span class="dt">user =</span> <span class="st">"yourusername"</span>, <span class="dt">password =</span> <span class="st">"yourpassword"</span>,
+    <span class="dt">method =</span> <span class="kw">list</span>(<span class="dt">accept_follow =</span> <span class="st">"/2017"</span>))
+
+cf &lt;-<span class="st"> </span>cf <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/bb_add.html">bb_add</a></span>(mysrc)</code></pre></div>
 <p>Alternatively, for data sources that are arranged in subdirectories, one could replace the <code>source_url</code> with one or more that point to the specific subdirectories that are wanted.</p>
 </div>
 </div>
@@ -485,7 +448,7 @@ cf &lt;-<span class="st"> </span>cf %&gt;%<span class="st"> </span><span class="
 <div id="writing-new-data-source-handlers" class="section level3">
 <h3 class="hasAnchor">
 <a href="#writing-new-data-source-handlers" class="anchor"></a>Writing new data source handlers</h3>
-<p>The <code>bb_handler_wget</code> R function provides a wrapper around <code>wget</code> that should be sufficient for many data sources. However, some data sources can’t be retrieved using only simple <code>wget</code> calls, and so the <code>method</code> for such data sources will need to be something more elaborate than <code>bb_handler_wget</code>. Notes will be added here about defining new handler functions, but in the meantime look at <code>bb_handler_oceandata</code> and <code>bb_handler_earthdata</code>, which provide handlers for <a href="https://oceandata.sci.gsfc.nasa.gov/">Oceandata</a> and <a href="https://earthdata.nasa.gov/">Earthdata</a> data sources.</p>
+<p>The <code>bb_handler_rget</code> R function provides a wrapper around <code>bb_rget</code> that should be sufficient for many data sources. However, some data sources need a more elaborate method. Notes will be added here about defining new handler functions, but in the meantime look at <code>bb_handler_oceandata</code> and <code>bb_handler_earthdata</code>, which provide handlers for <a href="https://oceandata.sci.gsfc.nasa.gov/">Oceandata</a> and <a href="https://earthdata.nasa.gov/">Earthdata</a> data sources.</p>
 </div>
 </div>
 <div id="data-source-summary" class="section level2">

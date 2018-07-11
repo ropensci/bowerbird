@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Handler for data sets from Earthdata providers — bb_handler_earthdata â€¢ bowerbird</title>
+<title>Example bowerbird data source: Microsoft US Buildings — bb_source_us_buildings â€¢ bowerbird</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -27,9 +27,9 @@
 <script src="../pkgdown.js"></script>
   
   
-<meta property="og:title" content="Handler for data sets from Earthdata providers — bb_handler_earthdata" />
+<meta property="og:title" content="Example bowerbird data source: Microsoft US Buildings — bb_source_us_buildings" />
 
-<meta property="og:description" content="This is a handler function to be used with data sets from NASA's Earthdata system. This function is not intended to be called directly, but rather is specified as a method option in bb_source." />
+<meta property="og:description" content="This function constructs a data source definition for the Microsoft US Buildings data set. This data set contains 124,885,597 computer generated building footprints in all 50 US states. NOTE: currently, the downloaded zip files will not be unzipped automatically. Work in progress." />
 <meta name="twitter:card" content="summary" />
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
@@ -101,56 +101,46 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Handler for data sets from Earthdata providers</h1>
+    <h1>Example bowerbird data source: Microsoft US Buildings</h1>
     </div>
 
     
-    <p>This is a handler function to be used with data sets from NASA's Earthdata system. This function is not intended to be called directly, but rather is specified as a <code>method</code> option in <code><a href='bb_source.html'>bb_source</a></code>.</p>
+    <p>This function constructs a data source definition for the Microsoft US Buildings data set. This data set contains 124,885,597 computer generated building footprints in all 50 US states. NOTE: currently, the downloaded zip files will not be unzipped automatically. Work in progress.</p>
     
 
-    <pre class="usage"><span class='fu'>bb_handler_earthdata</span>(<span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>bb_source_us_buildings</span>(<span class='no'>states</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>...</th>
-      <td><p>: parameters passed to <code><a href='bb_rget.html'>bb_rget</a></code></p></td>
+      <th>states</th>
+      <td><p>character: (optional) one or more US state names for which to download data. If missing, data from all states will be downloaded. See the reference page for valid state names</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>TRUE on success</p>
-    
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>This function uses <code><a href='bb_rget.html'>bb_rget</a></code>, and so data sources using this function will need to provide appropriate <code><a href='bb_rget.html'>bb_rget</a></code> parameters.</p>
+    <p>a tibble with columns as specified by <code><a href='bb_source.html'>bb_source</a></code></p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login</p>
+    <p><a href='https://github.com/Microsoft/USBuildingFootprints'>https://github.com/Microsoft/USBuildingFootprints</a></p>
+    
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <p><code><a href='bb_example_sources.html'>bb_example_sources</a></code>, <code><a href='bb_config.html'>bb_config</a></code>, <code><a href='bb_handler_rget.html'>bb_handler_rget</a></code></p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='co'>## note that the full version of this data source is provided as part of bb_example_data_sources()</span>
+<span class='co'>## define a configuration and add this buildings data source to it</span>
+<span class='co'>##  only including data for the District of Columbia and Hawaii</span>
+<span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_config.html'>bb_config</a></span>(<span class='fu'>tempdir</span>()) <span class='kw'>%&gt;%</span>
+  <span class='fu'><a href='bb_add.html'>bb_add</a></span>(<span class='fu'>bb_source_us_buildings</span>(<span class='kw'>states</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"District of Columbia"</span>, <span class='st'>"Hawaii"</span>)))
 
-<span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_source.html'>bb_source</a></span>(
-  <span class='kw'>name</span><span class='kw'>=</span><span class='st'>"Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2"</span>,
-  <span class='kw'>id</span><span class='kw'>=</span><span class='st'>"10.5067/EYICLBOAAJOU"</span>,
-  <span class='kw'>description</span><span class='kw'>=</span><span class='st'>"NSIDC provides this data set ... [truncated; see bb_example_data_sources()]"</span>,
-  <span class='kw'>doc_url</span><span class='kw'>=</span><span class='st'>"https://nsidc.org/data/NSIDC-0192/versions/2"</span>,
-  <span class='kw'>citation</span><span class='kw'>=</span><span class='st'>"Stroeve, J. and W. Meier. 2017. ... [truncated; see bb_example_data_sources()]"</span>,
-  <span class='kw'>source_url</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"</span>),
-  <span class='kw'>license</span><span class='kw'>=</span><span class='st'>"Please cite, see http://nsidc.org/about/use_copyright.html"</span>,
-  <span class='kw'>authentication_note</span><span class='kw'>=</span><span class='st'>"Requires Earthdata login, see https://urs.earthdata.nasa.gov/.
-    Note that you will also need to authorize the application 'nsidc-daacdata'
-    (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)"</span>,
-  <span class='kw'>method</span><span class='kw'>=</span><span class='fu'>list</span>(<span class='st'>"bb_handler_earthdata"</span>,<span class='kw'>recursive</span><span class='kw'>=</span><span class='fl'>TRUE</span>,<span class='kw'>level</span><span class='kw'>=</span><span class='fl'>4</span>,<span class='kw'>no_parent</span><span class='kw'>=</span><span class='fl'>TRUE</span>,<span class='kw'>relative</span><span class='kw'>=</span><span class='fl'>TRUE</span>),
-  <span class='kw'>user</span><span class='kw'>=</span><span class='st'>"your_earthdata_username"</span>,
-  <span class='kw'>password</span><span class='kw'>=</span><span class='st'>"your_earthdata_password"</span>,
-  <span class='kw'>collection_size</span><span class='kw'>=</span><span class='fl'>0.02</span>)
+<span class='co'>## synchronize (download) the data</span>
+<span class='fu'><a href='bb_sync.html'>bb_sync</a></span>(<span class='no'>cf</span>)
 <span class='co'># }</span><div class='input'>
 </div></pre>
   </div>
@@ -161,9 +151,9 @@
       
       <li><a href="#value">Value</a></li>
 
-      <li><a href="#details">Details</a></li>
-
       <li><a href="#references">References</a></li>
+
+      <li><a href="#see-also">See also</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>

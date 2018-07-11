@@ -85,7 +85,7 @@
       
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/AustralianAntarcticDivision/bowerbird">
+  <a href="https://github.com/ropensci/bowerbird">
     <span class="fa fa-github fa-lg"></span>
      
   </a>
@@ -108,7 +108,8 @@
     <p>A function for removing unwanted files after downloading. This function is not intended to be called directly, but rather is specified as a <code>postprocess</code> option in <code><a href='bb_source.html'>bb_source</a></code>.</p>
     
 
-    <pre class="usage"><span class='fu'>bb_cleanup</span>(<span class='no'>pattern</span>, <span class='kw'>recursive</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>ignore_case</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>bb_cleanup</span>(<span class='no'>pattern</span>, <span class='kw'>recursive</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>ignore_case</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>all_files</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -124,6 +125,10 @@
     <tr>
       <th>ignore_case</th>
       <td><p>logical: should pattern matching be case-insensitive?</p></td>
+    </tr>
+    <tr>
+      <th>all_files</th>
+      <td><p>logical: should the cleanup include hidden files?</p></td>
     </tr>
     <tr>
       <th>...</th>

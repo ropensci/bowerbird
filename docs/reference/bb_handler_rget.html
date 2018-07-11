@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Handler for data sets from Earthdata providers — bb_handler_earthdata â€¢ bowerbird</title>
+<title>Mirror an external data source using bowerbird's bb_rget utility — bb_handler_rget â€¢ bowerbird</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -27,9 +27,9 @@
 <script src="../pkgdown.js"></script>
   
   
-<meta property="og:title" content="Handler for data sets from Earthdata providers — bb_handler_earthdata" />
+<meta property="og:title" content="Mirror an external data source using bowerbird's bb_rget utility — bb_handler_rget" />
 
-<meta property="og:description" content="This is a handler function to be used with data sets from NASA's Earthdata system. This function is not intended to be called directly, but rather is specified as a method option in bb_source." />
+<meta property="og:description" content="This is a general handler function that is suitable for a range of data sets. This function is not intended to be called directly, but rather is specified as a method option in bb_source." />
 <meta name="twitter:card" content="summary" />
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
@@ -101,14 +101,14 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Handler for data sets from Earthdata providers</h1>
+    <h1>Mirror an external data source using bowerbird's bb_rget utility</h1>
     </div>
 
     
-    <p>This is a handler function to be used with data sets from NASA's Earthdata system. This function is not intended to be called directly, but rather is specified as a <code>method</code> option in <code><a href='bb_source.html'>bb_source</a></code>.</p>
+    <p>This is a general handler function that is suitable for a range of data sets. This function is not intended to be called directly, but rather is specified as a <code>method</code> option in <code><a href='bb_source.html'>bb_source</a></code>.</p>
     
 
-    <pre class="usage"><span class='fu'>bb_handler_earthdata</span>(<span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>bb_handler_rget</span>(<span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -125,32 +125,32 @@
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This function uses <code><a href='bb_rget.html'>bb_rget</a></code>, and so data sources using this function will need to provide appropriate <code><a href='bb_rget.html'>bb_rget</a></code> parameters.</p>
+    <p>This handler function makes calls to the <code><a href='bb_rget.html'>bb_rget</a></code> function. Arguments provided to <code>bb_handler_rget</code> are passed through to <code><a href='bb_rget.html'>bb_rget</a></code>.</p>
     
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <p>https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login</p>
+    <p><code><a href='bb_rget.html'>bb_rget</a></code>, <code><a href='bb_source.html'>bb_source</a></code>, <code><a href='bb_sync.html'>bb_sync</a></code></p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='co'>## note that the full version of this data source is provided as part of bb_example_data_sources()</span>
+    <pre class="examples"><div class='input'><span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_source.html'>bb_source</a></span>(
+   <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>"Australian Election 2016 House of Representatives data"</span>,
+   <span class='kw'>id</span> <span class='kw'>=</span> <span class='st'>"aus-election-house-2016"</span>,
+   <span class='kw'>description</span> <span class='kw'>=</span> <span class='st'>"House of Representatives results from the 2016 Australian election."</span>,
+   <span class='kw'>doc_url</span> <span class='kw'>=</span> <span class='st'>"http://results.aec.gov.au/"</span>,
+   <span class='kw'>citation</span> <span class='kw'>=</span> <span class='st'>"Copyright Commonwealth of Australia 2017. As far as practicable, material for
+               which the copyright is owned by a third party will be clearly labelled. The
+               AEC has made all reasonable efforts to ensure that this material has been
+               reproduced on this website with the full consent of the copyright owners."</span>,
+   <span class='kw'>source_url</span> <span class='kw'>=</span> <span class='st'>"http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"</span>,
+   <span class='kw'>license</span> <span class='kw'>=</span> <span class='st'>"CC-BY"</span>,
+   <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='st'>"bb_handler_rget"</span>, <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>accept_download</span> <span class='kw'>=</span> <span class='st'>"csv$"</span>),
+   <span class='kw'>collection_size</span> <span class='kw'>=</span> <span class='fl'>0.01</span>)
 
-<span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_source.html'>bb_source</a></span>(
-  <span class='kw'>name</span><span class='kw'>=</span><span class='st'>"Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2"</span>,
-  <span class='kw'>id</span><span class='kw'>=</span><span class='st'>"10.5067/EYICLBOAAJOU"</span>,
-  <span class='kw'>description</span><span class='kw'>=</span><span class='st'>"NSIDC provides this data set ... [truncated; see bb_example_data_sources()]"</span>,
-  <span class='kw'>doc_url</span><span class='kw'>=</span><span class='st'>"https://nsidc.org/data/NSIDC-0192/versions/2"</span>,
-  <span class='kw'>citation</span><span class='kw'>=</span><span class='st'>"Stroeve, J. and W. Meier. 2017. ... [truncated; see bb_example_data_sources()]"</span>,
-  <span class='kw'>source_url</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='st'>"https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"</span>),
-  <span class='kw'>license</span><span class='kw'>=</span><span class='st'>"Please cite, see http://nsidc.org/about/use_copyright.html"</span>,
-  <span class='kw'>authentication_note</span><span class='kw'>=</span><span class='st'>"Requires Earthdata login, see https://urs.earthdata.nasa.gov/.
-    Note that you will also need to authorize the application 'nsidc-daacdata'
-    (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)"</span>,
-  <span class='kw'>method</span><span class='kw'>=</span><span class='fu'>list</span>(<span class='st'>"bb_handler_earthdata"</span>,<span class='kw'>recursive</span><span class='kw'>=</span><span class='fl'>TRUE</span>,<span class='kw'>level</span><span class='kw'>=</span><span class='fl'>4</span>,<span class='kw'>no_parent</span><span class='kw'>=</span><span class='fl'>TRUE</span>,<span class='kw'>relative</span><span class='kw'>=</span><span class='fl'>TRUE</span>),
-  <span class='kw'>user</span><span class='kw'>=</span><span class='st'>"your_earthdata_username"</span>,
-  <span class='kw'>password</span><span class='kw'>=</span><span class='st'>"your_earthdata_password"</span>,
-  <span class='kw'>collection_size</span><span class='kw'>=</span><span class='fl'>0.02</span>)
+<span class='no'>my_data_dir</span> <span class='kw'>&lt;-</span> <span class='fu'>tempdir</span>()
+<span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_config.html'>bb_config</a></span>(<span class='no'>my_data_dir</span>)
+<span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_add.html'>bb_add</a></span>(<span class='no'>cf</span>, <span class='no'>my_source</span>)</div><span class='co'># NOT RUN {</span>
+<span class='fu'><a href='bb_sync.html'>bb_sync</a></span>(<span class='no'>cf</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 <span class='co'># }</span><div class='input'>
 </div></pre>
   </div>
@@ -163,7 +163,7 @@
 
       <li><a href="#details">Details</a></li>
 
-      <li><a href="#references">References</a></li>
+      <li><a href="#see-also">See also</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>
