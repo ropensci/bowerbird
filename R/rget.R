@@ -186,7 +186,11 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                     ## this is all very inelegant
                     dlf <- tempfile()
                     file.copy(fname, dlf)
-                    req <- httr::with_config(myopts, httr::GET(df, write_disk(path = dlf, overwrite = TRUE)))
+                    if (grepl("^ftp", df)) {
+                        suppressWarnings(req <- httr::with_config(myopts, httr::GET(df, write_disk(path = dlf, overwrite = TRUE))))
+                    } else {
+                        req <- httr::with_config(myopts, httr::GET(df, write_disk(path = dlf, overwrite = TRUE)))
+                    }
                     if (httr::http_error(req)) {
                         ## don't throw error on download
                         myfun <- if (stop_on_download_error) stop else warning
