@@ -251,7 +251,7 @@ spider <- function(to_visit, visited = character(), download_queue = character()
             } else {
                 if (opts$wait > 0) Sys.sleep(opts$wait)
             }
-            if (opts$verbose) cat(sprintf(" visiting %s ...\n", url))
+            if (opts$verbose) cat(sprintf(" visiting %s ...", url), if (opts$show_progress) "\n")
             if (ftp) {
                 ## ftp is a bit funny - when recursing, we can't be sure if a link is a file or a directory
                 ## we have added trailing slashes, but if it was actually a file this will throw an error
@@ -259,7 +259,7 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                 x <- tryCatch(suppressWarnings(httr::with_config(opts$curl_config, GET(url))), error = function(e) {
                     if (grepl("directory", e$message)) {
                         ## was probably a 'Server denied you to change to the given directory' message, ignore it
-                        if (opts$verbose) cat(" (ignoring error: ", e$message, ") ... done\n")
+                        if (opts$verbose) cat(" (ignoring error: ", e$message, ") ... done.\n")
                         NULL
                     } else {
                         stop(e$message)
@@ -335,7 +335,7 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                     download_queue <- c(download_queue, download_links)
                 }
             }
-            if (opts$verbose) cat(" ... done\n")
+            if (opts$verbose) cat(" done.\n")
         }
     }
     visited <- c(visited, to_visit)
