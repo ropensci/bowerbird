@@ -30,27 +30,38 @@ A comprehensive introduction to bowerbird can be found at https://ropensci.githu
 
 ## Installing
 
-```{r eval=FALSE}
-install.packages("devtools")
-library(devtools)
-install_github("ropensci/bowerbird",build_vignettes=TRUE)
+```{r eval = FALSE}
+install.packages("remotes")
+remotes::install_github("ropensci/bowerbird", build_vignettes = TRUE)
 ```
 
 ## Usage overview
 
 ### Configuration
 
-Build up a configuration by first defining global options such as the destination on your local file system:
+Build up a configuration by first defining global options such as the destination on your local file system. Commonly you would choose this destination data directory to be a persistent location, suitable for a data library. For demonstration purposes here we'll just use a temporary directory::
 
-```{r eval=FALSE}
+```{r include = FALSE}
+## code not shown in the README: (1) use load_all() instead of library() for convenience, (2) use anonymous "temporary" dir, and (3) hide the progress bar
+devtools::load_all()
+my_data_dir <- "c:/tmp/data"
+if (!dir.exists(my_data_dir)) dir.create(my_data_dir)
+if (dir.exists(file.path(my_data_dir, "results.aec.gov.au"))) unlink(file.path(my_data_dir, "results.aec.gov.au"), recursive = TRUE)
+cf <- bb_config(local_file_root = my_data_dir)
+mysrc <- bb_example_sources("Australian Election 2016 House of Representatives data") %>% bb_modify_source(method = list(show_progress = FALSE))
+cf <- cf %>% bb_add(mysrc)
+```
+
+
+```{r eval = FALSE}
 library(bowerbird)
-my_directory <- "~/my/data/directory"
+my_directory <- tempdir()
 cf <- bb_config(local_file_root = my_directory)
 ```
 
 Bowerbird must then be told which data sources to synchronize. Let's use data from the Australian 2016 federal election, which is provided as one of the example data sources:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 my_source <- bb_example_sources("Australian Election 2016 House of Representatives data")
 
 ## add this data source to the configuration
@@ -59,13 +70,27 @@ cf <- bb_add(cf, my_source)
 
 Once the configuration has been defined and the data source added to it, we can run the sync process. We set `verbose = TRUE` here so that we see additional progress output:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 status <- bb_sync(cf, verbose = TRUE)
+```
+
+```{r echo = FALSE, message = FALSE}
+## code not shown in README: capture the output and trim it down a bit
+op <- capture.output(status <- bb_sync(cf, verbose = TRUE))
+idx <- grepl("^ downloading file", op)
+if (sum(idx)>5) {
+  op[which(idx)[4]] <- ""
+  op[which(idx)[5]] <- " [... output truncated]"
+  idx[which(idx)[1:5]] <- FALSE
+  op <- op[!idx]
+  }
+#op ## gives ## [1] "" etc
+for (oo in op) cat(oo, "\n")
 ```
 
 Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. Details of the files in this data set are given in the `status$files` object:
 
-```{r eval=FALSE}
+```{r}
 status$files
 ```
 
