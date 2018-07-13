@@ -202,6 +202,8 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                             downloads$was_downloaded[downloads$url == df] <- TRUE
                             if (file.exists(fname)) file.remove(fname)
                             file.rename(dlf, fname)
+                            ## be sure that old file has been deleted
+                            if (file.exists(dlf)) file.remove(dlf)
                             if (verbose) cat(if (show_progress) "\n", "done.\n")
                         } else {
                             file.remove(dlf)
