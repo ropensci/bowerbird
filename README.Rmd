@@ -101,4 +101,34 @@ At a later time you can re-run this synchronization process. If the remote files
 
 The [blueant](https://github.com/AustralianAntarcticDivision/blueant) package provides a suite of bowerbird data source definitions themed around Southern Ocean and Antarctic data, and includes a range of oceanographic, meteorological, topographic, and other environmental data sets.
 
+
+## Other packages
+
+Many other data-retrieval R packages exist. bowerbird is perhaps most similar to the [rdataretriever](https://cran.r-project.org/package=rdataretriever). This package provides an R interface to the (Python-based) [Data Retriever](http://www.data-retriever.org/), which in turn provides (at time of writing) access to 85 ecological data sets. A quick comparison:
+
+### rdataretriever
+
+- requires `retriever` to be installed, either as a Python package or via a platform-specific installer (see http://www.data-retriever.org/)
+
+- makes efforts to clean and standardize the data that it downloads, and get them into a consistent format on the user's system
+
+- designed to make it easy for users to get on with the business of using those data sets
+
+- carries the tradeoff that adding new data sets (and maintaining the existing ones) takes a bit of effort, and it can be cumbersome to deal with data sets that contain many files, particularly if new files get added on a regular basis (e.g. satellite environmental data).
+
+### bowerbird
+
+- pure R, no other system dependencies
+
+- designed to make it easy for users to keep a local, up-to-date collection of files from remote providers. It can do recursive downloads, and so is particularly suitable for collections that are structured as a large number of individual files in yearly or other subdirectories (typical of e.g. satellite or climate model data)
+
+- simply mirrors remote data to your local system, without attempting to reformat the data files or do anything else clever with them (other than uncompress, if needed). It just grabs them and saves them in whatever format the provider uses
+
+- the upside is that it is intended to be easy to write bowerbird definitions for new data sources. In many cases, it is only necessary to specify some metadata and the top-level URL, and bowerbird can recursively download linked resources from there
+
+- bowerbird itself contains only a few example data sets, but data definitions are available from other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant), ~55 marine/Southern Ocean data sets).
+
+The rdataretriever and bowerbird packages are both part of the rOpenSci project.
+
 [![ropensci_footer](https://ropensci.org/public_images/scar_footer.png)](https://ropensci.org)
+

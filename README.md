@@ -48,7 +48,7 @@ status <- bb_sync(cf, verbose = TRUE)
 ```
 
     ##  
-    ## Fri Jul 13 02:23:28 2018 
+    ## Mon Jul 30 13:48:56 2018 
     ## Synchronizing dataset: Australian Election 2016 House of Representatives data 
     ## Source URL http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm 
     ## -------------------------------------------------------------------------------------------- 
@@ -61,7 +61,7 @@ status <- bb_sync(cf, verbose = TRUE)
     ##  
     ##  [... output truncated] 
     ##  
-    ## Fri Jul 13 02:24:33 2018 dataset synchronization complete: Australian Election 2016 House of Representatives data
+    ## Mon Jul 30 13:50:06 2018 dataset synchronization complete: Australian Election 2016 House of Representatives data
 
 Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. Details of the files in this data set are given in the `status$files` object:
 
@@ -69,18 +69,18 @@ Congratulations! You now have your own local copy of your chosen data set. This 
 status$files
 ## [[1]]
 ## # A tibble: 47 x 3
-##    url                           file                       was_downloaded
-##    <chr>                         <chr>                      <lgl>         
-##  1 http://results.aec.gov.au/20~ results.aec.gov.au/20499/~ T             
-##  2 http://results.aec.gov.au/20~ results.aec.gov.au/20499/~ T             
-##  3 http://results.aec.gov.au/20~ results.aec.gov.au/20499/~ T             
-##  4 http://results.aec.gov.au/20~ results.aec.gov.au/20499/~ T             
-##  5 http://results.aec.gov.au/20~ results.aec.gov.au/20499/~ T             
-##  6 http://results.aec.gov.au/20~ results.aec.gov.au/20499/~ T             
-##  7 http://results.aec.gov.au/20~ results.aec.gov.au/20499/~ T             
-##  8 http://results.aec.gov.au/20~ results.aec.gov.au/20499/~ T             
-##  9 http://results.aec.gov.au/20~ results.aec.gov.au/20499/~ T             
-## 10 http://results.aec.gov.au/20~ results.aec.gov.au/20499/~ T             
+##    url                          file                        was_downloaded
+##    <chr>                        <chr>                       <lgl>         
+##  1 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
+##  2 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
+##  3 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
+##  4 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
+##  5 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
+##  6 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
+##  7 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
+##  8 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
+##  9 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
+## 10 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
 ## # ... with 37 more rows
 ```
 
@@ -90,5 +90,34 @@ Data source definitions
 -----------------------
 
 The [blueant](https://github.com/AustralianAntarcticDivision/blueant) package provides a suite of bowerbird data source definitions themed around Southern Ocean and Antarctic data, and includes a range of oceanographic, meteorological, topographic, and other environmental data sets.
+
+Other packages
+--------------
+
+Many other data-retrieval R packages exist. bowerbird is perhaps most similar to the [rdataretriever](https://cran.r-project.org/package=rdataretriever). This package provides an R interface to the (Python-based) [Data Retriever](http://www.data-retriever.org/), which in turn provides (at time of writing) access to 85 ecological data sets. A quick comparison:
+
+### rdataretriever
+
+-   requires `retriever` to be installed, either as a Python package or via a platform-specific installer (see <http://www.data-retriever.org/>)
+
+-   makes efforts to clean and standardize the data that it downloads, and get them into a consistent format on the user's system
+
+-   designed to make it easy for users to get on with the business of using those data sets
+
+-   carries the tradeoff that adding new data sets (and maintaining the existing ones) takes a bit of effort, and it can be cumbersome to deal with data sets that contain many files, particularly if new files get added on a regular basis (e.g. satellite environmental data).
+
+### bowerbird
+
+-   pure R, no other system dependencies
+
+-   designed to make it easy for users to keep a local, up-to-date collection of files from remote providers. It can do recursive downloads, and so is particularly suitable for collections that are structured as a large number of individual files in yearly or other subdirectories (typical of e.g. satellite or climate model data)
+
+-   simply mirrors remote data to your local system, without attempting to reformat the data files or do anything else clever with them (other than uncompress, if needed). It just grabs them and saves them in whatever format the provider uses
+
+-   the upside is that it is intended to be easy to write bowerbird definitions for new data sources. In many cases, it is only necessary to specify some metadata and the top-level URL, and bowerbird can recursively download linked resources from there
+
+-   bowerbird itself contains only a few example data sets, but data definitions are available from other packages (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant), ~55 marine/Southern Ocean data sets).
+
+The rdataretriever and bowerbird packages are both part of the rOpenSci project.
 
 [![ropensci\_footer](https://ropensci.org/public_images/scar_footer.png)](https://ropensci.org)
