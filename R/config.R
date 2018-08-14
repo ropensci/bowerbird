@@ -325,7 +325,55 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
     }
 }
 
+## print method for config
+#' @method print bb_config
+#' @export
+print.bb_config <- function(x, ...) {
+    config <- bb_settings_to_cols(x)
 
+    config$local_file_paths <- vapply(seq_len(nrow(config)),function(z) {
+        temp <- directory_from_url(config$source_url[[z]])
+        temp[is.na(temp)] <- ""
+        paste(file.path(config$local_file_root[z],temp),collapse=", ")},FUN.VALUE="")
+    ## order by data group
+    config <- unique(config[,!names(config) %in% c("source_url","method","postprocess")]) ## drop cols, take unique rows
+    config$data_group[!nzchar(config$data_group)] <- NA ## so that these appear last
+    config <- config[order(config$data_group,config$name), ]
+    config$data_group[is.na(config$data_group)] <- ""
+
+    last_group <- "blah"
+    for (k in seq_len(nrow(config))) {
+        if (last_group!=config$data_group[k]) {
+            if (any(nzchar(config$data_group))) ## dont show this if NO sources have a data group defined
+                cat("\n# Data group: ",config$data_group[k],"\n")
+        }
+        last_group <- config$data_group[k]
+        cat("\n## ",config$name[k],"\n")
+        cat(config$description[k],"\n")
+        if (!is.na(config$authentication_note[k]))
+            cat("\nAuthentication note:", config$authentication_note[k],"\n")
+        cat("Approximate size:", if (is.na(config$collection_size[k])) "not specified" else paste0(config$collection_size[k], " GB"),"\n")
+        cat("Documentation link: ",config$doc_url[k],"\n")
+        this_citation <- config$citation[k]
+        if (is.null(this_citation) || is.na(this_citation) || !nzchar(this_citation)) {
+            this_citation <- "No citation details provided"
+        }
+        cat("Citation: ",this_citation,"\n")
+        this_license <- config$license[k]
+        if (is.null(this_license) || is.na(this_license) || !nzchar(this_license)) {
+            this_license <- "No formal license details provided"
+        }
+        cat("License: ",this_license,"\n")
+        temp <- config$local_file_paths[[k]]
+        temp <- gsub("\\\\","/",temp)
+        temp <- unique(gsub("/+","/",temp))
+        cat("Local file system paths: ",temp,"\n",sep="")
+        thisfun <- config$access_function[k]
+        if (is.null(thisfun) || is.na(thisfun) || !nzchar(thisfun)) { thisfun <- "none suggested" }
+        cat("Associated access functions: ",thisfun,"\n")
+    }
+    invisible(x)
+}
 
 ## Internal function
 ## Validate a bowerbird configuration
