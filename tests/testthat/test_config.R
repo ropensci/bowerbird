@@ -31,7 +31,14 @@ test_that("local directory looks right",{
     cf <- bb_config("/some/local/path") %>% bb_add(src)
     temp <- bb_data_source_dir(cf)
     temp <- gsub("\\+","/",temp) ## make sure are unix-style path seps
-    expect_identical(sub("/$","",temp),"/some/local/path/some.place.com/some/path")
+    expect_path <- file.path(normalizePath("/some/local/path", mustWork = FALSE), "some.place.com/some/path")
+    on_win <- tryCatch(tolower(Sys.info()[["sysname"]]) == "windows", error = function(e) FALSE)
+    if (on_win) {
+        ## case-insensitive
+        temp <- tolower(temp)
+        expect_path <- tolower(expect_path)
+    }
+    expect_identical(sub("/$","",temp), expect_path)
 })
 
 test_that("config validation works",{

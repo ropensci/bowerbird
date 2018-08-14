@@ -36,7 +36,7 @@ bb_config <- function(local_file_root,wget_global_flags=list(restrict_file_names
                  wget_global_flags=wget_global_flags,
                  http_proxy=http_proxy,
                  ftp_proxy=ftp_proxy,
-                 local_file_root=local_file_root,
+                 local_file_root=normalizePath(local_file_root, mustWork = FALSE),
                  clobber=clobber)),
         class="bb_config")
 }
