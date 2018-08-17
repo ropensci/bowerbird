@@ -11,7 +11,7 @@
 #' @param confirm_downloads_larger_than numeric or NULL: if non-negative, \code{bb_sync} will ask the user for confirmation to download any data source of size greater than this number (in GB). A value of zero will trigger confirmation on every data source. A negative or NULL value will not prompt for confirmation. Note that this only applies when R is being used interactively. The expected download size is taken from the \code{collection_size} parameter of the data source, and so its accuracy is dependent on the accuracy of the data source definition
 #' @param dry_run logical: if \code{TRUE}, \code{bb_sync} will do a dry run of the synchronization process without actually downloading files
 #'
-#' @return a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}
+#' @return a tibble with the \code{name}, \code{id}, \code{source_url}, sync success \code{status}, and \code{files} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}. \code{files} is a tibble with columns \code{url} (the URL the file was downloaded from), \code{file} (the path to the file), and \code{note} (either "downloaded" for a file that was downloaded, "local copy" for a file that was not downloaded because there was already a local copy, or "decompressed" for files that were extracted from a downloaded (or already-locally-present) compressed file. \code{url} will be \code{NA} for "decompressed" files
 #'
 #' @seealso \code{\link{bb_config}}, \code{\link{bb_source}}
 #'
@@ -22,7 +22,7 @@
 #'   ## we just use a temporary directory for example purposes.
 #'
 #'   td <- tempdir()
-#'   cf <- bb_config(local_file_root=td)
+#'   cf <- bb_config(local_file_root = td)
 #'
 #'   ## Bowerbird must then be told which data sources to synchronize.
 #'   ## Let's use data from the Australian 2016 federal election, which is provided as one
@@ -32,26 +32,22 @@
 #'
 #'   ## Add this data source to the configuration:
 #'
-#'   cf <- bb_add(cf,my_source)
+#'   cf <- bb_add(cf, my_source)
 #'
 #'   ## Once the configuration has been defined and the data source added to it,
 #'   ## we can run the sync process.
 #'   ## We set \code{verbose=TRUE} so that we see additional progress output:
 #'
-#'   status <- bb_sync(cf,verbose=TRUE)
+#'   status <- bb_sync(cf, verbose = TRUE)
 #'
 #'   ## The files in this data set have been stored in a data-source specific
 #'   ## subdirectory of our local file root:
-
-#'   bb_data_source_dir(cf)
 #'
-#'   ## The contents of that directory:
-#'
-#'   list.files(bb_data_source_dir(cf),recursive=TRUE,full.names=TRUE)
+#'   status$files[[1]]
 #'
 #'   ## We can run this at any later time and our repository will update if the source has changed:
 #'
-#'   status2 <- bb_sync(cf)
+#'   status2 <- bb_sync(cf, verbose = TRUE)
 #' }
 #'
 #' @export
@@ -95,7 +91,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
                      error=function(e) {
                          msg <- paste0("There was a problem synchronizing the dataset: ",bb_data_sources(config)$name[di],".\nThe error message was: ",e$message)
                          if (verbose) cat(msg,"\n") else warning(msg)
-                         tibble(ok = FALSE, files = list(tibble()), message = e$message)
+                         tibble(ok = FALSE, files = list(tibble(url = character(), file = character(), note = character())), message = e$message)
                      }
                      )
         }
@@ -182,6 +178,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
     if (!is.data.frame(method_loot)) method_loot <- tibble(ok = method_loot, files = NULL) ## older wget-based method handlers just return a status flag, newer (using bb_rget) return a tibble
     ok <- method_loot$ok
     ## postprocessing
+    decompressed_files <- character()
     if (length(pp)>0) {
         if (is.na(ok) || !ok) {
             if (verbose) cat(" download failed or was interrupted: not running post-processing step\n")
@@ -208,8 +205,8 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
                 ## note that file paths returned by the handler are relative to the local_file_root
                 ## if we are doing a dry run, no postprocessing
                 if (dry_run) {
-                    file_list_before <- c()
-                    file_list_after <- c()
+                    file_list_before <- character()
+                    file_list_after <- character()
                 } else {
                     ## all files go into both file_list_after and file_list_before
                     file_list_before <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files[[1]]$file))
@@ -223,10 +220,28 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
                 ## postprocessing steps are passed as functions or calls
                 qq <- match.fun(pp[[i]][[1]]) ## the function to call
                 qq_args <- pp[[i]][-1]
-                do.call(qq, c(list(config = this_dataset, file_list_before = file_list_before, file_list_after = file_list_after, verbose = verbose), qq_args))
+                res <- do.call(qq, c(list(config = this_dataset, file_list_before = file_list_before, file_list_after = file_list_after, verbose = verbose), qq_args))
+                ok <- ok && res$status
+                decompressed_files <- c(decompressed_files, res$files)
+                ## deal with our record of any deleted files now
+                if (length(res$deleted_files) > 0) {
+                    res$deleted_files <- std_path(res$deleted_files, case = TRUE)
+                    idx <- std_path(decompressed_files, case = TRUE) %in% res$deleted_files ## files that were deleted
+                    decompressed_files <- decompressed_files[!idx]
+                    idx <- std_path(method_loot$files[[1]]$file, case = TRUE) %in% res$deleted_files
+                    method_loot$files[[1]]$file <- method_loot$files[[1]]$file[!idx]
+                }
             }
         }
     }
+    ## merge decompressed_files with files
+    if (!is.null(method_loot$files[[1]])) method_loot$files[[1]]$file <- std_path(method_loot$files[[1]]$file) ## convert files to full paths
+    temp <- method_loot$files[[1]]
+    temp$note <- ifelse(temp$was_downloaded, "downloaded", "existing copy")
+    temp <- temp[!names(temp) %in% c("was_downloaded")]
+    if (length(decompressed_files) > 0) {
+        temp <- rbind(temp, tibble(url = NA_character_, file = decompressed_files, note = "decompressed"))
+    }
     if (verbose) cat(sprintf("\n%s dataset synchronization complete: %s\n", base::date(), bb_data_sources(this_dataset)$name))
-    tibble(ok = ok, files = list(method_loot$files[[1]]))
+    tibble(ok = ok, files = list(temp))
 }

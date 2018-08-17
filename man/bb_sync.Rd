@@ -21,7 +21,7 @@ bb_sync(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE,
 \item{dry_run}{logical: if \code{TRUE}, \code{bb_sync} will do a dry run of the synchronization process without actually downloading files}
 }
 \value{
-a tibble with the \code{name}, \code{id}, \code{source_url}, and sync success \code{status} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}
+a tibble with the \code{name}, \code{id}, \code{source_url}, sync success \code{status}, and \code{files} of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per \code{source_url}. \code{files} is a tibble with columns \code{url} (the URL the file was downloaded from), \code{file} (the path to the file), and \code{note} (either "downloaded" for a file that was downloaded, "local copy" for a file that was not downloaded because there was already a local copy, or "decompressed" for files that were extracted from a downloaded (or already-locally-present) compressed file. \code{url} will be \code{NA} for "decompressed" files
 }
 \description{
 This function takes a bowerbird configuration object and synchronizes each of the data sources defined within it. Data files will be downloaded if they are not present on the local machine, or if the configuration has been set to update local files.
@@ -36,7 +36,7 @@ Note that when \code{bb_sync} is run, the \code{local_file_root} directory must 
   ## we just use a temporary directory for example purposes.
 
   td <- tempdir()
-  cf <- bb_config(local_file_root=td)
+  cf <- bb_config(local_file_root = td)
 
   ## Bowerbird must then be told which data sources to synchronize.
   ## Let's use data from the Australian 2016 federal election, which is provided as one
@@ -46,25 +46,22 @@ Note that when \code{bb_sync} is run, the \code{local_file_root} directory must 
 
   ## Add this data source to the configuration:
 
-  cf <- bb_add(cf,my_source)
+  cf <- bb_add(cf, my_source)
 
   ## Once the configuration has been defined and the data source added to it,
   ## we can run the sync process.
   ## We set \\code{verbose=TRUE} so that we see additional progress output:
 
-  status <- bb_sync(cf,verbose=TRUE)
+  status <- bb_sync(cf, verbose = TRUE)
 
   ## The files in this data set have been stored in a data-source specific
   ## subdirectory of our local file root:
-  bb_data_source_dir(cf)
 
-  ## The contents of that directory:
-
-  list.files(bb_data_source_dir(cf),recursive=TRUE,full.names=TRUE)
+  status$files[[1]]
 
   ## We can run this at any later time and our repository will update if the source has changed:
 
-  status2 <- bb_sync(cf)
+  status2 <- bb_sync(cf, verbose = TRUE)
 }
 
 }

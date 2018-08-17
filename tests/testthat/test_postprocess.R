@@ -16,13 +16,16 @@ test_that("decompressing zip files works",{
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root = temp_root, clobber = 2), my_source)
-    bb_sync(cf, confirm_downloads_larger_than = NULL)
+    res <- bb_sync(cf, confirm_downloads_larger_than = NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp, "example_data.zip")))
     expect_true(file.exists(file.path(fp, "example_data_was_zipped.csv")))
     x <- read.csv(file.path(fp, "example_data_was_zipped.csv"))
     expect_named(x, c("a", "b", "c"))
+    ## should also have direct paths to those files in the res$files object
+    expect_true(bowerbird:::std_path(file.path(fp, "example_data.zip"), case = TRUE) %in% bowerbird:::std_path(res$files[[1]]$file, case = TRUE))
+    expect_true(bowerbird:::std_path(file.path(fp, "example_data_was_zipped.csv"), case = TRUE) %in% bowerbird:::std_path(res$files[[1]]$file, case = TRUE))
 })
 
 ## same thing, using wget
@@ -42,7 +45,7 @@ test_that("decompressing zip files works (wget)",{
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root = temp_root, clobber = 2), my_source)
-    bb_sync(cf, confirm_downloads_larger_than = NULL)
+    res <- bb_sync(cf, confirm_downloads_larger_than = NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp, "example_data.zip")))
@@ -128,6 +131,7 @@ test_that("decompressing Z-compressed files works",{
 test_that("cleanup postprocessing works",{
     skip_on_cran()
     skip_on_appveyor() ## fails for unknown reasons
+    ## unzip then cleanup
     my_source <- bb_source(
         name="Bowerbird test data",
         id="bbtest-v0.1",
@@ -141,8 +145,28 @@ test_that("cleanup postprocessing works",{
     )
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf,confirm_downloads_larger_than=NULL)
+    res <- bb_sync(cf,confirm_downloads_larger_than=NULL)
 
     fp <- bb_data_source_dir(cf)
     expect_false(file.exists(file.path(fp,"example_data_was_zipped.csv")))
+
+    ## unzip then cleanup then unzip again!
+    my_source <- bb_source(
+        name="Bowerbird test data",
+        id="bbtest-v0.1",
+        description="These are just some trivial test files provided with the bowerbird package.",
+        doc_url="https://github.com/ropensci/bowerbird",
+        citation="No citation needed.",
+        source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data.zip",
+        license="MIT",
+        method=list("bb_handler_rget", level = 1),
+        postprocess=list("bb_unzip", list("bb_cleanup",pattern="\\.csv$"), "bb_unzip")
+    )
+    temp_root <- tempdir()
+    cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
+    res <- bb_sync(cf,confirm_downloads_larger_than=NULL)
+
+    fp <- bb_data_source_dir(cf)
+    expect_true(file.exists(file.path(fp,"example_data_was_zipped.csv")))
+
 })

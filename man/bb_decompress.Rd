@@ -26,7 +26,7 @@ bb_uncompress(...)
 \item{...}{: extra parameters passed automatically by \code{bb_sync}}
 }
 \value{
-TRUE on success
+list with components status (\code{TRUE} on success), \code{files} (character vector of paths to extracted files), and \code{deleted_files} (character vector of paths of files that were deleted)
 }
 \description{
 Functions for decompressing files after downloading. These functions are not intended to be called directly, but rather are specified as a \code{postprocess} option in \code{\link{bb_source}}. \code{bb_unzip}, \code{bb_gunzip}, \code{bb_bunzip2}, and \code{bb_uncompress} are convenience wrappers around \code{bb_decompress} that specify the method.

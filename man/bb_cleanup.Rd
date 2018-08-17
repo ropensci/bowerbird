@@ -19,7 +19,7 @@ bb_cleanup(pattern, recursive = FALSE, ignore_case = FALSE,
 \item{...}{: extra parameters passed automatically by \code{bb_sync}}
 }
 \value{
-TRUE on success
+a list, with components \code{status} (TRUE on success) and \code{deleted_files} (character vector of paths of files that were deleted)
 }
 \description{
 A function for removing unwanted files after downloading. This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.

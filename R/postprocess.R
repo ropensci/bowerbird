@@ -8,7 +8,7 @@
 #' @param delete logical: delete the zip files after extracting their contents?
 #' @param ... : extra parameters passed automatically by \code{bb_sync}
 #'
-#' @return TRUE on success
+#' @return list with components status (\code{TRUE} on success), \code{files} (character vector of paths to extracted files), and \code{deleted_files} (character vector of paths of files that were deleted)
 #'
 #' @seealso \code{\link{bb_source}}, \code{\link{bb_config}}, \code{\link{bb_cleanup}}
 #' @examples
@@ -58,12 +58,13 @@ bb_decompress_inner <- function(config,file_list_before,file_list_after,verbose=
     } else {
         ## decompress but retain compressed file. decompress only if .zip/.gz/.bz2/.Z file has changed
         files_to_decompress <- find_changed_files(file_list_before,file_list_after,file_pattern)
-        do_decompress_files(method,files=files_to_decompress,verbose=verbose)
+        res1 <- do_decompress_files(method,files=files_to_decompress,verbose=verbose)
         ## also decompress if uncompressed file does not exist
         files_to_decompress <- setdiff(rownames(file_list_after),files_to_decompress) ## those that we haven't just dealt with
         files_to_decompress <- files_to_decompress[str_detect(files_to_decompress,regex(file_pattern,ignore_case=ignore_case))] ## only .zip/.gz/.bz2/.Z files
-        do_decompress_files(method,files=files_to_decompress,overwrite=FALSE,verbose=verbose)
+        res2 <- do_decompress_files(method,files=files_to_decompress,overwrite=FALSE,verbose=verbose)
         ## nb this may be slow, so might be worth explicitly checking for the existence of uncompressed files
+        list(status = res1$status && res2$status, files = c(res1$files, res2$files))
     }
 }
 
@@ -86,6 +87,8 @@ do_decompress_files <- function(method,files,overwrite=TRUE,verbose=FALSE) {
     ## MDS: this should use tail(warnings(), 1) instead
     last.warning <- NULL ## to avoid check note
     all_OK <- TRUE
+    outfiles <- character()
+    deleted_files <- character()
     for (thisf in files) {
         ## decompress, check for errors in doing so
         if (verbose) cat(sprintf("  decompressing: %s ... ",thisf))
@@ -98,14 +101,15 @@ do_decompress_files <- function(method,files,overwrite=TRUE,verbose=FALSE) {
                    target_dir <- dirname(thisf)
                    tryCatch({ unzipped_files <- unzip(thisf,list=TRUE) ## get list of files in archive
                               files_to_extract <- unzipped_files$Name
+                              outfiles <- c(outfiles, file.path(target_dir, files_to_extract))
                               if (!overwrite) {
                                   ## extract only files that don't exist
-                                  files_to_extract<-files_to_extract[!file.exists(file.path(target_dir,files_to_extract))]
+                                  files_to_extract <- files_to_extract[!file.exists(file.path(target_dir,files_to_extract))]
                               }
                               if (length(files_to_extract)>0) {
                                   if (verbose) cat(sprintf('extracting %d files into %s ... ',length(files_to_extract),target_dir))
-                                  unzip(thisf,files=files_to_extract,exdir=target_dir) ## now actually unzip them
-                                  was_ok <- is.null(last.warning[[1]]) && all(file.info(files_to_extract)$size>0)
+                                  temp <- unzip(thisf,files=files_to_extract,exdir=target_dir) ## now actually unzip them
+                                  was_ok <- is.null(last.warning[[1]]) && all(file.info(file.path(target_dir, files_to_extract))$size>0)
                               } else {
                                   if (verbose) cat(sprintf('no new files to extract (not overwriting existing files) ... '))
                                   was_ok <- TRUE
@@ -122,6 +126,7 @@ do_decompress_files <- function(method,files,overwrite=TRUE,verbose=FALSE) {
                        if (was_ok) {
                            if (verbose) cat(sprintf("  unzip of %s appears OK, deleting\n",thisf))
                            unlink(thisf)
+                           deleted_files <- c(deleted_files, thisf)
                        } else {
                            if (verbose) cat(sprintf("  problem unzipping %s, not deleting\n",thisf))
                        }
@@ -133,21 +138,24 @@ do_decompress_files <- function(method,files,overwrite=TRUE,verbose=FALSE) {
                    ## gunzip takes care of deleting the compressed file if remove is TRUE
                    unzip_this <- TRUE
                    was_ok <- FALSE
+                   destfile <- gsub("\\.gz$", "", thisf, ignore.case = TRUE)
+                   outfiles <- c(outfiles, destfile)
                    if (!overwrite) {
                        ## check if file exists, so that we can issue a more informative trace message to the user
-                       destname <- gsub("[.]gz$","",thisf,ignore.case=TRUE)
-                       if (file.exists(destname)) {
+                       if (file.exists(destfile)) {
                            if (verbose) cat(sprintf(" uncompressed file exists, skipping ... "))
                            unzip_this <- FALSE
                        }
                    }
                    if (unzip_this) {
                        ## wrap this in tryCatch block so that errors do not halt our whole process
-                       tryCatch({gunzip(thisf,destname=sub("\\.gz$","",thisf),remove=method=="gunzip_delete",overwrite=overwrite); was_ok <- TRUE},
-                                error=function(e){
-                                    if (verbose) cat(sprintf("  problem gunzipping %s: %s",thisf,e))
-                                }
-                                )
+                       tryCatch({
+                           temp <- gunzip(thisf, destname = destfile, remove = method == "gunzip_delete", overwrite = overwrite)
+                           if (method == "gunzip_delete") deleted_files <- c(deleted_files, thisf)
+                           was_ok <- TRUE
+                       }, error=function(e){
+                           if (verbose) cat(sprintf("  problem gunzipping %s: %s",thisf,e))
+                       })
                    }
                    all_OK <- all_OK && was_ok
                    if (verbose) cat(sprintf("done\n"))
@@ -157,21 +165,24 @@ do_decompress_files <- function(method,files,overwrite=TRUE,verbose=FALSE) {
                    ## same as for gunzip
                    unzip_this <- TRUE
                    was_ok <- FALSE
+                   destfile <- gsub("\\.bz2$", "", thisf, ignore.case = TRUE)
                    if (!overwrite) {
                        ## check if file exists, so that we can issue a more informative trace message to the user
-                       destname <- gsub("[.]bz2$","",thisf,ignore.case=TRUE)
-                       if (file.exists(destname)) {
+                       if (file.exists(destfile)) {
                            if (verbose) cat(sprintf(" uncompressed file exists, skipping ... "))
                            unzip_this <- FALSE
                        }
                    }
                    if (unzip_this) {
                        ## wrap this in tryCatch block so that errors do not halt our whole process
-                       tryCatch({bunzip2(thisf,destname=sub("\\.bz2$","",thisf),remove=method=="bunzip2_delete",overwrite=overwrite);was_ok <- TRUE},
-                                error=function(e){
-                                    if (verbose) cat(sprintf("  problem bunzipping %s: %s",thisf,e))
-                                }
-                                )
+                       tryCatch({
+                           temp <- bunzip2(thisf, destname = destfile, remove = method == "bunzip2_delete", overwrite = overwrite);
+                           outfiles <- c(outfiles, as.character(temp))
+                           if (method == "bunzip2_delete") deleted_files <- c(deleted_files, thisf)
+                           was_ok <- TRUE
+                       }, error=function(e){
+                           if (verbose) cat(sprintf("  problem bunzipping %s: %s",thisf,e))
+                       })
                    }
                    all_OK <- all_OK && was_ok
                    if (verbose) cat(sprintf("done\n"))
@@ -180,10 +191,11 @@ do_decompress_files <- function(method,files,overwrite=TRUE,verbose=FALSE) {
                "uncompress"={
                    unzip_this <- TRUE
                    was_ok <- FALSE
-                   destname <- gsub("\\.Z$","",thisf,ignore.case=TRUE)
+                   destfile <- gsub("\\.Z$", "", thisf, ignore.case = TRUE)
+                   outfiles <- c(outfiles, destfile)
                    if (!overwrite) {
                        ## check if file exists, so that we can issue a more informative trace message to the user
-                       if (file.exists(destname)) {
+                       if (file.exists(destfile)) {
                            if (verbose) cat(sprintf(" uncompressed file exists, skipping ... "))
                            unzip_this <- FALSE
                        }
@@ -194,9 +206,12 @@ do_decompress_files <- function(method,files,overwrite=TRUE,verbose=FALSE) {
                            fsize <- 1e7 ## needs to be the UNCOMPRESSED size, which is around 850k elements. Is allowed to be an overestimate, but the written file will be corrupt if this is an underestimate
                            ff <- archive::file_read(thisf)
                            open(ff,"rb") ## open in binary mode, so that readBin is happy
-                           writeBin(readBin(ff,"raw",fsize),destname)
+                           writeBin(readBin(ff, "raw", fsize), destfile)
                            close(ff)
-                           if (grepl("delete",method)) file.remove(thisf)
+                           if (grepl("delete", method)) {
+                               file.remove(thisf)
+                               deleted_files <- c(deleted_files, thisf)
+                           }
                            was_ok <- TRUE
                        },
                        error=function(e){
@@ -210,7 +225,7 @@ do_decompress_files <- function(method,files,overwrite=TRUE,verbose=FALSE) {
                )
     }
     options(warn=warn) ## reset
-    all_OK
+    list(status = all_OK, files = outfiles, deleted_files = deleted_files)
 }
 
 ## internal function
@@ -265,7 +280,7 @@ bb_uncompress <- function(...) bb_decompress(...,method="uncompress")
 #' @param all_files logical: should the cleanup include hidden files?
 #' @param ... : extra parameters passed automatically by \code{bb_sync}
 #'
-#' @return TRUE on success
+#' @return a list, with components \code{status} (TRUE on success) and \code{deleted_files} (character vector of paths of files that were deleted)
 #'
 #' @seealso \code{\link{bb_source}}, \code{\link{bb_config}}, \code{\link{bb_decompress}}
 #'
@@ -276,12 +291,12 @@ bb_uncompress <- function(...) bb_decompress(...,method="uncompress")
 #' }
 #'
 #' @export
-bb_cleanup <- function(pattern,recursive=FALSE,ignore_case=FALSE,all_files=FALSE,...) {
+bb_cleanup <- function(pattern, recursive = FALSE, ignore_case = FALSE, all_files = FALSE, ...) {
     assert_that(is.string(pattern))
-    assert_that(is.flag(recursive),!is.na(recursive))
-    assert_that(is.flag(ignore_case),!is.na(ignore_case))
-    assert_that(is.flag(all_files),!is.na(all_files))
-    do.call(bb_cleanup_inner,list(...,pattern=pattern,recursive=recursive,ignore_case=ignore_case,all_files=all_files))
+    assert_that(is.flag(recursive), !is.na(recursive))
+    assert_that(is.flag(ignore_case), !is.na(ignore_case))
+    assert_that(is.flag(all_files), !is.na(all_files))
+    do.call(bb_cleanup_inner, list(..., pattern = pattern, recursive = recursive, ignore_case = ignore_case, all_files = all_files))
 }
 
 
@@ -293,18 +308,18 @@ bb_cleanup <- function(pattern,recursive=FALSE,ignore_case=FALSE,all_files=FALSE
 # @param recursive logical: should the cleanup recurse into subdirectories?
 # @param ignore_case logical: should pattern matching be case-insensitive?
 #
-# @return TRUE on success
+# @return list, with components status = TRUE on success, and deleted_files = character vector of file names deleted
 #
-bb_cleanup_inner <- function(config,file_list_before,file_list_after,verbose=FALSE,pattern,recursive=FALSE,ignore_case=FALSE,all_files=FALSE) {
-    assert_that(is(config,"bb_config"))
-    assert_that(nrow(bb_data_sources(config))==1)
-    to_delete <- list.files(path=bb_data_source_dir(config),pattern=pattern,recursive=recursive,ignore.case=ignore_case,all.files=all_files,full.names=TRUE)
+bb_cleanup_inner <- function(config, file_list_before, file_list_after, verbose = FALSE, pattern, recursive = FALSE, ignore_case = FALSE, all_files = FALSE) {
+    assert_that(is(config, "bb_config"))
+    assert_that(nrow(bb_data_sources(config)) == 1)
+    to_delete <- list.files(path = bb_data_source_dir(config), pattern = pattern, recursive = recursive, ignore.case = ignore_case, all.files = all_files, full.names = TRUE)
     if (verbose) {
-        if (length(to_delete)>0) {
-            if (verbose) cat(sprintf(" cleaning up files: %s\n",paste(to_delete,collapse=",")))
+        if (length(to_delete) > 0) {
+            if (verbose) cat(sprintf(" cleaning up files: %s\n", paste(to_delete, collapse = ",")))
         } else {
             if (verbose) cat(" cleanup: no files to remove\n")
         }
     }
-    unlink(to_delete)==0
+    list(status = unlink(to_delete)==0, deleted_files = to_delete)
 }
