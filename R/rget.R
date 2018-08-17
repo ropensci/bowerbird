@@ -210,6 +210,8 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                             if (verbose) cat(if (show_progress) "\n", "file unchanged on server, not downloading.\n")
                         }
                     }
+                } else {
+                    if (verbose) cat(sprintf(" file already exists, not downloading: %s ... ", df), if (show_progress) "\n")
                 }
             }
         }
