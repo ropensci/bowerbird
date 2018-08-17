@@ -79,3 +79,16 @@ get_os <- function() {
         stop("unknown operating system: ",os)
     os
 }
+
+## standardize file paths, so that they can be more reliably compared
+## if case is TRUE and we are on windows, also convert to lower case
+std_path <- function(z, case = FALSE) {
+    z <- normalizePath(z, mustWork = FALSE)
+    ## remove trailing file separators
+    z <- gsub("[/\\]+$", "", z)
+    if (case) {
+        iswin <- tryCatch(get_os() == "windows", error = function(e) FALSE)
+        if (iswin) z <- tolower(z)
+    }
+    z
+}
