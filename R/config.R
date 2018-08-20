@@ -273,7 +273,7 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
     config$local_file_paths <- vapply(seq_len(nrow(config)),function(z) {
         temp <- directory_from_url(config$source_url[[z]])
         temp[is.na(temp)] <- ""
-        paste(file.path(config$local_file_root[z],temp),collapse=", ")},FUN.VALUE="")
+        paste(unique(file.path(config$local_file_root[z],temp)),collapse=", ")},FUN.VALUE="")
     ## order by data group
     config <- unique(config[,!names(config) %in% c("source_url","method","postprocess")]) ## drop cols, take unique rows
     config$data_group[!nzchar(config$data_group)] <- NA ## so that these appear last
@@ -334,7 +334,7 @@ print.bb_config <- function(x, ...) {
     config$local_file_paths <- vapply(seq_len(nrow(config)),function(z) {
         temp <- directory_from_url(config$source_url[[z]])
         temp[is.na(temp)] <- ""
-        paste(file.path(config$local_file_root[z],temp),collapse=", ")},FUN.VALUE="")
+        paste(unique(file.path(config$local_file_root[z],temp)),collapse=", ")},FUN.VALUE="")
     ## order by data group
     config <- unique(config[,!names(config) %in% c("source_url","method","postprocess")]) ## drop cols, take unique rows
     config$data_group[!nzchar(config$data_group)] <- NA ## so that these appear last
