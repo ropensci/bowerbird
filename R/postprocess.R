@@ -156,6 +156,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                        if (file.exists(destfile)) {
                            if (verbose) cat(sprintf(" uncompressed file exists, skipping ... "))
                            unzip_this <- FALSE
+                           was_ok <- TRUE
                        }
                    }
                    if (unzip_this) {
@@ -182,6 +183,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                        if (file.exists(destfile)) {
                            if (verbose) cat(sprintf(" uncompressed file exists, skipping ... "))
                            unzip_this <- FALSE
+                           was_ok <- TRUE
                        }
                    }
                    if (unzip_this) {
@@ -209,6 +211,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                        if (file.exists(destfile)) {
                            if (verbose) cat(sprintf(" uncompressed file exists, skipping ... "))
                            unzip_this <- FALSE
+                           was_ok <- TRUE
                        }
                    }
                    if (unzip_this) {
