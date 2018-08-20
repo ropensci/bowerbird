@@ -20,5 +20,5 @@ test_that("bb_fingerprint does something sensible",{
 
     fgpr <- bb_fingerprint(cf)
     expect_named(fgpr,c("filename","data_source_id","size","last_modified","hash"))
-    expect_equal(fgpr$hash[grepl("gz$",fgpr$filename)],"9d27e2bba97224f8934f1c591d9f50888f65348a")
+    expect_equal(fgpr$hash[grepl("example_data_was_gzipped\\.csv\\.gz$",fgpr$filename)],"9d27e2bba97224f8934f1c591d9f50888f65348a")
 })
