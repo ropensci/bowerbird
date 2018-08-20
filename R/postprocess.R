@@ -50,7 +50,7 @@ bb_decompress_inner <- function(config, file_list_before, file_list_after, verbo
                            "gunzip" = "\\.gz$",
                            "bunzip2" = "\\.bz2$",
                            "uncompress" = "\\.Z$",
-                           "untar" = "\\.tar.*$",
+                           "untar" = "\\.(tar|tar\\.gz|tar\\.bz2|tar\\.xz|tgz)$",
                            stop("unrecognized decompression")
                            )
     if (delete) {
