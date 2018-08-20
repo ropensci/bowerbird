@@ -6,6 +6,7 @@
 \alias{bb_gunzip}
 \alias{bb_bunzip2}
 \alias{bb_uncompress}
+\alias{bb_untar}
 \title{Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy}
 \usage{
 bb_decompress(method, delete = FALSE, ...)
@@ -17,9 +18,11 @@ bb_gunzip(...)
 bb_bunzip2(...)
 
 bb_uncompress(...)
+
+bb_untar(...)
 }
 \arguments{
-\item{method}{string: one of "unzip","gunzip","bunzip2","decompress"}
+\item{method}{string: one of "unzip", "gunzip", "bunzip2", "decompress", "untar"}
 
 \item{delete}{logical: delete the zip files after extracting their contents?}
 
@@ -29,7 +32,7 @@ bb_uncompress(...)
 list with components status (\code{TRUE} on success), \code{files} (character vector of paths to extracted files), and \code{deleted_files} (character vector of paths of files that were deleted)
 }
 \description{
-Functions for decompressing files after downloading. These functions are not intended to be called directly, but rather are specified as a \code{postprocess} option in \code{\link{bb_source}}. \code{bb_unzip}, \code{bb_gunzip}, \code{bb_bunzip2}, and \code{bb_uncompress} are convenience wrappers around \code{bb_decompress} that specify the method.
+Functions for decompressing files after downloading. These functions are not intended to be called directly, but rather are specified as a \code{postprocess} option in \code{\link{bb_source}}. \code{bb_unzip}, \code{bb_untar}, \code{bb_gunzip}, \code{bb_bunzip2}, and \code{bb_uncompress} are convenience wrappers around \code{bb_decompress} that specify the method.
 }
 \details{
 If the data source delivers compressed files, you will most likely want to decompress them after downloading. These functions will do this for you. By default, these do not delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.
@@ -37,10 +40,10 @@ If the data source delivers compressed files, you will most likely want to decom
 \examples{
 \dontrun{
   ## decompress .zip files after synchronization but keep zip files intact
-  my_source <- bb_source(...,postprocess=list("bb_unzip"))
+  my_source <- bb_source(..., postprocess = list("bb_unzip"))
 
   ## decompress .zip files after synchronization and delete zip files
-  my_source <- bb_source(...,postprocess=list(list("bb_unzip",delete=TRUE)))
+  my_source <- bb_source(..., postprocess = list(list("bb_unzip", delete = TRUE)))
 }
 
 }

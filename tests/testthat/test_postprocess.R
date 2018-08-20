@@ -79,6 +79,81 @@ test_that("decompressing gzipped files works",{
     expect_named(x,c("a","b","c"))
 })
 
+test_that("decompressing tar files works",{
+    skip_on_cran()
+    skip_on_appveyor() ## fails for unknown reasons
+    my_source <- bb_source(
+        name="Bowerbird test data",
+        id="bbtest-v0.1",
+        description="These are just some trivial test files provided with the bowerbird package.",
+        doc_url="https://github.com/ropensci/bowerbird",
+        citation="No citation needed.",
+        source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data_was_tarred.tar",
+        license="MIT",
+        method=list("bb_handler_rget", level = 1),
+        postprocess=list("bb_untar"))
+
+    temp_root <- tempdir()
+    cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
+
+    fp <- bb_data_source_dir(cf)
+    expect_true(file.exists(file.path(fp,"example_data_was_tarred.tar")))
+    expect_true(file.exists(file.path(fp,"example_data_was_tarred.csv")))
+    x <- read.csv(file.path(fp,"example_data_was_tarred.csv"))
+    expect_named(x,c("a","b","c"))
+})
+
+test_that("decompressing tgz files works",{
+    skip_on_cran()
+    skip_on_appveyor() ## fails for unknown reasons
+    my_source <- bb_source(
+        name="Bowerbird test data",
+        id="bbtest-v0.1",
+        description="These are just some trivial test files provided with the bowerbird package.",
+        doc_url="https://github.com/ropensci/bowerbird",
+        citation="No citation needed.",
+        source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data_was_tgzed.tgz",
+        license="MIT",
+        method=list("bb_handler_rget", level = 1),
+        postprocess=list("bb_untar"))
+
+    temp_root <- tempdir()
+    cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
+
+    fp <- bb_data_source_dir(cf)
+    expect_true(file.exists(file.path(fp,"example_data_was_tgzed.tgz")))
+    expect_true(file.exists(file.path(fp,"example_data_was_tgzed.csv")))
+    x <- read.csv(file.path(fp,"example_data_was_tgzed.csv"))
+    expect_named(x,c("a","b","c"))
+})
+
+test_that("decompressing tar.gz files works",{
+    skip_on_cran()
+    skip_on_appveyor() ## fails for unknown reasons
+    my_source <- bb_source(
+        name="Bowerbird test data",
+        id="bbtest-v0.1",
+        description="These are just some trivial test files provided with the bowerbird package.",
+        doc_url="https://github.com/ropensci/bowerbird",
+        citation="No citation needed.",
+        source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data_was_targzipped.tar.gz",
+        license="MIT",
+        method=list("bb_handler_rget", level = 1),
+        postprocess=list("bb_untar"))
+
+    temp_root <- tempdir()
+    cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
+    bb_sync(cf,confirm_downloads_larger_than=NULL)
+
+    fp <- bb_data_source_dir(cf)
+    expect_true(file.exists(file.path(fp,"example_data_was_targzipped.tar.gz")))
+    expect_true(file.exists(file.path(fp,"example_data_was_targzipped.csv")))
+    x <- read.csv(file.path(fp,"example_data_was_targzipped.csv"))
+    expect_named(x,c("a","b","c"))
+})
+
 test_that("decompressing bzipped files works",{
     skip_on_cran()
     skip_on_appveyor() ## fails for unknown reasons
