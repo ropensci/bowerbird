@@ -106,7 +106,11 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                    meth_str <- sub("_delete", "", method)
                    tryCatch({
                        unzipped_files <- unzfun(thisf, list = TRUE) ## get list of files in archive
-                       files_to_extract <- unzipped_files$Name
+                       ## note that this is a character vector for untar or data.frame for unzip, grrr
+                       files_to_extract <- switch(meth_str,
+                                                  unzip = unzipped_files$Name,
+                                                  untar = unzipped_files,
+                                                  stop("unexpected method"))
                        outfiles <- c(outfiles, file.path(target_dir, files_to_extract))
                        if (!overwrite) {
                            ## extract only files that don't exist
