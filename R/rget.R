@@ -377,7 +377,7 @@ is_nonparent_url <- function(url, parent) {
 
 #' @rdname bb_rget
 #' @export
-bb_rget_default_downloads <- function() "README|\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml|tif|tiff)$"
+bb_rget_default_downloads <- function() "README|\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml|tar|tgz|tif|tiff)$"
 
 build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_certificate = FALSE, user, password, enforce_basic_auth = FALSE) {
     out <- if (!is.null(debug) && debug) httr::verbose() else httr::config() ## curl's verbose output is intense, save it for debug = TRUE
