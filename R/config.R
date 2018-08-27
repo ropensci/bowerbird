@@ -331,6 +331,7 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
 #' @method print bb_config
 #' @export
 print.bb_config <- function(x, ...) {
+    cat("Local file root:", x$settings$local_file_root, "\n")
     config <- bb_settings_to_cols(x)
     if (nrow(config) > 0) {
         config$local_file_paths <- vapply(seq_len(nrow(config)),function(z) {
@@ -374,6 +375,8 @@ print.bb_config <- function(x, ...) {
             if (is.null(thisfun) || is.na(thisfun) || !nzchar(thisfun)) { thisfun <- "none suggested" }
             cat("Associated access functions: ",thisfun,"\n")
         }
+    } else {
+        cat("Config contains no data sources.\n")
     }
     invisible(x)
 }
