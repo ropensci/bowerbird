@@ -10,9 +10,9 @@ bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
   accept_download = bb_rget_default_downloads(),
   accept_download_extra = character(), reject_download = character(), user,
   password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE,
-  relative = FALSE, verbose = FALSE, show_progress = verbose,
-  debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE,
-  force_local_filename)
+  relative = FALSE, remote_time = TRUE, verbose = FALSE,
+  show_progress = verbose, debug = FALSE, dry_run = FALSE,
+  stop_on_download_error = FALSE, force_local_filename)
 
 bb_rget_default_downloads()
 }
@@ -44,6 +44,8 @@ bb_rget_default_downloads()
 \item{no_check_certificate}{logical: if \code{TRUE}, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution}
 
 \item{relative}{logical: if \code{TRUE}, only follow relative links. This can be useful for restricting what is downloaded in recursive mode}
+
+\item{remote_time}{logical: if \code{TRUE}, attempt to set the local file's time to that of the remote file}
 
 \item{verbose}{logical: print trace output?}
 

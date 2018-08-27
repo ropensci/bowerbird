@@ -73,7 +73,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     if (!is.null(cfrow$dry_run) && !is.na(cfrow$dry_run)) {
         this_flags$dry_run <- cfrow$dry_run
     }
-    this_flags <- c(list(url = cfrow$source_url), this_flags, list(verbose = verbose))
+    this_flags <- c(list(url = cfrow$source_url), this_flags, list(verbose = verbose, show_progress = verbose && sink.number() < 1))
     do.call(bb_rget, this_flags)
 }
 
@@ -98,6 +98,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param no_parent logical: if \code{TRUE}, do not ever ascend to the parent directory when retrieving recursively. This is \code{TRUE} by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded. Note that this check only applies to links on the same host as the starting \code{url}. If that URL links to files on another host, those links will be followed (unless \code{relative = TRUE})
 #' @param no_check_certificate logical: if \code{TRUE}, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution
 #' @param relative logical: if \code{TRUE}, only follow relative links. This can be useful for restricting what is downloaded in recursive mode
+#' @param remote_time logical: if \code{TRUE}, attempt to set the local file's time to that of the remote file
 #' @param verbose logical: print trace output?
 #' @param show_progress logical: if \code{TRUE}, show download progress
 #' @param debug logical: if \code{TRUE}, will print additional debugging information. If bb_rget is not behaving as expected, try setting this to \code{TRUE}
@@ -108,7 +109,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 #' @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename) {
     ## TO ADD: no_parent probably wise
     assert_that(is.string(url))
     assert_that(is.numeric(level), level >= 0)
@@ -125,6 +126,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(is.flag(no_parent),!is.na(no_parent))
     assert_that(is.flag(no_check_certificate), !is.na(no_check_certificate))
     assert_that(is.flag(relative), !is.na(relative))
+    assert_that(is.flag(remote_time), !is.na(remote_time))
     assert_that(is.numeric(wait))
     assert_that(is.flag(verbose), !is.na(verbose))
     assert_that(is.flag(debug), !is.na(debug))
@@ -134,7 +136,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     ## opts to pass to child function
     opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, debug = debug) ##robots_off = robots_off,
     ## curl options
-    opts$curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password)
+    opts$curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password, remote_time = remote_time)
     ok <- FALSE
     msg <- "" ## error or other messages
     downloads <- tibble(url = character(), file = character(), was_downloaded = logical())
@@ -202,8 +204,11 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                             downloads$was_downloaded[downloads$url == df] <- TRUE
                             if (file.exists(fname)) file.remove(fname)
                             file.copy(dlf, fname)
-                            ## and delete temp file
+                            ## delete temp file
                             file.remove(dlf)
+                            ## set local file time if appropriate
+                            ## setting the filetime option in the curl request does not appear to modify the local file timestamp
+                            if (remote_time) set_file_timestamp(path = fname, hdrs = httr::headers(req))
                             if (verbose) cat(if (show_progress) "\n", "done.\n")
                         } else {
                             file.remove(dlf)
@@ -373,13 +378,30 @@ is_nonparent_url <- function(url, parent) {
     }
 }
 
-
+set_file_timestamp <- function(path, hdrs) {
+    ok <- tryCatch({
+        ftime <- hdrs[grepl("last-modified", names(hdrs), ignore.case = TRUE)]
+        ## e.g. "Tue, 21 Aug 2018 16:00:00 GMT"
+        if (length(ftime) == 1) {
+            suppressWarnings(ftime <- lubridate::dmy_hms(ftime))
+            if (!is.na(ftime)) {
+                Sys.setFileTime(path = path, time = ftime)
+                TRUE
+            } else {
+                FALSE
+            }
+        } else {
+            FALSE
+        }
+    }, error = function(e) FALSE)
+    invisible(ok)
+}
 
 #' @rdname bb_rget
 #' @export
 bb_rget_default_downloads <- function() "README|\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml|tar|tgz|tif|tiff)$"
 
-build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_certificate = FALSE, user, password, enforce_basic_auth = FALSE) {
+build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_certificate = FALSE, user, password, enforce_basic_auth = FALSE, remote_time = NA) {
     out <- if (!is.null(debug) && debug) httr::verbose() else httr::config() ## curl's verbose output is intense, save it for debug = TRUE
     if (!is.null(show_progress) && show_progress) out$options <- c(out$options, httr::progress()$options)
     if (!is.null(no_check_certificate) && no_check_certificate) {
@@ -393,5 +415,6 @@ build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_cer
         out$options$password <- password
     }
     if (enforce_basic_auth) out$options$httpauth <- 1L # force basic authentication
+    if (!is.na(remote_time)) out$options$filetime <- if (remote_time) 1L else 0L
     out
 }
