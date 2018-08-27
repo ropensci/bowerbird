@@ -91,7 +91,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
                      error=function(e) {
                          msg <- paste0("There was a problem synchronizing the dataset: ",bb_data_sources(config)$name[di],".\nThe error message was: ",e$message)
                          if (verbose) cat(msg,"\n") else warning(msg)
-                         tibble(ok = FALSE, files = list(tibble(url = character(), file = character(), note = character())), message = e$message)
+                         tibble(ok = FALSE, files = list(tibble(url = character(), file = character(), note = character())))##, message = e$message)
                      }
                      )
         }
