@@ -27,12 +27,12 @@
 #'   ## the files that have been downloaded:
 #'   status$files[[1]]
 #'
-#'   ## Define a new source: bicycle paths from data.gov.au
+#'   ## Define a new source: Geelong bicycle paths from data.gov.au
 #'   my_source <- bb_source(
 #'     name = "Bike Paths - Greater Geelong",
 #'     id = "http://data.gov.au/dataset/7af9cf59-a4ea-47b2-8652-5e5eeed19611",
 #'     doc_url = "https://data.gov.au/dataset/geelong-bike-paths",
-#'     citation = "",
+#'     citation = "See https://data.gov.au/dataset/geelong-bike-paths",
 #'     source_url = "https://data.gov.au/dataset/7af9cf59-a4ea-47b2-8652-5e5eeed19611",
 #'     license = "CC-BY",
 #'     method = list("bb_handler_rget", accept_download = "\\.zip$", level = 1),
