@@ -280,10 +280,22 @@ spider <- function(to_visit, visited = character(), download_queue = character()
             }
             ## TODO check for error?
             if (ftp) {
+                ## treat as text (i.e. standard ftp directory listing)
+                ## except if it comes back as text/html, try parsing it as html
+                ## an FTP request through a proxy may be turned into HTML, grrr
+                was_html <- !is.null(headers(x)$`content-type`) && grepl("html", headers(x)$`content-type`)
                 x <- tryCatch(content(x, as = "text"), error = function (e) {
                     stop("error: ", e$message)
                 })
+                links_from <- "text"
+                if (was_html) {
+                    try({
+                        x <- read_html(x)
+                        links_from <- "html"
+                    }, silent = TRUE)
+                }
             } else {
+                links_from <- "html"
                 x <- tryCatch(read_html(content(x, as = "text")), error = function (e) {
                     ## not valid HTML?
                     NULL
@@ -302,7 +314,7 @@ spider <- function(to_visit, visited = character(), download_queue = character()
             if (!is.null(x)) {
                 ## if this url matches download criteria, should we also be writing this file to disk?
                 ## grab all link hrefs
-                if (ftp) {
+                if (links_from == "text") {
                     all_links <- strsplit(x, "[\r\n]+")[[1]]
                     #cat("all links:")
                     #cat(all_links)
