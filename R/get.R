@@ -39,7 +39,7 @@
 #'     postprocess = list("bb_unzip"))
 #'
 #'   ## get the data
-#'   status <- bb_get(local_file_root = tempdir(), data_sources = my_source, verbose = TRUE)
+#'   status <- bb_get(data_sources = my_source, local_file_root = tempdir(), verbose = TRUE)
 #'
 #'   ## find the .shp file amongst the files, and plot it
 #'   shpfile <- status$files[[1]]$file[grepl("shp$", status$files[[1]]$file)]
@@ -48,7 +48,7 @@
 #'   plot(bx)
 #' }
 #' @export
-bb_get <- function(local_file_root, data_sources, clobber = 1, http_proxy = NULL, ftp_proxy = NULL, create_root = FALSE, verbose = FALSE, confirm_downloads_larger_than = 0.1, dry_run = FALSE, ...) {
+bb_get <- function(data_sources, local_file_root, clobber = 1, http_proxy = NULL, ftp_proxy = NULL, create_root = FALSE, verbose = FALSE, confirm_downloads_larger_than = 0.1, dry_run = FALSE, ...) {
     extra_args <- list(...)
     ## build config
     cf_args <- list(local_file_root = local_file_root, clobber = clobber, http_proxy = http_proxy, ftp_proxy = ftp_proxy)

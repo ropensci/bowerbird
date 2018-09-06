@@ -4,14 +4,14 @@
 \alias{bb_get}
 \title{Convenience function to define and synchronize a bowerbird data collection}
 \usage{
-bb_get(local_file_root, data_sources, clobber = 1, http_proxy = NULL,
+bb_get(data_sources, local_file_root, clobber = 1, http_proxy = NULL,
   ftp_proxy = NULL, create_root = FALSE, verbose = FALSE,
   confirm_downloads_larger_than = 0.1, dry_run = FALSE, ...)
 }
 \arguments{
-\item{local_file_root}{string: location of data repository on local file system}
-
 \item{data_sources}{tibble: one or more data sources to download, as returned by e.g. \code{bb_example_sources}}
+
+\item{local_file_root}{string: location of data repository on local file system}
 
 \item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files}
 
@@ -58,7 +58,7 @@ Note that the \code{local_file_root} directory must exist or \code{create_root=T
     postprocess = list("bb_unzip"))
 
   ## get the data
-  status <- bb_get(local_file_root = tempdir(), data_sources = my_source, verbose = TRUE)
+  status <- bb_get(data_sources = my_source, local_file_root = tempdir(), verbose = TRUE)
 
   ## find the .shp file amongst the files, and plot it
   shpfile <- status$files[[1]]$file[grepl("shp$", status$files[[1]]$file)]
