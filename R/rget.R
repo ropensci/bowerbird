@@ -160,7 +160,8 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
         }
         ## download each file
         ## keep track of which were actually downloaded
-        for (df in downloads$url) {
+        for (dfi in seq_along(downloads$url)) {
+            df <- downloads$url[dfi]
             mydir <- sub("[\\/]$", "", directory_from_url(df)) ## no trailing filesep
             if (is.na(downloads$file[downloads$url == df])) {
                 fname <- file.path(mydir, basename(df))
@@ -174,7 +175,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                 do_download <- clobber >= 1 || (!file.exists(fname))
                 ## if clobber == 1, we set the if-modified-since option, so we can ask for download and it will not re-download unless needed
                 if (do_download) {
-                    if (verbose) cat(sprintf(" downloading file: %s ... ", df), if (show_progress) "\n")
+                    if (verbose) cat(sprintf(" downloading file %d of %d: %s ... ", dfi, nrow(downloads), df), if (show_progress) "\n")
                     myopts <- opts$curl_config ## curl options for this particular file, may be modified below depending on clobber
                     if (file.exists(fname)) {
                         if (clobber == 1) {
