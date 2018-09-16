@@ -73,7 +73,8 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     if (!is.null(cfrow$dry_run) && !is.na(cfrow$dry_run)) {
         this_flags$dry_run <- cfrow$dry_run
     }
-    this_flags <- c(list(url = cfrow$source_url), this_flags, list(verbose = verbose, show_progress = verbose && sink.number() < 1))
+    this_flags <- c(list(url = cfrow$source_url), this_flags, list(verbose = verbose))
+    if (!"show_progress" %in% names(this_flags)) this_flags <- c(this_flags, list(show_progress = verbose && sink.number() < 1))
     do.call(bb_rget, this_flags)
 }
 
