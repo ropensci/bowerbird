@@ -106,11 +106,12 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param dry_run logical: if \code{TRUE}, spider the remote site and work out which files would be downloaded, but don't download them
 #' @param stop_on_download_error logical: if \code{TRUE}, the download process will stop if any file download fails. If \code{FALSE}, the process will issue a warning and continue to the next file to download
 #' @param force_local_filename string: if provided, then the \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with this name, in a local directory determined by the \code{url}
+#' @param use_url_directory logical: if \code{TRUE}, files will be saved into a local directory that follows the URL structure (i.e. files from \code{http://some.where/place} will be saved into \code{some/where/place}. If \code{FALSE}, files will be saved into the current directory
 #'
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 #' @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename, use_url_directory = TRUE) {
     ## TO ADD: no_parent probably wise
     assert_that(is.string(url))
     assert_that(is.numeric(level), level >= 0)
@@ -134,6 +135,8 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(is.flag(dry_run), !is.na(dry_run))
     assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
     if (!missing(force_local_filename)) assert_that(is.string(force_local_filename))
+    assert_that(is.flag(use_url_directory), !is.na(use_url_directory))
+
     ## opts to pass to child function
     opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, debug = debug) ##robots_off = robots_off,
     ## curl options
@@ -163,16 +166,20 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
         ## keep track of which were actually downloaded
         for (dfi in seq_along(downloads$url)) {
             df <- downloads$url[dfi]
-            mydir <- sub("[\\/]$", "", directory_from_url(df)) ## no trailing filesep
+            mydir <- if (use_url_directory) sub("[\\/]$", "", directory_from_url(df)) else "" ## no trailing filesep
             if (is.na(downloads$file[downloads$url == df])) {
-                fname <- file.path(mydir, basename(df))
+                fname <- if (use_url_directory) file.path(mydir, basename(df)) else basename(df)
             } else {
                 ## filename has already been given, by force_local_filename
-                fname <- file.path(mydir, downloads$file[downloads$url == df]) ## prepend local path
+                fname <- if (use_url_directory) {
+                             file.path(mydir, downloads$file[downloads$url == df]) ## prepend local path
+                         } else {
+                             downloads$file[downloads$url == df]
+                         }
             }
             downloads$file[downloads$url == df] <- fname
             if (!dry_run) {
-                if (!dir.exists(mydir)) dir.create(mydir, recursive = TRUE)
+                if (use_url_directory && !dir.exists(mydir)) dir.create(mydir, recursive = TRUE)
                 do_download <- clobber >= 1 || (!file.exists(fname))
                 ## if clobber == 1, we set the if-modified-since option, so we can ask for download and it will not re-download unless needed
                 if (do_download) {
@@ -189,7 +196,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                     ## need to download to temp file, because a file of zero bytes will be written if not if-modified-since
                     ## this is all very inelegant
                     dlf <- tempfile()
-                    file.copy(fname, dlf)
+                    if (file.exists(fname)) file.copy(fname, dlf)
                     if (grepl("^ftp", df)) {
                         suppressWarnings(req <- httr::with_config(myopts, httr::GET(df, write_disk(path = dlf, overwrite = TRUE))))
                     } else {

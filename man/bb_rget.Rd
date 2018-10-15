@@ -5,14 +5,15 @@
 \alias{bb_rget_default_downloads}
 \title{A recursive download utility}
 \usage{
-bb_rget(url, level = 0, wait = 0, accept_follow = c("(/|\\\\.html?)$"),
-  reject_follow = character(),
+bb_rget(url, level = 0, wait = 0,
+  accept_follow = c("(/|\\\\.html?)$"), reject_follow = character(),
   accept_download = bb_rget_default_downloads(),
-  accept_download_extra = character(), reject_download = character(), user,
-  password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE,
-  relative = FALSE, remote_time = TRUE, verbose = FALSE,
-  show_progress = verbose, debug = FALSE, dry_run = FALSE,
-  stop_on_download_error = FALSE, force_local_filename)
+  accept_download_extra = character(), reject_download = character(),
+  user, password, clobber = 1, no_parent = TRUE,
+  no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE,
+  verbose = FALSE, show_progress = verbose, debug = FALSE,
+  dry_run = FALSE, stop_on_download_error = FALSE,
+  force_local_filename, use_url_directory = TRUE)
 
 bb_rget_default_downloads()
 }
@@ -58,6 +59,8 @@ bb_rget_default_downloads()
 \item{stop_on_download_error}{logical: if \code{TRUE}, the download process will stop if any file download fails. If \code{FALSE}, the process will issue a warning and continue to the next file to download}
 
 \item{force_local_filename}{string: if provided, then the \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with this name, in a local directory determined by the \code{url}}
+
+\item{use_url_directory}{logical: if \code{TRUE}, files will be saved into a local directory that follows the URL structure (i.e. files from \code{http://some.where/place} will be saved into \code{some/where/place}. If \code{FALSE}, files will be saved into the current directory}
 }
 \value{
 a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)

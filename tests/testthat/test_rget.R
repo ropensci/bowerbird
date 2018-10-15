@@ -45,3 +45,17 @@ test_that("rget's remote_time option works",{
     tms <- withdir()
     expect_true(as.numeric(difftime(tms[2], tms[1], units = "secs")) < -10) ## less than -10, i.e. remote time stamp is more than 10s earlier than now
 })
+
+test_that("rget use_url_directory parameter works", {
+    skip_on_cran()
+    test_url <- "https://www.google.com.au/robots.txt"
+    outdir <- tempdir()
+    if (file.exists(file.path(outdir, "robots.txt"))) file.remove(file.path(outdir, "robots.txt"))
+    withdir <- function(cwd = getwd()) {
+        on.exit(setwd(cwd))
+        setwd(outdir)
+        bb_rget(test_url, use_url_directory = FALSE)
+    }
+    res <- withdir()
+    expect_true(file.exists(file.path(outdir, "robots.txt")))
+})
