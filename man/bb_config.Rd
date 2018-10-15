@@ -5,8 +5,8 @@
 \title{Initialize a bowerbird configuration}
 \usage{
 bb_config(local_file_root, wget_global_flags = list(restrict_file_names =
-  "windows", progress = "dot:giga"), http_proxy = NULL, ftp_proxy = NULL,
-  clobber = 1)
+  "windows", progress = "dot:giga"), http_proxy = NULL,
+  ftp_proxy = NULL, clobber = 1)
 }
 \arguments{
 \item{local_file_root}{string: location of data repository on local file system}

@@ -4,8 +4,9 @@
 \alias{bb_sync}
 \title{Run a bowerbird data repository synchronization}
 \usage{
-bb_sync(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE,
-  confirm_downloads_larger_than = 0.1, dry_run = FALSE)
+bb_sync(config, create_root = FALSE, verbose = FALSE,
+  catch_errors = TRUE, confirm_downloads_larger_than = 0.1,
+  dry_run = FALSE)
 }
 \arguments{
 \item{config}{bb_config: configuration as returned by \code{\link{bb_config}}}
