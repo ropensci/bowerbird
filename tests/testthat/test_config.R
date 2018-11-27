@@ -28,10 +28,75 @@ test_that("local directory looks right",{
         license="blah",
         method=list("bb_handler_wget"),
         data_group="blah")
-    cf <- bb_config("/some/local/path") %>% bb_add(src)
+    cf <- bb_config("/my/data/repo") %>% bb_add(src)
     temp <- bb_data_source_dir(cf)
-    temp <- gsub("\\+","/",temp) ## make sure are unix-style path seps
-    expect_path <- file.path(normalizePath("/some/local/path", mustWork = FALSE), "some.place.com/some/path")
+    expect_path <- file.path(normalizePath("/my/data/repo", mustWork = FALSE), "some.place.com/some/path")
+    on_win <- tryCatch(tolower(Sys.info()[["sysname"]]) == "windows", error = function(e) FALSE)
+    if (on_win) {
+        ## case-insensitive
+        temp <- tolower(temp)
+        expect_path <- tolower(expect_path)
+    }
+    expect_identical(sub("/$","",temp), expect_path)
+
+    ## and same, for rget
+    src <- bb_source(
+        id="bilbobaggins",
+        name="Test",
+        description="blah",
+        doc_url="blah",
+        citation="blah",
+        source_url="http://some.place.com/some/path/",
+        license="blah",
+        method=list("bb_handler_rget"),
+        data_group="blah")
+    cf <- bb_config("/my/data/repo") %>% bb_add(src)
+    temp <- bb_data_source_dir(cf)
+    expect_path <- file.path(normalizePath("/my/data/repo", mustWork = FALSE), "some.place.com/some/path")
+    on_win <- tryCatch(tolower(Sys.info()[["sysname"]]) == "windows", error = function(e) FALSE)
+    if (on_win) {
+        ## case-insensitive
+        temp <- tolower(temp)
+        expect_path <- tolower(expect_path)
+    }
+    expect_identical(sub("/$","",temp), expect_path)
+
+    ## with cut_dirs
+    src <- bb_source(
+        id="bilbobaggins",
+        name="Test",
+        description="blah",
+        doc_url="blah",
+        citation="blah",
+        source_url="http://some.place.com/some/path/",
+        license="blah",
+        method=list("bb_handler_rget", cut_dirs = 1),
+        data_group="blah")
+    cf <- bb_config("/my/data/repo") %>% bb_add(src)
+    temp <- bb_data_source_dir(cf)
+    expect_path <- file.path(normalizePath("/my/data/repo", mustWork = FALSE), "some.place.com/path")
+    on_win <- tryCatch(tolower(Sys.info()[["sysname"]]) == "windows", error = function(e) FALSE)
+    if (on_win) {
+        ## case-insensitive
+        temp <- tolower(temp)
+        expect_path <- tolower(expect_path)
+    }
+    expect_identical(sub("/$","",temp), expect_path)
+
+    ## with no_host
+    src <- bb_source(
+        id="bilbobaggins",
+        name="Test",
+        description="blah",
+        doc_url="blah",
+        citation="blah",
+        source_url="http://some.place.com/some/path/",
+        license="blah",
+        method=list("bb_handler_rget", no_host = TRUE),
+        data_group="blah")
+    cf <- bb_config("/my/data/repo") %>% bb_add(src)
+    temp <- bb_data_source_dir(cf)
+    expect_path <- file.path(normalizePath("/my/data/repo", mustWork = FALSE), "some/path")
     on_win <- tryCatch(tolower(Sys.info()[["sysname"]]) == "windows", error = function(e) FALSE)
     if (on_win) {
         ## case-insensitive
@@ -64,12 +129,12 @@ test_that("config validation works",{
         method=list("bb_handler_wget"),
         data_group="blah",
         warn_empty_auth=FALSE)
-    cf <- bb_config("/some/local/path") %>% bb_add(src) %>% bb_add(src2)
+    cf <- bb_config("/my/data/repo") %>% bb_add(src) %>% bb_add(src2)
     expect_error(bowerbird:::bb_validate(cf),"requires authentication")
 
     src2$user <- "username"
     src2$password <- "password"
-    cf <- bb_config("/some/local/path") %>% bb_add(src) %>% bb_add(src2)
+    cf <- bb_config("/my/data/repo") %>% bb_add(src) %>% bb_add(src2)
     expect_true(bowerbird:::bb_validate(cf))
 })
 

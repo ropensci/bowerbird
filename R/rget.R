@@ -47,8 +47,12 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     assert_that(is.flag(verbose), !is.na(verbose))
     assert_that(is.flag(local_dir_only), !is.na(local_dir_only))
 
-    if (local_dir_only)
-        return(file.path(bb_settings(config)$local_file_root,directory_from_url(bb_data_sources(config)$source_url)))
+    if (local_dir_only) {
+        mth <- bb_data_sources(cf)$method[[1]]
+        no_host <- if ("no_host" %in% names(mth)) mth$no_host else FALSE
+        cut_dirs <- if ("cut_dirs" %in% names(mth)) mth$cut_dirs else 0L
+        return(file.path(bb_settings(config)$local_file_root,directory_from_url(bb_data_sources(config)$source_url, no_host = no_host, cut_dirs = cut_dirs)))
+    }
 
     cfrow <- bb_settings_to_cols(config)
     this_flags <- list(...)
@@ -106,12 +110,14 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param dry_run logical: if \code{TRUE}, spider the remote site and work out which files would be downloaded, but don't download them
 #' @param stop_on_download_error logical: if \code{TRUE}, the download process will stop if any file download fails. If \code{FALSE}, the process will issue a warning and continue to the next file to download
 #' @param force_local_filename string: if provided, then the \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with this name, in a local directory determined by the \code{url}
-#' @param use_url_directory logical: if \code{TRUE}, files will be saved into a local directory that follows the URL structure (i.e. files from \code{http://some.where/place} will be saved into \code{some/where/place}. If \code{FALSE}, files will be saved into the current directory
+#' @param use_url_directory logical: if \code{TRUE}, files will be saved into a local directory that follows the URL structure (e.g. files from \code{http://some.where/place} will be saved into directory \code{some.where/place}). If \code{FALSE}, files will be saved into the current directory
+#' @param no_host logical: if \code{use_url_directory = TRUE}, specifying \code{no_host = TRUE} will remove the host name from the directory (e.g. files from files from \code{http://some.where/place} will be saved into directory \code{place})
+#' @param cut_dirs integer: if \code{use_url_directory = TRUE}, specifying \code{cut_dirs} will remove this many directory levels from the path of the local directory where files will be saved (e.g. if \code{cut_dirs = 2}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{some.where/haa}. if \code{cut_dirs = 1} and \code{no_host = TRUE}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{baa/haa})
 #'
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 #' @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename, use_url_directory = TRUE) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L) {
     ## TO ADD: no_parent probably wise
     assert_that(is.string(url))
     assert_that(is.numeric(level), level >= 0)
@@ -136,6 +142,8 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
     if (!missing(force_local_filename)) assert_that(is.string(force_local_filename))
     assert_that(is.flag(use_url_directory), !is.na(use_url_directory))
+    assert_that(is.flag(no_host), !is.na(no_host))
+    assert_that(cut_dirs >= 0)
 
     ## opts to pass to child function
     opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, debug = debug) ##robots_off = robots_off,
@@ -166,7 +174,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
         ## keep track of which were actually downloaded
         for (dfi in seq_along(downloads$url)) {
             df <- downloads$url[dfi]
-            mydir <- if (use_url_directory) sub("[\\/]$", "", directory_from_url(df)) else "" ## no trailing filesep
+            mydir <- if (use_url_directory) sub("[\\/]$", "", directory_from_url(df, no_host = no_host, cut_dirs = cut_dirs)) else "" ## no trailing filesep
             if (is.na(downloads$file[downloads$url == df])) {
                 fname <- if (use_url_directory) file.path(mydir, basename(df)) else basename(df)
             } else {

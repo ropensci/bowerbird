@@ -13,7 +13,8 @@ bb_rget(url, level = 0, wait = 0,
   no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE,
   verbose = FALSE, show_progress = verbose, debug = FALSE,
   dry_run = FALSE, stop_on_download_error = FALSE,
-  force_local_filename, use_url_directory = TRUE)
+  force_local_filename, use_url_directory = TRUE, no_host = FALSE,
+  cut_dirs = 0L)
 
 bb_rget_default_downloads()
 }
@@ -60,7 +61,11 @@ bb_rget_default_downloads()
 
 \item{force_local_filename}{string: if provided, then the \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with this name, in a local directory determined by the \code{url}}
 
-\item{use_url_directory}{logical: if \code{TRUE}, files will be saved into a local directory that follows the URL structure (i.e. files from \code{http://some.where/place} will be saved into \code{some/where/place}. If \code{FALSE}, files will be saved into the current directory}
+\item{use_url_directory}{logical: if \code{TRUE}, files will be saved into a local directory that follows the URL structure (e.g. files from \code{http://some.where/place} will be saved into directory \code{some.where/place}). If \code{FALSE}, files will be saved into the current directory}
+
+\item{no_host}{logical: if \code{use_url_directory = TRUE}, specifying \code{no_host = TRUE} will remove the host name from the directory (e.g. files from files from \code{http://some.where/place} will be saved into directory \code{place})}
+
+\item{cut_dirs}{integer: if \code{use_url_directory = TRUE}, specifying \code{cut_dirs} will remove this many directory levels from the path of the local directory where files will be saved (e.g. if \code{cut_dirs = 2}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{some.where/haa}. if \code{cut_dirs = 1} and \code{no_host = TRUE}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{baa/haa})}
 }
 \value{
 a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
