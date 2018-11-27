@@ -49,15 +49,49 @@ restore_settings <- function(settings) {
 
 dir_exists <- function(z) file.exists(dirname(z)) && !(!file.info(z)$isdir || is.na(file.info(z)$isdir))
 
-directory_from_url <- function(this_url) {
-    ## this_url can be character or list of char
-    this_url <- sub("^(http|https|ftp)://","",unlist(this_url))
-    this_url <- sub(":","+",this_url) ## port
+
+directory_from_url <- function(this_url, no_host = FALSE, cut_dirs = 0L) {
+    if (is.list(this_url)) this_url <- unlist(this_url)
+    vapply(this_url, single_directory_from_url, no_host = no_host, cut_dirs = cut_dirs, FUN.VALUE = "", USE.NAMES = FALSE)
+}
+
+single_directory_from_url <- function(this_url, no_host = FALSE, cut_dirs = 0L) {
+    ## operate on one url string at a time
+    temp <- httr::parse_url(this_url)
+    if (cut_dirs > 0) {
+        ## remove this many directory levels from the path
+        ## note that we need to preserve the trailing slash (or not) in the path
+        has_tr_s <- grepl("[/\\]$", temp$path)
+        pths <- strsplit(temp$path, "[/\\]+")[[1]]
+        temp$path <- if (length(pths) > cut_dirs) pths[seq(from = cut_dirs+1, to = length(pths), by = 1)] else ""
+        if (has_tr_s) temp$path <- paste0(temp$path, "/")
+    }
+    temp$path <- paste(temp$path, collapse = "/")
+    this_url <- ""
+    if (!no_host) {
+        this_url <- temp$host
+        if (!is.null(temp$port) && nzchar(temp$port))
+            this_url <- paste0(this_url, "+", temp$port)
+    }
+    this_url <- paste(this_url, temp$path, sep = "/")
     ## discard anything at all after the last trailing slash
-    this_url <- sub("/[^/]*$","/",this_url)
-    this_url[grepl("[^/\\]$",this_url)] <- paste0(this_url[grepl("[^/\\]$",this_url)],"/") ## enforce trailing slash (?)
+    this_url <- sub("/[^/]*$","/",this_url) ## could use dirname here?
+    this_url[grepl("[^/\\]$",this_url)] <- paste0(this_url[grepl("[^/\\]$",this_url)],"/") ## enforce trailing slash
+    this_url <- sub("[/\\]+$", "/", this_url) ## single trailing slash only
+    this_url <- sub("^[/\\]+", "", this_url) ## and finally make sure we don't have any leading slashes
     this_url ## returns char vector
 }
+
+## old version
+## directory_from_url <- function(this_url) {
+##     ## this_url can be character or list of char
+##     this_url <- sub("^(http|https|ftp)://", "", unlist(this_url))
+##     this_url <- sub(":", "+", this_url) ## port
+##     ## discard anything at all after the last trailing slash
+##     this_url <- sub("/[^/]*$","/",this_url)
+##     this_url[grepl("[^/\\]$",this_url)] <- paste0(this_url[grepl("[^/\\]$",this_url)],"/") ## enforce trailing slash
+##     this_url ## returns char vector
+## }
 
 ## adapted from http://conjugateprior.org/2015/06/identifying-the-os-from-r/
 get_os <- function() {
