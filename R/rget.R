@@ -48,7 +48,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     assert_that(is.flag(local_dir_only), !is.na(local_dir_only))
 
     if (local_dir_only) {
-        mth <- bb_data_sources(cf)$method[[1]]
+        mth <- bb_data_sources(config)$method[[1]]
         no_host <- if ("no_host" %in% names(mth)) mth$no_host else FALSE
         cut_dirs <- if ("cut_dirs" %in% names(mth)) mth$cut_dirs else 0L
         return(file.path(bb_settings(config)$local_file_root,directory_from_url(bb_data_sources(config)$source_url, no_host = no_host, cut_dirs = cut_dirs)))
