@@ -51,7 +51,10 @@ do_fingerprint <- function(this_dataset,hash,settings) {
     }
     setwd(this_dataset$local_file_root)
 
-    this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(this_dataset$source_url))
+    mth <- this_dataset$method[[1]]
+    no_host <- if ("no_host" %in% names(mth)) mth$no_host else FALSE
+    cut_dirs <- if ("cut_dirs" %in% names(mth)) mth$cut_dirs else 0L
+    this_path_no_trailing_sep <- sub("[\\/]$","",directory_from_url(this_dataset$source_url, no_host = no_host, cut_dirs = cut_dirs))
     myfiles <- list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE) ## full.names TRUE so that names are relative to current working directory
     file_list <- file.info(myfiles)
     file_list$filename <- file.path(this_dataset$local_file_root,myfiles) ## absolute paths

@@ -56,6 +56,8 @@ directory_from_url <- function(this_url, no_host = FALSE, cut_dirs = 0L) {
 }
 
 single_directory_from_url <- function(this_url, no_host = FALSE, cut_dirs = 0L) {
+    ## for backwards compat
+    if (is.na(this_url)) return(NA_character_)
     ## operate on one url string at a time
     temp <- httr::parse_url(this_url)
     if (cut_dirs > 0) {

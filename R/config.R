@@ -271,9 +271,12 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
     cat("\nLast updated: ",format(Sys.time()),"\n",file=rmd_file,append=TRUE)
 
     config <- bb_settings_to_cols(config)
+    mth <- config$method
 
     config$local_file_paths <- vapply(seq_len(nrow(config)),function(z) {
-        temp <- directory_from_url(config$source_url[[z]])
+        no_host <- if ("no_host" %in% names(mth[[z]])) mth[[z]]$no_host else FALSE
+        cut_dirs <- if ("cut_dirs" %in% names(mth[[z]])) mth[[z]]$cut_dirs else 0L
+        temp <- directory_from_url(config$source_url[[z]], no_host = no_host, cut_dirs = cut_dirs)
         temp[is.na(temp)] <- ""
         paste(unique(file.path(config$local_file_root[z],temp)),collapse=", ")},FUN.VALUE="")
     ## order by data group
@@ -334,8 +337,11 @@ print.bb_config <- function(x, ...) {
     cat("Local file root:", x$settings$local_file_root, "\n")
     config <- bb_settings_to_cols(x)
     if (nrow(config) > 0) {
+        mth <- config$method
         config$local_file_paths <- vapply(seq_len(nrow(config)),function(z) {
-            temp <- directory_from_url(config$source_url[[z]])
+            no_host <- if ("no_host" %in% names(mth[[z]])) mth[[z]]$no_host else FALSE
+            cut_dirs <- if ("cut_dirs" %in% names(mth[[z]])) mth[[z]]$cut_dirs else 0L
+            temp <- directory_from_url(config$source_url[[z]], no_host = no_host, cut_dirs = cut_dirs)
             temp[is.na(temp)] <- ""
             paste(unique(file.path(config$local_file_root[z],temp)),collapse=", ")},FUN.VALUE="")
         ## order by data group

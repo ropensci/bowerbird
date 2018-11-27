@@ -56,7 +56,10 @@ bb_decompress_inner <- function(config, file_list_before, file_list_after, verbo
                            stop("unrecognized decompression")
                            )
     if (delete) {
-        files_to_decompress <- list.files(directory_from_url(bb_data_sources(config)$source_url), pattern = file_pattern, recursive = TRUE, ignore.case = ignore_case)
+        mth <- bb_data_sources(config)$method[[1]]
+        no_host <- if ("no_host" %in% names(mth)) mth$no_host else FALSE
+        cut_dirs <- if ("cut_dirs" %in% names(mth)) mth$cut_dirs else 0L
+        files_to_decompress <- list.files(directory_from_url(bb_data_sources(config)$source_url, no_host = no_host, cut_dirs = cut_dirs), pattern = file_pattern, recursive = TRUE, ignore.case = ignore_case)
         do_decompress_files(paste0(method, "_delete"), files = files_to_decompress, verbose = verbose)
     } else {
         ## decompress but retain compressed file. decompress only if .zip/.gz/.bz2/.Z file has changed
