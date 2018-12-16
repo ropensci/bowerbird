@@ -300,7 +300,13 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                 ## treat as text (i.e. standard ftp directory listing)
                 ## except if it comes back as text/html, try parsing it as html
                 ## an FTP request through a proxy may be turned into HTML, grrr
-                was_html <- !is.null(headers(x)$`content-type`) && grepl("html", headers(x)$`content-type`)
+                ## with httr 1.4, ftp headers will not be parsed
+                ## TODO need to find an example of ftp:// returning http headers, and catch them
+                if (is.raw(headers(x))) {
+                    was_html <- FALSE
+                } else {
+                    was_html <- !is.null(headers(x)$`content-type`) && grepl("html", headers(x)$`content-type`)
+                }
                 x <- tryCatch(content(x, as = "text"), error = function (e) {
                     stop("error: ", e$message)
                 })
