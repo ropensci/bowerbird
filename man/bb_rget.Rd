@@ -14,7 +14,7 @@ bb_rget(url, level = 0, wait = 0,
   verbose = FALSE, show_progress = verbose, debug = FALSE,
   dry_run = FALSE, stop_on_download_error = FALSE,
   force_local_filename, use_url_directory = TRUE, no_host = FALSE,
-  cut_dirs = 0L)
+  cut_dirs = 0L, curl_opts)
 
 bb_rget_default_downloads()
 }
@@ -66,6 +66,8 @@ bb_rget_default_downloads()
 \item{no_host}{logical: if \code{use_url_directory = TRUE}, specifying \code{no_host = TRUE} will remove the host name from the directory (e.g. files from files from \code{http://some.where/place} will be saved into directory \code{place})}
 
 \item{cut_dirs}{integer: if \code{use_url_directory = TRUE}, specifying \code{cut_dirs} will remove this many directory levels from the path of the local directory where files will be saved (e.g. if \code{cut_dirs = 2}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{some.where/haa}. if \code{cut_dirs = 1} and \code{no_host = TRUE}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{baa/haa})}
+
+\item{curl_opts}{named list: options to use with \code{curl} downloads, passed to the \code{.list} parameter of \code{curl::new_handle}}
 }
 \value{
 a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
