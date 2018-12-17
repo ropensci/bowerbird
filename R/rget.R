@@ -149,17 +149,20 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, debug = debug) ##robots_off = robots_off,
     ## curl options
     opts$curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password, remote_time = remote_time)
+    is_ftp <- grepl("^ftp", url)
+    if (is_ftp) opts$curl_config$options$dirlistonly <- 1L
+    ## create curl handle here
+    handle <- new_handle(.list = opts$curl_config$options)
     ok <- FALSE
     msg <- "" ## error or other messages
     downloads <- tibble(url = character(), file = character(), was_downloaded = logical())
     tryCatch({
         if (missing(force_local_filename)) {
-            is_ftp <- grepl("^ftp", url)
             if (is_ftp && missing(accept_follow)) {
                 ## modify accept_follow, unless user has already overridden the defaults
                 opts$accept_follow <- "[^\\.]" ## anything without a .
             }
-            rec <- spider(to_visit = url, opts = opts, ftp = is_ftp)
+            rec <- spider_curl(to_visit = url, opts = opts, ftp = is_ftp, handle = handle)
             ## download each file, or not depending on clobber behaviour
             ## if doing a dry run no download, but do enumerate the list of files that would be downloaded
             downloads <- tibble(url = unique(rec$download_queue), file = NA_character_, was_downloaded = FALSE)
@@ -192,30 +195,27 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                 ## if clobber == 1, we set the if-modified-since option, so we can ask for download and it will not re-download unless needed
                 if (do_download) {
                     if (verbose) cat(sprintf(" downloading file %d of %d: %s ... ", dfi, nrow(downloads), df), if (show_progress) "\n")
-                    myopts <- opts$curl_config ## curl options for this particular file, may be modified below depending on clobber
+                    myopts <- opts$curl_config$options ## curl options for this particular file, may be modified below depending on clobber
                     if (file.exists(fname)) {
                         if (clobber == 1) {
                             ## timestamping via curl if-modified-since option
                             ## if this doesn't work, do a head request to get file modified time, and compare explicitly to local file
-                            myopts$options$timevalue <- as.numeric(file.info(fname)$mtime)
-                            myopts$options$timecondition <- 3L ## CURL_TIMECOND_IFMODSINCE is value 3
+                            myopts$timevalue <- as.numeric(file.info(fname)$mtime)
+                            myopts$timecondition <- 3L ## CURL_TIMECOND_IFMODSINCE is value 3
                         }
                     }
                     ## need to download to temp file, because a file of zero bytes will be written if not if-modified-since
-                    ## this is all very inelegant
                     dlf <- tempfile()
                     if (file.exists(fname)) file.copy(fname, dlf)
-                    if (grepl("^ftp", df)) {
-                        suppressWarnings(req <- httr::with_config(myopts, httr::GET(df, write_disk(path = dlf, overwrite = TRUE))))
-                    } else {
-                        req <- httr::with_config(myopts, httr::GET(df, write_disk(path = dlf, overwrite = TRUE)))
-                    }
-                    if (httr::http_error(req)) {
+                    ## may need to suppressWarnings with ftp here
+                    req <- curl_fetch_disk(df, path = dlf, handle = handle_setopt(handle, .list = myopts))
+                    if (httr::http_error(req$status_code)) {
                         ## don't throw error on download
                         myfun <- if (stop_on_download_error) stop else warning
-                        myfun("Error downloading ", df, ": ", httr::http_status(req)$message)
+                        myfun("Error downloading ", df, ": ", httr::http_status(req$status_code)$message)
                     } else {
                         ## now if the file wasn't re-downloaded, dlf will be zero bytes
+                        ## we should have received a 304 Not Modified response
                         if (file.exists(dlf) && file.info(dlf)$size > 0) {
                             ## file was updated
                             downloads$was_downloaded[downloads$url == df] <- TRUE
@@ -225,7 +225,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                             file.remove(dlf)
                             ## set local file time if appropriate
                             ## setting the filetime option in the curl request does not appear to modify the local file timestamp
-                            if (remote_time) set_file_timestamp(path = fname, hdrs = httr::headers(req))
+                            if (remote_time) set_file_timestamp(path = fname, hdrs = parse_headers_list(req$headers))
                             if (verbose) cat(if (show_progress) "\n", "done.\n")
                         } else {
                             file.remove(dlf)
@@ -252,10 +252,8 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     tibble(ok = ok, files = list(downloads), message = msg)
 }
 
-## ftp logical: if TRUE, use ftp
-spider <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0, ftp = FALSE) {
+spider_curl <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0, ftp = FALSE, handle) {
     ## TODO: check that opts has the names we expect
-    if (ftp) opts$curl_config$options$dirlistonly <- 1L
     to_visit <- to_visit[!to_visit %in% visited]
     if (length(to_visit) < 1) return(list(visited = visited, download_queue = download_queue))
     next_level_to_visit <- character()
@@ -282,7 +280,9 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                 ## ftp is a bit funny - when recursing, we can't be sure if a link is a file or a directory
                 ## we have added trailing slashes, but if it was actually a file this will throw an error
                 ## also, suppress warnings else we get warnings about reading directory contents etc
-                x <- tryCatch(suppressWarnings(httr::with_config(opts$curl_config, GET(url))), error = function(e) {
+                x <- tryCatch(##suppressWarnings(
+                    curl_fetch_memory(url, handle = handle)##)
+                  , error = function(e) {
                     if (grepl("directory", e$message)) {
                         ## was probably a 'Server denied you to change to the given directory' message, ignore it
                         if (opts$verbose) cat(" (ignoring error: ", e$message, ") ... done.\n")
@@ -293,7 +293,7 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                 })
                 if (is.null(x)) next
             } else {
-                x <- httr::with_config(opts$curl_config, GET(url))
+                x <- curl_fetch_memory(url, handle = handle)
             }
             ## TODO check for error?
             if (ftp) {
@@ -301,13 +301,11 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                 ## except if it comes back as text/html, try parsing it as html
                 ## an FTP request through a proxy may be turned into HTML, grrr
                 ## with httr 1.4, ftp headers will not be parsed
-                ## TODO need to find an example of ftp:// returning http headers, and catch them
-                if (is.raw(headers(x))) {
-                    was_html <- FALSE
-                } else {
-                    was_html <- !is.null(headers(x)$`content-type`) && grepl("html", headers(x)$`content-type`)
-                }
-                x <- tryCatch(content(x, as = "text"), error = function (e) {
+                ## see e.g. this: ftp://sidads.colorado.edu/pub/DATASETS/seaice/polar-stereo/tools/
+                ## returns HTTP/1.1 headers
+                hdrs <- parse_headers_list(x$headers)
+                was_html <- !is.null(hdrs$`content-type`) && grepl("html", hdrs$`content-type`)
+                x <- tryCatch(rawToChar(x$content), error = function (e) { ## need to deal with encoding here
                     stop("error: ", e$message)
                 })
                 links_from <- "text"
@@ -319,18 +317,9 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                 }
             } else {
                 links_from <- "html"
-                x <- tryCatch(read_html(content(x, as = "text")), error = function (e) {
+                x <- tryCatch(read_html(rawToChar(x$content)), error = function (e) {
                     ## not valid HTML?
                     NULL
-                    #if (current_level < 1 && grepl("^ftp", url, ignore.case = TRUE)) {
-                    #    ## this was the as-provided URL, and it doesn't deliver HTML
-                    #    ## not supported yet
-                    #    cat("recalling spider with ftp = TRUE\n")
-                    #    return(spider(to_visit, visited = character(), download_queue = character(), opts = opts, current_level = 0, ftp = TRUE))
-                    #    stop("rget currently only supports ftp:// urls if they deliver a valid HTML response")
-                    #} else {
-                    #    NULL
-                    #}
                 })
             }
             if (opts$verbose && opts$show_progress) cat("\n")
@@ -373,7 +362,6 @@ spider <- function(to_visit, visited = character(), download_queue = character()
                     if (opts$verbose) cat(sprintf(", %d links to visit", length(follow_links))) ## parent links might be included here, but excluded when attempt to visit at next recursion level
                     next_level_to_visit <- c(next_level_to_visit, follow_links) ## add to list to visit at next recursion level
                 }
-                ##    lh <- lapply(all_links, httr::HEAD)
                 if (current_level < opts$level) {
                     ## ad download_links to download_queue for later downloading, so long as they are within our recursion limit
                     download_queue <- c(download_queue, download_links)
@@ -384,7 +372,7 @@ spider <- function(to_visit, visited = character(), download_queue = character()
     }
     visited <- c(visited, to_visit)
     ## recurse to next level
-    spider(next_level_to_visit, visited = visited, download_queue = download_queue, opts = opts, current_level = current_level + 1, ftp = ftp)
+    spider_curl(next_level_to_visit, visited = visited, download_queue = download_queue, opts = opts, current_level = current_level + 1, ftp = ftp, handle = handle)
 }
 
 clean_and_filter_url <- function(url, accept_schemes = c("https", "http", "ftp")) {

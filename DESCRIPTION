@@ -2,10 +2,10 @@ Package: bowerbird
 Type: Package
 Title: Keep a Collection of Sparkly Data Resources
 Version: 0.8.1.9999
-Authors@R: c(person("Ben","Raymond",email="ben.raymond@aad.gov.au",role=c("aut","cre")),
-	   person("Michael","Sumner",role="aut"),
-	   person("Miles","McBain",email="miles.mcbain@gmail.com",role=c("rev","ctb")),
-	   person("Leah","Wasser",role=c("rev","ctb")))
+Authors@R: c(person("Ben", "Raymond", email = "ben.raymond@aad.gov.au", role = c("aut", "cre")),
+             person("Michael", "Sumner", role = "aut"),
+             person("Miles", "McBain", email = "miles.mcbain@gmail.com", role = c("rev", "ctb")),
+             person("Leah", "Wasser", role = c("rev", "ctb")))
 Description: Tools to get and maintain a data repository from third-party data
     providers.
 URL: https://github.com/ropensci/bowerbird
@@ -14,6 +14,7 @@ License: MIT + file LICENSE
 Depends: R (>= 3.3.0)
 Imports:
     assertthat,
+    curl,
     httr,
     lubridate,
     magrittr,
@@ -28,7 +29,7 @@ Imports:
     xml2
 LazyLoad: yes
 Encoding: UTF-8
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Suggests:
     archive,
     knitr,

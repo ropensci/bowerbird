@@ -7,7 +7,8 @@
 #' @docType package
 #' @references \url{https://github.com/AustralianAntarcticDivision/bowerbird}
 #' @importFrom assertthat assert_that is.flag is.string
-#' @importFrom httr build_url config content GET headers http_error http_status parse_url POST progress set_config verbose with_config write_disk
+#' @importFrom curl curl_fetch_disk curl_fetch_memory handle_setopt new_handle parse_headers_list
+#' @importFrom httr build_url config content GET http_error http_status parse_url POST progress verbose with_config write_disk
 #' @importFrom magrittr %>%
 #' @importFrom methods is
 #' @importFrom openssl sha1 md5
