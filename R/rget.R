@@ -147,7 +147,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(cut_dirs >= 0)
     if (!missing(curl_opts)) {
         assert_that(is.list(curl_opts))
-        if (is.null(names(curl_opts)) || (names(curl_opts) != length(curl_opts))) stop("curl_opts list must be named")
+        if (is.null(names(curl_opts)) || (length(names(curl_opts)) != length(curl_opts))) stop("curl_opts list must be named")
     }
 
     ## opts to pass to child function
