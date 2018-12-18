@@ -133,7 +133,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             if (download_this) {
                 if (verbose) cat(sprintf("Downloading: %s ... \n", this_url))
                 if (!dir.exists(dirname(this_fullfile))) dir.create(dirname(this_fullfile), recursive = TRUE)
-                req <- httr::with_config(my_curl_config, httr::GET(this_url, write_disk(path = this_fullfile, overwrite = TRUE)))
+                req <- httr::with_config(my_curl_config, httr::GET(this_url, httr::write_disk(path = this_fullfile, overwrite = TRUE)))
                 if (httr::http_error(req)) {
                     myfun <- if (stop_on_download_error) stop else warning
                     myfun("Error downloading ", this_url, ": ", httr::http_status(req)$message)
