@@ -205,6 +205,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                 if (do_download) {
                     if (verbose) cat(sprintf(" downloading file %d of %d: %s ... ", dfi, nrow(downloads), df), if (show_progress) "\n")
                     myopts <- opts$curl_config$options ## curl options for this particular file, may be modified below depending on clobber
+                    if (is_ftp) myopts$dirlistonly <- 0L
                     if (file.exists(fname)) {
                         if (clobber == 1) {
                             ## timestamping via curl if-modified-since option
