@@ -13,11 +13,10 @@ install:
 # Adapt as necessary starting from here
 
 environment:
-  NOT_CRAN: true
   global:
-   _R_CHECK_FORCE_SUGGESTS_: false
-   PKGTYPE: binary
-   USE_RTOOLS: true
+    NOT_CRAN: yes
+    _R_CHECK_FORCE_SUGGESTS_: false
+    USE_RTOOLS: true
 
 build_script:
   - travis-tool.sh install_deps
