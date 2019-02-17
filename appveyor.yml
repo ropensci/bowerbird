@@ -17,7 +17,7 @@ environment:
   global:
    _R_CHECK_FORCE_SUGGESTS_: false
    PKGTYPE: binary
-#   USE_RTOOLS: true
+   USE_RTOOLS: true
 
 build_script:
   - travis-tool.sh install_deps
