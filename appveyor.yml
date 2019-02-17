@@ -16,6 +16,7 @@ environment:
   NOT_CRAN: true
   global:
    _R_CHECK_FORCE_SUGGESTS_: false
+   PKGTYPE: binary
 #   WARNINGS_ARE_ERRORS: 0
 #   USE_RTOOLS: true
 
