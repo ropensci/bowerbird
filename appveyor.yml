@@ -19,7 +19,7 @@ environment:
   global:
     NOT_CRAN: yes
     _R_CHECK_FORCE_SUGGESTS_: false
-    USE_RTOOLS: true
+    USE_RTOOLS: false
     PKGTYPE: binary
 
 build_script:
