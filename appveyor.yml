@@ -10,6 +10,9 @@ init:
 install:
   ps: Bootstrap
 
+cache:
+  - C:\RLibrary
+
 # Adapt as necessary starting from here
 
 environment:
@@ -17,6 +20,7 @@ environment:
     NOT_CRAN: yes
     _R_CHECK_FORCE_SUGGESTS_: false
     USE_RTOOLS: true
+    PKGTYPE: binary
 
 build_script:
   - travis-tool.sh install_deps
