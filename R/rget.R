@@ -347,7 +347,7 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 ## discard non-relative links, if opts$relative
                 if (opts$relative) all_links <- all_links[vapply(all_links, is_relative_url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
                 ## get all links as absolute URLs, discarding anchors (fragments)
-                all_links <- vapply(all_links, function(z) clean_and_filter_url(xml2::url_absolute(z, url)), FUN.VALUE = "", USE.NAMES = FALSE)
+                all_links <- vapply(all_links, clean_and_filter_url, base = url, FUN.VALUE = "", USE.NAMES = FALSE)
                 if (opts$no_parent) all_links <- all_links[vapply(all_links, is_nonparent_url, parent = url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
                 follow_idx <- rep(length(opts$accept_follow) > 0, length(all_links))
                 for (rgx in opts$accept_follow) follow_idx <- follow_idx & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
@@ -385,7 +385,14 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
     spider_curl(next_level_to_visit, visited = visited, download_queue = download_queue, opts = opts, current_level = current_level + 1, ftp = ftp, handle = handle)
 }
 
-clean_and_filter_url <- function(url, accept_schemes = c("https", "http", "ftp")) {
+clean_and_filter_url <- function(url, base, accept_schemes = c("https", "http", "ftp")) {
+    if (!is.string(url) || is.na(url)) return(NA_character_)
+    if (!missing(base)) {
+        if (!is.string(base) || is.na(base)) return(NA_character_)
+        ## note that url_absolute will fail if the url or base have spaces or other chars that should be percent-encoded in URLs
+        ## so we URLencode them, but URLdecode the overall result to preserve the path on the local filesystem
+        url <- URLdecode(xml2::url_absolute(URLencode(url), URLencode(base)))
+    }
     if (!is.string(url) || !nzchar(url) || is.na(url)) return(NA_character_)
     temp <- httr::parse_url(url)
     temp$fragment <- NULL ## discard fragment
