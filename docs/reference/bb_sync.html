@@ -108,8 +108,9 @@
     <p>This function takes a bowerbird configuration object and synchronizes each of the data sources defined within it. Data files will be downloaded if they are not present on the local machine, or if the configuration has been set to update local files.</p>
     
 
-    <pre class="usage"><span class='fu'>bb_sync</span>(<span class='no'>config</span>, <span class='kw'>create_root</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>catch_errors</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>confirm_downloads_larger_than</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>dry_run</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    <pre class="usage"><span class='fu'>bb_sync</span>(<span class='no'>config</span>, <span class='kw'>create_root</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>catch_errors</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>confirm_downloads_larger_than</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
+  <span class='kw'>dry_run</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -142,7 +143,7 @@
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a tibble with the <code>name</code>, <code>id</code>, <code>source_url</code>, and sync success <code>status</code> of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per <code>source_url</code></p>
+    <p>a tibble with the <code>name</code>, <code>id</code>, <code>source_url</code>, sync success <code>status</code>, and <code>files</code> of each data source. Data sources that contain multiple source URLs will appear as multiple rows in the returned tibble, one per <code>source_url</code>. <code>files</code> is a tibble with columns <code>url</code> (the URL the file was downloaded from), <code>file</code> (the path to the file), and <code>note</code> (either "downloaded" for a file that was downloaded, "local copy" for a file that was not downloaded because there was already a local copy, or "decompressed" for files that were extracted from a downloaded (or already-locally-present) compressed file. <code>url</code> will be <code>NA</code> for "decompressed" files</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
@@ -160,7 +161,7 @@
   <span class='co'>## we just use a temporary directory for example purposes.</span>
 
   <span class='no'>td</span> <span class='kw'>&lt;-</span> <span class='fu'>tempdir</span>()
-  <span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_config.html'>bb_config</a></span>(<span class='kw'>local_file_root</span><span class='kw'>=</span><span class='no'>td</span>)
+  <span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_config.html'>bb_config</a></span>(<span class='kw'>local_file_root</span> <span class='kw'>=</span> <span class='no'>td</span>)
 
   <span class='co'>## Bowerbird must then be told which data sources to synchronize.</span>
   <span class='co'>## Let's use data from the Australian 2016 federal election, which is provided as one</span>
@@ -170,25 +171,22 @@
 
   <span class='co'>## Add this data source to the configuration:</span>
 
-  <span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_add.html'>bb_add</a></span>(<span class='no'>cf</span>,<span class='no'>my_source</span>)
+  <span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_add.html'>bb_add</a></span>(<span class='no'>cf</span>, <span class='no'>my_source</span>)
 
   <span class='co'>## Once the configuration has been defined and the data source added to it,</span>
   <span class='co'>## we can run the sync process.</span>
   <span class='co'>## We set \code{verbose=TRUE} so that we see additional progress output:</span>
 
-  <span class='no'>status</span> <span class='kw'>&lt;-</span> <span class='fu'>bb_sync</span>(<span class='no'>cf</span>,<span class='kw'>verbose</span><span class='kw'>=</span><span class='fl'>TRUE</span>)
+  <span class='no'>status</span> <span class='kw'>&lt;-</span> <span class='fu'>bb_sync</span>(<span class='no'>cf</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 
   <span class='co'>## The files in this data set have been stored in a data-source specific</span>
   <span class='co'>## subdirectory of our local file root:</span>
-  <span class='fu'><a href='bb_data_source_dir.html'>bb_data_source_dir</a></span>(<span class='no'>cf</span>)
 
-  <span class='co'>## The contents of that directory:</span>
-
-  <span class='fu'>list.files</span>(<span class='fu'><a href='bb_data_source_dir.html'>bb_data_source_dir</a></span>(<span class='no'>cf</span>),<span class='kw'>recursive</span><span class='kw'>=</span><span class='fl'>TRUE</span>,<span class='kw'>full.names</span><span class='kw'>=</span><span class='fl'>TRUE</span>)
+  <span class='no'>status</span>$<span class='no'>files</span><span class='kw'>[[</span><span class='fl'>1</span>]]
 
   <span class='co'>## We can run this at any later time and our repository will update if the source has changed:</span>
 
-  <span class='no'>status2</span> <span class='kw'>&lt;-</span> <span class='fu'>bb_sync</span>(<span class='no'>cf</span>)
+  <span class='no'>status2</span> <span class='kw'>&lt;-</span> <span class='fu'>bb_sync</span>(<span class='no'>cf</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 <span class='co'># }</span><div class='input'>
 </div></pre>
   </div>

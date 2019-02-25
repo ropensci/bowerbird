@@ -47,10 +47,9 @@ When might you consider using bowerbird rather than, say, [curl](https://cran.r-
 
 ## Installing
 
-```{r eval=FALSE}
-install.packages("devtools")
-library(devtools)
-install_github("ropensci/bowerbird",build_vignettes=TRUE)
+```{r eval = FALSE}
+install.packages("remotes")
+remotes::install_github("ropensci/bowerbird", build_vignettes = TRUE)
 ```
 
 ## Usage overview
@@ -59,7 +58,7 @@ install_github("ropensci/bowerbird",build_vignettes=TRUE)
 
 Build up a configuration by first defining global options such as the destination on your local file system:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 library(bowerbird)
 my_directory <- "~/my/data/directory"
 cf <- bb_config(local_file_root = my_directory)
@@ -67,7 +66,7 @@ cf <- bb_config(local_file_root = my_directory)
 
 Bowerbird must then be told which data sources to synchronize. Let's use data from the Australian 2016 federal election, which is provided as one of the example data sources:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 my_source <- bb_example_sources("Australian Election 2016 House of Representatives data")
 
 ## add this data source to the configuration
@@ -76,13 +75,13 @@ cf <- bb_add(cf, my_source)
 
 Once the configuration has been defined and the data source added to it, we can run the sync process. We set `verbose = TRUE` here so that we see additional progress output:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 status <- bb_sync(cf, verbose = TRUE)
 ```
 
 Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. Details of the files in this data set are given in the `status$files` object:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 status$files
 ```
 
@@ -123,7 +122,7 @@ Specifying a data source is done by the `bb_source` function. This can seem a li
 
 Say we've found [this bathymetric data set](https://doi.org/10.4225/25/53D9B12E0F96E) and we want to define a data source for it. It's a single zip file that contains some ArcGIS binary grids. A minimal data source definition might look like this:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 src1 <- bb_source(
     name = "Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
     id = "10.4225/25/53D9B12E0F96E",
@@ -147,7 +146,7 @@ The parameters provided here are all mandatory:
 
 
 Add this data source to a configuration and synchronize it:
-```{r eval=FALSE}
+```{r eval = FALSE}
 cf <- bb_config("c:/temp/data/bbtest") %>% bb_add(src1)
 status <- bb_sync(cf)
 ```
@@ -158,7 +157,7 @@ There are a few additional entries that we might consider for this data source, 
 
 Firstly, having the zip file locally is great, but we will need to unzip it before we can actually use it. Bowerbird can do this by specifying a `postprocess` action:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 src1 <- bb_source(..., postprocess = list("bb_unzip"))
 ```
 
@@ -171,7 +170,7 @@ For the benefit of other users, we might also add the `description`, `collection
 
 So our full data source definition now looks like:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 src1 <- bb_source(
     name = "Geoscience Australia multibeam bathymetric grids of the Macquarie Ridge",
     id = "10.4225/25/53D9B12E0F96E",
@@ -183,7 +182,7 @@ src1 <- bb_source(
     method = list("bb_handler_rget"),
     postprocess = list("bb_unzip"),
     collection_size = 0.4,
-	access_function = "raster::raster",
+    access_function = "raster::raster",
     data_group = "Topography")
 ```
 
@@ -195,7 +194,7 @@ The primary entry point to this data set is an HTML index page, which links to a
 
 The definition for this data source is:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 src2 <- bb_source(
     name = "Australian Election 2016 House of Representatives data",
     id = "aus-election-house-2016",
@@ -214,7 +213,7 @@ Most of these parameters will be familiar from the previous example, but the `me
 - `accept_download = "\\.csv$"` means that we only want to retrieve csv files.
 
 Add this data source to a configuration and synchronize it:
-```{r eval=FALSE}
+```{r eval = FALSE}
 cf <- bb_config("c:/temp/data/bbtest") %>% bb_add(src2)
 status <- bb_sync(cf)
 ```
@@ -241,7 +240,7 @@ You only need to create an Earthdata login once. If you want to download other E
 
 Now that we have access to the data, we can write our bowerbird data source:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 src3 <- bb_source(
     name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2",
     id = "10.5067/EYICLBOAAJOU",
@@ -267,18 +266,18 @@ This is very similar to our previous examples, with these differences:
 
 Note that if you were providing this data source definition for other people to use, you would obviously not want to hard-code your Earthdata credentials in the `user` and `password` slots. In this case, specify the credentials as empty strings, and also include `warn_empty_auth = FALSE` in the data source definition (this suppresses the warning that `bb_source` would otherwise give you about missing credentials):
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 src3 <- bb_source(
     name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2",
     ... details as above...,
     user = "",
-	password = "",
+    password = "",
     warn_empty_auth = FALSE)
 ```
 
 When another user wants to use this data source, they simply insert their own credentials, e.g.:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 mysrc <- src3
 mysrc$user <- "theirusername"
 mysrc$password <- "theirpassword"
@@ -298,7 +297,7 @@ Oceandata uses standardized file naming conventions (see https://oceancolor.gsfc
 
 Here, for the sake of a small example, we'll limit ourselves to a single file ("T20000322000060.L3m_MO_SST_sst_9km.nc", which is sea surface temperature from the Terra satellite in February 2000):
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 src4 <- bb_source(
     name = "Oceandata test file",
     id = "oceandata-test",
@@ -365,7 +364,7 @@ The `bb_cleanup` postprocessing option can be used to remove unwanted files afte
 
 Some data providers require users to log in. The `authentication_note` column in the configuration table should indicate when this is the case, including a reference (e.g. the URL via which an account can be obtained). For these sources, you will need to provide your user name and password, e.g.:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 mysrc <- bb_example_sources("CMEMS global gridded SSH reprocessed (1993-ongoing)")
 mysrc$user <- "yourusername"
 mysrc$password <- "yourpassword"
@@ -383,7 +382,7 @@ Sometimes you might only want part of a data collection. Perhaps you only want a
 
 Say a particular data provider uses predictable file name patterns that include the year information. It would be fairly easy to restrict ourselves to only the 2017 data using the `accept` option. Here we use the `bb_modify_source` helper function to do so:
 
-```{r eval=FALSE}
+```{r eval = FALSE}
 mysrc <- bb_example_sources("CMEMS global gridded SSH reprocessed (1993-ongoing)") %>%
   bb_modify_source(user = "yourusername", password = "yourpassword",
     method = list(accept_follow = "/2017"))

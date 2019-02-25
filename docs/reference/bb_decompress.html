@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy — bb_decompress â€¢ bowerbird</title>
+<title>Postprocessing: decompress zip, gz, bz2, tar, Z files and optionally delete the compressed copy — bb_decompress â€¢ bowerbird</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -27,9 +27,9 @@
 <script src="../pkgdown.js"></script>
   
   
-<meta property="og:title" content="Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy — bb_decompress" />
+<meta property="og:title" content="Postprocessing: decompress zip, gz, bz2, tar, Z files and optionally delete the compressed copy — bb_decompress" />
 
-<meta property="og:description" content="Functions for decompressing files after downloading. These functions are not intended to be called directly, but rather are specified as a postprocess option in bb_source. bb_unzip, bb_gunzip, bb_bunzip2, and bb_uncompress are convenience wrappers around bb_decompress that specify the method." />
+<meta property="og:description" content="Functions for decompressing files after downloading. These functions are not intended to be called directly, but rather are specified as a postprocess option in bb_source. bb_unzip, bb_untar, bb_gunzip, bb_bunzip2, and bb_uncompress are convenience wrappers around bb_decompress that specify the method." />
 <meta name="twitter:card" content="summary" />
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
@@ -101,11 +101,11 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Postprocessing: decompress zip, gz, bz2, Z files and optionally delete the compressed copy</h1>
+    <h1>Postprocessing: decompress zip, gz, bz2, tar, Z files and optionally delete the compressed copy</h1>
     </div>
 
     
-    <p>Functions for decompressing files after downloading. These functions are not intended to be called directly, but rather are specified as a <code>postprocess</code> option in <code><a href='bb_source.html'>bb_source</a></code>. <code>bb_unzip</code>, <code>bb_gunzip</code>, <code>bb_bunzip2</code>, and <code>bb_uncompress</code> are convenience wrappers around <code>bb_decompress</code> that specify the method.</p>
+    <p>Functions for decompressing files after downloading. These functions are not intended to be called directly, but rather are specified as a <code>postprocess</code> option in <code><a href='bb_source.html'>bb_source</a></code>. <code>bb_unzip</code>, <code>bb_untar</code>, <code>bb_gunzip</code>, <code>bb_bunzip2</code>, and <code>bb_uncompress</code> are convenience wrappers around <code>bb_decompress</code> that specify the method.</p>
     
 
     <pre class="usage"><span class='fu'>bb_decompress</span>(<span class='no'>method</span>, <span class='kw'>delete</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)
@@ -116,14 +116,16 @@
 
 <span class='fu'>bb_bunzip2</span>(<span class='no'>...</span>)
 
-<span class='fu'>bb_uncompress</span>(<span class='no'>...</span>)</pre>
+<span class='fu'>bb_uncompress</span>(<span class='no'>...</span>)
+
+<span class='fu'>bb_untar</span>(<span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>method</th>
-      <td><p>string: one of "unzip","gunzip","bunzip2","decompress"</p></td>
+      <td><p>string: one of "unzip", "gunzip", "bunzip2", "decompress", "untar"</p></td>
     </tr>
     <tr>
       <th>delete</th>
@@ -137,11 +139,12 @@
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>TRUE on success</p>
+    <p>list with components status (<code>TRUE</code> on success), <code>files</code> (character vector of paths to extracted files), and <code>deleted_files</code> (character vector of paths of files that were deleted)</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>If the data source delivers compressed files, you will most likely want to decompress them after downloading. These functions will do this for you. By default, these do not delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.</p>
+    <p>Tar files can be compressed (i.e. file extensions .tar, .tgz, .tar.gz, .tar.bz2, or .tar.xz). Support for tar files may depend on your platform (see <code>untar</code>).</p>
+<p>If the data source delivers compressed files, you will most likely want to decompress them after downloading. These functions will do this for you. By default, these do not delete the compressed files after decompressing. The reason for this is so that on the next synchronization run, the local (compressed) copy can be compared to the remote compressed copy, and the download can be skipped if nothing has changed. Deleting local compressed files will save space on your file system, but may result in every file being re-downloaded on every synchronization run.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
@@ -151,10 +154,10 @@
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
   <span class='co'>## decompress .zip files after synchronization but keep zip files intact</span>
-  <span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_source.html'>bb_source</a></span>(<span class='no'>...</span>,<span class='kw'>postprocess</span><span class='kw'>=</span><span class='fu'>list</span>(<span class='st'>"bb_unzip"</span>))
+  <span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_source.html'>bb_source</a></span>(<span class='no'>...</span>, <span class='kw'>postprocess</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='st'>"bb_unzip"</span>))
 
   <span class='co'>## decompress .zip files after synchronization and delete zip files</span>
-  <span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_source.html'>bb_source</a></span>(<span class='no'>...</span>,<span class='kw'>postprocess</span><span class='kw'>=</span><span class='fu'>list</span>(<span class='fu'>list</span>(<span class='st'>"bb_unzip"</span>,<span class='kw'>delete</span><span class='kw'>=</span><span class='fl'>TRUE</span>)))
+  <span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_source.html'>bb_source</a></span>(<span class='no'>...</span>, <span class='kw'>postprocess</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='fu'>list</span>(<span class='st'>"bb_unzip"</span>, <span class='kw'>delete</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)))
 <span class='co'># }</span><div class='input'>
 </div></pre>
   </div>

@@ -145,17 +145,94 @@
 
 <span class='co'>## examine the sources contained in cf</span>
 <span class='fu'>bb_data_sources</span>(<span class='no'>cf</span>)</div><div class='output co'>#&gt; # A tibble: 6 x 16
-#&gt;   id     name   description  doc_url source_url citation license comment method
-#&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;        &lt;chr&gt;   &lt;list&gt;     &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;   &lt;list&gt;
-#&gt; 1 oisst~ NOAA ~ Weekly and ~ http:/~ &lt;chr [1]&gt;  NOAA_OI~ Please~ &lt;NA&gt;    &lt;list~
-#&gt; 2 aus-e~ Austr~ House of Re~ http:/~ &lt;chr [1]&gt;  Copyrig~ CC-BY   &lt;NA&gt;    &lt;list~
-#&gt; 3 SEALE~ CMEMS~ "For the Gl~ http:/~ &lt;chr [1]&gt;  "In cas~ See ht~ &lt;NA&gt;    &lt;list~
-#&gt; 4 SeaWi~ Ocean~ Monthly rem~ https:~ &lt;chr [1]&gt;  See htt~ Please~ &lt;NA&gt;    &lt;list~
-#&gt; 5 10.50~ Sea I~ NSIDC provi~ https:~ &lt;chr [1]&gt;  Stroeve~ Please~ &lt;NA&gt;    &lt;list~
-#&gt; 6 great~ Bathy~ A draft ver~ https:~ &lt;chr [1]&gt;  Publish~ https:~ Only t~ &lt;list~
-#&gt; # ... with 7 more variables: postprocess &lt;list&gt;, authentication_note &lt;chr&gt;,
-#&gt; #   user &lt;chr&gt;, password &lt;chr&gt;, access_function &lt;chr&gt;, data_group &lt;chr&gt;,
-#&gt; #   collection_size &lt;dbl&gt;</div><div class='input'>
+#&gt;   id                                          
+#&gt;   &lt;chr&gt;                                       
+#&gt; 1 oisst.v2                                    
+#&gt; 2 aus-election-house-2016                     
+#&gt; 3 SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047
+#&gt; 4 SeaWiFS_L3m_MO_CHL_chlor_a_9km              
+#&gt; 5 10.5067/EYICLBOAAJOU                        
+#&gt; 6 greatlakes-superior-bathymetry              
+#&gt;   name                                                                 
+#&gt;   &lt;chr&gt;                                                                
+#&gt; 1 NOAA OI SST V2                                                       
+#&gt; 2 Australian Election 2016 House of Representatives data               
+#&gt; 3 CMEMS global gridded SSH reprocessed (1993-ongoing)                  
+#&gt; 4 Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a                   
+#&gt; 5 Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2
+#&gt; 6 Bathymetry of Lake Superior                                          
+#&gt;   description                                                                   
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 Weekly and monthly mean and long-term monthly mean SST data, 1-degree resolut~
+#&gt; 2 House of Representatives results from the 2016 Australian election.           
+#&gt; 3 "For the Global Ocean - Multimission altimeter satellite gridded sea surface ~
+#&gt; 4 Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at 9km spatia~
+#&gt; 5 NSIDC provides this data set to aid in the investigations of the variability ~
+#&gt; 6 A draft version of the Lake Superior Bathymetry was compiled as a component o~
+#&gt;   doc_url                                                                       
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html             
+#&gt; 2 http://results.aec.gov.au/                                                    
+#&gt; 3 http://marine.copernicus.eu/services-portfolio/access-to-products/?option=com~
+#&gt; 4 https://oceancolor.gsfc.nasa.gov/                                             
+#&gt; 5 https://nsidc.org/data/NSIDC-0192/versions/2                                  
+#&gt; 6 https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html                        
+#&gt;   source_url
+#&gt;   &lt;list&gt;    
+#&gt; 1 &lt;chr [1]&gt; 
+#&gt; 2 &lt;chr [1]&gt; 
+#&gt; 3 &lt;chr [1]&gt; 
+#&gt; 4 &lt;chr [1]&gt; 
+#&gt; 5 &lt;chr [1]&gt; 
+#&gt; 6 &lt;chr [1]&gt; 
+#&gt;   citation                                                                      
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 NOAA_OI_SST_V2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA~
+#&gt; 2 Copyright Commonwealth of Australia 2017. As far as practicable, material for~
+#&gt; 3 "In case of any publication, the Licensee will ensure credit the Copernicus M~
+#&gt; 4 See https://oceancolor.gsfc.nasa.gov/citations                                
+#&gt; 5 Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR an~
+#&gt; 6 Publisher: DOC/NOAA/NESDIS/NCEI &gt; National Centers for Environmental Informat~
+#&gt;   license                                                                       
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 Please cite                                                                   
+#&gt; 2 CC-BY                                                                         
+#&gt; 3 See http://marine.copernicus.eu/services-portfolio/service-commitments-and-li~
+#&gt; 4 Please cite                                                                   
+#&gt; 5 Please cite, see http://nsidc.org/about/use_copyright.html                    
+#&gt; 6 https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright                     
+#&gt;   comment                                                                       
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 &lt;NA&gt;                                                                          
+#&gt; 2 &lt;NA&gt;                                                                          
+#&gt; 3 &lt;NA&gt;                                                                          
+#&gt; 4 &lt;NA&gt;                                                                          
+#&gt; 5 &lt;NA&gt;                                                                          
+#&gt; 6 Only the netcdf format data are retrieved here - adjust the accept_follow par~
+#&gt;   method     postprocess
+#&gt;   &lt;list&gt;     &lt;list&gt;     
+#&gt; 1 &lt;list [2]&gt; &lt;list [0]&gt; 
+#&gt; 2 &lt;list [3]&gt; &lt;list [0]&gt; 
+#&gt; 3 &lt;list [2]&gt; &lt;list [1]&gt; 
+#&gt; 4 &lt;list [2]&gt; &lt;list [0]&gt; 
+#&gt; 5 &lt;list [4]&gt; &lt;list [0]&gt; 
+#&gt; 6 &lt;list [3]&gt; &lt;list [1]&gt; 
+#&gt;   authentication_note                                                           
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 &lt;NA&gt;                                                                          
+#&gt; 2 &lt;NA&gt;                                                                          
+#&gt; 3 Copernicus Marine login required, see http://marine.copernicus.eu/services-po~
+#&gt; 4 &lt;NA&gt;                                                                          
+#&gt; 5 Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+~
+#&gt; 6 &lt;NA&gt;                                                                          
+#&gt;   user  password access_function data_group              collection_size
+#&gt;   &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;           &lt;chr&gt;                             &lt;dbl&gt;
+#&gt; 1 &lt;NA&gt;  &lt;NA&gt;     raster::raster  Sea surface temperature            0.9 
+#&gt; 2 &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;            Electoral                          0.01
+#&gt; 3 ""    ""       raster::raster  Altimetry                        310   
+#&gt; 4 &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;            Ocean colour                       7.2 
+#&gt; 5 ""    ""       &lt;NA&gt;            Sea ice                            0.02
+#&gt; 6 &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;            Topography                         0.03</div><div class='input'>
 ## replace the sources with different ones
 </div><span class='co'># NOT RUN {</span>
 <span class='fu'>bb_data_sources</span>(<span class='no'>cf</span>) <span class='kw'>&lt;-</span> <span class='no'>new_sources</span>

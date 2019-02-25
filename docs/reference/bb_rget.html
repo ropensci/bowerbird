@@ -108,14 +108,16 @@
     <p>This function provides similar, but simplified, functionality to the the command-line <code>wget</code> utility. It is based on the <code>rvest</code> package.</p>
     
 
-    <pre class="usage"><span class='fu'>bb_rget</span>(<span class='no'>url</span>, <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>wait</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>accept_follow</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"(/|\\.html?)$"</span>),
-  <span class='kw'>reject_follow</span> <span class='kw'>=</span> <span class='fu'>character</span>(),
+    <pre class="usage"><span class='fu'>bb_rget</span>(<span class='no'>url</span>, <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>wait</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>accept_follow</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"(/|\\.html?)$"</span>), <span class='kw'>reject_follow</span> <span class='kw'>=</span> <span class='fu'>character</span>(),
   <span class='kw'>accept_download</span> <span class='kw'>=</span> <span class='fu'>bb_rget_default_downloads</span>(),
-  <span class='kw'>accept_download_extra</span> <span class='kw'>=</span> <span class='fu'>character</span>(), <span class='kw'>reject_download</span> <span class='kw'>=</span> <span class='fu'>character</span>(), <span class='no'>user</span>,
-  <span class='no'>password</span>, <span class='kw'>clobber</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>no_parent</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>no_check_certificate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>relative</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>show_progress</span> <span class='kw'>=</span> <span class='no'>verbose</span>,
-  <span class='kw'>debug</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>dry_run</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>stop_on_download_error</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='no'>force_local_filename</span>)
+  <span class='kw'>accept_download_extra</span> <span class='kw'>=</span> <span class='fu'>character</span>(), <span class='kw'>reject_download</span> <span class='kw'>=</span> <span class='fu'>character</span>(),
+  <span class='no'>user</span>, <span class='no'>password</span>, <span class='kw'>clobber</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>no_parent</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>no_check_certificate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>relative</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>remote_time</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>show_progress</span> <span class='kw'>=</span> <span class='no'>verbose</span>, <span class='kw'>debug</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>dry_run</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>stop_on_download_error</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='no'>force_local_filename</span>, <span class='kw'>use_url_directory</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>no_host</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>cut_dirs</span> <span class='kw'>=</span> <span class='fl'>0L</span>, <span class='no'>curl_opts</span>)
 
 <span class='fu'>bb_rget_default_downloads</span>()</pre>
     
@@ -179,6 +181,10 @@
       <td><p>logical: if <code>TRUE</code>, only follow relative links. This can be useful for restricting what is downloaded in recursive mode</p></td>
     </tr>
     <tr>
+      <th>remote_time</th>
+      <td><p>logical: if <code>TRUE</code>, attempt to set the local file's time to that of the remote file</p></td>
+    </tr>
+    <tr>
       <th>verbose</th>
       <td><p>logical: print trace output?</p></td>
     </tr>
@@ -201,6 +207,22 @@
     <tr>
       <th>force_local_filename</th>
       <td><p>string: if provided, then the <code>url</code> will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with this name, in a local directory determined by the <code>url</code></p></td>
+    </tr>
+    <tr>
+      <th>use_url_directory</th>
+      <td><p>logical: if <code>TRUE</code>, files will be saved into a local directory that follows the URL structure (e.g. files from <code>http://some.where/place</code> will be saved into directory <code>some.where/place</code>). If <code>FALSE</code>, files will be saved into the current directory</p></td>
+    </tr>
+    <tr>
+      <th>no_host</th>
+      <td><p>logical: if <code>use_url_directory = TRUE</code>, specifying <code>no_host = TRUE</code> will remove the host name from the directory (e.g. files from files from <code>http://some.where/place</code> will be saved into directory <code>place</code>)</p></td>
+    </tr>
+    <tr>
+      <th>cut_dirs</th>
+      <td><p>integer: if <code>use_url_directory = TRUE</code>, specifying <code>cut_dirs</code> will remove this many directory levels from the path of the local directory where files will be saved (e.g. if <code>cut_dirs = 2</code>, files from <code>http://some.where/place/baa/haa</code> will be saved into directory <code>some.where/haa</code>. if <code>cut_dirs = 1</code> and <code>no_host = TRUE</code>, files from <code>http://some.where/place/baa/haa</code> will be saved into directory <code>baa/haa</code>)</p></td>
+    </tr>
+    <tr>
+      <th>curl_opts</th>
+      <td><p>named list: options to use with <code>curl</code> downloads, passed to the <code>.list</code> parameter of <code><a href='http://www.rdocumentation.org/packages/curl/topics/handle'>curl::new_handle</a></code></p></td>
     </tr>
     </table>
     

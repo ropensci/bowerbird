@@ -48,20 +48,20 @@ status <- bb_sync(cf, verbose = TRUE)
 ```
 
     ##  
-    ## Mon Jul 30 13:48:56 2018 
+    ## Mon Feb 25 22:19:27 2019 
     ## Synchronizing dataset: Australian Election 2016 House of Representatives data 
     ## Source URL http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm 
     ## -------------------------------------------------------------------------------------------- 
     ##  
-    ##  this dataset path is: c:/tmp/data/results.aec.gov.au/20499/Website 
+    ##  this dataset path is: c:\tmp\data/results.aec.gov.au/20499/Website 
     ##  visiting http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm ... done. 
-    ##  downloading file: http://results.aec.gov.au/20499/Website/Downloads/HouseCandidatesDownload-20499.csv ...  done. 
-    ##  downloading file: http://results.aec.gov.au/20499/Website/Downloads/HouseMembersElectedDownload-20499.csv ...  done. 
-    ##  downloading file: http://results.aec.gov.au/20499/Website/Downloads/HouseNominationsByStateDownload-20499.csv ...  done. 
+    ##  downloading file 1 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseCandidatesDownload-20499.csv ...  done. 
+    ##  downloading file 2 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseMembersElectedDownload-20499.csv ...  done. 
+    ##  downloading file 3 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseNominationsByStateDownload-20499.csv ...  done. 
     ##  
     ##  [... output truncated] 
     ##  
-    ## Mon Jul 30 13:50:06 2018 dataset synchronization complete: Australian Election 2016 House of Representatives data
+    ## Mon Feb 25 22:20:34 2019 dataset synchronization complete: Australian Election 2016 House of Representatives data
 
 Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. Details of the files in this data set are given in the `status$files` object:
 
@@ -69,18 +69,18 @@ Congratulations! You now have your own local copy of your chosen data set. This 
 status$files
 ## [[1]]
 ## # A tibble: 47 x 3
-##    url                          file                        was_downloaded
-##    <chr>                        <chr>                       <lgl>         
-##  1 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
-##  2 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
-##  3 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
-##  4 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
-##  5 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
-##  6 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
-##  7 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
-##  8 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
-##  9 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
-## 10 http://results.aec.gov.au/2~ results.aec.gov.au/20499/W~ TRUE          
+##    url                              file                             note  
+##    <chr>                            <chr>                            <chr> 
+##  1 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  2 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  3 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  4 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  5 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  6 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  7 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  8 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  9 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+## 10 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
 ## # ... with 37 more rows
 ```
 

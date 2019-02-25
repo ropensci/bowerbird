@@ -91,9 +91,8 @@
 <div id="installing" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installing" class="anchor"></a>Installing</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"devtools"</span>)
-<span class="kw">library</span>(devtools)
-<span class="kw">install_github</span>(<span class="st">"ropensci/bowerbird"</span>,<span class="dt">build_vignettes=</span><span class="ot">TRUE</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">"remotes"</span>)
+remotes<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">"ropensci/bowerbird"</span>, <span class="dt">build_vignettes =</span> <span class="ot">TRUE</span>)</code></pre></div>
 </div>
 <div id="usage-overview" class="section level2">
 <h2 class="hasAnchor">
@@ -101,9 +100,9 @@
 <div id="configuration" class="section level3">
 <h3 class="hasAnchor">
 <a href="#configuration" class="anchor"></a>Configuration</h3>
-<p>Build up a configuration by first defining global options such as the destination on your local file system:</p>
+<p>Build up a configuration by first defining global options such as the destination on your local file system. Commonly you would choose this destination data directory to be a persistent location, suitable for a data library. For demonstration purposes here we’ll just use a temporary directory::</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bowerbird)
-my_directory &lt;-<span class="st"> "~/my/data/directory"</span>
+my_directory &lt;-<span class="st"> </span><span class="kw">tempdir</span>()
 cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_config.html">bb_config</a></span>(<span class="dt">local_file_root =</span> my_directory)</code></pre></div>
 <p>Bowerbird must then be told which data sources to synchronize. Let’s use data from the Australian 2016 federal election, which is provided as one of the example data sources:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_source &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_example_sources.html">bb_example_sources</a></span>(<span class="st">"Australian Election 2016 House of Representatives data"</span>)
@@ -112,8 +111,38 @@ cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_config.h
 cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_add.html">bb_add</a></span>(cf, my_source)</code></pre></div>
 <p>Once the configuration has been defined and the data source added to it, we can run the sync process. We set <code>verbose = TRUE</code> here so that we see additional progress output:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">status &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_sync.html">bb_sync</a></span>(cf, <span class="dt">verbose =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>##  
+## Mon Feb 25 22:20:40 2019 
+## Synchronizing dataset: Australian Election 2016 House of Representatives data 
+## Source URL http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm 
+## -------------------------------------------------------------------------------------------- 
+##  
+##  this dataset path is: c:\tmp\data/results.aec.gov.au/20499/Website 
+##  visiting http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm ... done. 
+##  downloading file 1 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseCandidatesDownload-20499.csv ...  done. 
+##  downloading file 2 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseMembersElectedDownload-20499.csv ...  done. 
+##  downloading file 3 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseNominationsByStateDownload-20499.csv ...  done. 
+##  
+##  [... output truncated] 
+##  
+## Mon Feb 25 22:21:44 2019 dataset synchronization complete: Australian Election 2016 House of Representatives data</code></pre>
 <p>Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. Details of the files in this data set are given in the <code>status$files</code> object:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">status<span class="op">$</span>files</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">status<span class="op">$</span>files
+## [[1]]
+## # A tibble: 47 x 3
+##    url                              file                             note  
+##    &lt;chr&gt;                            &lt;chr&gt;                            &lt;chr&gt; 
+##  1 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  2 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  3 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  4 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  5 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  6 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  7 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  8 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+##  9 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+## 10 http://results.aec.gov.au/20499~ "c:\\tmp\\data\\results.aec.gov~ downl~
+## # ... with 37 more rows</code></pre></div>
 <p>At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the <code>clobber</code> parameter set to 0 (“do not overwrite existing files”) or 1 (“overwrite only if the remote file is newer than the local copy”) then the sync process will run more quickly because it will not need to re-download any data files.</p>
 </div>
 </div>
@@ -121,7 +150,34 @@ cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/bb_add.html
 <h2 class="hasAnchor">
 <a href="#data-source-definitions" class="anchor"></a>Data source definitions</h2>
 <p>The <a href="https://github.com/AustralianAntarcticDivision/blueant">blueant</a> package provides a suite of bowerbird data source definitions themed around Southern Ocean and Antarctic data, and includes a range of oceanographic, meteorological, topographic, and other environmental data sets.</p>
+</div>
+<div id="other-packages" class="section level2">
+<h2 class="hasAnchor">
+<a href="#other-packages" class="anchor"></a>Other packages</h2>
+<p>Many other data-retrieval R packages exist. bowerbird is perhaps most similar to the <a href="https://cran.r-project.org/package=rdataretriever">rdataretriever</a>. This package provides an R interface to the (Python-based) <a href="http://www.data-retriever.org/">Data Retriever</a>, which in turn provides (at time of writing) access to 85 ecological data sets. A quick comparison:</p>
+<div id="rdataretriever" class="section level3">
+<h3 class="hasAnchor">
+<a href="#rdataretriever" class="anchor"></a>rdataretriever</h3>
+<ul>
+<li><p>requires <code>retriever</code> to be installed, either as a Python package or via a platform-specific installer (see <a href="http://www.data-retriever.org/" class="uri">http://www.data-retriever.org/</a>)</p></li>
+<li><p>makes efforts to clean and standardize the data that it downloads, and get them into a consistent format on the user’s system</p></li>
+<li><p>designed to make it easy for users to get on with the business of using those data sets</p></li>
+<li><p>carries the tradeoff that adding new data sets (and maintaining the existing ones) takes a bit of effort, and it can be cumbersome to deal with data sets that contain many files, particularly if new files get added on a regular basis (e.g. satellite environmental data).</p></li>
+</ul>
+</div>
+<div id="bowerbird-1" class="section level3">
+<h3 class="hasAnchor">
+<a href="#bowerbird-1" class="anchor"></a>bowerbird</h3>
+<ul>
+<li><p>pure R, no other system dependencies</p></li>
+<li><p>designed to make it easy for users to keep a local, up-to-date collection of files from remote providers. It can do recursive downloads, and so is particularly suitable for collections that are structured as a large number of individual files in yearly or other subdirectories (typical of e.g. satellite or climate model data)</p></li>
+<li><p>simply mirrors remote data to your local system, without attempting to reformat the data files or do anything else clever with them (other than uncompress, if needed). It just grabs them and saves them in whatever format the provider uses</p></li>
+<li><p>the upside is that it is intended to be easy to write bowerbird definitions for new data sources. In many cases, it is only necessary to specify some metadata and the top-level URL, and bowerbird can recursively download linked resources from there</p></li>
+<li><p>bowerbird itself contains only a few example data sets, but data definitions are available from other packages (e.g. <a href="https://github.com/AustralianAntarcticDivision/blueant">blueant</a>, ~55 marine/Southern Ocean data sets).</p></li>
+</ul>
+<p>The rdataretriever and bowerbird packages are both part of the rOpenSci project.</p>
 <p><a href="https://ropensci.org"><img src="https://ropensci.org/public_images/scar_footer.png" alt="ropensci_footer"></a></p>
+</div>
 </div>
 </div>
 </div>

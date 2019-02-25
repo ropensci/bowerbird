@@ -158,28 +158,91 @@
 
 <span class='co'>## remove the existing "data_group" component</span>
 <span class='no'>src</span> <span class='kw'>%&gt;%</span> <span class='fu'>bb_modify_source</span>(<span class='kw'>data_group</span><span class='kw'>=</span><span class='kw'>NULL</span>)</div><div class='output co'>#&gt; # A tibble: 1 x 16
-#&gt;   id     name   description  doc_url source_url citation license comment method
-#&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;        &lt;chr&gt;   &lt;list&gt;     &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;   &lt;list&gt;
-#&gt; 1 10.50~ Sea I~ NSIDC provi~ https:~ &lt;chr [1]&gt;  Stroeve~ Please~ &lt;NA&gt;    &lt;list~
-#&gt; # ... with 7 more variables: postprocess &lt;list&gt;, authentication_note &lt;chr&gt;,
-#&gt; #   user &lt;chr&gt;, password &lt;chr&gt;, access_function &lt;chr&gt;, data_group &lt;chr&gt;,
-#&gt; #   collection_size &lt;dbl&gt;</div><div class='input'>
+#&gt;   id                  
+#&gt;   &lt;chr&gt;               
+#&gt; 1 10.5067/EYICLBOAAJOU
+#&gt;   name                                                                 
+#&gt;   &lt;chr&gt;                                                                
+#&gt; 1 Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2
+#&gt;   description                                                                   
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 NSIDC provides this data set to aid in the investigations of the variability ~
+#&gt;   doc_url                                      source_url
+#&gt;   &lt;chr&gt;                                        &lt;list&gt;    
+#&gt; 1 https://nsidc.org/data/NSIDC-0192/versions/2 &lt;chr [1]&gt; 
+#&gt;   citation                                                                      
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR an~
+#&gt;   license                                                    comment method    
+#&gt;   &lt;chr&gt;                                                      &lt;chr&gt;   &lt;list&gt;    
+#&gt; 1 Please cite, see http://nsidc.org/about/use_copyright.html &lt;NA&gt;    &lt;list [4]&gt;
+#&gt;   postprocess
+#&gt;   &lt;list&gt;     
+#&gt; 1 &lt;list [0]&gt; 
+#&gt;   authentication_note                                                           
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+~
+#&gt;   user       password   access_function data_group collection_size
+#&gt;   &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;           &lt;chr&gt;                &lt;dbl&gt;
+#&gt; 1 myusername mypassword &lt;NA&gt;            &lt;NA&gt;                  0.02</div><div class='input'>
 <span class='co'>## change just the 'level' setting of an existing method definition</span>
 <span class='no'>src</span> <span class='kw'>%&gt;%</span> <span class='fu'>bb_modify_source</span>(<span class='kw'>method</span><span class='kw'>=</span><span class='fu'>list</span>(<span class='kw'>level</span><span class='kw'>=</span><span class='fl'>3</span>))</div><div class='output co'>#&gt; # A tibble: 1 x 16
-#&gt;   id     name   description  doc_url source_url citation license comment method
-#&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;        &lt;chr&gt;   &lt;list&gt;     &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;   &lt;list&gt;
-#&gt; 1 10.50~ Sea I~ NSIDC provi~ https:~ &lt;chr [1]&gt;  Stroeve~ Please~ &lt;NA&gt;    &lt;list~
-#&gt; # ... with 7 more variables: postprocess &lt;list&gt;, authentication_note &lt;chr&gt;,
-#&gt; #   user &lt;chr&gt;, password &lt;chr&gt;, access_function &lt;chr&gt;, data_group &lt;chr&gt;,
-#&gt; #   collection_size &lt;dbl&gt;</div><div class='input'>
+#&gt;   id                  
+#&gt;   &lt;chr&gt;               
+#&gt; 1 10.5067/EYICLBOAAJOU
+#&gt;   name                                                                 
+#&gt;   &lt;chr&gt;                                                                
+#&gt; 1 Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2
+#&gt;   description                                                                   
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 NSIDC provides this data set to aid in the investigations of the variability ~
+#&gt;   doc_url                                      source_url
+#&gt;   &lt;chr&gt;                                        &lt;list&gt;    
+#&gt; 1 https://nsidc.org/data/NSIDC-0192/versions/2 &lt;chr [1]&gt; 
+#&gt;   citation                                                                      
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR an~
+#&gt;   license                                                    comment method    
+#&gt;   &lt;chr&gt;                                                      &lt;chr&gt;   &lt;list&gt;    
+#&gt; 1 Please cite, see http://nsidc.org/about/use_copyright.html &lt;NA&gt;    &lt;list [4]&gt;
+#&gt;   postprocess
+#&gt;   &lt;list&gt;     
+#&gt; 1 &lt;list [0]&gt; 
+#&gt;   authentication_note                                                           
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+~
+#&gt;   user       password   access_function data_group collection_size
+#&gt;   &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;           &lt;chr&gt;                &lt;dbl&gt;
+#&gt; 1 myusername mypassword &lt;NA&gt;            Sea ice               0.02</div><div class='input'>
 <span class='co'>## remove the 'level' component of an existing method definition</span>
 <span class='no'>src</span> <span class='kw'>%&gt;%</span> <span class='fu'>bb_modify_source</span>(<span class='kw'>method</span><span class='kw'>=</span><span class='fu'>list</span>(<span class='kw'>level</span><span class='kw'>=</span><span class='kw'>NULL</span>))</div><div class='output co'>#&gt; # A tibble: 1 x 16
-#&gt;   id     name   description  doc_url source_url citation license comment method
-#&gt;   &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;        &lt;chr&gt;   &lt;list&gt;     &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;   &lt;list&gt;
-#&gt; 1 10.50~ Sea I~ NSIDC provi~ https:~ &lt;chr [1]&gt;  Stroeve~ Please~ &lt;NA&gt;    &lt;list~
-#&gt; # ... with 7 more variables: postprocess &lt;list&gt;, authentication_note &lt;chr&gt;,
-#&gt; #   user &lt;chr&gt;, password &lt;chr&gt;, access_function &lt;chr&gt;, data_group &lt;chr&gt;,
-#&gt; #   collection_size &lt;dbl&gt;</div><div class='input'>
+#&gt;   id                  
+#&gt;   &lt;chr&gt;               
+#&gt; 1 10.5067/EYICLBOAAJOU
+#&gt;   name                                                                 
+#&gt;   &lt;chr&gt;                                                                
+#&gt; 1 Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2
+#&gt;   description                                                                   
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 NSIDC provides this data set to aid in the investigations of the variability ~
+#&gt;   doc_url                                      source_url
+#&gt;   &lt;chr&gt;                                        &lt;list&gt;    
+#&gt; 1 https://nsidc.org/data/NSIDC-0192/versions/2 &lt;chr [1]&gt; 
+#&gt;   citation                                                                      
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR an~
+#&gt;   license                                                    comment method    
+#&gt;   &lt;chr&gt;                                                      &lt;chr&gt;   &lt;list&gt;    
+#&gt; 1 Please cite, see http://nsidc.org/about/use_copyright.html &lt;NA&gt;    &lt;list [3]&gt;
+#&gt;   postprocess
+#&gt;   &lt;list&gt;     
+#&gt; 1 &lt;list [0]&gt; 
+#&gt;   authentication_note                                                           
+#&gt;   &lt;chr&gt;                                                                         
+#&gt; 1 Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+~
+#&gt;   user       password   access_function data_group collection_size
+#&gt;   &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;           &lt;chr&gt;                &lt;dbl&gt;
+#&gt; 1 myusername mypassword &lt;NA&gt;            Sea ice               0.02</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
