@@ -17,10 +17,10 @@ test_that("rget's remote_time option works",{
     test_url <- "https://www.google.com.au/robots.txt"
     ccf <- bowerbird:::build_curl_config(remote_time = FALSE)
     f1 <- tempfile()
-    res <- httr::with_config(ccf, httr::GET(test_url, write_disk(path = f1, overwrite = TRUE)))
+    res <- httr::with_config(ccf, httr::GET(test_url, httr::write_disk(path = f1, overwrite = TRUE)))
     ccf <- bowerbird:::build_curl_config(remote_time = TRUE)
     f2 <- tempfile()
-    res <- httr::with_config(ccf, httr::GET(test_url, write_disk(path = f2, overwrite = TRUE)))
+    res <- httr::with_config(ccf, httr::GET(test_url, httr::write_disk(path = f2, overwrite = TRUE)))
     finf1 <- file.info(c(f1, f2))
     ## don't expect that local file timestamp will have been modified here, because curl doesn't seem to honour the filetime option?
     expect_true(abs(as.numeric(difftime(finf1$mtime[1], finf1$mtime[2], units = "secs"))) < 10) ## less than 10s
