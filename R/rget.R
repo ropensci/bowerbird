@@ -338,9 +338,6 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 ## grab all link hrefs
                 if (links_from == "text") {
                     all_links <- strsplit(x, "[\r\n]+")[[1]]
-                    #cat("all links:")
-                    #cat(all_links)
-                    #cat("\n")
                 } else {
                     all_links <- unique(na.omit(vapply(html_nodes(x, "a"), function(z) html_attr(z, "href"), FUN.VALUE = "", USE.NAMES = FALSE)))
                 }

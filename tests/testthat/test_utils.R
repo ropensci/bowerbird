@@ -19,3 +19,22 @@ test_that("internal directory_from_url function works",{
     expect_identical(directory_from_url(this_url, no_host = FALSE, cut_dirs = 10), c("blah.blah/", "some.thing/", "some.thing/", "yah.yah.yah/", "yah.yah.yah/"))
 })
 
+test_that("internal list_files function works", {
+    path <- system.file(package = "bowerbird")
+    testargs <- list(path = path, recursive = TRUE)
+    expect_setequal(do.call(list.files, testargs), do.call(list_files, testargs))
+
+    testargs <- list(path = path, recursive = TRUE, full.names = TRUE)
+    expect_setequal(do.call(list.files, testargs), do.call(list_files, testargs))
+
+    testargs <- list(path = path, recursive = TRUE, include.dirs = TRUE)
+    expect_setequal(do.call(list.files, testargs), do.call(list_files, testargs))
+
+    skip_on_os("windows")
+    ## skip everything from here onwards if on windows
+    path <- "/dev"
+    testargs <- list(path = path, recursive = FALSE)
+    expect_setequal(do.call(list.files, testargs), do.call(list_files, testargs))
+    testargs <- list(path = path, recursive = FALSE, include.dirs = TRUE)
+    expect_setequal(do.call(list.files, testargs), do.call(list_files, testargs))
+})

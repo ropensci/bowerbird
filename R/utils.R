@@ -128,3 +128,17 @@ std_path <- function(z, case = FALSE) {
     }
     z
 }
+
+## wrapper around fs::dir_ls that acts mostly like list.files, but faster
+list_files <- function(path = ".", pattern = NULL, all.files = FALSE, full.names = FALSE, recursive = FALSE, ignore.case = FALSE, include.dirs = FALSE) {
+    types <- if (include.dirs) "any" else c("file", "symlink", "FIFO", "socket", "character_device", "block_device")
+    ## note that pattern in list.files acts on file names, but regexp in dir_ls acts on paths
+    grepargs <- list()
+    if (ignore.case) grepargs$ignore.case = TRUE
+    out <- do.call(fs::dir_ls, c(list(path = path, regexp = pattern, type = types, recursive = recursive, all = all.files), grepargs))
+    if (!full.names) {
+        n_to_strip <- nchar(fs::as_fs_path(path)) + 1L ## +1 for trailing filesep
+        out <- substr(out, n_to_strip+1L, 1000000L)
+    }
+    as.character(out)
+}
