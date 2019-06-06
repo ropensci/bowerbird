@@ -60,8 +60,9 @@ bb_config <- function(local_file_root,wget_global_flags=list(restrict_file_names
 bb_subset <- function(config,idx) {
     assert_that(is(config,"bb_config"))
     temp <- bb_data_sources(config)[idx,]
-    ## if we indexed past the end of this tibble, we'll have rows that are all NA or NULL - discard these
-    temp <- temp[!apply(temp,1,function(z)all(vapply(z,function(w)is.null(w) || is.na(w),FUN.VALUE=TRUE))),]
+    ## if we indexed past the end of this tibble, we'll have rows that are all NA or list of NULL - discard these
+    ## this is truly unattractive
+    temp <- temp[!vapply(seq_len(nrow(temp)), function(ri) all(vapply(seq_len(ncol(temp)), function(ci) (is.list(temp[ri, ][[ci]]) && is.null(temp[ri, ][[ci]][[1]])) || is.na(temp[ri, ][[ci]]), FUN.VALUE = TRUE)), FUN.VALUE = TRUE), ]
     bb_data_sources(config) <- temp
     config
 }
