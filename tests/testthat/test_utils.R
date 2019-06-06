@@ -24,6 +24,10 @@ test_that("internal list_files function works", {
     testargs <- list(path = path, recursive = TRUE)
     expect_setequal(do.call(list.files, testargs), do.call(list_files, testargs))
 
+    path <- system.file(package = "bowerbird")
+    testargs <- list(path = path, recursive = FALSE)
+    expect_setequal(do.call(list.files, testargs), do.call(list_files, testargs))
+
     testargs <- list(path = path, recursive = TRUE, full.names = TRUE)
     expect_setequal(do.call(list.files, testargs), do.call(list_files, testargs))
 
