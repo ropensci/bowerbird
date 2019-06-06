@@ -25,7 +25,7 @@ test_that("rget's remote_time option works",{
     ## don't expect that local file timestamp will have been modified here, because curl doesn't seem to honour the filetime option?
     expect_true(abs(as.numeric(difftime(finf1$mtime[1], finf1$mtime[2], units = "secs"))) < 10) ## less than 10s
     ## so we set the file time manually
-    bowerbird:::set_file_timestamp(f2, headers(res))
+    bowerbird:::set_file_timestamp(f2, httr::headers(res))
     finf2 <- file.info(c(f1, f2))
     expect_true(as.numeric(difftime(finf2$mtime[2], finf2$mtime[1], units = "secs")) < -10) ## less than -10, i.e. remote time stamp is more than 10s earlier than now
 
