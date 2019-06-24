@@ -218,7 +218,9 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                     dlf <- tempfile()
                     if (file.exists(fname)) file.copy(fname, dlf)
                     ## may need to suppressWarnings with ftp here
-                    req <- curl_fetch_disk(df, path = dlf, handle = handle_setopt(handle, .list = myopts))
+                    ##req <- curl_fetch_disk(df, path = dlf, handle = handle_setopt(handle, .list = myopts))
+                    req <- curl_fetch_disk(df, path = dlf, handle = handle_setopt(curl::new_handle(), .list = myopts))
+                    ## NOTE should be able to re-use handle there, not create a new handle. But it's not working (see https://github.com/ropensci/bowerbird/issues/27)
                     if (httr::http_error(req$status_code)) {
                         ## don't throw error on download
                         myfun <- if (stop_on_download_error) stop else warning
