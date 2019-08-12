@@ -7,9 +7,9 @@
 bb_handler_oceandata(search, dtype, ...)
 }
 \arguments{
-\item{search}{string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)}
+\item{search}{string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/api/file_search)}
 
-\item{dtype}{string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)}
+\item{dtype}{string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/api/file_search)}
 
 \item{...}{: extra parameters passed automatically by \code{bb_sync}}
 }

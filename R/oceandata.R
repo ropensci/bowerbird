@@ -5,8 +5,8 @@
 #' Oceandata uses standardized file naming conventions (see https://oceancolor.gsfc.nasa.gov/docs/format/), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the \code{search} argument. Note that the \code{bb_handler_oceandata} does not take need `source_url` to be specified in the \code{bb_source} call.
 #'
 #' @references https://oceandata.sci.gsfc.nasa.gov/
-#' @param search string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)
-#' @param dtype string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi)
+#' @param search string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/api/file_search)
+#' @param dtype string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/api/file_search)
 #' @param ... : extra parameters passed automatically by \code{bb_sync}
 #'
 #' @return TRUE on success
@@ -45,10 +45,10 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     ## oceandata synchronization handler
 
     ## oceandata provides a file search interface, e.g.:
-    ## wget -q --post-data="cksum=1&search=A2002*DAY_CHL_chlor*9km*" -O - https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi
-    ## wget -q --post-data="cksum=1&search=S*L3m_MO_CHL_chlor_a_9km.nc" -O - https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi
+    ## wget -q --post-data="cksum=1&search=A2002*DAY_CHL_chlor*9km*" -O - https://oceandata.sci.gsfc.nasa.gov/api/file_search
+    ## wget -q --post-data="cksum=1&search=S*L3m_MO_CHL_chlor_a_9km.nc" -O - https://oceandata.sci.gsfc.nasa.gov/api/file_search
     ## or
-    ## wget -q --post-data="dtype=L3b&cksum=1&search=A2014*DAY_CHL.*" -O - https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi
+    ## wget -q --post-data="dtype=L3b&cksum=1&search=A2014*DAY_CHL.*" -O - https://oceandata.sci.gsfc.nasa.gov/api/file_search
     ## returns list of files and SHA1 checksum for each file
     ## each file can be retrieved from https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/filename
 
@@ -84,18 +84,18 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = this_att$user, password = this_att$password)
     if (verbose) cat("Downloading file list ... \n")
     while (tries<3) {
-        myfiles <- httr::with_config(my_curl_config, httr::POST("https://oceandata.sci.gsfc.nasa.gov/search/file_search.cgi", body = list(cksum = 1, search = search, if (!is.null(dtype)) dtype = dtype)))
+        bdy <- list(cksum = 1, search = search)
+        if (!is.null(dtype)) bdy$dtype <- dtype
+        myfiles <- httr::with_config(my_curl_config, httr::POST("https://oceandata.sci.gsfc.nasa.gov/api/file_search", body = bdy))
         if (!httr::http_error(myfiles)) break
         tries <- tries + 1
     }
     if (httr::http_error(myfiles)) stop("error with oceancolour data file search: could not retrieve file list (query: ", search, ")")
     myfiles <- httr::content(myfiles, as = "text")
     myfiles <- strsplit(myfiles,"\n")[[1]]
-    ## catch "Sorry No Files Matched Your Query"
-    if (any(grepl("no files matched your query", myfiles, ignore.case = TRUE))) stop("No files matched the supplied oceancolour data file search query (", search, ")")
-    ## also bail out if we don't see the "Your query generated xx results" message
-    if (!any(grepl("Your query generated .* results",myfiles,ignore.case=TRUE))) stop("error with oceancolour data file search: could not retrieve file list (query: ",search,")")
-    myfiles <- myfiles[-c(1, 2)] ## get rid of header line and blank line that follows it
+    ## the old service would return a "Sorry No Files Matched Your Query", but this no longer happens
+    ## just look for an empty body
+    if (length(myfiles) < 1) stop("No files matched the supplied oceancolour data file search query (", search, ")")
     myfiles <- as_tibble(do.call(rbind, lapply(myfiles, function(z) strsplit(z, "[[:space:]]+")[[1]]))) ## split checksum and file name from each line
     colnames(myfiles) <- c("checksum", "filename")
     myfiles <- myfiles[order(myfiles$filename), ]
