@@ -84,7 +84,17 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
     ## first expand the source_url list-column, so that we have one row per source_url entry
     temp <- bb_data_sources(config)
     ns <- vapply(temp$source_url,length,FUN.VALUE=1) ## number of source_url entries per row
+    if (interactive()) temp$`__TEMPORARY_ROW_ID` <- seq_len(nrow(temp)) ## see below
     bb_data_sources(config) <- do.call(rbind,lapply(seq_len(nrow(temp)),function(z){ out <- temp[rep(z,ns[z]),]; out$source_url <- temp$source_url[[z]]; out}))
+    ## a data source that had multiple source_urls will now be split across multiple rows
+    ## if that data source also had a collection_size greater than our confirm_downloads_larger_than threshold, and we are running interactively, then the user will get asked to confirm each row separately
+    ## so let's remove the collection_size entries from the second and subsequent rows
+    if (interactive()) {
+        temp <- bb_data_sources(config)
+        temp$collection_size[duplicated(temp$`__TEMPORARY_ROW_ID`)] <- NA
+        temp$`__TEMPORARY_ROW_ID` <- NULL
+        bb_data_sources(config) <- temp
+    }
     if (catch_errors) {
         sync_wrapper <- function(di) {
             tryCatch(do_sync_repo(this_dataset=bb_subset(config,di),create_root=create_root,verbose=verbose,settings=settings,confirm_downloads_larger_than=confirm_downloads_larger_than),
