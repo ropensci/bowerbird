@@ -78,7 +78,6 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
         ## but the second time it will authenticate using the stored cookie and proceed with the recursion
         do.call(bb_handler_wget,c(list(config,verbose=verbose),dummy$method[[1]][-1]))
     } else {
-        this_att <- bb_settings(config)
         my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = dummy$user, password = dummy$password, enforce_basic_auth = TRUE)
         ## and some more configs specifically for earthdata
         my_curl_config$options$followlocation <- 1
