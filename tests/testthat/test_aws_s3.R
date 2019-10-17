@@ -14,7 +14,7 @@ test_that("bb_handler_aws_s3 works", {
         data_group = "Biology")
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
-    expect_true(grepl("clo-is-da-example-data.s3.amazonaws.com/yebsap-ERD2016-EBIRD_SCIENCE-20180729-7c8cec83$", bb_data_source_dir(cf)))
+    expect_true(grepl("clo-is-da-example-data.s3.amazonaws.com/yebsap-ERD2016-EBIRD_SCIENCE-20180729-7c8cec83/?$", bb_data_source_dir(cf)))
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL)
 
     expect_equal(nrow(status$files[[1]]), 1)
@@ -76,7 +76,7 @@ test_that("bb_handler_aws_s3 works", {
         data_group = "Climate")
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
-    expect_true(grepl("silo-open-data.s3.amazonaws.com/annual/monthly_rain$", bb_data_source_dir(cf)))
+    expect_true(grepl("silo-open-data.s3.amazonaws.com/annual/monthly_rain/?$", bb_data_source_dir(cf)))
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
 
     expect_equal(nrow(status$files[[1]]), 1)
