@@ -440,7 +440,7 @@ set_file_timestamp <- function(path, hdrs) {
 #' @export
 bb_rget_default_downloads <- function() "README|\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml|tar|tgz|tif|tiff)$"
 
-build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_certificate = FALSE, user, password, enforce_basic_auth = FALSE, remote_time = NA) {
+build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_certificate = FALSE, user, password, enforce_basic_auth = FALSE, remote_time = NA, accept_encoding = "gzip, deflate") {
     out <- if (!is.null(debug) && debug) httr::verbose() else httr::config() ## curl's verbose output is intense, save it for debug = TRUE
     if (!is.null(show_progress) && show_progress) out$options <- c(out$options, httr::progress()$options)
     if (!is.null(no_check_certificate) && no_check_certificate) {
@@ -455,5 +455,6 @@ build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_cer
     }
     if (enforce_basic_auth) out$options$httpauth <- 1L # force basic authentication
     if (!is.na(remote_time)) out$options$filetime <- if (remote_time) 1L else 0L
+    if (!is.null(accept_encoding) && nzchar(accept_encoding)) out$options$accept_encoding <- accept_encoding
     out
 }
