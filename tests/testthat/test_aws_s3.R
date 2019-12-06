@@ -82,5 +82,8 @@ test_that("bb_handler_aws_s3 works", {
     expect_equal(nrow(status$files[[1]]), 1)
     expect_true(file.exists(status$files[[1]]$file))
     fi <- file.info(status$files[[1]]$file)
-    expect_gt(fi$size, 14e6)
+    expect_gt(fi$size, 0)
+    ## first few bytes should indicate that it's HDF
+    chk <- readBin(status$files[[1]]$file, "raw", n = 6L)
+    expect_identical(chk, as.raw(c(137, utf8ToInt("HDF\r\n"))))
 })
