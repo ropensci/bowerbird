@@ -8,7 +8,7 @@ Authors@R: c(person("Ben", "Raymond", email = "ben.raymond@aad.gov.au", role = c
              person("Leah", "Wasser", role = c("rev", "ctb")))
 Description: Tools to get and maintain a data repository from third-party data
     providers.
-URL: https://github.com/ropensci/bowerbird
+URL: https://docs.ropensci.org/bowerbird, https://github.com/ropensci/bowerbird
 BugReports: https://github.com/ropensci/bowerbird/issues
 License: MIT + file LICENSE
 Depends: R (>= 3.3.0)
