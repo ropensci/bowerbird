@@ -37,7 +37,7 @@ Suggests:
     knitr,
     testthat,
     covr
-Remotes: jimhester/archive, cloudyr/aws.s3
+Remotes: jimhester/archive, cloudyr/aws.s3@v0.3.12
 VignetteBuilder: knitr
 X-schema.org-applicationCategory: Antarctic/Southern Ocean
 X-schema.org-keywords: ropensci, Antarctic, Southern Ocean, data, environmental, satellite, climate
