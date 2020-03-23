@@ -84,7 +84,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
         ## uncompress uses archive::file_read, which is a suggested package
         ## check that we have it
         if (!requireNamespace("archive", quietly = TRUE))
-            stop("the archive package is needed for uncompress functionality")
+            stop("the archive package is needed for uncompress functionality. Install it with `remotes::install_github('jimhester/archive')`")
 
     }
     ## unzip() issues warnings in some cases when operations have errors, and sometimes issues actual errors
