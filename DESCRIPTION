@@ -1,7 +1,7 @@
 Package: bowerbird
 Type: Package
 Title: Keep a Collection of Sparkly Data Resources
-Version: 0.9.3
+Version: 0.9.3.9999
 Authors@R: c(person("Ben", "Raymond", email = "ben.raymond@aad.gov.au", role = c("aut", "cre")),
              person("Michael", "Sumner", role = "aut"),
              person("Miles", "McBain", email = "miles.mcbain@gmail.com", role = c("rev", "ctb")),
@@ -14,7 +14,6 @@ License: MIT + file LICENSE
 Depends: R (>= 3.3.0)
 Imports:
     assertthat,
-    aws.s3 (>= 0.3.20),
     curl,
     fs,
     httr,
@@ -31,13 +30,14 @@ Imports:
     xml2
 LazyLoad: yes
 Encoding: UTF-8
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 Suggests:
     archive,
+    aws.s3 (>= 0.3.20),
+    covr,
     knitr,
-    testthat,
-    covr
-Remotes: jimhester/archive, cloudyr/aws.s3@8c722f8
+    testthat
+Remotes: jimhester/archive
 VignetteBuilder: knitr
 X-schema.org-applicationCategory: Antarctic/Southern Ocean
 X-schema.org-keywords: ropensci, Antarctic, Southern Ocean, data, environmental, satellite, climate
