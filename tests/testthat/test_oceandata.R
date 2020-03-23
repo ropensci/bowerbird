@@ -1,17 +1,19 @@
 context("oceandata handler")
 
 test_that("bb_handler_oceandata works",{
-    skip_on_appveyor() ## failing on AppVeyor for unknown reasons
+    skip("skipping oceandata test downloads, requires Earth data login")
     ods <- bb_source(
         id="bilbobaggins",
         name="Oceandata test",
-        description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
+        description="Monthly remote-sensing PAR from the MODIS Terra satellite at 9km spatial resolution",
         doc_url= "https://oceancolor.gsfc.nasa.gov/",
         citation="See https://oceancolor.gsfc.nasa.gov/cms/citations",
         source_url="",
         license="Please cite",
+        user = "YOUR_EARTHDATA_USERNAME", password = "YOUR_EARTHDATA_PASSWORD",
         comment="",
-        method=list("bb_handler_oceandata",search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
+        method=list("bb_handler_oceandata",search="T20000322000060.L3m_MO_PAR_par_9km.nc"),
+          ##T20000322000060.L3m_MO_SST_sst_9km.nc ## gives 404 but it appears that the file search utility reports it, but it doesn't actually exist on the server
         postprocess=NULL,
         access_function="",
         data_group="Sea surface temperature")
@@ -19,7 +21,7 @@ test_that("bb_handler_oceandata works",{
     ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODIST/Mapped$",bb_data_source_dir(ocf)))
     bb_sync(ocf, confirm_downloads_larger_than = NULL)
-    fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/SST/T20000322000060.L3m_MO_SST_sst_9km.nc" ## relative file name
+    fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/par/T20000322000060.L3m_MO_PAR_par_9km.nc" ## relative file name
     expect_true(file.exists(file.path(temp_root,fnm)))
     fi <- file.info(file.path(temp_root,fnm))
     expect_gt(fi$size,6e6)
@@ -54,6 +56,7 @@ test_that("bb_handler_oceandata works when no files match",{
         citation="See https://oceancolor.gsfc.nasa.gov/cms/citations",
         source_url="",
         license="Please cite",
+        user = "YOUR_EARTHDATA_USERNAME", password = "YOUR_EARTHDATA_PASSWORD",
         comment="",
         method=list("bb_handler_oceandata",search="Tblahblahblah20000322000060.L3m_MO_SST_sst_9km.nc"),
         postprocess=NULL,

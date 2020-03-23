@@ -224,7 +224,7 @@ You can immediately see that by using a recursive download, not only did we not 
 
 #### Example 3: an Earthdata source
 
-The [Earthdata system](https://earthdata.nasa.gov/) is one of NASA's data management systems and home to a vast range of Earth science data from satellites, aircraft, field measurements, and other sources. Say you had a rummage through their [data catalogue](https://search.earthdata.nasa.gov/) and found yourself wanting a copy of [Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS](http://doi.org/10.5067/EYICLBOAAJOU).
+The [Earthdata system](https://earthdata.nasa.gov/) is one of NASA's data management systems and home to a vast range of Earth science data from satellites, aircraft, field measurements, and other sources. Say you had a rummage through their [data catalogue](https://search.earthdata.nasa.gov/) and found yourself wanting a copy of [Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS](https://doi.org/10.5067/IJ0T7HFHB9Y6).
 
 Data sources served through the Earthdata system require users to have an Earthdata account, and to log in with their credential when downloading data. Bowerbird's `bb_handler_earthdata` function eases some of the hassle involved with these Earthdata sources.
 
@@ -232,9 +232,9 @@ First, let's create an account and get ourselves access to the data.
 
 1. create an Earthdata login via https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login if you don't already have one
 
-1. we need to know the URL of the actual data. The [metadata record](http://doi.org/10.5067/EYICLBOAAJOU) for this data set contains a "Get data" button, which in turn directs the user to this URL: https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/. That's the data URL (which will be used as the `source_url` in our data source definition)
+1. we need to know the URL of the actual data. The [metadata record](https://doi.org/10.5067/IJ0T7HFHB9Y6) for this data set contains a "Download via HTTPS" link, which in turn directs the user to this URL: https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v3/. That's the data URL (which will be used as the `source_url` in our data source definition)
 
-1. browse to the [that data URL](https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/), using your Earthdata login to authenticate. When you use access an Earthdata application for the first time, you will be requested to authorize it so that it can access data using your credentials (see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login). This dataset is served by the NSIDC DAAC application, so you will need to authorize this application (either through browsing as just described, or go to 'My Applications' at https://urs.earthdata.nasa.gov/profile and add the application 'nsidc-daacdata' to your list of authorized applications)
+1. browse to the [that data URL](https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v3/), using your Earthdata login to authenticate. When you use access an Earthdata application for the first time, you will be requested to authorize it so that it can access data using your credentials (see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login). This dataset is served by the NSIDC DAAC application, so you will need to authorize this application (either through browsing as just described, or go to 'My Applications' at https://urs.earthdata.nasa.gov/profile and add the application 'nsidc-daacdata' to your list of authorized applications)
 
 You only need to create an Earthdata login once. If you want to download other Earthdata data sets via bowerbird, you'll use the same credentials, but note that you may need to authorize additional applications, depending on where your extra data sets come from.
 
@@ -242,12 +242,12 @@ Now that we have access to the data, we can write our bowerbird data source:
 
 ```{r eval = FALSE}
 src3 <- bb_source(
-    name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2",
-    id = "10.5067/EYICLBOAAJOU",
+    name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3",
+    id = "10.5067/IJ0T7HFHB9Y6",
     description = "NSIDC provides this data set to aid in the investigations of the variability and trends of sea ice cover. Ice cover in these data are indicated by sea ice concentration: the percentage of the ocean surface covered by ice. The ice-covered area indicates how much ice is present; it is the total area of a pixel multiplied by the ice concentration in that pixel. Ice persistence is the percentage of months over the data set time period that ice existed at a location. The ice-extent indicates whether ice is present; here, ice is considered to exist in a pixel if the sea ice concentration exceeds 15 percent. This data set provides users with data about total ice-covered areas, sea ice extent, ice persistence, and monthly climatologies of sea ice concentrations.",
-    doc_url = "https://doi.org/10.5067/EYICLBOAAJOU",
-    citation = "Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2. [Indicate subset used]. Boulder, Colorado USA. NASA National Snow and Ice Data Center Distributed Active Archive Center. doi: http://dx.doi.org/10.5067/EYICLBOAAJOU. [Date Accessed].",
-    source_url = c("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"),
+    doc_url = "https://doi.org/10.5067/IJ0T7HFHB9Y6",
+    citation = "Stroeve J, Meier WN (2018) Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3. [Indicate subset used]. Boulder, Colorado USA. NASA National Snow and Ice Data Center Distributed Active Archive Center. doi:10.5067/IJ0T7HFHB9Y6. [Date Accessed].",
+    source_url = c("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v3/"),
     license = "Please cite, see http://nsidc.org/about/use_copyright.html",
     authentication_note = "Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login . Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
     method = list("bb_handler_earthdata", level = 4, relative = TRUE, accept_download = "\\.(s|n|png|txt)$"),
@@ -268,7 +268,7 @@ Note that if you were providing this data source definition for other people to 
 
 ```{r eval = FALSE}
 src3 <- bb_source(
-    name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2",
+    name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3",
     ... details as above...,
     user = "",
     password = "",
@@ -295,18 +295,22 @@ NASA's [Oceandata](https://oceandata.sci.gsfc.nasa.gov/) system provides access 
 
 Oceandata uses standardized file naming conventions (see https://oceancolor.gsfc.nasa.gov/docs/format/), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the `search` argument to the `bb_handler_oceandata` handler function. Note that the `bb_handler_oceandata` does not need a `source_url` to be specified in the `bb_source` call.
 
-Here, for the sake of a small example, we'll limit ourselves to a single file ("T20000322000060.L3m_MO_SST_sst_9km.nc", which is sea surface temperature from the Terra satellite in February 2000):
+Note that as of 1-Jan-2020, all Oceandata users [require an EarthData login](https://oceancolor.gsfc.nasa.gov/forum/oceancolor/topic_show.pl?tid=11280). You will need to provide your username and password in the `bb_source` call, and you will also need to authorize the 'OB.DAAC Data Access' application in your EarthData account (see 'My Applications' at https://urs.earthdata.nasa.gov/profile).
+
+Here, for the sake of a small example, we'll limit ourselves to a single file ("T20000322000060.L3m_MO_PAR_par_9km.nc", which is photosynthetically-active radiation from the Terra satellite in February 2000):
 
 ```{r eval = FALSE}
 src4 <- bb_source(
     name = "Oceandata test file",
     id = "oceandata-test",
-    description = "Monthly, 9km remote-sensed sea surface temperature from the MODIS Terra satellite",
+    description = "Monthly, 9km remote-sensed PAR from the MODIS Terra satellite",
     doc_url = "https://oceancolor.gsfc.nasa.gov/",
     citation = "See https://oceancolor.gsfc.nasa.gov/cms/citations",
     license = "Please cite",
-    method = list("bb_handler_oceandata", search="T20000322000060.L3m_MO_SST_sst_9km.nc"),
-    data_group = "Sea surface temperature")
+    method = list("bb_handler_oceandata", search="T20000322000060.L3m_MO_PAR_par_9km.nc"),
+    user = "your_earthdata_username",
+    password = "your_earthdata_password",
+    data_group = "Ocean data")
 
 ## add this source to a configuration and synchronize it:
 cf <- bb_config("c:/temp/data/bbtest") %>% bb_add(src4)

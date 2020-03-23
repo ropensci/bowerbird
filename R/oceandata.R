@@ -2,6 +2,8 @@
 #'
 #' This is a handler function to be used with data sets from NASA's Oceandata system. This function is not intended to be called directly, but rather is specified as a \code{method} option in \code{\link{bb_source}}.
 #'
+#' Note that users will need an Earthdata login, see https://urs.earthdata.nasa.gov/. Users will also need to authorize the application 'OB.DAAC Data Access' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)
+#'
 #' Oceandata uses standardized file naming conventions (see https://oceancolor.gsfc.nasa.gov/docs/format/), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the \code{search} argument. Note that the \code{bb_handler_oceandata} does not take need `source_url` to be specified in the \code{bb_source} call.
 #'
 #' @references https://oceandata.sci.gsfc.nasa.gov/
@@ -64,6 +66,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     if (!is.null(dtype)) assert_that(is.string(dtype), nzchar(dtype))
     assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
 
+    thisds <- bb_data_sources(config) ## user and password info will be in here
     this_att <- bb_settings(config)
     if (local_dir_only) {
         ## highest-level dir
@@ -79,9 +82,10 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         }
         return(file.path(this_att$local_file_root,out))
     }
+    if (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password)) stop(sprintf("Oceandata sources now require an Earthdata login: provide your user and password in the source configuration"))
     tries <- 0
     ## don't show progress for the file index
-    my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = this_att$user, password = this_att$password)
+    my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = thisds$user, password = thisds$password)
     if (verbose) cat("Downloading file list ... \n")
     while (tries<3) {
         bdy <- list(cksum = 1, search = search)
@@ -103,7 +107,12 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     ## for each file, download if needed and store in appropriate directory
     ok <- TRUE
     downloads <- tibble(url = NA_character_, file = myfiles$filename, was_downloaded = FALSE)
-    my_curl_config <- build_curl_config(debug = FALSE, show_progress = verbose, user = this_att$user, password = this_att$password)
+    cookies_file <- tempfile()
+    my_curl_config <- build_curl_config(debug = TRUE, show_progress = verbose, user = thisds$user, password = thisds$password, enforce_basic_auth = TRUE)
+    ## and some more configs specifically for earthdata
+    my_curl_config$options$followlocation <- 1
+    my_curl_config$options$cookiefile <- cookies_file ## reads cookies from here
+    my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
     for (idx in seq_len(nrow(myfiles))) {
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/",myfiles$filename[idx]) ## full URL
         downloads$url[idx] <- this_url
