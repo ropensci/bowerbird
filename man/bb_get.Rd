@@ -4,9 +4,18 @@
 \alias{bb_get}
 \title{Convenience function to define and synchronize a bowerbird data collection}
 \usage{
-bb_get(data_sources, local_file_root, clobber = 1, http_proxy = NULL,
-  ftp_proxy = NULL, create_root = FALSE, verbose = FALSE,
-  confirm_downloads_larger_than = 0.1, dry_run = FALSE, ...)
+bb_get(
+  data_sources,
+  local_file_root,
+  clobber = 1,
+  http_proxy = NULL,
+  ftp_proxy = NULL,
+  create_root = FALSE,
+  verbose = FALSE,
+  confirm_downloads_larger_than = 0.1,
+  dry_run = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data_sources}{tibble: one or more data sources to download, as returned by e.g. \code{bb_example_sources}}

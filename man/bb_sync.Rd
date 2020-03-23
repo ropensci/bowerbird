@@ -4,9 +4,14 @@
 \alias{bb_sync}
 \title{Run a bowerbird data repository synchronization}
 \usage{
-bb_sync(config, create_root = FALSE, verbose = FALSE,
-  catch_errors = TRUE, confirm_downloads_larger_than = 0.1,
-  dry_run = FALSE)
+bb_sync(
+  config,
+  create_root = FALSE,
+  verbose = FALSE,
+  catch_errors = TRUE,
+  confirm_downloads_larger_than = 0.1,
+  dry_run = FALSE
+)
 }
 \arguments{
 \item{config}{bb_config: configuration as returned by \code{\link{bb_config}}}
@@ -51,7 +56,7 @@ Note that when \code{bb_sync} is run, the \code{local_file_root} directory must 
 
   ## Once the configuration has been defined and the data source added to it,
   ## we can run the sync process.
-  ## We set \\code{verbose=TRUE} so that we see additional progress output:
+  ## We set \code{verbose=TRUE} so that we see additional progress output:
 
   status <- bb_sync(cf, verbose = TRUE)
 

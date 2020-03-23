@@ -4,8 +4,13 @@
 \alias{bb_cleanup}
 \title{Postprocessing: remove unwanted files}
 \usage{
-bb_cleanup(pattern, recursive = FALSE, ignore_case = FALSE,
-  all_files = FALSE, ...)
+bb_cleanup(
+  pattern,
+  recursive = FALSE,
+  ignore_case = FALSE,
+  all_files = FALSE,
+  ...
+)
 }
 \arguments{
 \item{pattern}{string: regular expression, passed to \code{file.info}}

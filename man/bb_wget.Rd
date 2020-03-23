@@ -4,14 +4,36 @@
 \alias{bb_wget}
 \title{Make a wget call}
 \usage{
-bb_wget(url, recursive = TRUE, level = 1, wait = 0, accept, reject,
-  accept_regex, reject_regex, exclude_directories, restrict_file_names,
-  progress, user, password, output_file, robots_off = FALSE,
-  timestamping = FALSE, no_if_modified_since = FALSE,
-  no_clobber = FALSE, no_parent = TRUE, no_check_certificate = FALSE,
-  relative = FALSE, adjust_extension = FALSE, retr_symlinks = FALSE,
-  extra_flags = character(), verbose = FALSE, capture_stdout = FALSE,
-  quiet = FALSE, debug = FALSE)
+bb_wget(
+  url,
+  recursive = TRUE,
+  level = 1,
+  wait = 0,
+  accept,
+  reject,
+  accept_regex,
+  reject_regex,
+  exclude_directories,
+  restrict_file_names,
+  progress,
+  user,
+  password,
+  output_file,
+  robots_off = FALSE,
+  timestamping = FALSE,
+  no_if_modified_since = FALSE,
+  no_clobber = FALSE,
+  no_parent = TRUE,
+  no_check_certificate = FALSE,
+  relative = FALSE,
+  adjust_extension = FALSE,
+  retr_symlinks = FALSE,
+  extra_flags = character(),
+  verbose = FALSE,
+  capture_stdout = FALSE,
+  quiet = FALSE,
+  debug = FALSE
+)
 }
 \arguments{
 \item{url}{string: the URL to retrieve}

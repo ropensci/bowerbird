@@ -4,9 +4,16 @@
 \alias{bb_summary}
 \title{Produce a summary of a bowerbird configuration}
 \usage{
-bb_summary(config, file = tempfile(fileext = ".html"), format = "html",
-  inc_license = TRUE, inc_auth = TRUE, inc_size = TRUE,
-  inc_access_function = TRUE, inc_path = TRUE)
+bb_summary(
+  config,
+  file = tempfile(fileext = ".html"),
+  format = "html",
+  inc_license = TRUE,
+  inc_auth = TRUE,
+  inc_size = TRUE,
+  inc_access_function = TRUE,
+  inc_path = TRUE
+)
 }
 \arguments{
 \item{config}{bb_config: a bowerbird configuration (as returned by \code{bb_config})}

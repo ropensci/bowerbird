@@ -4,12 +4,25 @@
 \alias{bb_source}
 \title{Define a data source}
 \usage{
-bb_source(id, name, description = NA_character_, doc_url, source_url,
-  citation, license, comment = NA_character_, method, postprocess,
-  authentication_note = NA_character_, user = NA_character_,
-  password = NA_character_, access_function = NA_character_,
-  data_group = NA_character_, collection_size = NA,
-  warn_empty_auth = TRUE)
+bb_source(
+  id,
+  name,
+  description = NA_character_,
+  doc_url,
+  source_url,
+  citation,
+  license,
+  comment = NA_character_,
+  method,
+  postprocess,
+  authentication_note = NA_character_,
+  user = NA_character_,
+  password = NA_character_,
+  access_function = NA_character_,
+  data_group = NA_character_,
+  collection_size = NA,
+  warn_empty_auth = TRUE
+)
 }
 \arguments{
 \item{id}{string: (required) a unique identifier of the data source. If the data source has a DOI, use that. Otherwise, if the original data provider has an identifier for this dataset, that is probably a good choice here (include the data version number if there is one). The ID should be something that changes when the data set changes (is updated). A DOI is ideal for this}
