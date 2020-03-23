@@ -15,12 +15,12 @@
 #' ## note that the full version of this data source is provided as part of bb_example_data_sources()
 #'
 #' my_source <- bb_source(
-#'   name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2",
+#'   name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3",
 #'   id = "10.5067/EYICLBOAAJOU",
 #'   description = "NSIDC provides this data set ... [truncated; see bb_example_data_sources()]",
-#'   doc_url = "https://nsidc.org/data/NSIDC-0192/versions/2",
-#'   citation = "Stroeve, J. and W. Meier. 2017. ... [truncated; see bb_example_data_sources()]",
-#'   source_url = "https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/",
+#'   doc_url = "https://nsidc.org/data/NSIDC-0192/versions/3",
+#'   citation = "Stroeve J, Meier WN (2018) ... [truncated; see bb_example_data_sources()]",
+#'   source_url = "https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v3/",
 #'   license = "Please cite, see http://nsidc.org/about/use_copyright.html",
 #'   authentication_note = "Requires Earthdata login, see https://urs.earthdata.nasa.gov/.
 #'     Note that you will also need to authorize the application 'nsidc-daacdata'
@@ -62,7 +62,7 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
     }
 
     dummy <- bb_data_sources(config)
-    if (na_or_empty(dummy$user) || na_or_empty(dummy$password)) stop(sprintf("Earthdata source \"%s\" requires user and password", dummy$name))
+    if (is.null(dummy$user) || is.null(dummy$password) || na_or_empty(dummy$user) || na_or_empty(dummy$password)) stop(sprintf("Earthdata source \"%s\" requires user and password", dummy$name))
     cookies_file <- gsub("\\\\", "/", tempfile()) ## probably don't need the gsub, was there for windows debugging
     ## create this file
     if (!file.exists(cookies_file)) cat("", file = cookies_file)

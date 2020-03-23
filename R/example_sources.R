@@ -8,7 +8,7 @@
 #'   \item "Australian Election 2016 House of Representatives data" - an example of a recursive download that uses additional criteria to restrict what is downloaded
 #'   \item "CMEMS global gridded SSH reprocessed (1993-ongoing)" - a data source that requires a username and password
 #'   \item "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a" - an example data source that uses the \code{bb_handler_oceandata} method
-#'   \item "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2" - an example data source that uses the \code{bb_handler_earthdata} method
+#'   \item "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3" - an example data source that uses the \code{bb_handler_earthdata} method
 #'   \item "Bathymetry of Lake Superior" - another example that passes extra flags to the \code{bb_handler_rget} call in order to restrict what is downloaded
 #' }
 #'
@@ -119,14 +119,14 @@ bb_example_sources <- function(sources) {
                           collection_size = 7.2,
                           data_group = "Ocean colour")))
     }
-    if (missing(sources) || any(c("Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2", "10.5067/EYICLBOAAJOU") %in% sources)) {
+    if (missing(sources) || any(c("Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3", "10.5067/EYICLBOAAJOU") %in% sources)) {
         out <- c(out, list(bb_source(
-                          name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2",
-                          id = "10.5067/EYICLBOAAJOU",
+                          name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3",
+                          id = "10.5067/IJ0T7HFHB9Y6",
                           description = "NSIDC provides this data set to aid in the investigations of the variability and trends of sea ice cover. Ice cover in these data are indicated by sea ice concentration: the percentage of the ocean surface covered by ice. The ice-covered area indicates how much ice is present; it is the total area of a pixel multiplied by the ice concentration in that pixel. Ice persistence is the percentage of months over the data set time period that ice existed at a location. The ice-extent indicates whether ice is present; here, ice is considered to exist in a pixel if the sea ice concentration exceeds 15 percent. This data set provides users with data about total ice-covered areas, sea ice extent, ice persistence, and monthly climatologies of sea ice concentrations.",
-                          doc_url = "https://nsidc.org/data/NSIDC-0192/versions/2",
-                          citation = "Stroeve, J. and W. Meier. 2017. Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2. [Indicate subset used]. Boulder, Colorado USA. NASA National Snow and Ice Data Center Distributed Active Archive Center. doi: http://dx.doi.org/10.5067/EYICLBOAAJOU. [Date Accessed].",
-                          source_url = c("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v2/"),
+                          doc_url = "https://nsidc.org/data/NSIDC-0192/versions/3",
+                          citation = "Stroeve J, Meier WN (2018) Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3. [Indicate subset used]. Boulder, Colorado USA. NASA National Snow and Ice Data Center Distributed Active Archive Center. doi:10.5067/IJ0T7HFHB9Y6. [Date Accessed].",
+                          source_url = c("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v3/"),
                           license = "Please cite, see http://nsidc.org/about/use_copyright.html",
                           authentication_note = "Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login . Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
                           method = list("bb_handler_earthdata", level = 4, relative = TRUE, accept_download = "\\.(s|n|png|txt)$"),

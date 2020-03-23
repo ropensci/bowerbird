@@ -22,7 +22,7 @@ Example data sources:
   \item "Australian Election 2016 House of Representatives data" - an example of a recursive download that uses additional criteria to restrict what is downloaded
   \item "CMEMS global gridded SSH reprocessed (1993-ongoing)" - a data source that requires a username and password
   \item "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a" - an example data source that uses the \code{bb_handler_oceandata} method
-  \item "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2" - an example data source that uses the \code{bb_handler_earthdata} method
+  \item "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3" - an example data source that uses the \code{bb_handler_earthdata} method
   \item "Bathymetry of Lake Superior" - another example that passes extra flags to the \code{bb_handler_rget} call in order to restrict what is downloaded
 }
 }
