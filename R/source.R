@@ -160,14 +160,14 @@ bb_source <- function(id,name,description=NA_character_,doc_url,source_url,citat
 #'
 #' ## this pre-defined source requires a username and password
 #' src <- bb_example_sources(
-#'           "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2")
+#'           "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3")
 #'
 #' ## add username and password
 #' src <- bb_modify_source(src,user="myusername",password="mypassword")
 #'
 #' ## or using the pipe operator
 #' src <- bb_example_sources(
-#'           "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 2") %>%
+#'           "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3") %>%
 #'   bb_modify_source(user="myusername",password="mypassword")
 #'
 #' ## remove the existing "data_group" component
