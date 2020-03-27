@@ -343,6 +343,7 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 } else {
                     all_links <- unique(na.omit(vapply(html_nodes(x, "a"), function(z) html_attr(z, "href"), FUN.VALUE = "", USE.NAMES = FALSE)))
                 }
+                ##cat("First 20 links: "); print(head(all_links, 20))
                 ## discard non-relative links, if opts$relative
                 if (opts$relative) all_links <- all_links[vapply(all_links, is_relative_url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
                 ## get all links as absolute URLs, discarding anchors (fragments)
@@ -358,8 +359,10 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 for (rgx in opts$accept_download_extra) temp2 <- temp2 & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 download_idx <- temp1 | temp2
                 for (rgx in opts$reject_download) download_idx <- download_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                ##cat("First 20 links to follow: "); print(head(follow_links, 20))
                 download_links <- all_links[download_idx]
                 download_links <- download_links[!download_links %in% download_queue]
+                ##cat("First 20 links to download: "); print(download_links)
                 if (current_level < (opts$level - 1)) { ## -1 because we will download files linked from these pages, and those files will be current_level + 2
                     if (opts$verbose) cat(sprintf(" %d download links", length(download_links)))
                     follow_links <- setdiff(follow_links, download_links) ## can't be in both, treat as download?
@@ -438,7 +441,7 @@ set_file_timestamp <- function(path, hdrs) {
 
 #' @rdname bb_rget
 #' @export
-bb_rget_default_downloads <- function() "README|\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml|tar|tgz|tif|tiff)$"
+bb_rget_default_downloads <- function() "README|\\.(asc|csv|hdf|nc|bin|txt|gz|bz|bz2|Z|zip|kmz|kml|pdf|tar|tgz|tif|tiff)$"
 
 build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_certificate = FALSE, user, password, enforce_basic_auth = FALSE, remote_time = NA, accept_encoding = "gzip, deflate") {
     out <- if (!is.null(debug) && debug) httr::verbose() else httr::config() ## curl's verbose output is intense, save it for debug = TRUE
