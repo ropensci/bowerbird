@@ -17,6 +17,7 @@ Imports:
     curl,
     fs,
     httr,
+    jsonlite,
     lubridate,
     magrittr,
     methods,
