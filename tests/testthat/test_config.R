@@ -168,14 +168,4 @@ test_that("bb_subset works",{
     idx[1:2] <- TRUE
     temp <- bb_subset(cf,idx)
     expect_equal(nrow(bb_data_sources(temp)),2)
-    idx <- rep(FALSE,nrow(bb_data_sources(cf))+1)
-    idx[1:2] <- TRUE
-    expect_warning(temp <- bb_subset(cf,idx),"Length of logical index must be") ## logical index longer than number of rows
-    expect_equal(nrow(bb_data_sources(temp)),2) ## but still get two rows back
-    temp <- bb_subset(cf,c(1:2,100)) ## two legit indices plus one dud one
-    expect_equal(nrow(bb_data_sources(temp)),2) ## dud one should be ignored
-    temp <- bb_subset(cf,-1)
-    expect_equal(nrow(bb_data_sources(temp)),5)
-    temp <- bb_subset(cf,-100)
-    expect_identical(temp,cf) ## can't drop the 100th row, nothing to do
 })
