@@ -10,10 +10,24 @@ bb_zenodo_source(id)
 \item{id}{: the ID of the data set}
 }
 \value{
-A tibble containing the data source definition, as would be returned by \code{\link[bowerbird]{bb_source}}
+A tibble containing the data source definition, as would be returned by \code{\link{bb_source}}
 }
 \description{
 Generate a bowerbird data source object for a Zenodo data set
+}
+\examples{
+\dontrun{
+  ## generate the source object for the dataset
+  ##   'Ichtyological data of Station de biologie des Laurentides 2019'
+  src <- bb_zenodo_source(3533328)
+
+  ## download it to a temporary directory
+  data_dir <- tempfile()
+  dir.create(data_dir)
+  res <- bb_get(src, local_file_root = data_dir, verbose = TRUE)
+  res$files
+}
+
 }
 \seealso{
 \code{\link{bb_source}}

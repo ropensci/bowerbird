@@ -2,14 +2,14 @@
 #'
 #' @param id : the ID of the data set
 #'
-#' @return A tibble containing the data source definition, as would be returned by \code{\link[bowerbird]{bb_source}}
+#' @return A tibble containing the data source definition, as would be returned by \code{\link{bb_source}}
 #'
 #' @seealso \code{\link{bb_source}}
 #'
 #' @examples
 #' \dontrun{
-#'   ## generate the source object for the dataset 'Ichtyological data of Station de biologie
-#'        des Laurentides 2019'
+#'   ## generate the source object for the dataset
+#'   ##   'Ichtyological data of Station de biologie des Laurentides 2019'
 #'   src <- bb_zenodo_source(3533328)
 #'
 #'   ## download it to a temporary directory
