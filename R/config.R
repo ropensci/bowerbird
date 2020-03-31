@@ -226,7 +226,7 @@ bb_data_source_dir <- function(config) {
             as.character(NA)
         }
     }
-    vapply(seq_len(nrow(bb_data_sources(config))),function(z)single_source_dir(bb_subset(config,z)),FUN.VALUE="")
+    unlist(lapply(seq_len(nrow(bb_data_sources(config))),function(z)single_source_dir(bb_subset(config,z))))
 }
 
 
