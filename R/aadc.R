@@ -27,8 +27,11 @@ bb_aadc_source <- function(metadata_id) {
     murl <- paste0("https://data.aad.gov.au/metadata/records/", metadata_id)
     doi <- tryCatch(sub("^doi:", "", md$data$data_set_citation$dataset_doi), error = function(e) NULL)
     ## get collection size from the S3 API
+    postproc <- list()
     csize <- tryCatch({
         s3x <- get_json(paste0("https://data.aad.gov.au/s3/api/bucket/datasets/science/", metadata_id, "/?export=json"))
+        if (any(grepl("\\.zip$", s3x$name, ignore.case = TRUE))) postproc <- c(postproc, list("unzip"))
+        if (any(grepl("\\.gz$", s3x$name, ignore.case = TRUE))) postproc <- c(postproc, list("gunzip"))
         sz <- sum(s3x$size, na.rm = TRUE)/1024^3 ## in GB
         if (!is.na(sz)) ceiling(sz*10)/10 else NULL
     }, error = function(e) NULL)
@@ -40,7 +43,7 @@ bb_aadc_source <- function(metadata_id) {
               license = "CC-BY",
               method = list("bb_handler_aws_s3", bucket = "datasets", base_url = "services.aad.gov.au", region = "public", prefix = paste0("science/", metadata_id), use_https = FALSE),
               comment = "Source definition created by bb_aadc_source",
-              postprocess = NULL,
+              postprocess = postproc,
               collection_size = csize)
 }
 
