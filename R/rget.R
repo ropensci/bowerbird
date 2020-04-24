@@ -74,7 +74,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     ##} else {
 
     ## if dry_run, still call bb_rget
-    if (!is.null(cfrow$dry_run) && !is.na(cfrow$dry_run)) {
+    if (!is.null(cfrow[["dry_run"]]) && !is.na(cfrow$dry_run)) {
         this_flags$dry_run <- cfrow$dry_run
     }
     this_flags <- c(list(url = cfrow$source_url), this_flags, list(verbose = verbose))
