@@ -160,8 +160,8 @@ bb_example_sources <- function(sources) {
                           source_url = "https://www.ngdc.noaa.gov/mgg/greatlakes/superior/data/",
                           citation="Publisher: DOC/NOAA/NESDIS/NCEI > National Centers for Environmental Information, NESDIS, NOAA, U.S. Department of Commerce",
                           license = "https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright",
-                          method=list("bb_handler_rget", level = 2, accept_follow="/netcdf/"),
-                          comment="Only the netcdf format data are retrieved here - adjust the accept_follow parameter in the method argument to get other formats",
+                          method=list("bb_handler_rget", level = 2, accept_follow="/netcdf|xyz/"),
+                          comment="Only the netcdf and xyz format data are retrieved here - adjust the accept_follow parameter in the method argument to get other formats",
                           postprocess=list("bb_gunzip"),
                           collection_size=0.03,
                           data_group="Topography")))
