@@ -163,7 +163,7 @@ bb_example_sources <- function(sources) {
                           method=list("bb_handler_rget", level = 2, accept_follow="/netcdf|xyz/"),
                           comment="Only the netcdf and xyz format data are retrieved here - adjust the accept_follow parameter in the method argument to get other formats",
                           postprocess=list("bb_gunzip"),
-                          collection_size=0.03,
+                          collection_size=0.1,
                           data_group="Topography")))
     }
     do.call(rbind, out)
