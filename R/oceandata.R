@@ -43,7 +43,7 @@ bb_handler_oceandata <- function(search, dtype, ...) {
 # @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, dtype = NULL, stop_on_download_error = FALSE) {
+bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, search_method = "api", dtype = NULL, stop_on_download_error = FALSE, ...) {
     ## oceandata synchronization handler
 
     ## oceandata provides a file search interface, e.g.:
@@ -52,7 +52,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     ## or
     ## wget -q --post-data="dtype=L3b&cksum=1&search=A2014*DAY_CHL.*" -O - https://oceandata.sci.gsfc.nasa.gov/api/file_search
     ## returns list of files and SHA1 checksum for each file
-    ## each file can be retrieved from https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/filename
+    ## each file can be retrieved from https://oceandata.sci.gsfc.nasa.gov/ob/getfile/filename
 
     ## expect that config$data_sources$method list will contain the search and dtype components of the post string
     ##  i.e. "search=...&dtype=..." in "dtype=L3m&addurl=1&results_as_file=1&search=A2002*DAY_CHL_chlor*9km*"
@@ -63,22 +63,36 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     assert_that(is.flag(verbose), !is.na(verbose))
     assert_that(is.flag(local_dir_only), !is.na(local_dir_only))
     assert_that(is.string(search), nzchar(search))
+    assert_that(is.string(search_method), nzchar(search_method))
+    search_method <- match.arg(tolower(search_method), c("api", "scrape"))
     if (!is.null(dtype)) assert_that(is.string(dtype), nzchar(dtype))
     assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
+    dots <- list(...)
 
     thisds <- bb_data_sources(config) ## user and password info will be in here
     this_att <- bb_settings(config)
     if (local_dir_only) {
-        ## highest-level dir
-        out <- "oceandata.sci.gsfc.nasa.gov"
-        ## refine by platform
-        this_search_spec <- search
-        this_platform <- oceandata_platform_map(substr(this_search_spec,1,1))
-        if (nchar(this_platform)>0) out <- file.path(out,this_platform)
-        if (grepl("L3m",this_search_spec)) {
-            out <- file.path(out,"Mapped")
-        } else if (grepl("L3",this_search_spec)) {
-            out <- file.path(out,"L3BIN")
+        if (search_method == "scrape") {
+            ## url will be https://oceandata.sci.gsfc.nasa.gov/SeaWiFS/Mapped/something
+            ## we just want the host and first two path components
+            temp <- httr::parse_url(search)
+            out <- strsplit(temp$path, "/")[[1]]
+            if (is.null(temp$hostname) || !nzchar(temp$hostname) || length(out) < 2) {
+                stop("could not figure out local directory from scrape search URL")
+            }
+            out <- file.path(temp$hostname, out[1], out[2])
+        } else {
+            ## highest-level dir
+            out <- "oceandata.sci.gsfc.nasa.gov"
+            ## refine by platform
+            this_search_spec <- search
+            this_platform <- oceandata_platform_map(substr(this_search_spec,1,1))
+            if (nchar(this_platform)>0) out <- file.path(out,this_platform)
+            if (grepl("L3m",this_search_spec)) {
+                out <- file.path(out,"Mapped")
+            } else if (grepl("L3",this_search_spec)) {
+                out <- file.path(out,"L3BIN")
+            }
         }
         return(file.path(this_att$local_file_root,out))
     }
@@ -87,34 +101,46 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     ## don't show progress for the file index
     my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = thisds$user, password = thisds$password)
     if (verbose) cat("Downloading file list ... \n")
-    while (tries<3) {
-        bdy <- list(cksum = 1, search = search)
-        if (!is.null(dtype)) bdy$dtype <- dtype
-        myfiles <- httr::with_config(my_curl_config, httr::POST("https://oceandata.sci.gsfc.nasa.gov/api/file_search", body = bdy))
-        if (!httr::http_error(myfiles)) break
-        tries <- tries + 1
+    if (search_method == "api") {
+        ## this can be super slow for large queries, but it gives a checksum
+        while (tries<3) {
+            bdy <- list(cksum = 1, search = search)
+            if (!is.null(dtype)) bdy$dtype <- dtype
+            myfiles <- httr::with_config(my_curl_config, httr::POST("https://oceandata.sci.gsfc.nasa.gov/api/file_search", body = bdy))
+            if (!httr::http_error(myfiles)) break
+            tries <- tries + 1
+        }
+        if (httr::http_error(myfiles)) stop("error with oceancolour data file search: could not retrieve file list (query: ", search, ")")
+        myfiles <- httr::content(myfiles, as = "text")
+        myfiles <- strsplit(myfiles,"\n")[[1]]
+        ## the old service would return a "Sorry No Files Matched Your Query", but this no longer happens
+        ## just look for an empty body
+        if (length(myfiles) < 1) stop("No files matched the supplied oceancolour data file search query (", search, ")")
+        myfiles <- as_tibble(do.call(rbind, lapply(myfiles, function(z) strsplit(z, "[[:space:]]+")[[1]]))) ## split checksum and file name from each line
+        colnames(myfiles) <- c("checksum", "filename")
+    } else if (search_method == "scrape") {
+        ## potentially override accept_download etc
+        myfiles <- bb_rget(search, level = 3,
+                           accept_download = if ("accept_download" %in% names(dots)) dots[["accept_download"]] else "/getfile/",
+                           ## follow 3-digit (day of year) or 4-digit (year) folders by default
+                           accept_follow = if ("accept_follow" %in% names(dots)) dots[["accept_follow"]] else "/[[:digit:]]{3}[[:digit:]]?/$",
+                           dry_run = TRUE, no_parent = FALSE, relative = FALSE, verbose = FALSE)
+        myfiles <- tibble(filename = basename(myfiles$files[[1]]$url), checksum = NA_character_)
     }
-    if (httr::http_error(myfiles)) stop("error with oceancolour data file search: could not retrieve file list (query: ", search, ")")
-    myfiles <- httr::content(myfiles, as = "text")
-    myfiles <- strsplit(myfiles,"\n")[[1]]
-    ## the old service would return a "Sorry No Files Matched Your Query", but this no longer happens
-    ## just look for an empty body
-    if (length(myfiles) < 1) stop("No files matched the supplied oceancolour data file search query (", search, ")")
-    myfiles <- as_tibble(do.call(rbind, lapply(myfiles, function(z) strsplit(z, "[[:space:]]+")[[1]]))) ## split checksum and file name from each line
-    colnames(myfiles) <- c("checksum", "filename")
+
     myfiles <- myfiles[order(myfiles$filename), ]
     if (verbose) cat(sprintf("\n%d file%s to download\n", nrow(myfiles), if (nrow(myfiles)>1) "s" else ""))
     ## for each file, download if needed and store in appropriate directory
     ok <- TRUE
     downloads <- tibble(url = NA_character_, file = myfiles$filename, was_downloaded = FALSE)
     cookies_file <- tempfile()
-    my_curl_config <- build_curl_config(debug = TRUE, show_progress = verbose, user = thisds$user, password = thisds$password, enforce_basic_auth = TRUE)
+    my_curl_config <- build_curl_config(debug = FALSE, show_progress = verbose, user = thisds$user, password = thisds$password, enforce_basic_auth = TRUE)
     ## and some more configs specifically for earthdata
     my_curl_config$options$followlocation <- 1
     my_curl_config$options$cookiefile <- cookies_file ## reads cookies from here
     my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
     for (idx in seq_len(nrow(myfiles))) {
-        this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/",myfiles$filename[idx]) ## full URL
+        this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename[idx]) ## full URL
         downloads$url[idx] <- this_url
         this_fullfile <- oceandata_url_mapper(this_url) ## where local copy will go
         if (is.null(this_fullfile)) {
@@ -131,10 +157,14 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                 ## don't clobber existing
             } else if (this_att$clobber == 1) {
                 ## replace existing if server copy newer than local copy
-                ## use checksum rather than dates for this
-                if (this_exists) {
-                    existing_checksum <- file_hash(this_fullfile, "sha1")
-                    download_this <- existing_checksum != myfiles$checksum[idx]
+                if (search_method == "api") {
+                    ## use checksum rather than dates for this
+                    if (this_exists) {
+                        existing_checksum <- file_hash(this_fullfile, "sha1")
+                        download_this <- existing_checksum != myfiles$checksum[idx]
+                    }
+                } else {
+                    download_this <- TRUE
                 }
             } else {
                 download_this <- TRUE
@@ -142,12 +172,22 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             if (download_this) {
                 if (verbose) cat(sprintf("Downloading: %s ... \n", this_url))
                 if (!dir.exists(dirname(this_fullfile))) dir.create(dirname(this_fullfile), recursive = TRUE)
-                req <- httr::with_config(my_curl_config, httr::GET(this_url, httr::write_disk(path = this_fullfile, overwrite = TRUE)))
-                if (httr::http_error(req)) {
-                    myfun <- if (stop_on_download_error) stop else warning
-                    myfun("Error downloading ", this_url, ": ", httr::http_status(req)$message)
+                myfun <- if (stop_on_download_error) stop else warning
+                if (search_method == "scrape") {
+                    res <- bb_rget(this_url, force_local_filename = this_fullfile, use_url_directory = FALSE, clobber = this_att$clobber, ##user = thisds$user, password = thisds$password,
+                                   curl_opts = my_curl_config$options, verbose = verbose)
+                    if (!res$ok) {
+                        myfun("Error downloading ", this_url, ": ", res$message)
+                    } else {
+                        downloads$was_downloaded[idx] <- TRUE
+                    }
                 } else {
-                    downloads$was_downloaded[idx] <- TRUE
+                    req <- httr::with_config(my_curl_config, httr::GET(this_url, httr::write_disk(path = this_fullfile, overwrite = TRUE)))
+                    if (httr::http_error(req)) {
+                        myfun("Error downloading ", this_url, ": ", httr::http_status(req)$message)
+                    } else {
+                        downloads$was_downloaded[idx] <- TRUE
+                    }
                 }
             } else {
                 if (this_exists) {
@@ -165,7 +205,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
 
 # Satellite platform names and abbreviations used in Oceancolor URLs and file names
 # Oceancolor data file URLs need to be mapped to a file system hierarchy that mirrors the one used on the Oceancolor web site.
-# For example, \url{https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} or \url{https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (obtained from the Oceancolor visual browser or file search facility)
+# For example, \url{https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} or \url{https://oceandata.sci.gsfc.nasa.gov/ob/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (obtained from the Oceancolor visual browser or file search facility)
 # maps to \url{https://oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (in the Oceancolor file browse interface). Locally, this file will be stored in oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/V2016044.L3m_DAY_NPP_PAR_par_9km.nc
 # The \code{oceandata_platform_map} function maps the URL platform component ("V" in this example) to the corresponding directory name ("VIIRS")
 # @param abbrev character: the platform abbreviation from the URL (e.g. "Q" for Aquarius, "M" for MODIS-Aqua)
@@ -200,7 +240,7 @@ V,VIIRS"
 
 # Time periods and abbreviations used in Oceancolor URLs and file names
 # Oceancolor data file URLs need to be mapped to a file system hierarchy that mirrors the one used on the Oceancolor web site.
-# For example, \url{https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} or \url{https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (obtained from the Oceancolor visual browser or file search facility)
+# For example, \url{https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} or \url{https://oceandata.sci.gsfc.nasa.gov/ob/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (obtained from the Oceancolor visual browser or file search facility)
 # maps to \url{https://oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (in the Oceancolor file browse interface). Locally, this file will be stored in oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/V2016044.L3m_DAY_NPP_PAR_par_9km.nc
 # The \code{oceandata_timeperiod_map} function maps the URL time period component ("DAY" in this example) to the corresponding directory name ("Daily")
 # @references \url{https://oceandata.sci.gsfc.nasa.gov/}
@@ -288,7 +328,7 @@ V,RRS,S?NPP_RRS_.*"
 
 # Parameter names used in Oceancolor URLs and file names
 # Oceancolor data file URLs need to be mapped to a file system hierarchy that mirrors the one used on the Oceancolor web site.
-# For example, \url{https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} or \url{https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (obtained from the Oceancolor visual browser or file search facility)
+# For example, \url{https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} or \url{https://oceandata.sci.gsfc.nasa.gov/ob/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (obtained from the Oceancolor visual browser or file search facility)
 # maps to \url{https://oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (in the Oceancolor file browse interface). Locally, this file will be stored in oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/V2016044.L3m_DAY_NPP_PAR_par_9km.nc
 # The \code{oceandata_parameter_map} function maps the URL parameter component ("NPP_PAR_par" in this example) to the corresponding directory name ("par").
 # @references \url{https://oceandata.sci.gsfc.nasa.gov/}
@@ -320,18 +360,18 @@ oceandata_parameter_map <- function(platform,urlparm,error_no_match=FALSE) {
 
 # Map Oceancolor URL to file path
 # Oceancolor data file URLs need to be mapped to a file system hierarchy that mirrors the one used on the Oceancolor web site.
-# For example, \url{https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} or \url{https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (obtained from the Oceancolor visual browser or file search facility)
+# For example, \url{https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} or \url{https://oceandata.sci.gsfc.nasa.gov/ob/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (obtained from the Oceancolor visual browser or file search facility)
 # maps to \url{https://oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (in the Oceancolor file browse interface). Locally, this file will be stored in oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/V2016044.L3m_DAY_NPP_PAR_par_9km.nc
 # The \code{oceandata_url_mapper} function maps the URL parameter component ("NPP_PAR_par" in this example) to the corresponding directory name ("par").
 # @references \url{https://oceandata.sci.gsfc.nasa.gov/}
-# @param this_url string: the Oceancolor URL, e.g. https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km.bz2
+# @param this_url string: the Oceancolor URL, e.g. https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km.bz2
 # @param path_only logical: if TRUE, do not append the file name to the path
 # @param sep string: the path separator to use
 # @return Either the directory string corresponding to the URL code, if \code{abbrev} supplied, or a data.frame of all URL regexps and corresponding directory name strings if \code{urlparm} is missing
 # @export
 oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep) {
     ## take getfile URL and return (relative) path to put the file into
-    ## this_url should look like: https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km.bz2
+    ## this_url should look like: https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km.bz2
     ## Mapped files (L3m) should become oceandata.sci.gsfc.nasa.gov/platform/Mapped/timeperiod/spatial/parm/[yyyy/]basename
     ## [yyyy] only for 8Day,Daily,Rolling_32_Day
     ## Binned files (L3b) should become oceandata.sci.gsfc.nasa.gov/platform/L3BIN/yyyy/ddd/basename
@@ -341,7 +381,7 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
     if (grepl("\\.L3m_",this_url)) {
         ## mapped file
         url_parts <- str_match(this_url,"/([ASTCV])([[:digit:]]+)\\.(L3m)_([[:upper:][:digit:]]+)_(.*?)_(9|4)(km)?\\.(bz2|nc)")
-        ## e.g. [1,] "https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km"
+        ## e.g. [1,] "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km"
         ## [,2] [,3]      [,4]  [,5]  [,6]          [,7]
         ## "A"  "2002359" "L3m" "DAY" "CHL_chlor_a" "9"
         url_parts <- as.data.frame(url_parts,stringsAsFactors=FALSE)
@@ -349,14 +389,14 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
     } else if (grepl("\\.L3b_",this_url)) {
 
         url_parts <- str_match(this_url,"/([ASTCV])([[:digit:]]+)\\.(L3b)_([[:upper:][:digit:]]+)_(.*?)\\.(bz2|nc)")
-        ## https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A20090322009059.L3b_MO_KD490.main.bz2
+        ## https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A20090322009059.L3b_MO_KD490.main.bz2
 
-        ## e.g. [1,] "https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A20090322009059.L3b_MO_KD490.main.bz2" "A"  "20090322009059" "L3b" "MO" "KD490"
-        ## https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A2015016.L3b_DAY_RRS.nc
+        ## e.g. [1,] "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A20090322009059.L3b_MO_KD490.main.bz2" "A"  "20090322009059" "L3b" "MO" "KD490"
+        ## https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2015016.L3b_DAY_RRS.nc
         url_parts <- as.data.frame(url_parts,stringsAsFactors=FALSE)
         colnames(url_parts) <- c("full_url","platform","date","type","timeperiod","parm")
     } else if (grepl("\\.L2", this_url)) {
-      # "https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A2017002003000.L2_LAC_OC.nc"
+      # "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2017002003000.L2_LAC_OC.nc"
       url_parts <- str_match(this_url,"/([ASTCV])([[:digit:]]+)\\.(L2)_([[:upper:][:digit:]]+)_(.*?)\\.(bz2|nc)")
       url_parts <- as.data.frame(url_parts,stringsAsFactors=FALSE)
       colnames(url_parts) <- c("full_url","platform","date","type","coverage","parm", "extension")
