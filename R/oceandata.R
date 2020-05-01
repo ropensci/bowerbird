@@ -116,8 +116,9 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         ## the old service would return a "Sorry No Files Matched Your Query", but this no longer happens
         ## just look for an empty body
         if (length(myfiles) < 1) stop("No files matched the supplied oceancolour data file search query (", search, ")")
-        myfiles <- as_tibble(do.call(rbind, lapply(myfiles, function(z) strsplit(z, "[[:space:]]+")[[1]]))) ## split checksum and file name from each line
+        myfiles <- do.call(rbind, lapply(myfiles, function(z) strsplit(z, "[[:space:]]+")[[1]])) ## split checksum and file name from each line
         colnames(myfiles) <- c("checksum", "filename")
+        myfiles <- as_tibble(myfiles)
     } else if (search_method == "scrape") {
         ## potentially override accept_download etc
         myfiles <- bb_rget(search, level = 3,
