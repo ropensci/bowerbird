@@ -8,7 +8,8 @@
 #'
 #' @references https://oceandata.sci.gsfc.nasa.gov/
 #' @param search string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/api/file_search)
-#' @param dtype string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/api/file_search)
+#' @param dtype string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are aquarius, seawifs, aqua, terra, meris, octs, czcs, hico, viirs (for snpp), viirsj1, s3olci (for sentinel-3a), s3bolci (see https://oceancolor.gsfc.nasa.gov/data/download_methods/)
+#' @param sensor string: (optional) the sensor (e.g. "seawifs") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)
 #' @param ... : extra parameters passed automatically by \code{bb_sync}
 #'
 #' @return TRUE on success
@@ -29,21 +30,26 @@
 #'   data_group="Ocean colour")
 #'
 #' @export
-bb_handler_oceandata <- function(search, dtype, ...) {
+bb_handler_oceandata <- function(search, dtype, sensor, ...) {
     assert_that(is.string(search), nzchar(search))
     if (!missing(dtype)) {
         if (!is.null(dtype)) assert_that(is.string(dtype), nzchar(dtype))
     } else {
         dtype <- NULL
     }
-    do.call(bb_handler_oceandata_inner, list(..., search = search, dtype = dtype))
+    if (!missing(sensor)) {
+        if (!is.null(sensor)) assert_that(is.string(sensor), nzchar(sensor))
+    } else {
+        sensor <- NULL
+    }
+    do.call(bb_handler_oceandata_inner, list(..., search = search, dtype = dtype, sensor = sensor))
 }
 
 
 # @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, search_method = "api", dtype = NULL, stop_on_download_error = FALSE, ...) {
+bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, search_method = "api", dtype = NULL, sensor = NULL, stop_on_download_error = FALSE, ...) {
     ## oceandata synchronization handler
 
     ## oceandata provides a file search interface, e.g.:
@@ -66,6 +72,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     assert_that(is.string(search_method), nzchar(search_method))
     search_method <- match.arg(tolower(search_method), c("api", "scrape"))
     if (!is.null(dtype)) assert_that(is.string(dtype), nzchar(dtype))
+    if (!is.null(sensor)) assert_that(is.string(sensor), nzchar(sensor))
     assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
     dots <- list(...)
 
@@ -106,6 +113,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         while (tries<3) {
             bdy <- list(cksum = 1, search = search)
             if (!is.null(dtype)) bdy$dtype <- dtype
+            if (!is.null(sensor)) bdy$sensor <- sensor
             myfiles <- httr::with_config(my_curl_config, httr::POST("https://oceandata.sci.gsfc.nasa.gov/api/file_search", body = bdy))
             if (!httr::http_error(myfiles)) break
             tries <- tries + 1
