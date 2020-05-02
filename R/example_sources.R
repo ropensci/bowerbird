@@ -114,9 +114,11 @@ bb_example_sources <- function(sources) {
                           doc_url = "https://oceancolor.gsfc.nasa.gov/",
                           citation = "See https://oceancolor.gsfc.nasa.gov/citations",
                           license = "Please cite",
-                          method = list("bb_handler_oceandata", search = "S*L3m_MO_CHL_chlor_a_9km.nc"),
+                          method = list("bb_handler_oceandata", search="S*L3m_MO_CHL_chlor_a_9km.nc", sensor = "seawifs", dtype = "L3m"),
                           postprocess = NULL,
                           collection_size = 7.2,
+                          user = "", password = "", warn_empty_auth = FALSE,
+                          authentication_note = "Requires Earthdata login, see https://urs.earthdata.nasa.gov/. Note that you will also need to authorize the application 'OB.DAAC Data Access' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
                           data_group = "Ocean colour")))
     }
     if (missing(sources) || any(c("Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3", "10.5067/EYICLBOAAJOU") %in% sources)) {
