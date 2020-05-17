@@ -4,12 +4,14 @@
 \alias{bb_handler_oceandata}
 \title{Handler for Oceandata data sets}
 \usage{
-bb_handler_oceandata(search, dtype, ...)
+bb_handler_oceandata(search, dtype, sensor, ...)
 }
 \arguments{
 \item{search}{string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/api/file_search)}
 
-\item{dtype}{string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/api/file_search)}
+\item{dtype}{string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are aquarius, seawifs, aqua, terra, meris, octs, czcs, hico, viirs (for snpp), viirsj1, s3olci (for sentinel-3a), s3bolci (see https://oceancolor.gsfc.nasa.gov/data/download_methods/)}
+
+\item{sensor}{string: (optional) the sensor (e.g. "seawifs") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)}
 
 \item{...}{: extra parameters passed automatically by \code{bb_sync}}
 }
