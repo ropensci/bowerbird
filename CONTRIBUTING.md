@@ -6,5 +6,5 @@ Requests are also welcome: open an [issue](https://github.com/AustralianAntarcti
 
 # Code of Conduct
 
-Maintainers and contributors must follow this repository's [code of conduct](CONDUCT.md).
+Maintainers and contributors must follow this repository's [code of conduct](CODE_OF_CONDUCT.md).
 
