@@ -48,7 +48,7 @@ bb_aadc_source <- function(metadata_id) {
 }
 
 get_aadc_md <- function(metadata_id) {
-    get_json(paste0("https://data.aad.gov.au/metadata/records/", metadata_id)) ##, "?format=json")) ## query parm no longer needed?
+    get_json(paste0("https://data.aad.gov.au/metadata/records/", metadata_id, "?format=json"))
 }
 
 get_json <- function(url) {
