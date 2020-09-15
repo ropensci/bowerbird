@@ -148,19 +148,17 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     my_curl_config$options$followlocation <- 1
     my_curl_config$options$cookiefile <- cookies_file ## reads cookies from here
     my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
+    myfiles$local_filename <- vapply(paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename), oceandata_url_mapper, FUN.VALUE = "", USE.NAMES = FALSE) ## where local copy will go
+    fidx <- file.exists(myfiles$local_filename)
+    myfiles$existing_checksum <- NA_character_
+    myfiles$existing_checksum[fidx] <- vapply(myfiles$local_filename[fidx], file_hash, hash = "sha1", FUN.VALUE = "", USE.NAMES = FALSE)
     for (idx in seq_len(nrow(myfiles))) {
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename[idx]) ## full URL
         downloads$url[idx] <- this_url
-        this_fullfile <- oceandata_url_mapper(this_url) ## where local copy will go
-        if (is.null(this_fullfile)) {
-            msg <- sprintf("skipping oceandata URL (%s): cannot determine the local path to store the file",this_url)
-            if (verbose) cat(msg,"\n")
-            warning(msg)
-            next
-        }
+        this_fullfile <- myfiles$local_filename[idx]
         downloads$file[idx] <- this_fullfile
         if (!this_att$dry_run) {
-            this_exists <- file.exists(this_fullfile)
+            this_exists <- !is.na(myfiles$existing_checksum[idx])
             download_this <- !this_exists
             if (this_att$clobber < 1) {
                 ## don't clobber existing
@@ -169,8 +167,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                 if (search_method == "api") {
                     ## use checksum rather than dates for this
                     if (this_exists) {
-                        existing_checksum <- file_hash(this_fullfile, "sha1")
-                        download_this <- existing_checksum != myfiles$checksum[idx]
+                        download_this <- myfiles$existing_checksum[idx] != myfiles$checksum[idx]
                     }
                 } else {
                     download_this <- TRUE
