@@ -400,7 +400,7 @@ clean_and_filter_url <- function(url, base, accept_schemes = c("https", "http", 
     if (!is.string(url) || !nzchar(url) || is.na(url)) return(NA_character_)
     temp <- httr::parse_url(url)
     temp$fragment <- NULL ## discard fragment
-    if (temp$scheme %in% accept_schemes) httr::build_url(temp) else NA_character_
+    if (length(temp$scheme) == 1 && temp$scheme %in% accept_schemes) httr::build_url(temp) else NA_character_
 }
 
 is_relative_url <- function(url) is.null(httr::parse_url(url)$hostname)
