@@ -1,7 +1,7 @@
 Package: bowerbird
 Type: Package
 Title: Keep a Collection of Sparkly Data Resources
-Version: 0.10.3
+Version: 0.10.4
 Authors@R: c(person("Ben", "Raymond", email = "ben.raymond@aad.gov.au", role = c("aut", "cre")),
              person("Michael", "Sumner", role = "aut"),
              person("Miles", "McBain", email = "miles.mcbain@gmail.com", role = c("rev", "ctb")),
@@ -38,7 +38,6 @@ Suggests:
     covr,
     knitr,
     testthat
-Remotes: jimhester/archive
 VignetteBuilder: knitr
 X-schema.org-applicationCategory: Antarctic/Southern Ocean
 X-schema.org-keywords: ropensci, Antarctic, Southern Ocean, data, environmental, satellite, climate
