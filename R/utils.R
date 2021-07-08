@@ -84,17 +84,6 @@ single_directory_from_url <- function(this_url, no_host = FALSE, cut_dirs = 0L) 
     this_url ## returns char vector
 }
 
-## old version
-## directory_from_url <- function(this_url) {
-##     ## this_url can be character or list of char
-##     this_url <- sub("^(http|https|ftp)://", "", unlist(this_url))
-##     this_url <- sub(":", "+", this_url) ## port
-##     ## discard anything at all after the last trailing slash
-##     this_url <- sub("/[^/]*$","/",this_url)
-##     this_url[grepl("[^/\\]$",this_url)] <- paste0(this_url[grepl("[^/\\]$",this_url)],"/") ## enforce trailing slash
-##     this_url ## returns char vector
-## }
-
 ## adapted from http://conjugateprior.org/2015/06/identifying-the-os-from-r/
 get_os <- function() {
     if (.Platform$OS.type=="windows") return("windows")
@@ -135,7 +124,7 @@ list_files <- function(path = ".", pattern = NULL, all.files = FALSE, full.names
     ## note that pattern in list.files acts on file names, but regexp in dir_ls acts on paths
     grepargs <- list()
     if (ignore.case) grepargs$ignore.case = TRUE
-    out <- do.call(fs::dir_ls, c(list(path = path, regexp = pattern, type = types, recursive = recursive, all = all.files), grepargs))
+    out <- do.call(fs::dir_ls, c(list(path = path, regexp = pattern, type = types, recurse = recursive, all = all.files), grepargs))
     if (!full.names) {
         n_to_strip <- nchar(fs::as_fs_path(path)) + 1L ## +1 for trailing filesep
         out <- substr(out, n_to_strip+1L, 1000000L)

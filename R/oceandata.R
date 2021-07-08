@@ -123,7 +123,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         myfiles <- strsplit(myfiles,"\n")[[1]]
         ## the old service would return a "Sorry No Files Matched Your Query", but this no longer happens
         ## just look for an empty body
-        if (length(myfiles) < 1) stop("No files matched the supplied oceancolour data file search query (", search, ")")
+        if (length(myfiles) < 1 || !any(nzchar(myfiles))) stop("No files matched the supplied oceancolour data file search query (", search, ")")
         myfiles <- do.call(rbind, lapply(myfiles, function(z) strsplit(z, "[[:space:]]+")[[1]])) ## split checksum and file name from each line
         colnames(myfiles) <- c("checksum", "filename")
         myfiles <- as_tibble(myfiles)
