@@ -72,7 +72,6 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
 
     if (local_dir_only) {
         if (TRUE) {
-            ## use get_aws_s3_url, but note that this relies on the unexported aws.s3:::setup_s3_url function
             this_url <- file.path(do.call(get_aws_s3_url, c(list(path = paste0("/", s3args$prefix)), s3HTTP_args)), "dummy")
         } else {
             ## make an s3HTTP call and get its URL
@@ -129,10 +128,19 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
     status
 }
 
-get_aws_s3_url <- function(bucket, region = NULL, path, url_style = "path", base_url, verbose = FALSE, use_https = TRUE) {
-    if (missing(base_url)) {
-        aws.s3:::setup_s3_url(bucketname = bucket, region = region, path = path, url_style = url_style, verbose = verbose, use_https = use_https)
+## construct s3 URL
+get_aws_s3_url <- function(bucket, region = NULL, path, base_url, verbose = FALSE, use_https = TRUE) {
+    if (missing(base_url)) base_url <- Sys.getenv("AWS_S3_ENDPOINT", "s3.amazonaws.com")
+    if (base_url != "s3.amazonaws.com") {
+        if (!is.null(region) && nzchar(region)) base_url <- paste0(region, ".", base_url)
     } else {
-        aws.s3:::setup_s3_url(bucketname = bucket, region = region, path = path, url_style = url_style, base_url = base_url, verbose = verbose, use_https = use_https)
+        if (!is.null(region) && nzchar(region) && region != "us-east-1") base_url <- paste0("s3-", region, ".amazonaws.com")
     }
+    url <- paste0("http", if (isTRUE(use_https)) "s", "://", base_url)
+    if (nzchar(bucket)) url <- paste0(url, "/", bucket)
+    terminal_slash <- grepl("/$", path)
+    path <- if (nzchar(path)) paste(vapply(strsplit(path, "/")[[1]], function(i) URLencode(i, TRUE), USE.NAMES = FALSE, FUN.VALUE = ""), collapse = "/") else "/"
+    url <- if (grepl("^[\\/].*", path)) paste0(url, path) else paste(url, path, sep = "/")
+    if (isTRUE(terminal_slash)) url <- paste0(url, "/")
+  url
 }
