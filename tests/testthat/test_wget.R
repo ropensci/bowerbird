@@ -1,9 +1,9 @@
 context("wget stuff")
 
 test_that("wget_install works and bb_find_wget finds something", {
-    if (.Platform$OS.type!="windows") {
+    if (.Platform$OS.type != "windows") {
         expect_error(bb_install_wget(force=TRUE),"only supports windows platforms") ## only supported for Windows platforms (use force=TRUE in case test platform already has wget)
-        expect_true(is.string(bb_find_wget())) ## should still be able to find system-installed wget
+        if (bowerbird:::get_os() %in% c("unix", "linux")) expect_true(is.string(bb_find_wget())) ## should still be able to find system-installed wget
     } else {
         wge <- bb_install_wget()
         expect_true(file.exists(wge))
@@ -11,7 +11,10 @@ test_that("wget_install works and bb_find_wget finds something", {
     }
 })
 
+have_wget <- !is.null(bb_find_wget(install = FALSE, error = FALSE))
+
 test_that("wget help works", {
+    skip_if_not(have_wget)
     blah <- capture_messages(bb_wget("--help"))
     ## should see phrase like "GNU Wget 1.19.5, a non-interactive network retriever." in the output
     expect_true(grepl("network retriever",blah,ignore.case=TRUE))
