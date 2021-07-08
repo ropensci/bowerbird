@@ -1,7 +1,7 @@
 Package: bowerbird
 Type: Package
 Title: Keep a Collection of Sparkly Data Resources
-Version: 0.10.5
+Version: 0.10.6
 Authors@R: c(person("Ben", "Raymond", email = "ben.raymond@aad.gov.au", role = c("aut", "cre")),
              person("Michael", "Sumner", role = "aut"),
              person("Miles", "McBain", email = "miles.mcbain@gmail.com", role = c("rev", "ctb")),
@@ -13,6 +13,7 @@ BugReports: https://github.com/ropensci/bowerbird/issues
 License: MIT + file LICENSE
 Depends: R (>= 3.3.0)
 Imports:
+    archive,
     assertthat,
     curl,
     fs,
@@ -33,7 +34,6 @@ LazyLoad: yes
 Encoding: UTF-8
 RoxygenNote: 7.1.1
 Suggests:
-    archive,
     aws.s3 (>= 0.3.20),
     covr,
     knitr,

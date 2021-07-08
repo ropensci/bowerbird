@@ -181,8 +181,6 @@ test_that("decompressing bzipped files works",{
 
 test_that("decompressing Z-compressed files works",{
     skip_on_cran()
-    skip_on_os("windows") ## requires archive, which isn't yet on cran and requires compilation from source
-    skip_if_not_installed("archive")
     my_source <- bb_source(
         name="Bowerbird test data",
         id="bbtest-v0.1",

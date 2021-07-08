@@ -80,13 +80,6 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
     ## this function overwrites existing decompressed files if overwrite is TRUE
     assert_that(is.string(method))
     method <- match.arg(method, c("unzip", "unzip_delete", "gunzip", "gunzip_delete", "bunzip2", "bunzip2_delete", "uncompress", "uncompress_delete", "untar", "untar_delete"))
-    if (grepl("uncompress", method)) {
-        ## uncompress uses archive::file_read, which is a suggested package
-        ## check that we have it
-        if (!requireNamespace("archive", quietly = TRUE))
-            stop("the archive package is needed for uncompress functionality. Install it with `remotes::install_github('jimhester/archive')`")
-
-    }
     ## unzip() issues warnings in some cases when operations have errors, and sometimes issues actual errors
     warn <- getOption("warn") ## save current setting
     options(warn = 0) ## so that we can be sure that last.warning will be set
