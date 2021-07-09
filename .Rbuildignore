@@ -10,3 +10,4 @@
 ^CONTRIBUTING\.md$
 ^docs$
 ^codemeta\.json$
+^\.github$
