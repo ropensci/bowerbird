@@ -43,8 +43,6 @@
 #'
 #' @export
 bb_handler_aws_s3 <- function(...) {
-    if (!requireNamespace("aws.s3", quietly = TRUE))
-        stop("the aws.s3 package is needed if you want to use `bb_handler_aws_s3`. Install it with `install.packages('aws.s3')`")
     bb_handler_aws_s3_inner(...)
 }
 
