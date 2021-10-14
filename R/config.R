@@ -203,7 +203,7 @@ bb_settings_to_cols <- function(obj) {
 
 #' Return the local directory of each data source in a configuration
 #'
-#'  Return the local directory of each data source in a configuration. Files from each data source are stored locally in the associated directory.
+#'  Return the local directory of each data source in a configuration. Files from each data source are stored locally in the associated directory. Note that if a data source has multiple \code{source_url} values, this function might return multiple directory names (depending on whether those \code{source_url}s map to the same directory or not).
 #'
 #' @param config bb_config: configuration as returned by \code{\link{bb_config}}
 #'
@@ -216,17 +216,17 @@ bb_settings_to_cols <- function(obj) {
 #'
 #' @export
 bb_data_source_dir <- function(config) {
-    assert_that(is(config,"bb_config"))
+    assert_that(is(config, "bb_config"))
     single_source_dir <- function(cfrow) {
         mth <- NULL
-        try(mth <- match.fun(bb_data_sources(cfrow)$method[[1]][[1]]),silent=TRUE)
+        try(mth <- match.fun(bb_data_sources(cfrow)$method[[1]][[1]]), silent = TRUE)
         if (is.function(mth)) {
-            do.call(mth,c(list(config=cfrow,local_dir_only=TRUE),bb_data_sources(cfrow)$method[[1]][-1]))
+            do.call(mth, c(list(config = cfrow, local_dir_only = TRUE), bb_data_sources(cfrow)$method[[1]][-1]))
         } else {
-            as.character(NA)
+            NA_character_
         }
     }
-    unlist(lapply(seq_len(nrow(bb_data_sources(config))),function(z)single_source_dir(bb_subset(config,z))))
+    unique(unlist(lapply(seq_len(nrow(bb_data_sources(config))), function(z) single_source_dir(bb_subset(config, z)))))
 }
 
 

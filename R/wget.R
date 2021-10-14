@@ -80,7 +80,9 @@ bb_handler_wget_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,...)
         }
         ok <- TRUE
     } else {
-        this_flags <- c(list(url=cfrow$source_url),this_flags,list(verbose=verbose))
+        this_urls <- if (is.list(cfrow$source_url) && length(cfrow$source_url) == 1) cfrow$source_url[[1]] else cfrow$source_url
+        if (length(this_urls) != 1) stop("bb_handler_wget can only handle a single source_url at a time")
+        this_flags <- c(list(url = this_urls), this_flags, list(verbose = verbose))
         if (sink.number()>0) {
             ## we have a sink() redirection in place
             ## sink() won't catch the output of system commands, which means we miss stuff in our log

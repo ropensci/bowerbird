@@ -37,7 +37,7 @@ test_that("bb_sync is quiet when asked",{
         citation="blah",
         license="blah",
         method=list("bb_handler_wget",recursive=TRUE,no_check_certificate=TRUE,level=1),
-        source_url="https://github.com/AustralianAntarcticDivision/bowerbird/blob/master/README.Rmd") ## just some file to download
+        source_url="https://github.com/ropensci/bowerbird/blob/master/README.Rmd") ## just some file to download
     cf <- cf %>% bb_add(myds)
     expect_silent(bb_sync(cf,verbose=FALSE,confirm_downloads_larger_than=NULL))
 

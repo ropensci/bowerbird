@@ -75,25 +75,28 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
     bb_validate(config)
     ## check that wget can be found (this will also set it in the options)
     ## but don't do this unless we are using the bb_handler_wget method, since the others (rget, oceandata, earthdata) don't need wget
-    if (any(vapply(bb_data_sources(config)$method, function(z)grepl("wget", z[[1]][[1]]), FUN.VALUE = TRUE, USE.NAMES = FALSE)))
-        tmp <- bb_find_wget(install=FALSE,error=TRUE)
+    using_wget <- any(vapply(bb_data_sources(config)$method, function(z)grepl("wget", z[[1]][[1]]), FUN.VALUE = TRUE, USE.NAMES = FALSE))
+    if (using_wget) tmp <- bb_find_wget(install = FALSE, error = TRUE)
     ## save some current settings: path and proxy env values
     settings <- save_current_settings()
     on.exit({ restore_settings(settings) })
     ## iterate through each dataset in turn
-    ## first expand the source_url list-column, so that we have one row per source_url entry
-    temp <- bb_data_sources(config)
-    ns <- vapply(temp$source_url,length,FUN.VALUE=1) ## number of source_url entries per row
-    if (interactive()) temp$`__TEMPORARY_ROW_ID` <- seq_len(nrow(temp)) ## see below
-    bb_data_sources(config) <- do.call(rbind,lapply(seq_len(nrow(temp)),function(z){ out <- temp[rep(z,ns[z]),]; out$source_url <- temp$source_url[[z]]; out}))
-    ## a data source that had multiple source_urls will now be split across multiple rows
-    ## if that data source also had a collection_size greater than our confirm_downloads_larger_than threshold, and we are running interactively, then the user will get asked to confirm each row separately
-    ## so let's remove the collection_size entries from the second and subsequent rows
-    if (interactive()) {
+    ## previously we would expand the source_url list-column, so that we have one row per source_url entry
+    ## this is no longer necessary except when using wget-based handlers
+    if (using_wget) {
         temp <- bb_data_sources(config)
-        temp$collection_size[duplicated(temp$`__TEMPORARY_ROW_ID`)] <- NA
-        temp$`__TEMPORARY_ROW_ID` <- NULL
-        bb_data_sources(config) <- temp
+        ns <- vapply(temp$source_url,length,FUN.VALUE=1) ## number of source_url entries per row
+        if (interactive()) temp$`__TEMPORARY_ROW_ID` <- seq_len(nrow(temp)) ## see below
+        bb_data_sources(config) <- do.call(rbind,lapply(seq_len(nrow(temp)),function(z){ out <- temp[rep(z,ns[z]),]; out$source_url <- temp$source_url[[z]]; out}))
+        ## a data source that had multiple source_urls will now be split across multiple rows
+        ## if that data source also had a collection_size greater than our confirm_downloads_larger_than threshold, and we are running interactively, then the user will get asked to confirm each row separately
+        ## so let's remove the collection_size entries from the second and subsequent rows
+        if (interactive()) {
+            temp <- bb_data_sources(config)
+            temp$collection_size[duplicated(temp$`__TEMPORARY_ROW_ID`)] <- NA
+            temp$`__TEMPORARY_ROW_ID` <- NULL
+            bb_data_sources(config) <- temp
+        }
     }
     if (catch_errors) {
         sync_wrapper <- function(di) {
@@ -118,8 +121,7 @@ bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,con
 do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downloads_larger_than) {
     assert_that(is(this_dataset,"bb_config"))
     on.exit({ restore_settings(settings) })
-    if (nrow(bb_data_sources(this_dataset))!=1)
-        stop("expecting single-row data set")
+    if (nrow(bb_data_sources(this_dataset))!=1) stop("expecting single-row data set")
     this_att <- bb_settings(this_dataset)
     this_collection_size <- bb_data_sources(this_dataset)$collection_size
     dry_run <- !is.null(bb_settings(this_dataset)$dry_run) && !is.na(bb_settings(this_dataset)$dry_run) && bb_settings(this_dataset)$dry_run
