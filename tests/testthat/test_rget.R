@@ -59,3 +59,10 @@ test_that("rget use_url_directory parameter works", {
     res <- withdir()
     expect_true(file.exists(file.path(outdir, "robots.txt")))
 })
+
+test_that("rget works with multiple input URLs", {
+    expect_error(bb_rget(c("http://blah", "ftp://hah")), "bb_rget can't handle a mixture of ftp/http")
+    res1 <- bb_rget("https://github.com/ropensci/bowerbird/", accept_download = "\\.md$", no_parent = FALSE, level = 1)
+    res2 <- bb_rget(c("https://github.com/ropensci/bowerbird/", "https://github.com/ropensci/bowerbird/"), accept_download = "\\.md$", no_parent = FALSE, level = 1)
+    expect_identical(res1, res2)
+})

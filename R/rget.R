@@ -77,7 +77,8 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     if (!is.null(cfrow[["dry_run"]]) && !is.na(cfrow$dry_run)) {
         this_flags$dry_run <- cfrow$dry_run
     }
-    this_flags <- c(list(url = cfrow$source_url), this_flags, list(verbose = verbose))
+    this_urls <- if (is.list(cfrow$source_url) && length(cfrow$source_url) == 1) cfrow$source_url[[1]] else cfrow$source_url
+    this_flags <- c(list(url = this_urls), this_flags, list(verbose = verbose))
     if (!"show_progress" %in% names(this_flags)) this_flags <- c(this_flags, list(show_progress = verbose && sink.number() < 1))
     do.call(bb_rget, this_flags)
 }
@@ -121,7 +122,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @export
 bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, link_css = "a", curl_opts) {
     ## TO ADD: no_parent probably wise
-    assert_that(is.string(url))
+    assert_that(is.character(url))
     assert_that(is.numeric(level), level >= 0)
     assert_that(is.character(accept_follow))
     assert_that(is.character(reject_follow))
@@ -156,7 +157,10 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, debug = debug, link_css = link_css) ##robots_off = robots_off,
     ## curl options
     opts$curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password, remote_time = remote_time)
-    is_ftp <- grepl("^ftp", url)
+    ## we can handle multiple input URLs, but they can't be a mix of ftp/http
+    is_ftp <- grepl("^ftp", url, ignore.case = TRUE)
+    if (any(is_ftp) && !all(is_ftp)) stop("bb_rget can't handle a mixture of ftp/http URLs")
+    is_ftp <- is_ftp[1]
     if (is_ftp) opts$curl_config$options$dirlistonly <- 1L
     ## apply any user-specified options (these can also be passed by other source-specific handlers, like the earthdata handler)
     if (!missing(curl_opts)) {
@@ -273,6 +277,7 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
     next_level_to_visit <- character()
     first_req <- TRUE
     for (url in to_visit) {
+        if (url %in% visited && opts$verbose) { cat("  already visited: ", url, ", skipping\n", sep = ""); next }
         ## first check that this isn't a download file
         temp1 <- length(opts$accept_download) > 0
         for (rgx in opts$accept_download) temp1 <- temp1 & grepl(rgx, url)
@@ -383,10 +388,14 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
             }
             if (opts$verbose) cat(" done.\n")
         }
+        visited <- c(visited, url)
     }
-    visited <- c(visited, to_visit)
-    ## recurse to next level
-    spider_curl(next_level_to_visit, visited = visited, download_queue = download_queue, opts = opts, current_level = current_level + 1, ftp = ftp, handle = handle)
+    if (length(next_level_to_visit) > 0) {
+        ## recurse to next level
+        spider_curl(next_level_to_visit, visited = visited, download_queue = download_queue, opts = opts, current_level = current_level + 1, ftp = ftp, handle = handle)
+    } else {
+        list(visited = visited, download_queue = download_queue)
+    }
 }
 
 clean_and_filter_url <- function(url, base, accept_schemes = c("https", "http", "ftp")) {
