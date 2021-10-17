@@ -247,10 +247,18 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
         }
     }
     ## merge decompressed_files with files
-    if (!is.null(method_loot$files[[1]])) method_loot$files[[1]]$file <- std_path(method_loot$files[[1]]$file) ## convert files to full paths
-    temp <- method_loot$files[[1]]
-    temp$note <- ifelse(temp$was_downloaded, "downloaded", "existing copy")
-    temp <- temp[!names(temp) %in% c("was_downloaded")]
+    if (!is.null(method_loot$files[[1]])) {
+        temp <- method_loot$files[[1]]
+        temp$file <- std_path(temp$file) ## convert files to full paths
+        ## if the download was aborted (e.g. by the user) then we will have entries in the file column that don't correspond to actual existing files
+        idx <- file.exists(temp$file)
+        temp$file[!idx] <- NA_character_
+        temp$note <- NA_character_
+        temp$note[idx] <- ifelse(temp$was_downloaded[idx], "downloaded", "existing copy")
+        temp <- temp[, !names(temp) %in% c("was_downloaded")]
+    } else {
+        temp <- NULL
+    }
     if (length(decompressed_files) > 0) {
         temp <- rbind(temp, tibble(url = NA_character_, file = decompressed_files, note = "decompressed"))
     }
