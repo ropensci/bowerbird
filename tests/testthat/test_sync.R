@@ -5,7 +5,9 @@ test_that("bb_sync works with dry run",{
     temp_root <- tempdir()
     cf <- bb_config(local_file_root=temp_root)
     cf <- cf %>% bb_add(bb_example_sources()[1,])
-    bb_sync(cf,catch_errors=FALSE,confirm_downloads_larger_than=NULL,dry_run=TRUE)
+    res <- bb_sync(cf,catch_errors=FALSE,confirm_downloads_larger_than=NULL,dry_run=TRUE)
+    expect_true(res$status)
+    expect_true(all(is.na(res$files[[1]]$file)))
 })
 
 test_that("bb_sync fails when given an empty config",{

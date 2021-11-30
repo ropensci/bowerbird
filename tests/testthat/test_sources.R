@@ -92,7 +92,7 @@ test_that("empty/missing/NA source_urls get dealt with correctly",{
 })
 
 test_that("bb_source works with multiple postprocess actions", {
-    bb_source(
+    src <- bb_source(
         id="bilbobaggins",
         name="Oceandata test",
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
@@ -105,8 +105,10 @@ test_that("bb_source works with multiple postprocess actions", {
         postprocess=list(list("bb_unzip",delete=TRUE),"bb_gunzip"),
         access_function="",
         data_group="Sea surface temperature")
+    expect_true(is.list(src$postprocess))
+    expect_equal(length(src$postprocess[[1]]), 2)
 
-    bb_source(
+    src <- bb_source(
         id="bilbobaggins",
         name="Oceandata test",
         description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
@@ -119,6 +121,8 @@ test_that("bb_source works with multiple postprocess actions", {
         postprocess=list(bb_unzip,bb_gunzip),
         access_function="",
         data_group="Sea surface temperature")
+    expect_true(is.list(src$postprocess))
+    expect_equal(length(src$postprocess[[1]]), 2)
 })
 
 test_that("sources with authentication have an authentication_note entry", {
