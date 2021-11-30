@@ -41,7 +41,7 @@ test_that("bb_handler_aws_s3 works", {
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL, dry_run = TRUE)
     expect_gt(nrow(status$files[[1]]), 10)
-    expect_true(all(grepl("(tif|csv|txt|RData)$", status$files[[1]]$file)))
+    expect_true(all(grepl("(tif|csv|txt|RData)$", status$files[[1]]$url)))
 
     ## test the same source using reject_download
     src <- bb_source(
