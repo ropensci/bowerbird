@@ -109,19 +109,29 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
         }, FUN.VALUE = TRUE)
         bx <- bx[idx]
     }
-    status <- tibble(ok = TRUE, files = list(tibble(url = character(), file = character(), was_downloaded = logical())), message = "")
-    ## note that this gives a sequence of "downloading file 1 of 1" messages, rather than "1 of x", "2 of x", etc
-    for (oi in seq_along(bx)) {
-        ## figure out the actual URL (and destination path?) for each object and hand that to bb_rget via a dummy config
-        ## asking for options will give us the URL without actually downloading anything substantial
-        ##this_url <- do.call(aws.s3::s3HTTP, c(list(verb = "OPTIONS", parse_response = FALSE, path = paste0("/", bx[[oi]]$Key)), s3HTTP_args))$url
-        this_url <- do.call(get_aws_s3_url, c(list(path = paste0("/", bx[[oi]]$Key)), s3HTTP_args))
+    if (FALSE) {
+        ## note that this gives a sequence of "downloading file 1 of 1" messages, rather than "1 of x", "2 of x", etc
+        status <- tibble(ok = TRUE, files = list(tibble(url = character(), file = character(), was_downloaded = logical())), message = "")
+        for (oi in seq_along(bx)) {
+            ## figure out the actual URL (and destination path?) for each object and hand that to bb_rget via a dummy config
+            ## asking for options will give us the URL without actually downloading anything substantial
+            ##this_url <- do.call(aws.s3::s3HTTP, c(list(verb = "OPTIONS", parse_response = FALSE, path = paste0("/", bx[[oi]]$Key)), s3HTTP_args))$url
+            this_url <- do.call(get_aws_s3_url, c(list(path = paste0("/", bx[[oi]]$Key)), s3HTTP_args))
+            dummy <- config
+            dummy$data_sources$method[[1]] <- list("bb_rget")
+            dummy$data_sources$source_url <- this_url
+            rget_args <- c(list(dummy, verbose = verbose), myargs[intersect(names(myargs), names(formals("bb_rget")))])
+            this_status <- do.call(bb_handler_rget, rget_args)
+            status <- tibble(ok = status$ok && this_status$ok, files = list(rbind(status$files[[1]], this_status$files[[1]])), message = paste(status$message, this_status$message))
+        }
+    } else {
+        ## do all in one to avoid the repeated "downloading file 1 of 1" messages
+        all_urls <- vapply(bx, function(z) do.call(get_aws_s3_url, c(list(path = paste0("/", z$Key)), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
         dummy <- config
         dummy$data_sources$method[[1]] <- list("bb_rget")
-        dummy$data_sources$source_url <- this_url
+        dummy$data_sources$source_url <- list(all_urls)
         rget_args <- c(list(dummy, verbose = verbose), myargs[intersect(names(myargs), names(formals("bb_rget")))])
-        this_status <- do.call(bb_handler_rget, rget_args)
-        status <- tibble(ok = status$ok && this_status$ok, files = list(rbind(status$files[[1]], this_status$files[[1]])), message = paste(status$message, this_status$message))
+        status <- do.call(bb_handler_rget, rget_args)
     }
     status
 }
