@@ -41,7 +41,8 @@ bb_aadc_source <- function(metadata_id) {
               doc_url = if (length(doi) > 0) paste0("https://doi.org/", doi) else murl,
               citation = md$data$citation,
               license = "CC-BY",
-              method = list("bb_handler_aws_s3", bucket = "datasets", base_url = "services.aad.gov.au", region = "public", prefix = paste0("science/", metadata_id), use_https = FALSE),
+              method = list("bb_handler_aws_s3", bucket = "datasets", base_url = "services.aad.gov.au", region = "public", prefix = paste0("science/", metadata_id), use_https = FALSE, bucketlist_json = paste0("http://data.aad.gov.au/s3/api/bucket/datasets/science/", metadata_id, "/")),
+              ## bucketlist_json is a workaround for AADC servers not supporting the usual aws.s3::get_bucket method
               comment = "Source definition created by bb_aadc_source",
               postprocess = postproc,
               collection_size = csize)

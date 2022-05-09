@@ -86,54 +86,38 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
     }
 
     ## get list of objects in bucket that match our specs
-    bx <- do.call(aws.s3::get_bucket, c(s3args[intersect(names(s3args), c("max", "prefix"))], s3HTTP_args, list(verbose = TRUE)))
+    if (is.null(myargs$bucketlist_json)) {
+        bx <- do.call(aws.s3::get_bucket, c(s3args[intersect(names(s3args), c("max", "prefix"))], s3HTTP_args, list(verbose = TRUE)))
+        all_urls <- vapply(bx, function(z) do.call(get_aws_s3_url, c(list(path = paste0("/", z$Key)), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
+    } else {
+        bx <- jsonlite::fromJSON(myargs$bucketlist_json)$objects
+        all_urls <- vapply(bx$name, function(z) do.call(get_aws_s3_url, c(list(path = z), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
+    }
     ## apply accept_download etc filters
-    idx <- rep(TRUE, length(bx))
+    idx <- rep(TRUE, length(all_urls))
     if (!is.null(myargs[["accept_download"]]) && length(myargs[["accept_download"]]) > 0) {
-        idx <- vapply(bx, function(z) {
-            this_url <- do.call(get_aws_s3_url, c(list(path = paste0("/", z$Key)), s3HTTP_args))
+        idx <- vapply(all_urls, function(this_url) {
             all(vapply(myargs[["accept_download"]], function(rgx) grepl(rgx, this_url), FUN.VALUE = TRUE))
         }, FUN.VALUE = TRUE)
     }
     if (!is.null(myargs[["accept_download_extra"]]) && length(myargs[["accept_download_extra"]]) > 0) {
-        idx <- idx | vapply(bx, function(z) {
-            this_url <- do.call(get_aws_s3_url, c(list(path = paste0("/", z$Key)), s3HTTP_args))
+        idx <- idx | vapply(all_urls, function(this_url) {
             all(vapply(myargs[["accept_download_extra"]], function(rgx) grepl(rgx, this_url), FUN.VALUE = TRUE))
         }, FUN.VALUE = TRUE)
     }
-    bx <- bx[idx]
+    all_urls <- all_urls[idx]
     if (!is.null(myargs[["reject_download"]]) && length(myargs[["reject_download"]]) > 0) {
-        idx <- vapply(bx, function(z) {
-            this_url <- do.call(get_aws_s3_url, c(list(path = paste0("/", z$Key)), s3HTTP_args))
+        idx <- vapply(all_urls, function(this_url) {
             !any(vapply(myargs[["reject_download"]], function(rgx) grepl(rgx, this_url), FUN.VALUE = TRUE))
         }, FUN.VALUE = TRUE)
-        bx <- bx[idx]
+        all_urls <- all_urls[idx]
     }
-    if (FALSE) {
-        ## note that this gives a sequence of "downloading file 1 of 1" messages, rather than "1 of x", "2 of x", etc
-        status <- tibble(ok = TRUE, files = list(tibble(url = character(), file = character(), was_downloaded = logical())), message = "")
-        for (oi in seq_along(bx)) {
-            ## figure out the actual URL (and destination path?) for each object and hand that to bb_rget via a dummy config
-            ## asking for options will give us the URL without actually downloading anything substantial
-            ##this_url <- do.call(aws.s3::s3HTTP, c(list(verb = "OPTIONS", parse_response = FALSE, path = paste0("/", bx[[oi]]$Key)), s3HTTP_args))$url
-            this_url <- do.call(get_aws_s3_url, c(list(path = paste0("/", bx[[oi]]$Key)), s3HTTP_args))
-            dummy <- config
-            dummy$data_sources$method[[1]] <- list("bb_rget")
-            dummy$data_sources$source_url <- this_url
-            rget_args <- c(list(dummy, verbose = verbose), myargs[intersect(names(myargs), names(formals("bb_rget")))])
-            this_status <- do.call(bb_handler_rget, rget_args)
-            status <- tibble(ok = status$ok && this_status$ok, files = list(rbind(status$files[[1]], this_status$files[[1]])), message = paste(status$message, this_status$message))
-        }
-    } else {
         ## do all in one to avoid the repeated "downloading file 1 of 1" messages
-        all_urls <- vapply(bx, function(z) do.call(get_aws_s3_url, c(list(path = paste0("/", z$Key)), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
-        dummy <- config
-        dummy$data_sources$method[[1]] <- list("bb_rget")
-        dummy$data_sources$source_url <- list(all_urls)
-        rget_args <- c(list(dummy, verbose = verbose), myargs[intersect(names(myargs), names(formals("bb_rget")))])
-        status <- do.call(bb_handler_rget, rget_args)
-    }
-    status
+    dummy <- config
+    dummy$data_sources$method[[1]] <- list("bb_rget")
+    dummy$data_sources$source_url <- list(all_urls)
+    rget_args <- c(list(dummy, verbose = verbose), myargs[intersect(names(myargs), names(formals("bb_rget")))])
+    do.call(bb_handler_rget, rget_args)
 }
 
 ## construct s3 URL
