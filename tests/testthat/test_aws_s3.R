@@ -69,14 +69,14 @@ test_that("bb_handler_aws_s3 works", {
         doc_url = "https://www.longpaddock.qld.gov.au/silo/gridded-data/",
         citation = "SILO datasets are constructed by the Queensland Government using observational data provided by the Australian Bureau of Meteorology and are available under the Creative Commons Attribution 4.0 license",
         license = "CC-BY 4.0",
-        method = list("bb_handler_aws_s3", region = "silo-open-data.s3",  base_url = "amazonaws.com", prefix = "annual/monthly_rain/", accept_download = "2005\\.monthly_rain\\.nc$"),
+        method = list("bb_handler_aws_s3", region = "silo-open-data.s3",  base_url = "amazonaws.com", prefix = "Official/annual/monthly_rain/", accept_download = "2005\\.monthly_rain\\.nc$"),
         comment = "Unusual spec of region and base_url is a workaround for an aws.s3 issue, see https://github.com/cloudyr/aws.s3/issues/318",
         postprocess = NULL,
         collection_size = 0.02,
         data_group = "Climate")
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
-    expect_true(grepl("silo-open-data.s3.amazonaws.com/annual/monthly_rain/?$", bb_data_source_dir(cf)))
+    expect_true(grepl("silo-open-data.s3.amazonaws.com/Official/annual/monthly_rain/?$", bb_data_source_dir(cf)))
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
 
     expect_equal(nrow(status$files[[1]]), 1)

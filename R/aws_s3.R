@@ -30,7 +30,7 @@
 #'                        and are available under the Creative Commons Attribution 4.0 license",
 #'            license = "CC-BY 4.0",
 #'            method = list("bb_handler_aws_s3", region = "silo-open-data.s3",
-#'                          base_url = "amazonaws.com", prefix = "annual/monthly_rain/",
+#'                          base_url = "amazonaws.com", prefix = "Official/annual/monthly_rain/",
 #'                          accept_download = "2005\\.monthly_rain\\.nc$"),
 #'            comment = "The unusual specification of region and base_url is a workaround for
 #'                       an aws.s3 issue, see https://github.com/cloudyr/aws.s3/issues/318",
