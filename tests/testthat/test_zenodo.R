@@ -10,3 +10,12 @@ test_that("A small Zenodo source works", {
     fi <- file.size(status$files[[1]]$file)
     expect_true(all(fi > 0))
 })
+
+
+test_that("Zenodo 'use_latest' works", {
+    src1 <- bb_zenodo_source(6131579, use_latest = FALSE)
+    expect_true(grepl("6131579", src1$id))
+    src2 <- bb_zenodo_source(6131579, use_latest = TRUE)
+    expect_false(grepl("6131579", src2$id))
+    expect_false(isTRUE(all.equal(src1, src2)))
+})

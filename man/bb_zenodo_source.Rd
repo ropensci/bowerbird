@@ -4,10 +4,12 @@
 \alias{bb_zenodo_source}
 \title{Generate a bowerbird data source object for a Zenodo data set}
 \usage{
-bb_zenodo_source(id)
+bb_zenodo_source(id, use_latest = FALSE)
 }
 \arguments{
 \item{id}{: the ID of the data set}
+
+\item{use_latest}{logical: if \code{TRUE}, use the most recent version of the data set (if there is one). The most recent version might have a different data set ID to the one provided here}
 }
 \value{
 A tibble containing the data source definition, as would be returned by \code{\link{bb_source}}
