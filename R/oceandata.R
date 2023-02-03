@@ -121,9 +121,8 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         if (httr::http_error(myfiles)) stop("error with oceancolour data file search: could not retrieve file list (query: ", search, ")")
         myfiles <- httr::content(myfiles, as = "text")
         myfiles <- strsplit(myfiles,"\n")[[1]]
-        ## the old service would return a "Sorry No Files Matched Your Query", but this no longer happens
-        ## just look for an empty body
-        if (length(myfiles) < 1 || !any(nzchar(myfiles))) stop("No files matched the supplied oceancolour data file search query (", search, ")")
+        ## look for an empty body or "No files found" message
+        if (length(myfiles) < 1 || !any(nzchar(myfiles)) || any(tolower(myfiles) %in% "no results found")) stop("No files matched the supplied oceancolour data file search query (", search, ")")
         myfiles <- do.call(rbind, lapply(myfiles, function(z) strsplit(z, "[[:space:]]+")[[1]])) ## split checksum and file name from each line
         colnames(myfiles) <- c("checksum", "filename")
         myfiles <- as_tibble(myfiles)
@@ -295,36 +294,36 @@ SCWI,Seasonal_Climatology"
 # @export
 oceandata_parameters <- function(platform) {
     rawtext <- "platform,parameter,pattern
-SATCO,Kd,KD490_Kd_490
+SATCO,Kd,KD490[_\\.]Kd_490
 SATCO,NSST,NSST
-SATCO,Rrs,RRS_Rrs_[[:digit:]]+
+SATCO,Rrs,RRS[_\\.]Rrs_[[:digit:]]+
 SATCO,SST,SST
-SATCO,SST,SST_sst
+SATCO,SST,SST[_\\.]sst
 SATCO,SST4,SST4
-SATCO,a,IOP_a_.*
-SATCO,adg,IOP_adg_.*
-SATCO,angstrom,RRS_angstrom
-SATCO,aot,RRS_aot_[[:digit:]]+
-SATCO,aph,IOP_aph_.*
-SATCO,bb,IOP_bb_.*
-SATCO,bbp,IOP_bbp_.*
-SATCO,cdom,CDOM_cdom_index
-SATCO,chl,CHL_chl_ocx
-SATCO,chlor,CHL_chlor_a
-SATCO,ipar,FLH_ipar
-SATCO,nflh,FLH_nflh
-SATCO,par,PAR_par
-SATCO,pic,PIC_pic
-SATCO,poc,POC_poc
-S,NDVI,LAND_NDVI
-V,KD490,S?NPP_KD490_Kd_490
-V,chl,S?NPP_CHL_chl_ocx
-V,chlor,S?NPP_CHL_chlor_a
-V,IOP,S?NPP_IOP_.*
-V,par,S?NPP_PAR_par
-V,pic,S?NPP_PIC_pic
-V,poc,S?NPP_POC_poc
-V,RRS,S?NPP_RRS_.*"
+SATCO,a,IOP[_\\.]a_.*
+SATCO,adg,IOP[_\\.]adg_.*
+SATCO,angstrom,RRS[_\\.]angstrom
+SATCO,aot,RRS[_\\.]aot_[[:digit:]]+
+SATCO,aph,IOP[_\\.]aph_.*
+SATCO,bb,IOP[_\\.]bb_.*
+SATCO,bbp,IOP[_\\.]bbp_.*
+SATCO,cdom,CDOM[_\\.]cdom_index
+SATCO,chl,CHL[_\\.]chl_ocx
+SATCO,chlor,CHL[_\\.]chlor_a
+SATCO,ipar,FLH[_\\.]ipar
+SATCO,nflh,FLH[_\\.]nflh
+SATCO,par,PAR[_\\.]par
+SATCO,pic,PIC[_\\.]pic
+SATCO,poc,POC[_\\.]poc
+S,NDVI,LAND[_\\.]NDVI
+V,KD490,S?NPP[_\\.]KD490[_\\.]Kd_490
+V,chl,S?NPP[_\\.]CHL[_\\.]chl_ocx
+V,chlor,S?NPP[_\\.]CHL[_\\.]chlor_a
+V,IOP,S?NPP[_\\.]IOP[_\\.].*
+V,par,S?NPP[_\\.]PAR[_\\.]par
+V,pic,S?NPP[_\\.]PIC[_\\.]pic
+V,poc,S?NPP[_\\.]POC[_\\.]poc
+V,RRS,S?NPP[_\\.]RRS[_\\.].*"
     ## note some VIIRS parameters that appear in the browse file structure but with no associated files, and so have not been coded here:
     ## CHLOCI GSM QAA ZLEE
     ## platforms yet to do: "Q","H" (are different folder structure to the others)
@@ -363,6 +362,16 @@ oceandata_parameter_map <- function(platform,urlparm,error_no_match=FALSE) {
     }
 }
 
+## platform component of filenames was changed from e.g. "A" to "AQUA_MODIS" starting 2019
+oceandata_platform_to_abbrev <- function(p) {
+    p[p %in% "AQUA_MODIS"] <- "A"
+    p[p %in% "SEASTAR_SEAWIFS_GAC"] <- "S"
+    p[p %in% "TERRA_MODIS"] <- "T"
+    p[p %in% "NIMBUS7_CZCS"] <- "C"
+    p[p %in% c("SNPP_VIIRS", "JPSS1_VIIRS")] <- "V"
+    p
+}
+
 
 # Map Oceancolor URL to file path
 # Oceancolor data file URLs need to be mapped to a file system hierarchy that mirrors the one used on the Oceancolor web site.
@@ -384,28 +393,32 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
     assert_that(is.string(this_url))
     assert_that(is.flag(path_only),!is.na(path_only))
     assert_that(is.string(sep))
-    if (grepl("\\.L3m_",this_url)) {
+    if (grepl("\\.L3m[_\\.]",this_url)) {
         ## mapped file
-        url_parts <- str_match(this_url,"/([ASTCV])([[:digit:]]+)\\.(L3m)_([[:upper:][:digit:]]+)_(.*?)_(9|4)(km)?\\.(bz2|nc)")
+        url_parts <- str_match(this_url,"/([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]_]+)\\.(L3m)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)[_\\.](9|4)(km)?\\.(bz2|nc)")
         ## e.g. [1,] "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km"
         ## [,2] [,3]      [,4]  [,5]  [,6]          [,7]
         ## "A"  "2002359" "L3m" "DAY" "CHL_chlor_a" "9"
         url_parts <- as.data.frame(url_parts,stringsAsFactors=FALSE)
         colnames(url_parts) <- c("full_url","platform","date","type","timeperiod","parm","spatial","spatial_unit")
-    } else if (grepl("\\.L3b_",this_url)) {
+        ## map back to old sensor abbreviations, at least temporarily
+        url_parts$platform <- oceandata_platform_to_abbrev(url_parts$platform)
+    } else if (grepl("\\.L3b[_\\.]",this_url)) {
 
-        url_parts <- str_match(this_url,"/([ASTCV])([[:digit:]]+)\\.(L3b)_([[:upper:][:digit:]]+)_(.*?)\\.(bz2|nc)")
+        url_parts <- str_match(this_url,"/([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]]+)\\.(L3b)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)\\.(bz2|nc)")
         ## https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A20090322009059.L3b_MO_KD490.main.bz2
 
         ## e.g. [1,] "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A20090322009059.L3b_MO_KD490.main.bz2" "A"  "20090322009059" "L3b" "MO" "KD490"
         ## https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2015016.L3b_DAY_RRS.nc
         url_parts <- as.data.frame(url_parts,stringsAsFactors=FALSE)
         colnames(url_parts) <- c("full_url","platform","date","type","timeperiod","parm")
+        url_parts$platform <- oceandata_platform_to_abbrev(url_parts$platform)
     } else if (grepl("\\.L2", this_url)) {
       # "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2017002003000.L2_LAC_OC.nc"
-      url_parts <- str_match(this_url,"/([ASTCV])([[:digit:]]+)\\.(L2)_([[:upper:][:digit:]]+)_(.*?)\\.(bz2|nc)")
+      url_parts <- str_match(this_url,"/([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]]+)\\.(L2)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)\\.(bz2|nc)")
       url_parts <- as.data.frame(url_parts,stringsAsFactors=FALSE)
       colnames(url_parts) <- c("full_url","platform","date","type","coverage","parm", "extension")
+        url_parts$platform <- oceandata_platform_to_abbrev(url_parts$platform)
     } else {
         stop("not a L2 or L3 binned or L3 mapped file")
     }
