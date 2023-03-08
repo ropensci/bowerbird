@@ -43,6 +43,28 @@ test_that("url mapper works", {
     expect_identical(bowerbird:::oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A20140012014008.L3b_8D_PAR.main.bz2", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/2014/001/")
     expect_identical(bowerbird:::oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/")
     expect_identical(bowerbird:::oceandata_url_mapper("https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/")
+    ## new naming conventions
+    expect_identical(bowerbird:::oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/AQUA_MODIS.20230109.L3b.DAY.RRS.nc", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/2023/01/09/")
+
+})
+
+test_that("other oceandata handler tests", {
+    ods <- sources("Oceandata MODIS Aqua Level-3 binned daily RRS")
+    temp_root <- tempdir()
+    ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN$", bb_data_source_dir(ocf)))
+
+    ods <- sources("Oceandata VIIRS Level-3 binned daily RRS")
+    ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/VIIRS/L3BIN$", bb_data_source_dir(ocf)))
+
+    ods <- sources("Oceandata MODIS Aqua Level-3 mapped daily 4km chl-a")
+    ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODISA/Mapped$", bb_data_source_dir(ocf)))
+
+    ods <- sources("Oceandata SeaWiFS Level-3 binned daily RRS")
+    ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/SeaWiFS/L3BIN$", bb_data_source_dir(ocf)))
 })
 
 test_that("bb_handler_oceandata works when no files match",{

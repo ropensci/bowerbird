@@ -91,17 +91,16 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         } else {
             ## highest-level dir
             out <- "oceandata.sci.gsfc.nasa.gov"
-            ## refine by platform
-            this_search_spec <- search
-            this_platform <- oceandata_platform_map(substr(this_search_spec,1,1))
-            if (nchar(this_platform)>0) out <- file.path(out,this_platform)
-            if (grepl("L3m",this_search_spec)) {
-                out <- file.path(out,"Mapped")
-            } else if (grepl("L3",this_search_spec)) {
-                out <- file.path(out,"L3BIN")
+            ## refine by platform. Find platform, either full or one-letter abbrev
+            this_platform <- oceandata_find_platform(search)
+            if (nchar(this_platform) > 0) out <- file.path(out, this_platform)
+            if (grepl("L3m",search)) {
+                out <- file.path(out, "Mapped")
+            } else if (grepl("L3",search)) {
+                out <- file.path(out, "L3BIN")
             }
         }
-        return(file.path(this_att$local_file_root,out))
+        return(file.path(this_att$local_file_root, out))
     }
     if (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password)) stop(sprintf("Oceandata sources now require an Earthdata login: provide your user and password in the source configuration"))
     tries <- 0
@@ -235,6 +234,7 @@ V,VIIRS"
         allp
     } else {
         assert_that(is.string(abbrev))
+        abbrev[!abbrev %in% allp$abbrev] <- oceandata_platform_to_abbrev(abbrev[!abbrev %in% allp$abbrev]) ## turn full platform names into abbreviations
         out <- allp$platform[allp$abbrev==abbrev]
         if (error_no_match & length(out)<1) {
             stop("oceandata platform \"", abbrev, "\" not recognized")
@@ -372,11 +372,25 @@ oceandata_platform_to_abbrev <- function(p) {
     p
 }
 
+oceandata_find_platform <- function(x) {
+    ## find the full platform name in a URL or search spec
+    ## look for full first, because SNPP_VIIRS is ambiguous with S (old SeaWiFS abbrev)
+    ## if full not found, look for abbreviation but return its full equivalent
+    chk <- stringr::str_match(x, "(AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)")
+    if (nrow(chk < 1)) {
+        ## abbreviated platform, but it has to be at the start of the string or after a /
+        chk <- stringr::str_match(x, "^([ASTCV])")
+        if (nrow(chk) < 1) chk <- stringr::str_match(x, "/([ASTCV])")
+        if (nrow(chk) == 1) chk[1, 2] <- oceandata_platform_map(chk[1, 2])
+    }
+    if (nrow(chk) == 1) chk[1, 2] else NULL
+}
 
 # Map Oceancolor URL to file path
 # Oceancolor data file URLs need to be mapped to a file system hierarchy that mirrors the one used on the Oceancolor web site.
 # For example, \url{https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} or \url{https://oceandata.sci.gsfc.nasa.gov/ob/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (obtained from the Oceancolor visual browser or file search facility)
 # maps to \url{https://oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (in the Oceancolor file browse interface). Locally, this file will be stored in oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/V2016044.L3m_DAY_NPP_PAR_par_9km.nc
+# Newer files previously mapped to YYYY/DOY folders are now mapped to YYYY/MM/DD, e.g. <https://oceandata.sci.gsfc.nasa.gov/ob/getfile/AQUA_MODIS.20230109.L3b.DAY.RRS.nc will map to oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/2023/01/09/AQUA_MODIS.20230109.L3b.DAY.RRS.nc
 # The \code{oceandata_url_mapper} function maps the URL parameter component ("NPP_PAR_par" in this example) to the corresponding directory name ("par").
 # @references \url{https://oceandata.sci.gsfc.nasa.gov/}
 # @param this_url string: the Oceancolor URL, e.g. https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km.bz2
@@ -428,36 +442,37 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
         stop("cannot ascertain file type from oceancolor URL: ",this_url)
     } else {
         switch(url_parts$type,
-               L3m={
-                   this_parm_folder <- oceandata_parameter_map(url_parts$platform,url_parts$parm,error_no_match=TRUE)
-                   out <- paste("oceandata.sci.gsfc.nasa.gov",oceandata_platform_map(url_parts$platform,error_no_match=TRUE),"Mapped",oceandata_timeperiod_map(url_parts$timeperiod,error_no_match=TRUE),paste0(url_parts$spatial,"km"),this_parm_folder,sep=sep)
-                   if (url_parts$timeperiod %in% c("8D","DAY","R32")) {
-                       out <- paste(out,this_year,sep=sep)
+               L3m = {
+                   this_parm_folder <- oceandata_parameter_map(url_parts$platform, url_parts$parm, error_no_match=TRUE)
+                   out <- paste("oceandata.sci.gsfc.nasa.gov", oceandata_platform_map(url_parts$platform, error_no_match=TRUE), "Mapped", oceandata_timeperiod_map(url_parts$timeperiod, error_no_match=TRUE), paste0(url_parts$spatial, "km"), this_parm_folder, sep=sep)
+                   if (url_parts$timeperiod %in% c("8D", "DAY", "R32")) {
+                       out <- paste(out, this_year, sep=sep)
                    }
                    if (!path_only) {
-                       out <- paste(out,basename(this_url),sep=sep)
+                       out <- paste(out, basename(this_url), sep=sep)
                    } else {
-                       out <- paste0(out,sep) ## trailing path separator
+                       out <- paste0(out, sep) ## trailing path separator
                    }
-                 },
-               L3b={ this_doy <- substr(url_parts$date,5,7)
-                     out <- paste("oceandata.sci.gsfc.nasa.gov",oceandata_platform_map(url_parts$platform,error_no_match=TRUE),"L3BIN",this_year,this_doy,sep=sep)
-                     if (!path_only) {
-                         out <- paste(out,basename(this_url),sep=sep)
-                     } else {
-                         out <- paste0(out,sep) ## trailing path separator
-                     }
-                 },
-               L2 = {
-                 this_doy <- substr(url_parts$date,5,7)
-                 out <- paste("oceandata.sci.gsfc.nasa.gov",oceandata_platform_map(url_parts$platform,error_no_match=TRUE),"L2",this_year,this_doy,sep=sep)
-                 if (!path_only) {
-                   out <- paste(out,basename(this_url),sep=sep)
-                 } else {
-                   out <- paste0(out,sep) ## trailing path separator
-                 }
                },
-               stop("unrecognized file type: ",url_parts$type,"\n",str(url_parts))
+               L3b = {
+                   this_doy <- if (nchar(url_parts$date) == 8) paste0(substr(url_parts$date, 5, 6), sep, substr(url_parts$date, 7, 8)) else substr(url_parts$date, 5, 7)
+                   out <- paste("oceandata.sci.gsfc.nasa.gov", oceandata_platform_map(url_parts$platform, error_no_match=TRUE), "L3BIN", this_year, this_doy, sep=sep)
+                   if (!path_only) {
+                       out <- paste(out, basename(this_url), sep=sep)
+                   } else {
+                       out <- paste0(out, sep) ## trailing path separator
+                   }
+               },
+               L2 = {
+                   this_doy <- if (nchar(url_parts$date) == 8) paste0(substr(url_parts$date, 5, 6), sep, substr(url_parts$date, 7, 8)) else substr(url_parts$date, 5, 7)
+                   out <- paste("oceandata.sci.gsfc.nasa.gov", oceandata_platform_map(url_parts$platform, error_no_match=TRUE), "L2", this_year, this_doy, sep=sep)
+                   if (!path_only) {
+                       out <- paste(out, basename(this_url), sep=sep)
+                   } else {
+                       out <- paste0(out, sep) ## trailing path separator
+                   }
+               },
+               stop("unrecognized file type: ", url_parts$type, "\n", capture.output(str(url_parts)))
                )
     }
     out
