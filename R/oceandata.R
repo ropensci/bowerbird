@@ -219,17 +219,16 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
 # @seealso \code{\link{oceandata_timeperiod_map}}, \code{\link{oceandata_parameter_map}}
 # @export
 oceandata_platform_map <- function(abbrev,error_no_match=FALSE) {
-    rawtext <- "abbrev,platform
-Q,Aquarius
-C,CZCS
-H,HICO
-M,MERIS
-A,MODISA
-T,MODIST
-O,OCTS
-S,SeaWiFS
-V,VIIRS"
-    allp <- read.table(text=rawtext,stringsAsFactors=FALSE,sep=",",header=TRUE)
+    allp <- tribble(~abbrev, ~platform,
+                    "Q", "Aquarius",
+                    "C", "CZCS",
+                    "H", "HICO",
+                    "M", "MERIS",
+                    "A", "MODISA",
+                    "T", "MODIST",
+                    "O", "OCTS",
+                    "S", "SeaWiFS",
+                    "V", "VIIRS")
     if (missing(abbrev)) {
         allp
     } else {
@@ -255,25 +254,23 @@ V,VIIRS"
 # @seealso \code{\link{oceandata_platform_map}}, \code{\link{oceandata_parameter_map}}
 # @export
 oceandata_timeperiod_map <- function(abbrev,error_no_match=FALSE) {
-    rawtext <- "abbrev,time_period
-WC,8D_Climatology
-8D,8Day
-YR,Annual
-CU,Cumulative
-DAY,Daily
-MO,Monthly
-MC,Monthly_Climatology
-R32,Rolling_32_Day
-SNSP,Seasonal
-SNSU,Seasonal
-SNAU,Seasonal
-SNWI,Seasonal
-SCSP,Seasonal_Climatology
-SCSU,Seasonal_Climatology
-SCAU,Seasonal_Climatology
-SCWI,Seasonal_Climatology"
-
-    alltp <- read.table(text=rawtext,stringsAsFactors=FALSE,sep=",",header=TRUE)
+    alltp <- tribble(~abbrev, ~time_period,
+                     "WC", "8D_Climatology",
+                     "8D", "8Day",
+                     "YR", "Annual",
+                     "CU", "Cumulative",
+                     "DAY", "Daily",
+                     "MO", "Monthly",
+                     "MC", "Monthly_Climatology",
+                     "R32", "Rolling_32_Day",
+                     "SNSP", "Seasonal",
+                     "SNSU", "Seasonal",
+                     "SNAU", "Seasonal",
+                     "SNWI", "Seasonal",
+                     "SCSP", "Seasonal_Climatology",
+                     "SCSU", "Seasonal_Climatology",
+                     "SCAU", "Seasonal_Climatology",
+                     "SCWI", "Seasonal_Climatology")
     if (missing(abbrev)) {
         alltp
     } else {
@@ -293,41 +290,40 @@ SCWI,Seasonal_Climatology"
 #
 # @export
 oceandata_parameters <- function(platform) {
-    rawtext <- "platform,parameter,pattern
-SATCO,Kd,KD490[_\\.]Kd_490
-SATCO,NSST,NSST
-SATCO,Rrs,RRS[_\\.]Rrs_[[:digit:]]+
-SATCO,SST,SST
-SATCO,SST,SST[_\\.]sst
-SATCO,SST4,SST4
-SATCO,a,IOP[_\\.]a_.*
-SATCO,adg,IOP[_\\.]adg_.*
-SATCO,angstrom,RRS[_\\.]angstrom
-SATCO,aot,RRS[_\\.]aot_[[:digit:]]+
-SATCO,aph,IOP[_\\.]aph_.*
-SATCO,bb,IOP[_\\.]bb_.*
-SATCO,bbp,IOP[_\\.]bbp_.*
-SATCO,cdom,CDOM[_\\.]cdom_index
-SATCO,chl,CHL[_\\.]chl_ocx
-SATCO,chlor,CHL[_\\.]chlor_a
-SATCO,ipar,FLH[_\\.]ipar
-SATCO,nflh,FLH[_\\.]nflh
-SATCO,par,PAR[_\\.]par
-SATCO,pic,PIC[_\\.]pic
-SATCO,poc,POC[_\\.]poc
-S,NDVI,LAND[_\\.]NDVI
-V,KD490,S?NPP[_\\.]KD490[_\\.]Kd_490
-V,chl,S?NPP[_\\.]CHL[_\\.]chl_ocx
-V,chlor,S?NPP[_\\.]CHL[_\\.]chlor_a
-V,IOP,S?NPP[_\\.]IOP[_\\.].*
-V,par,S?NPP[_\\.]PAR[_\\.]par
-V,pic,S?NPP[_\\.]PIC[_\\.]pic
-V,poc,S?NPP[_\\.]POC[_\\.]poc
-V,RRS,S?NPP[_\\.]RRS[_\\.].*"
     ## note some VIIRS parameters that appear in the browse file structure but with no associated files, and so have not been coded here:
     ## CHLOCI GSM QAA ZLEE
     ## platforms yet to do: "Q","H" (are different folder structure to the others)
-    read.table(text=rawtext,stringsAsFactors=FALSE,sep=",",header=TRUE)
+    tribble(~platform, ~parameter, ~pattern,
+            "SATCO", "Kd", "KD490[_\\.]Kd_490",
+            "SATCO", "NSST", "NSST",
+            "SATCO", "Rrs", "RRS[_\\.]Rrs_[[:digit:]]+",
+            "SATCO", "SST", "SST",
+            "SATCO", "SST", "SST[_\\.]sst",
+            "SATCO", "SST4", "SST4",
+            "SATCO", "a", "IOP[_\\.]a_.*",
+            "SATCO", "adg", "IOP[_\\.]adg_.*",
+            "SATCO", "angstrom", "RRS[_\\.]angstrom",
+            "SATCO", "aot", "RRS[_\\.]aot_[[:digit:]]+",
+            "SATCO", "aph", "IOP[_\\.]aph_.*",
+            "SATCO", "bb", "IOP[_\\.]bb_.*",
+            "SATCO", "bbp", "IOP[_\\.]bbp_.*",
+            "SATCO", "cdom", "CDOM[_\\.]cdom_index",
+            "SATCO", "chl", "CHL[_\\.]chl_ocx",
+            "SATCO", "chlor", "CHL[_\\.]chlor_a",
+            "SATCO", "ipar", "FLH[_\\.]ipar",
+            "SATCO", "nflh", "FLH[_\\.]nflh",
+            "SATCO", "par", "PAR[_\\.]par",
+            "SATCO", "pic", "PIC[_\\.]pic",
+            "SATCO", "poc", "POC[_\\.]poc",
+            "S", "NDVI", "LAND[_\\.]NDVI",
+            "V", "KD490", "S?NPP[_\\.]KD490[_\\.]Kd_490",
+            "V", "chl", "S?NPP[_\\.]CHL[_\\.]chl_ocx",
+            "V", "chlor", "S?NPP[_\\.]CHL[_\\.]chlor_a",
+            "V", "IOP", "S?NPP[_\\.]IOP[_\\.].*",
+            "V", "par", "S?NPP[_\\.]PAR[_\\.]par",
+            "V", "pic", "S?NPP[_\\.]PIC[_\\.]pic",
+            "V", "poc", "S?NPP[_\\.]POC[_\\.]poc",
+            "V", "RRS", "S?NPP[_\\.]RRS[_\\.].*")
 }
 
 
