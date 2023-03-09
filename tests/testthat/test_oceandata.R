@@ -49,40 +49,68 @@ test_that("url mapper works", {
 })
 
 test_that("other oceandata handler tests", {
-    ods <- sources("Oceandata MODIS Aqua Level-3 binned daily RRS")
+    ods <- bb_source(
+        name="Oceandata MODIS Aqua Level-3 binned daily RRS",
+        id="MODISA_L3b_DAY_RRS",
+        description="Daily remote-sensing reflectance from MODIS Aqua. RRS is used to produce standard ocean colour products such as chlorophyll concentration",
+        doc_url="http://oceancolor.gsfc.nasa.gov/",
+        citation="See https://oceancolor.gsfc.nasa.gov/citations",
+        license="Please cite",
+        method=list("bb_handler_oceandata",search="AQUA_MODIS*L3b.DAY.RRS.nc", sensor = "aqua", dtype = "L3b"),
+        user = "", password = "", warn_empty_auth = FALSE)
     temp_root <- tempdir()
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN$", bb_data_source_dir(ocf)))
 
-    ods <- sources("Oceandata VIIRS Level-3 binned daily RRS")
+    ods <- bb_source(name="Oceandata VIIRS Level-3 binned daily RRS",
+                     id="VIIRS_L3b_DAY_SNPP_RRS",
+                     description="Daily remote-sensing reflectance from VIIRS. RRS is used to produce standard ocean colour products such as chlorophyll concentration",
+                     doc_url="http://oceancolor.gsfc.nasa.gov/",
+                     citation="See https://oceancolor.gsfc.nasa.gov/citations",
+                     license="Please cite",
+                     method=list("bb_handler_oceandata", search = "V*L3b.DAY.SNPP.RRS.nc", sensor = "viirs", dtype = "L3b"),
+                     user = "", password = "", warn_empty_auth = FALSE)
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/VIIRS/L3BIN$", bb_data_source_dir(ocf)))
 
-    ods <- sources("Oceandata MODIS Aqua Level-3 mapped daily 4km chl-a")
+    ods <- bb_source(name="Oceandata MODIS Aqua Level-3 mapped daily 4km chl-a",
+                     id="MODISA_L3m_DAY_CHL_chlor_a_4km",
+                     description="Daily remote-sensing chlorophyll-a from the MODIS Aqua satellite at 4km spatial resolution",
+                     doc_url="http://oceancolor.gsfc.nasa.gov/",
+                     citation="See https://oceancolor.gsfc.nasa.gov/citations",
+                     license="Please cite",
+                     method=list("bb_handler_oceandata",search="AQUA_MODIS*L3m.DAY.CHL.chlor_a.4km.nc", sensor = "aqua", dtype = "L3m"),
+                     user = "", password = "", warn_empty_auth = FALSE)
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODISA/Mapped$", bb_data_source_dir(ocf)))
 
-    ods <- sources("Oceandata SeaWiFS Level-3 binned daily RRS")
+    ods <- bb_source(name="Oceandata SeaWiFS Level-3 binned daily RRS",
+                     id="SeaWiFS_L3b_DAY_RRS",
+                     description="Daily remote-sensing reflectance from SeaWiFS. RRS is used to produce standard ocean colour products such as chlorophyll concentration",
+                     doc_url="http://oceancolor.gsfc.nasa.gov/",
+                     citation="See https://oceancolor.gsfc.nasa.gov/citations",
+                     license="Please cite",
+                     method=list("bb_handler_oceandata",search="SEASTAR_SEAWIFS_GAC*L3b.DAY.RRS.nc", sensor = "seawifs", dtype = "L3b"),
+                     user = "", password = "", warn_empty_auth = FALSE)
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/SeaWiFS/L3BIN$", bb_data_source_dir(ocf)))
 })
 
 test_that("bb_handler_oceandata works when no files match",{
     skip_on_appveyor() ## failing on AppVeyor for unknown reasons
-    ods <- bb_source(
-        id="bilbobaggins",
-        name="Oceandata test",
-        description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
-        doc_url= "https://oceancolor.gsfc.nasa.gov/",
-        citation="See https://oceancolor.gsfc.nasa.gov/cms/citations",
-        source_url="",
-        license="Please cite",
-        user = "YOUR_EARTHDATA_USERNAME", password = "YOUR_EARTHDATA_PASSWORD",
-        comment="",
-        method=list("bb_handler_oceandata",search="Tblahblahblah20000322000060.L3m_MO_SST_sst_9km.nc"),
-        postprocess=NULL,
-        access_function="",
-        data_group="Sea surface temperature")
+    ods <- bb_source(id="bilbobaggins",
+                     name="Oceandata test",
+                     description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
+                     doc_url= "https://oceancolor.gsfc.nasa.gov/",
+                     citation="See https://oceancolor.gsfc.nasa.gov/cms/citations",
+                     source_url="",
+                     license="Please cite",
+                     user = "YOUR_EARTHDATA_USERNAME", password = "YOUR_EARTHDATA_PASSWORD",
+                     comment="",
+                     method=list("bb_handler_oceandata",search="Tblahblahblah20000322000060.L3m_MO_SST_sst_9km.nc"),
+                     postprocess=NULL,
+                     access_function="",
+                     data_group="Sea surface temperature")
     temp_root <- tempdir()
     ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
     expect_error(bb_sync(ocf, confirm_downloads_larger_than = NULL, catch_errors = FALSE), "No files matched")
