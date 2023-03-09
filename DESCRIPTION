@@ -15,7 +15,7 @@ Depends: R (>= 3.3.0)
 Imports:
     archive,
     assertthat,
-    aws.s3 (>= 0.3.20),
+    aws.s3 (>= 0.3.21),
     curl,
     fs,
     httr,
