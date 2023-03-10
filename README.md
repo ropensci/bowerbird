@@ -3,7 +3,7 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/ropensci/bowerbird/workflows/R-CMD-check/badge.svg)](https://github.com/ropensci/bowerbird/actions)
+[![R-CMD-check](https://github.com/ropensci/bowerbird/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ropensci/bowerbird/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/ropensci/bowerbird/branch/master/graph/badge.svg)](https://codecov.io/gh/ropensci/bowerbird?branch=master)
 [![](https://badges.ropensci.org/139_status.svg)](https://github.com/ropensci/onboarding/issues/139)
