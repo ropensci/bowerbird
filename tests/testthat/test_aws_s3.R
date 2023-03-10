@@ -12,7 +12,7 @@ test_that("bb_handler_aws_s3 works", {
         collection_size = 0.1)
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
-    expect_true(grepl("noaa-bathymetry-pds.s3.amazonaws.com//?$", bb_data_source_dir(cf)))
+    expect_true(grepl("noaa\\-bathymetry\\-pds\\.s3\\.amazonaws\\.com[/\\\\]?$", bb_data_source_dir(cf)))
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL)
     expect_equal(nrow(status$files[[1]]), 1)
     expect_true(file.exists(status$files[[1]]$file))
