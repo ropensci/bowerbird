@@ -10,23 +10,27 @@
 
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -37,7 +41,6 @@
 
 <meta property="og:title" content="Run a bowerbird data repository synchronization — bb_sync" />
 <meta property="og:description" content="This function takes a bowerbird configuration object and synchronizes each of the data sources defined within it. Data files will be downloaded if they are not present on the local machine, or if the configuration has been set to update local files." />
-<meta name="twitter:card" content="summary" />
 
 
 
@@ -55,7 +58,7 @@
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -69,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">bowerbird</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.3.9999</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -77,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -102,8 +105,8 @@
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/ropensci/bowerbird">
-    <span class="fab fa fab fa-github fa-lg"></span>
+  <a href="https://github.com/ropensci/bowerbird/">
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -129,14 +132,14 @@
     <p>This function takes a bowerbird configuration object and synchronizes each of the data sources defined within it. Data files will be downloaded if they are not present on the local machine, or if the configuration has been set to update local files.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>bb_sync</span>(
-  <span class='no'>config</span>,
-  <span class='kw'>create_root</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>catch_errors</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>confirm_downloads_larger_than</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
-  <span class='kw'>dry_run</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
-)</pre>
+    <pre class="usage"><span class='fu'>bb_sync</span><span class='op'>(</span>
+  <span class='va'>config</span>,
+  create_root <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  verbose <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  catch_errors <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  confirm_downloads_larger_than <span class='op'>=</span> <span class='fl'>0.1</span>,
+  dry_run <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -178,50 +181,46 @@
     <div class='dont-index'><p><code><a href='bb_config.html'>bb_config</a></code>, <code><a href='bb_source.html'>bb_source</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
   <span class='co'>## Choose a location to store files on the local file system.</span>
   <span class='co'>## Normally this would be an explicit choice by the user, but here</span>
   <span class='co'>## we just use a temporary directory for example purposes.</span>
 
-  <span class='no'>td</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span>()
-  <span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_config.html'>bb_config</a></span>(<span class='kw'>local_file_root</span> <span class='kw'>=</span> <span class='no'>td</span>)
+  <span class='va'>td</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span><span class='op'>(</span><span class='op'>)</span>
+  <span class='va'>cf</span> <span class='op'>&lt;-</span> <span class='fu'><a href='bb_config.html'>bb_config</a></span><span class='op'>(</span>local_file_root <span class='op'>=</span> <span class='va'>td</span><span class='op'>)</span>
 
   <span class='co'>## Bowerbird must then be told which data sources to synchronize.</span>
   <span class='co'>## Let's use data from the Australian 2016 federal election, which is provided as one</span>
   <span class='co'>## of the example data sources:</span>
 
-  <span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_example_sources.html'>bb_example_sources</a></span>(<span class='st'>"Australian Election 2016 House of Representatives data"</span>)
+  <span class='va'>my_source</span> <span class='op'>&lt;-</span> <span class='fu'><a href='bb_example_sources.html'>bb_example_sources</a></span><span class='op'>(</span><span class='st'>"Australian Election 2016 House of Representatives data"</span><span class='op'>)</span>
 
   <span class='co'>## Add this data source to the configuration:</span>
 
-  <span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_add.html'>bb_add</a></span>(<span class='no'>cf</span>, <span class='no'>my_source</span>)
+  <span class='va'>cf</span> <span class='op'>&lt;-</span> <span class='fu'><a href='bb_add.html'>bb_add</a></span><span class='op'>(</span><span class='va'>cf</span>, <span class='va'>my_source</span><span class='op'>)</span>
 
   <span class='co'>## Once the configuration has been defined and the data source added to it,</span>
   <span class='co'>## we can run the sync process.</span>
   <span class='co'>## We set \code{verbose=TRUE} so that we see additional progress output:</span>
 
-  <span class='no'>status</span> <span class='kw'>&lt;-</span> <span class='fu'>bb_sync</span>(<span class='no'>cf</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+  <span class='va'>status</span> <span class='op'>&lt;-</span> <span class='fu'>bb_sync</span><span class='op'>(</span><span class='va'>cf</span>, verbose <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 
   <span class='co'>## The files in this data set have been stored in a data-source specific</span>
   <span class='co'>## subdirectory of our local file root:</span>
 
-  <span class='no'>status</span>$<span class='no'>files</span><span class='kw'>[[</span><span class='fl'>1</span>]]
+  <span class='va'>status</span><span class='op'>$</span><span class='va'>files</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
 
   <span class='co'>## We can run this at any later time and our repository will update if the source has changed:</span>
 
-  <span class='no'>status2</span> <span class='kw'>&lt;-</span> <span class='fu'>bb_sync</span>(<span class='no'>cf</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
-}</div></pre>
-  </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#value">Value</a></li>
-      <li><a href="#details">Details</a></li>
-      <li><a href="#see-also">See also</a></li>
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+  <span class='va'>status2</span> <span class='op'>&lt;-</span> <span class='fu'>bb_sync</span><span class='op'>(</span><span class='va'>cf</span>, verbose <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='op'>}</span>
 
+</div></pre>
+  </div>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -232,7 +231,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

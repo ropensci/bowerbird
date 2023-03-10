@@ -252,7 +252,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                         }
                     }
                 } else {
-                    if (verbose) cat(sprintf(" file already exists, not downloading: %s ... ", df), if (show_progress) "\n")
+                    if (verbose) cat(" file already exists, not downloading:", df, "\n", df)
                 }
             }
         }

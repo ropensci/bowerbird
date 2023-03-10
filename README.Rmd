@@ -12,6 +12,7 @@ knitr::opts_chunk$set(
   ##comment = "#>",
   fig.path = "README-"
 )
+options(tibble.width = 80, tibble.print_max = 10, tibble.print_min = 10)
 ```
 
 <!-- badges: start -->
@@ -31,8 +32,16 @@ A comprehensive introduction to bowerbird can be found at https://docs.ropensci.
 ## Installing
 
 ```{r eval = FALSE}
-install.packages("remotes")
+## use the SCAR r-universe package repository
+options(repos = c(SCAR = "https://scar.r-universe.dev", CRAN = "https://cloud.r-project.org"))
+
+## install
+install.packages("bowerbird")
+
+## or install from github
+##install.packages("remotes") ## if needed
 remotes::install_github("ropensci/bowerbird", build_vignettes = TRUE)
+
 ```
 
 ## Usage overview
@@ -44,7 +53,7 @@ Build up a configuration by first defining global options such as the destinatio
 ```{r include = FALSE}
 ## code not shown in the README: (1) use load_all() instead of library() for convenience, (2) use anonymous "temporary" dir, and (3) hide the progress bar
 devtools::load_all()
-my_data_dir <- "c:/tmp/data"
+my_data_dir <- "/tmp/data"
 if (!dir.exists(my_data_dir)) dir.create(my_data_dir)
 if (dir.exists(file.path(my_data_dir, "results.aec.gov.au"))) unlink(file.path(my_data_dir, "results.aec.gov.au"), recursive = TRUE)
 cf <- bb_config(local_file_root = my_data_dir)

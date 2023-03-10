@@ -10,23 +10,27 @@
 
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -37,7 +41,6 @@
 
 <meta property="og:title" content="Define a data source — bb_source" />
 <meta property="og:description" content="This function is used to define a data source, which can then be added to a bowerbird data repository configuration. Passing the configuration object to bb_sync will trigger a download of all of the data sources in that configuration." />
-<meta name="twitter:card" content="summary" />
 
 
 
@@ -55,7 +58,7 @@
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -69,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">bowerbird</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.3.9999</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -77,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -102,8 +105,8 @@
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/ropensci/bowerbird">
-    <span class="fab fa fab fa-github fa-lg"></span>
+  <a href="https://github.com/ropensci/bowerbird/">
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -129,25 +132,25 @@
     <p>This function is used to define a data source, which can then be added to a bowerbird data repository configuration. Passing the configuration object to <code>bb_sync</code> will trigger a download of all of the data sources in that configuration.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>bb_source</span>(
-  <span class='no'>id</span>,
-  <span class='no'>name</span>,
-  <span class='kw'>description</span> <span class='kw'>=</span> <span class='fl'>NA_character_</span>,
-  <span class='no'>doc_url</span>,
-  <span class='no'>source_url</span>,
-  <span class='no'>citation</span>,
-  <span class='no'>license</span>,
-  <span class='kw'>comment</span> <span class='kw'>=</span> <span class='fl'>NA_character_</span>,
-  <span class='no'>method</span>,
-  <span class='no'>postprocess</span>,
-  <span class='kw'>authentication_note</span> <span class='kw'>=</span> <span class='fl'>NA_character_</span>,
-  <span class='kw'>user</span> <span class='kw'>=</span> <span class='fl'>NA_character_</span>,
-  <span class='kw'>password</span> <span class='kw'>=</span> <span class='fl'>NA_character_</span>,
-  <span class='kw'>access_function</span> <span class='kw'>=</span> <span class='fl'>NA_character_</span>,
-  <span class='kw'>data_group</span> <span class='kw'>=</span> <span class='fl'>NA_character_</span>,
-  <span class='kw'>collection_size</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>warn_empty_auth</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
-)</pre>
+    <pre class="usage"><span class='fu'>bb_source</span><span class='op'>(</span>
+  <span class='va'>id</span>,
+  <span class='va'>name</span>,
+  description <span class='op'>=</span> <span class='cn'>NA_character_</span>,
+  <span class='va'>doc_url</span>,
+  <span class='va'>source_url</span>,
+  <span class='va'>citation</span>,
+  <span class='va'>license</span>,
+  comment <span class='op'>=</span> <span class='cn'>NA_character_</span>,
+  <span class='va'>method</span>,
+  <span class='va'>postprocess</span>,
+  authentication_note <span class='op'>=</span> <span class='cn'>NA_character_</span>,
+  user <span class='op'>=</span> <span class='cn'>NA_character_</span>,
+  password <span class='op'>=</span> <span class='cn'>NA_character_</span>,
+  access_function <span class='op'>=</span> <span class='cn'>NA_character_</span>,
+  data_group <span class='op'>=</span> <span class='cn'>NA_character_</span>,
+  collection_size <span class='op'>=</span> <span class='cn'>NA</span>,
+  warn_empty_auth <span class='op'>=</span> <span class='cn'>TRUE</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -238,53 +241,49 @@
     <pre class="examples"><div class='input'>
 <span class='co'>## a minimal definition for the GSHHG coastline data set:</span>
 
-<span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'>bb_source</span>(
-   <span class='kw'>id</span> <span class='kw'>=</span> <span class='st'>"gshhg_coastline"</span>,
-   <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>"GSHHG coastline data"</span>,
-   <span class='kw'>doc_url</span> <span class='kw'>=</span> <span class='st'>"http://www.soest.hawaii.edu/pwessel/gshhg"</span>,
-   <span class='kw'>citation</span> <span class='kw'>=</span> <span class='st'>"Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
+<span class='va'>my_source</span> <span class='op'>&lt;-</span> <span class='fu'>bb_source</span><span class='op'>(</span>
+   id <span class='op'>=</span> <span class='st'>"gshhg_coastline"</span>,
+   name <span class='op'>=</span> <span class='st'>"GSHHG coastline data"</span>,
+   doc_url <span class='op'>=</span> <span class='st'>"http://www.soest.hawaii.edu/pwessel/gshhg"</span>,
+   citation <span class='op'>=</span> <span class='st'>"Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996"</span>,
-   <span class='kw'>source_url</span> <span class='kw'>=</span> <span class='st'>"ftp://ftp.soest.hawaii.edu/gshhg/"</span>,
-   <span class='kw'>license</span> <span class='kw'>=</span> <span class='st'>"LGPL"</span>,
-   <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='st'>"bb_handler_rget"</span>,<span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>accept_download</span> <span class='kw'>=</span> <span class='st'>"README|bin.*\\.zip$"</span>))
+   source_url <span class='op'>=</span> <span class='st'>"ftp://ftp.soest.hawaii.edu/gshhg/"</span>,
+   license <span class='op'>=</span> <span class='st'>"LGPL"</span>,
+   method <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"bb_handler_rget"</span>,level <span class='op'>=</span> <span class='fl'>1</span>, accept_download <span class='op'>=</span> <span class='st'>"README|bin.*\\.zip$"</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='co'>## a more complete definition, which unzips the files after downloading and also</span>
 <span class='co'>##  provides an indication of the size of the dataset</span>
 
-<span class='no'>my_source</span> <span class='kw'>&lt;-</span> <span class='fu'>bb_source</span>(
-   <span class='kw'>id</span> <span class='kw'>=</span> <span class='st'>"gshhg_coastline"</span>,
-   <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>"GSHHG coastline data"</span>,
-   <span class='kw'>description</span> <span class='kw'>=</span> <span class='st'>"A Global Self-consistent, Hierarchical, High-resolution Geography Database"</span>,
-   <span class='kw'>doc_url</span> <span class='kw'>=</span> <span class='st'>"http://www.soest.hawaii.edu/pwessel/gshhg"</span>,
-   <span class='kw'>citation</span> <span class='kw'>=</span> <span class='st'>"Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
+<span class='va'>my_source</span> <span class='op'>&lt;-</span> <span class='fu'>bb_source</span><span class='op'>(</span>
+   id <span class='op'>=</span> <span class='st'>"gshhg_coastline"</span>,
+   name <span class='op'>=</span> <span class='st'>"GSHHG coastline data"</span>,
+   description <span class='op'>=</span> <span class='st'>"A Global Self-consistent, Hierarchical, High-resolution Geography Database"</span>,
+   doc_url <span class='op'>=</span> <span class='st'>"http://www.soest.hawaii.edu/pwessel/gshhg"</span>,
+   citation <span class='op'>=</span> <span class='st'>"Wessel, P., and W. H. F. Smith, A Global Self-consistent, Hierarchical,
      High-resolution Shoreline Database, J. Geophys. Res., 101, 8741-8743, 1996"</span>,
-   <span class='kw'>source_url</span> <span class='kw'>=</span> <span class='st'>"ftp://ftp.soest.hawaii.edu/gshhg/*"</span>,
-   <span class='kw'>license</span> <span class='kw'>=</span> <span class='st'>"LGPL"</span>,
-   <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='st'>"bb_handler_rget"</span>, <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>accept_download</span> <span class='kw'>=</span> <span class='st'>"README|bin.*\\.zip$"</span>),
-   <span class='kw'>postprocess</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='st'>"bb_unzip"</span>),
-   <span class='kw'>collection_size</span> <span class='kw'>=</span> <span class='fl'>0.6</span>)
+   source_url <span class='op'>=</span> <span class='st'>"ftp://ftp.soest.hawaii.edu/gshhg/*"</span>,
+   license <span class='op'>=</span> <span class='st'>"LGPL"</span>,
+   method <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"bb_handler_rget"</span>, level <span class='op'>=</span> <span class='fl'>1</span>, accept_download <span class='op'>=</span> <span class='st'>"README|bin.*\\.zip$"</span><span class='op'>)</span>,
+   postprocess <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"bb_unzip"</span><span class='op'>)</span>,
+   collection_size <span class='op'>=</span> <span class='fl'>0.6</span><span class='op'>)</span>
 
 <span class='co'>## define a data repository configuration</span>
-<span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_config.html'>bb_config</a></span>(<span class='st'>"/my/repo/root"</span>)
+<span class='va'>cf</span> <span class='op'>&lt;-</span> <span class='fu'><a href='bb_config.html'>bb_config</a></span><span class='op'>(</span><span class='st'>"/my/repo/root"</span><span class='op'>)</span>
 
 <span class='co'>## add this source to the repository</span>
-<span class='no'>cf</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bb_add.html'>bb_add</a></span>(<span class='no'>cf</span>, <span class='no'>my_source</span>)
+<span class='va'>cf</span> <span class='op'>&lt;-</span> <span class='fu'><a href='bb_add.html'>bb_add</a></span><span class='op'>(</span><span class='va'>cf</span>, <span class='va'>my_source</span><span class='op'>)</span>
 
-<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 <span class='co'>## sync the repo</span>
-<span class='fu'><a href='bb_sync.html'>bb_sync</a></span>(<span class='no'>cf</span>)
-}</div></pre>
-  </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#value">Value</a></li>
-      <li><a href="#details">Details</a></li>
-      <li><a href="#see-also">See also</a></li>
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+<span class='fu'><a href='bb_sync.html'>bb_sync</a></span><span class='op'>(</span><span class='va'>cf</span><span class='op'>)</span>
+<span class='op'>}</span>
 
+</div></pre>
+  </div>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -295,7 +294,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

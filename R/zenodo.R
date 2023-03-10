@@ -1,6 +1,7 @@
 #' Generate a bowerbird data source object for a Zenodo data set
 #'
 #' @param id : the ID of the data set
+#' @param use_latest logical: if \code{TRUE}, use the most recent version of the data set (if there is one). The most recent version might have a different data set ID to the one provided here
 #'
 #' @return A tibble containing the data source definition, as would be returned by \code{\link{bb_source}}
 #'
@@ -20,8 +21,12 @@
 #' }
 #'
 #' @export
-bb_zenodo_source <- function(id) {
+bb_zenodo_source <- function(id, use_latest = FALSE) {
     jx <- jsonlite::fromJSON(paste0("https://zenodo.org/api/records/", id))
+    if (isTRUE(use_latest) && length(jx$links$latest) == 1 && nzchar(jx$links$latest) && !is.na(jx$links$latest)) {
+        latest_id <- stringr::str_match(jx$links$latest, "zenodo.org/api/records/([[:digit:]]+)$")
+        if (nrow(latest_id) == 1) return(bb_zenodo_source(id = latest_id[1, 2], use_latest = FALSE))
+    }
     ne_or <- function(z, or) tryCatch(if (!is.null(z) && nzchar(z)) z else or, error = function(e) or)
     ## collection size
     csize <- tryCatch(as.numeric(format(sum(jx$files$filesize, na.rm = TRUE)/1024^3, digits = 1)), error = function(e) NULL)
