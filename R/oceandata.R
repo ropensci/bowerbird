@@ -323,7 +323,15 @@ oceandata_parameters <- function(platform) {
             "V", "par", "S?NPP[_\\.]PAR[_\\.]par",
             "V", "pic", "S?NPP[_\\.]PIC[_\\.]pic",
             "V", "poc", "S?NPP[_\\.]POC[_\\.]poc",
-            "V", "RRS", "S?NPP[_\\.]RRS[_\\.].*")
+            "V", "RRS", "S?NPP[_\\.]RRS[_\\.].*",
+            "V", "KD490", "S?NPP[_\\.]KD490[_\\.]Kd_490",
+            "V", "chl", "CHL[_\\.]chl_ocx",
+            "V", "chlor", "CHL[_\\.]chlor_a",
+            "V", "IOP", "IOP[_\\.].*",
+            "V", "par", "PAR[_\\.]par",
+            "V", "pic", "PIC[_\\.]pic",
+            "V", "poc", "POC[_\\.]poc",
+            "V", "RRS", "RRS[_\\.].*")
 }
 
 
