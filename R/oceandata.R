@@ -373,7 +373,7 @@ oceandata_find_platform <- function(x) {
     ## look for full first, because SNPP_VIIRS is ambiguous with S (old SeaWiFS abbrev)
     ## if full not found, look for abbreviation but return its full equivalent
     chk <- stringr::str_match(x, "(AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)")
-    if (nrow(chk < 1)) {
+    if (nrow(chk) < 1) {
         ## abbreviated platform, but it has to be at the start of the string or after a /
         chk <- stringr::str_match(x, "^([ASTCV])")
         if (nrow(chk) < 1) chk <- stringr::str_match(x, "/([ASTCV])")
