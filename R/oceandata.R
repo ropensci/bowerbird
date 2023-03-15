@@ -93,7 +93,13 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             out <- "oceandata.sci.gsfc.nasa.gov"
             ## refine by platform. Find platform, either full or one-letter abbrev
             this_platform <- oceandata_find_platform(search)
-            if (nchar(this_platform) > 0) out <- file.path(out, this_platform)
+            if (!is.na(this_platform) && nchar(this_platform) > 0) {
+                ## want old platform name for backwards compatibility
+                if (!this_platform %in% oceandata_platform_map()$platform) {
+                    this_platform <- oceandata_platform_map(oceandata_platform_to_abbrev(this_platform))
+                }
+                out <- file.path(out, this_platform)
+            }
             if (grepl("L3m",search)) {
                 out <- file.path(out, "Mapped")
             } else if (grepl("L3",search)) {
@@ -381,7 +387,7 @@ oceandata_find_platform <- function(x) {
     ## look for full first, because SNPP_VIIRS is ambiguous with S (old SeaWiFS abbrev)
     ## if full not found, look for abbreviation but return its full equivalent
     chk <- stringr::str_match(x, "(AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)")
-    if (nrow(chk) < 1) {
+    if (nrow(chk) < 1 || is.na(chk[1, 2])) {
         ## abbreviated platform, but it has to be at the start of the string or after a /
         chk <- stringr::str_match(x, "^([ASTCV])")
         if (nrow(chk) < 1) chk <- stringr::str_match(x, "/([ASTCV])")

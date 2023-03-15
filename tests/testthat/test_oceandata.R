@@ -12,8 +12,7 @@ test_that("bb_handler_oceandata works",{
         license="Please cite",
         user = "YOUR_EARTHDATA_USERNAME", password = "YOUR_EARTHDATA_PASSWORD",
         comment="",
-        method=list("bb_handler_oceandata",search="T20000322000060.L3m_MO_PAR_par_9km.nc"),
-          ##T20000322000060.L3m_MO_SST_sst_9km.nc ## gives 404 but it appears that the file search utility reports it, but it doesn't actually exist on the server
+        method=list("bb_handler_oceandata",search="TERRA_MODIS.20000301_20000331.L3m.MO.PAR.par.9km.nc"),
         postprocess=NULL,
         access_function="",
         data_group="Sea surface temperature")
@@ -21,7 +20,7 @@ test_that("bb_handler_oceandata works",{
     ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODIST/Mapped$",bb_data_source_dir(ocf)))
     bb_sync(ocf, confirm_downloads_larger_than = NULL)
-    fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/par/T20000322000060.L3m_MO_PAR_par_9km.nc" ## relative file name
+    fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/par/TERRA_MODIS.20000301_20000331.L3m.MO.PAR.par.9km.nc" ## relative file name
     expect_true(file.exists(file.path(temp_root,fnm)))
     fi <- file.info(file.path(temp_root,fnm))
     expect_gt(fi$size,6e6)
@@ -68,7 +67,7 @@ test_that("other oceandata handler tests", {
                      doc_url="http://oceancolor.gsfc.nasa.gov/",
                      citation="See https://oceancolor.gsfc.nasa.gov/citations",
                      license="Please cite",
-                     method=list("bb_handler_oceandata", search = "V*L3b.DAY.SNPP.RRS.nc", sensor = "viirs", dtype = "L3b"),
+                     method=list("bb_handler_oceandata", search = "SNPP_VIIRS*L3b.DAY.RRS.nc", sensor = "viirs", dtype = "L3b"),
                      user = "", password = "", warn_empty_auth = FALSE)
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/VIIRS/L3BIN$", bb_data_source_dir(ocf)))
@@ -107,7 +106,7 @@ test_that("bb_handler_oceandata works when no files match",{
                      license="Please cite",
                      user = "YOUR_EARTHDATA_USERNAME", password = "YOUR_EARTHDATA_PASSWORD",
                      comment="",
-                     method=list("bb_handler_oceandata",search="Tblahblahblah20000322000060.L3m_MO_SST_sst_9km.nc"),
+                     method=list("bb_handler_oceandata",search="TERRA_MODISblahblahblah20000322000060.L3m_MO_SST_sst_9km.nc"),
                      postprocess=NULL,
                      access_function="",
                      data_group="Sea surface temperature")
