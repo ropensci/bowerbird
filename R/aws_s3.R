@@ -86,12 +86,14 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
     }
 
     ## get list of objects in bucket that match our specs
-    if (is.null(myargs$bucketlist_json)) {
+    if (!is.null(myargs$bucketlist_json)) warning("the `bucketlist_json` parameter has been replaced by `bucket_browser_url`, ignoring")
+    if (is.null(myargs$bucket_browser_url)) {
         bx <- do.call(aws.s3::get_bucket, c(s3args[intersect(names(s3args), c("max", "prefix"))], s3HTTP_args, list(verbose = TRUE)))
         all_urls <- vapply(bx, function(z) do.call(get_aws_s3_url, c(list(path = paste0("/", z$Key)), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
     } else {
-        bx <- jsonlite::fromJSON(myargs$bucketlist_json)$objects
-        all_urls <- vapply(bx$name, function(z) do.call(get_aws_s3_url, c(list(path = z), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
+        ## for providers that don't support bucket indexing
+        objs <- s3_faux_bucket_list(bucket_browser_url = myargs$bucket_browser_url, bucket = s3args$bucket, prefix = s3args$prefix)
+        all_urls <- vapply(objs, function(z) do.call(get_aws_s3_url, c(list(path = z), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
     }
     ## apply accept_download etc filters
     idx <- rep(TRUE, length(all_urls))
@@ -135,4 +137,28 @@ get_aws_s3_url <- function(bucket, region = NULL, path, base_url, verbose = FALS
     url <- if (grepl("^[\\/].*", path)) paste0(url, path) else paste(url, path, sep = "/")
     if (isTRUE(terminal_slash)) url <- paste0(url, "/")
   url
+}
+
+s3_faux_bucket_list <- function(bucket_browser_url, bucket, prefix) {
+    ## (slow) recursive listing of objects, to emulate bucket listing for providers that don't support it, like AADC
+    s3_faux_inner(bucket_browser_url, bucket, prefix)
+}
+s3_faux_inner <- function(bucket_browser_url, bucket, prefix, out = c(), seen = c(), lv = 0L, max_lv = 99L) {
+    if (lv >= max_lv) return(out)
+    if (is.null(prefix)) prefix <- ""
+    if (prefix %in% seen) return(out)
+    seen <- c(seen, prefix)
+    url <- sub("/+$", "/", file.path(bucket_browser_url, bucket, prefix, ""))
+    obj <- jsonlite::fromJSON(url)$objects
+    ##cat(str(obj))
+    to_follow <- !is.na(obj$prefix)
+    if (any(to_follow)) {
+        c(out, obj$name[!to_follow],
+          unlist(lapply(obj$prefix[to_follow], function(prfx) {
+              ##cat("following prefix: ", prfx, "\n")
+              s3_faux_inner(bucket_browser_url, bucket = bucket, prefix = URLencode(prfx), out = out, seen = seen, lv = lv + 1L)
+          })))
+    } else {
+        c(out, obj$name)
+    }
 }
