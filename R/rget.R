@@ -337,7 +337,8 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 }
             } else {
                 links_from <- "html"
-                x <- tryCatch(read_html(rawToChar(x$content)), error = function (e) {
+                temp <- sub("</html><body>", "<body>", rawToChar(x$content), fixed = TRUE) ## workaround for occasional malformed html pages that have an errant </html> tag before the body starts
+                x <- tryCatch(read_html(temp), error = function (e) {
                     ## not valid HTML?
                     NULL
                 })
