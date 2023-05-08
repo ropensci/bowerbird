@@ -459,8 +459,8 @@ build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_cer
     out <- if (!is.null(debug) && debug) httr::verbose() else httr::config() ## curl's verbose output is intense, save it for debug = TRUE
     if (!is.null(show_progress) && show_progress) out$options <- c(out$options, httr::progress()$options)
     if (!is.null(no_check_certificate) && no_check_certificate) {
-            out$options$ssl_verifypeer = 0L
-            ##out$options$ssl_verifyhost = 0L ## does not seem to work
+        out$options$ssl_verifypeer = 0L
+        out$options$ssl_verifyhost = 0L ## sometimes also seem to need this?
     }
     if (!missing(user) && !is.null(user) && !is.na(user)) {
         out$options$username <- user
