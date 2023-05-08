@@ -26,7 +26,7 @@ Imports:
     openssl,
     R.utils,
     rmarkdown,
-    rvest,
+    rvest (>= 1.0.0),
     stringr,
     sys (>= 1.4.9000),
     tibble,

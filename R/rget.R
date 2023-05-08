@@ -114,7 +114,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param use_url_directory logical: if \code{TRUE}, files will be saved into a local directory that follows the URL structure (e.g. files from \code{http://some.where/place} will be saved into directory \code{some.where/place}). If \code{FALSE}, files will be saved into the current directory
 #' @param no_host logical: if \code{use_url_directory = TRUE}, specifying \code{no_host = TRUE} will remove the host name from the directory (e.g. files from files from \code{http://some.where/place} will be saved into directory \code{place})
 #' @param cut_dirs integer: if \code{use_url_directory = TRUE}, specifying \code{cut_dirs} will remove this many directory levels from the path of the local directory where files will be saved (e.g. if \code{cut_dirs = 2}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{some.where/haa}. if \code{cut_dirs = 1} and \code{no_host = TRUE}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{baa/haa})
-#' @param link_css string: css selector that identifies links (passed as the \code{css} parameter to \code{\link[rvest]{html_nodes}}). Note that link elements must have an \code{href} attribute
+#' @param link_css string: css selector that identifies links (passed as the \code{css} parameter to \code{\link[rvest]{html_elements}}). Note that link elements must have an \code{href} attribute
 #' @param curl_opts named list: options to use with \code{curl} downloads, passed to the \code{.list} parameter of \code{curl::new_handle}
 #'
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
@@ -349,7 +349,7 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 if (links_from == "text") {
                     all_links <- strsplit(x, "[\r\n]+")[[1]]
                 } else {
-                    all_links <- unique(na.omit(vapply(html_nodes(x, opts$link_css), function(z) html_attr(z, "href"), FUN.VALUE = "", USE.NAMES = FALSE)))
+                    all_links <- unique(na.omit(vapply(html_elements(x, opts$link_css), function(z) html_attr(z, "href"), FUN.VALUE = "", USE.NAMES = FALSE)))
                 }
                 ##cat("First 20 links: "); print(head(all_links, 20))
                 ## discard non-relative links, if opts$relative
