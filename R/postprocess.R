@@ -67,6 +67,7 @@ bb_decompress_inner <- function(config, file_list_before, file_list_after, verbo
         res1 <- do_decompress_files(method, files = files_to_decompress, verbose = verbose)
         ## also decompress if uncompressed file does not exist
         files_to_decompress <- setdiff(rownames(file_list_after), files_to_decompress) ## those that we haven't just dealt with
+        files_to_decompress <- files_to_decompress[file.exists(files_to_decompress)]
         files_to_decompress <- files_to_decompress[str_detect(files_to_decompress, regex(file_pattern, ignore_case = ignore_case))] ## only .zip/.gz/.bz2/.Z files
         res2 <- do_decompress_files(method, files = files_to_decompress, overwrite = FALSE, verbose = verbose)
         ## nb this may be slow, so might be worth explicitly checking for the existence of uncompressed files
@@ -243,6 +244,9 @@ find_changed_files <- function(file_list_before, file_list_after, filename_patte
     ## expect both file_list_before and file_list_after to be a data.frame from file.info()
     ## detect changes on basis of ctime and size attributes
     ## returns names only
+    ## discard any files that don't actually exist
+    file_list_before <- file_list_before[file.exists(rownames(file_list_before)), ]
+    file_list_after <- file_list_after[file.exists(rownames(file_list_after)), ]
     changed_files <- setdiff(rownames(file_list_after), rownames(file_list_before)) ## anything that has appeared afterwards
     for (thisf in intersect(rownames(file_list_after), rownames(file_list_before))) {
         ## files in both
