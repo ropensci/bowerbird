@@ -92,8 +92,7 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
         all_urls <- vapply(bx, function(z) do.call(get_aws_s3_url, c(list(path = paste0("/", z$Key)), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
     } else {
         ## for providers that don't support bucket indexing
-        objs <- s3_faux_bucket_list(bucket_browser_url = myargs$bucket_browser_url, bucket = s3args$bucket, prefix = s3args$prefix)
-        all_urls <- vapply(objs, function(z) do.call(get_aws_s3_url, c(list(path = z), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
+        all_urls <- s3_faux_bucket_list(bucket_browser_url = myargs$bucket_browser_url, bucket = s3args$bucket, prefix = s3args$prefix, s3HTTP_args = s3HTTP_args)
     }
     ## apply accept_download etc filters
     idx <- rep(TRUE, length(all_urls))
@@ -139,9 +138,20 @@ get_aws_s3_url <- function(bucket, region = NULL, path, base_url, verbose = FALS
   url
 }
 
-s3_faux_bucket_list <- function(bucket_browser_url, bucket, prefix) {
-    ## (slow) recursive listing of objects, to emulate bucket listing for providers that don't support it, like AADC
-    s3_faux_inner(bucket_browser_url, bucket, prefix)
+## this is a horrible workaround for providers that do not implement the standard endpoint for listing objects in a bucket
+s3_faux_bucket_list <- function(bucket_browser_url, bucket, prefix, s3HTTP_args) {
+    temp <- httr::parse_url(bucket_browser_url)
+    if (isTRUE(temp$hostname == "data.aad.gov.au" && grepl("^eds/api/dataset/[^/]+/objects", temp$path))) {
+        ## it's an aadc non-standards bucket list URL
+        out <- get_json(bucket_browser_url) ## df of objects
+        ## convert to urls, download links look like
+        ## https://data.aad.gov.au/eds/api/dataset/UUID/object/download?prefix=OBJECTNAME
+        paste0(sub("objects.*", "object/download?prefix=", bucket_browser_url), URLencode(out$name))
+    } else {
+        ## (slow) recursive listing of objects, to emulate bucket listing for providers that don't support it
+        objs <- s3_faux_inner(bucket_browser_url, bucket, prefix)
+        vapply(objs, function(z) do.call(get_aws_s3_url, c(list(path = z), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
+    }
 }
 s3_faux_inner <- function(bucket_browser_url, bucket, prefix, out = c(), seen = c(), lv = 0L, max_lv = 99L) {
     if (lv >= max_lv) return(out)

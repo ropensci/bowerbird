@@ -3,7 +3,7 @@ test_that("A small AADC source works", {
     src <- bb_aadc_source("AADC-00009")
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
-    expect_true(grepl("public.services.aad.gov.au/datasets/science/AADC-00009/?$", bb_data_source_dir(cf)))
+    expect_true(grepl("data.aad.gov.au/eds/api/dataset/869C18A1-663F-4439-9D5E-0A8056443E91/AADC-00009/?$", bb_data_source_dir(cf)))
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL)
     expect_equal(nrow(status$files[[1]]), 7L)
     expect_true(all(file.exists(status$files[[1]]$file)))
