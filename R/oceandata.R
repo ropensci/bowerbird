@@ -301,6 +301,7 @@ oceandata_parameters <- function(platform) {
     ## platforms yet to do: "Q","H" (are different folder structure to the others)
     tribble(~platform, ~parameter, ~pattern,
             "SATCO", "Kd", "KD490[_\\.]Kd_490",
+            "SATCO", "Kd", "KD[_\\.]Kd_490", ## changed?
             "SATCO", "NSST", "NSST",
             "SATCO", "Rrs", "RRS[_\\.]Rrs_[[:digit:]]+",
             "SATCO", "SST", "SST",
