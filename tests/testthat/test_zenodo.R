@@ -3,7 +3,7 @@ test_that("A small Zenodo source works", {
     src <- bb_zenodo_source(3533328)
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
-    expect_true(all(grepl("zenodo.org/api/files/afff5403-f7d8-4dfe-9b63-2720a890e208/?$", bb_data_source_dir(cf))))
+    expect_true(all(grepl("zenodo.org/api/records/3533328/files", bb_data_source_dir(cf))))
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL)
     expect_equal(nrow(status$files[[1]]), 14)
     expect_true(all(file.exists(status$files[[1]]$file)))
