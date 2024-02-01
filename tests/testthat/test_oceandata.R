@@ -40,8 +40,8 @@ test_that("url mapper works", {
     expect_identical(bowerbird:::oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A20090322009059.L3b_MO_RRS.main.bz2", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/2009/032/")
     expect_identical(bowerbird:::oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A20090322009059.L3b_MO_RRS.x06.bz2", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/2009/032/")
     expect_identical(bowerbird:::oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/A20140012014008.L3b_8D_PAR.main.bz2", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/2014/001/")
-    expect_identical(bowerbird:::oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/")
-    expect_identical(bowerbird:::oceandata_url_mapper("https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/")
+    expect_identical(bowerbird:::oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/V2016044.L3m_DAY_PAR_par_9km.nc", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/")
+    expect_identical(bowerbird:::oceandata_url_mapper("https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_PAR_par_9km.nc", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/9km/par/2016/")
     ## new naming conventions
     expect_identical(bowerbird:::oceandata_url_mapper("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/AQUA_MODIS.20230109.L3b.DAY.RRS.nc", path_only = TRUE), "oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/2023/01/09/")
 
