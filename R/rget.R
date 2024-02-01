@@ -65,14 +65,6 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     if (!is.na(cfrow$user) && nchar(cfrow$user)>0) this_flags <- c(this_flags,list(user=cfrow$user))
     if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- c(this_flags,list(password=cfrow$password))
 
-    ##if (!is.null(cfrow$dry_run) && cfrow$dry_run) {
-    ##    if (verbose) {
-    ##        temp <- vapply(seq_len(length(this_flags)),function(z)paste0(names(this_flags)[z],"=",this_flags[z]),FUN.VALUE="",USE.NAMES=FALSE)
-    ##        cat(sprintf(" dry_run is TRUE, not executing bb_rget with parameters: url=\"%s\", %s\n",cfrow$source_url,paste(temp,collapse=", ")))
-    ##    }
-    ##    ok <- TRUE
-    ##} else {
-
     ## if dry_run, still call bb_rget
     if (!is.null(cfrow[["dry_run"]]) && !is.na(cfrow$dry_run)) {
         this_flags$dry_run <- cfrow$dry_run
