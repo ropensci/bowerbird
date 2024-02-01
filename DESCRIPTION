@@ -16,6 +16,7 @@ Imports:
     archive,
     assertthat,
     aws.s3 (>= 0.3.21),
+    CopernicusMarine,
     curl,
     fs,
     httr,
