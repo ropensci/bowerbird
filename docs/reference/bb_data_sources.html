@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">bowerbird</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.12.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.14.1</span>
       </span>
     </div>
 
@@ -104,18 +104,17 @@
 <span class="r-in"><span><span class="co">## examine the sources contained in cf</span></span></span>
 <span class="r-in"><span><span class="fu">bb_data_sources</span><span class="op">(</span><span class="va">cf</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 16</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   id          name  descr…¹ doc_url sourc…² citat…³ license comment method      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> oisst.v2    NOAA… <span style="color: #949494;">"</span>Weekl… http:/… &lt;chr&gt;   <span style="color: #949494;">"</span>NOAA_… Please… <span style="color: #BB0000;">NA</span>      &lt;named list&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> aus-electi… Aust… <span style="color: #949494;">"</span>House… http:/… &lt;chr&gt;   <span style="color: #949494;">"</span>Copyr… CC-BY   <span style="color: #BB0000;">NA</span>      &lt;named list&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> SEALEVEL_G… CMEM… <span style="color: #949494;">"</span>For t… http:/… &lt;chr&gt;   <span style="color: #949494;">"</span>In ca… See ht… <span style="color: #BB0000;">NA</span>      &lt;named list&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> SeaWiFS_L3… Ocea… <span style="color: #949494;">"</span>Month… https:… &lt;chr&gt;   <span style="color: #949494;">"</span>See h… Please… <span style="color: #BB0000;">NA</span>      &lt;named list&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 10.5067/IJ… Sea … <span style="color: #949494;">"</span>NSIDC… https:… &lt;chr&gt;   <span style="color: #949494;">"</span>Stroe… Please… <span style="color: #BB0000;">NA</span>      &lt;named list&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> greatlakes… Bath… <span style="color: #949494;">"</span>A dra… https:… &lt;chr&gt;   <span style="color: #949494;">"</span>Publi… https:… Only t… &lt;named list&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 7 more variables: postprocess &lt;list&gt;, authentication_note &lt;chr&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   user &lt;chr&gt;, password &lt;chr&gt;, access_function &lt;chr&gt;, data_group &lt;chr&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   collection_size &lt;dbl&gt;, and abbreviated variable names ¹​description,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ²​source_url, ³​citation</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   id               name  description doc_url source_url citation license comment</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> oisst.v2         NOAA… <span style="color: #949494;">"</span>Weekly an… http:/… <span style="color: #949494;">&lt;chr [1]&gt;</span>  <span style="color: #949494;">"</span>NOAA_O… Please… <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> aus-election-ho… Aust… <span style="color: #949494;">"</span>House of … http:/… <span style="color: #949494;">&lt;chr [1]&gt;</span>  <span style="color: #949494;">"</span>Copyri… CC-BY   <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> SEALEVEL_GLO_PH… CMEM… <span style="color: #949494;">"</span>For the G… http:/… <span style="color: #949494;">&lt;chr [1]&gt;</span>  <span style="color: #949494;">"</span>In cas… See ht… <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> SeaWiFS_L3m_MO_… Ocea… <span style="color: #949494;">"</span>Monthly r… https:… <span style="color: #949494;">&lt;chr [1]&gt;</span>  <span style="color: #949494;">"</span>See ht… Please… <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 10.5067/IJ0T7HF… Sea … <span style="color: #949494;">"</span>NSIDC pro… https:… <span style="color: #949494;">&lt;chr [1]&gt;</span>  <span style="color: #949494;">"</span>Stroev… Please… <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> greatlakes-supe… Bath… <span style="color: #949494;">"</span>A draft v… https:… <span style="color: #949494;">&lt;chr [1]&gt;</span>  <span style="color: #949494;">"</span>Publis… https:… Only t…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 8 more variables: method &lt;list&gt;, postprocess &lt;list&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   authentication_note &lt;chr&gt;, user &lt;chr&gt;, password &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   access_function &lt;chr&gt;, data_group &lt;chr&gt;, collection_size &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## replace the sources with different ones</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
@@ -136,7 +135,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">bowerbird</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.12.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.14.1</span>
       </span>
     </div>
 
@@ -63,13 +63,25 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bb_aadc_source</span><span class="op">(</span><span class="va">metadata_id</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bb_aadc_source</span><span class="op">(</span><span class="va">metadata_id</span>, <span class="va">eds_id</span>, id_is_metadata_id <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>metadata_id</dt>
 <dd><p>string: the metadata ID of the data set. Browse the AADC's collection at https://data.aad.gov.au/metadata/records/ to find the relevant <code>metadata_id</code></p></dd>
+
+
+<dt>eds_id</dt>
+<dd><p>integer: specify one or more <code>eds_id</code>s if the metadata record has multiple data assets attached to it and you don't want all of them</p></dd>
+
+
+<dt>id_is_metadata_id</dt>
+<dd><p>logical: if TRUE, use the <code>metadata_id</code> as the data source ID, otherwise use its DOI</p></dd>
+
+
+<dt>...</dt>
+<dd><p>: passed to <code><a href="bb_source.html">bb_source</a></code></p></dd>
 
 </dl></div>
     <div id="value">
@@ -113,7 +125,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
