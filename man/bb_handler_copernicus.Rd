@@ -4,10 +4,12 @@
 \alias{bb_handler_copernicus}
 \title{Handler for Copernicus Marine datasets}
 \usage{
-bb_handler_copernicus(product, ...)
+bb_handler_copernicus(product, ctype = "stac", ...)
 }
 \arguments{
 \item{product}{string: the desired Copernicus marine product. See \code{\link[CopernicusMarine]{cms_products_list}}}
+
+\item{ctype}{string: most likely "stac" for a dataset containing multiple files, or "file" for a single file}
 
 \item{...}{: parameters passed to \code{\link{bb_rget}}}
 }
