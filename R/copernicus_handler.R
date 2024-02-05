@@ -81,7 +81,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
                 if (!is.na(myfiles$ETag[idx])) {
                     ## we have a remote hash, so replace existing if remote hash does not match that of local copy
                     if (this_exists) {
-                        download_this <- !isTRUE(myfiles$ETag[idx] == myfiles$checksum[idx])
+                        download_this <- !isTRUE(myfiles$ETag[idx] == myfiles$existing_checksum[idx])
                     }
                 } else {
                     ## no remote hash, so attempt the download and rely on timestamps
