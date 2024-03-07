@@ -42,7 +42,7 @@ bb_handler_earthdata <- function(...) {
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 # @param use_wget logical: TRUE use wget (deprecated), FALSE use rget
-bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, use_wget = FALSE, ...) {
+bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, use_wget = FALSE, allow_unrestricted_auth = FALSE, ...) {
     assert_that(is(config, "bb_config"))
     assert_that(nrow(bb_data_sources(config)) == 1)
     assert_that(is.flag(verbose), !is.na(verbose))
@@ -83,6 +83,9 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
         my_curl_config$options$followlocation <- 1
         my_curl_config$options$cookiefile <- cookies_file ## reads cookies from here
         my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
+        if (isTRUE(allow_unrestricted_auth)) my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname
+        ## but we make this something that the source has to specifically set, because it's a security risk: https://curl.se/libcurl/c/CURLOPT_UNRESTRICTED_AUTH.html
+        dummy$method[[1]]$allow_unrestricted_auth <- NULL ## remove this from the method parms being passed to rget
         do.call(bb_handler_rget, c(list(config, verbose = verbose, curl_opts = my_curl_config$options), dummy$method[[1]][-1]))
     }
 }

@@ -113,7 +113,6 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #'
 #' @export
 bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, link_css = "a", curl_opts) {
-    ## TO ADD: no_parent probably wise
     assert_that(is.character(url))
     if (length(url) < 1) return(tibble(ok = TRUE, files = list(tibble(url = character(), file = character(), was_downloaded = logical())), message = ""))
     assert_that(is.numeric(level), level >= 0)
@@ -127,7 +126,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     if (missing(password)) password <- NA_character_
     assert_that(is.string(password))
     assert_that(clobber %in% c(0, 1, 2))
-    assert_that(is.flag(no_parent),!is.na(no_parent))
+    assert_that(is.flag(no_parent), !is.na(no_parent))
     assert_that(is.flag(no_check_certificate), !is.na(no_check_certificate))
     assert_that(is.flag(relative), !is.na(relative))
     assert_that(is.flag(remote_time), !is.na(remote_time))
