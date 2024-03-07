@@ -69,27 +69,28 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
     fidx <- file.exists(myfiles$local_filename) & !is.na(myfiles$ETag)
     myfiles$existing_checksum <- NA_character_
     myfiles$existing_checksum[fidx] <- vapply(myfiles$local_filename[fidx], file_hash, hash = "md5", FUN.VALUE = "", USE.NAMES = FALSE)
-    if (!this_att$dry_run) {
-        for (idx in seq_len(nrow(myfiles))) {
-            this_url <- myfiles$url[idx]
-            this_fullfile <- myfiles$local_filename[idx]
-            this_exists <- !is.na(myfiles$existing_checksum[idx])
-            download_this <- !this_exists
-            if (this_att$clobber < 1) {
-                ## don't clobber existing
-            } else if (this_att$clobber == 1) {
-                if (!is.na(myfiles$ETag[idx])) {
-                    ## we have a remote hash, so replace existing if remote hash does not match that of local copy
-                    if (this_exists) {
-                        download_this <- !isTRUE(myfiles$ETag[idx] == myfiles$existing_checksum[idx])
-                    }
-                } else {
-                    ## no remote hash, so attempt the download and rely on timestamps
-                    download_this <- TRUE
+    myfiles$would_actually_download <- FALSE ## only used with dry_run
+    for (idx in seq_len(nrow(myfiles))) {
+        this_url <- myfiles$url[idx]
+        this_fullfile <- myfiles$local_filename[idx]
+        this_exists <- !is.na(myfiles$existing_checksum[idx])
+        download_this <- !this_exists
+        if (this_att$clobber < 1) {
+            ## don't clobber existing
+        } else if (this_att$clobber == 1) {
+            if (!is.na(myfiles$ETag[idx])) {
+                ## we have a remote hash, so replace existing if remote hash does not match that of local copy
+                if (this_exists) {
+                    download_this <- !isTRUE(myfiles$ETag[idx] == myfiles$existing_checksum[idx])
                 }
             } else {
+                ## no remote hash, so attempt the download and rely on timestamps
                 download_this <- TRUE
             }
+        } else {
+            download_this <- TRUE
+        }
+        if (!this_att$dry_run) {
             if (download_this) {
                 if (verbose) cat("Downloading:", this_url, "... \n")
                 if (!dir.exists(dirname(this_fullfile))) dir.create(dirname(this_fullfile), recursive = TRUE)
@@ -115,9 +116,12 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
                     if (verbose) cat("not downloading ", myfiles$filename[idx], ", local copy exists with identical checksum\n", sep = "")
                 }
             }
+        } else {
+            myfiles$would_actually_download[idx] <- download_this
         }
-    } else if (verbose) {
-        cat(" dry_run is TRUE, bb_handler_oceandata is not downloading the following files:\n", paste(myfiles$url, collapse="\n "), "\n")
+    }
+    if (verbose && dry_run) {
+        cat(" dry_run is TRUE, bb_handler_copernicus is not downloading the following files:\n", paste(myfiles$url[which(myfiles$would_actually_download)], collapse="\n "), "\n")
     }
     fls <- myfiles[, c("url", "local_filename", "was_downloaded")]
     names(fls)[2] <- "file"
