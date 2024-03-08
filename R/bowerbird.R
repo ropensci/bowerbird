@@ -19,6 +19,6 @@
 #' @importFrom stats na.omit
 #' @importFrom sys exec_wait exec_internal
 #' @importFrom tibble as_tibble tibble tribble
-#' @importFrom utils capture.output download.file menu read.table str untar unzip URLencode URLdecode
+#' @importFrom utils capture.output download.file head menu read.table str untar unzip URLencode URLdecode
 #' @importFrom xml2 read_html
-NULL
+"_PACKAGE"

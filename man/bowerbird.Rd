@@ -3,6 +3,7 @@
 \docType{package}
 \name{bowerbird}
 \alias{bowerbird}
+\alias{_PACKAGE}
 \alias{bowerbird-package}
 \title{\pkg{bowerbird}}
 \description{
@@ -10,4 +11,28 @@ Often it's desirable to have local copies of third-party data sets. Fetching dat
 }
 \references{
 \url{https://github.com/AustralianAntarcticDivision/bowerbird}
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://docs.ropensci.org/bowerbird}
+  \item \url{https://github.com/ropensci/bowerbird}
+  \item Report bugs at \url{https://github.com/ropensci/bowerbird/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Ben Raymond \email{ben.raymond@aad.gov.au}
+
+Authors:
+\itemize{
+  \item Michael Sumner
+}
+
+Other contributors:
+\itemize{
+  \item Miles McBain \email{miles.mcbain@gmail.com} [reviewer, contributor]
+  \item Leah Wasser [reviewer, contributor]
+}
+
 }

@@ -120,7 +120,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
             myfiles$would_actually_download[idx] <- download_this
         }
     }
-    if (verbose && dry_run) {
+    if (verbose && this_att$dry_run) {
         cat(" dry_run is TRUE, bb_handler_copernicus is not downloading the following files:\n", paste(myfiles$url[which(myfiles$would_actually_download)], collapse="\n "), "\n")
     }
     fls <- myfiles[, c("url", "local_filename", "was_downloaded")]
