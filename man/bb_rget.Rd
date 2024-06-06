@@ -18,6 +18,7 @@ bb_rget(
   password,
   clobber = 1,
   no_parent = TRUE,
+  no_parent_download = no_parent,
   no_check_certificate = FALSE,
   relative = FALSE,
   remote_time = TRUE,
@@ -60,6 +61,8 @@ bb_rget_default_downloads()
 \item{clobber}{numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files}
 
 \item{no_parent}{logical: if \code{TRUE}, do not ever ascend to the parent directory when retrieving recursively. This is \code{TRUE} by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded. Note that this check only applies to links on the same host as the starting \code{url}. If that URL links to files on another host, those links will be followed (unless \code{relative = TRUE})}
+
+\item{no_parent_download}{logical: similar to \code{no_parent}, but applies only to download links. A typical use case is to set \code{no_parent} to \code{TRUE} and \code{no_parent_download} to \code{FALSE}, in which case the spidering process (following links to find downloadable files) will not ascend to the parent directory, but files can be downloaded from a directory that is not within the parent}
 
 \item{no_check_certificate}{logical: if \code{TRUE}, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution}
 

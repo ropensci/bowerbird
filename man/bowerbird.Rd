@@ -3,7 +3,6 @@
 \docType{package}
 \name{bowerbird}
 \alias{bowerbird}
-\alias{_PACKAGE}
 \alias{bowerbird-package}
 \title{\pkg{bowerbird}}
 \description{

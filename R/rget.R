@@ -94,6 +94,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param password string: password used to authenticate to the remote server
 #' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files
 #' @param no_parent logical: if \code{TRUE}, do not ever ascend to the parent directory when retrieving recursively. This is \code{TRUE} by default, bacause it guarantees that only the files below a certain hierarchy will be downloaded. Note that this check only applies to links on the same host as the starting \code{url}. If that URL links to files on another host, those links will be followed (unless \code{relative = TRUE})
+#' @param no_parent_download logical: similar to \code{no_parent}, but applies only to download links. A typical use case is to set \code{no_parent} to \code{TRUE} and \code{no_parent_download} to \code{FALSE}, in which case the spidering process (following links to find downloadable files) will not ascend to the parent directory, but files can be downloaded from a directory that is not within the parent
 #' @param no_check_certificate logical: if \code{TRUE}, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution
 #' @param relative logical: if \code{TRUE}, only follow relative links. This can be useful for restricting what is downloaded in recursive mode
 #' @param remote_time logical: if \code{TRUE}, attempt to set the local file's time to that of the remote file
@@ -112,7 +113,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 #' @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, link_css = "a", curl_opts) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_parent_download = no_parent, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, link_css = "a", curl_opts) {
     assert_that(is.character(url))
     if (length(url) < 1) return(tibble(ok = TRUE, files = list(tibble(url = character(), file = character(), was_downloaded = logical())), message = ""))
     assert_that(is.numeric(level), level >= 0)
@@ -127,6 +128,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(is.string(password))
     assert_that(clobber %in% c(0, 1, 2))
     assert_that(is.flag(no_parent), !is.na(no_parent))
+    assert_that(is.flag(no_parent_download), !is.na(no_parent_download))
     assert_that(is.flag(no_check_certificate), !is.na(no_check_certificate))
     assert_that(is.flag(relative), !is.na(relative))
     assert_that(is.flag(remote_time), !is.na(remote_time))
@@ -146,7 +148,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     }
 
     ## opts to pass to child function
-    opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, debug = debug, link_css = link_css) ##robots_off = robots_off,
+    opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, no_parent_download = no_parent_download, debug = debug, link_css = link_css) ##robots_off = robots_off,
     ## curl options
     opts$curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password, remote_time = remote_time)
     ## we can handle multiple input URLs, but they can't be a mix of ftp/http
@@ -347,22 +349,24 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 ## discard non-relative links, if opts$relative
                 if (opts$relative) all_links <- all_links[vapply(all_links, is_relative_url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
                 ## get all links as absolute URLs, discarding anchors (fragments)
-                all_links <- vapply(all_links, clean_and_filter_url, base = url, FUN.VALUE = "", USE.NAMES = FALSE)
+                all_links <- all_links_inc_parent <- vapply(all_links, clean_and_filter_url, base = url, FUN.VALUE = "", USE.NAMES = FALSE)
+                ## discard parent links (to follow) if opts$no_parent is TRUE
                 if (opts$no_parent) all_links <- all_links[vapply(all_links, is_nonparent_url, parent = url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
                 follow_idx <- rep(length(opts$accept_follow) > 0, length(all_links))
                 for (rgx in opts$accept_follow) follow_idx <- follow_idx & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 for (rgx in opts$reject_follow) follow_idx <- follow_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 follow_links <- all_links[follow_idx]
-                temp1 <- rep(length(opts$accept_download) > 0, length(all_links))
-                for (rgx in opts$accept_download) temp1 <- temp1 & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-                temp2 <- rep(length(opts$accept_download_extra) > 0, length(all_links))
-                for (rgx in opts$accept_download_extra) temp2 <- temp2 & vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                all_dl_links <- if (opts$no_parent_download) all_links else all_links_inc_parent ## all potential download links, now we'll filter them
+                temp1 <- rep(length(opts$accept_download) > 0, length(all_dl_links))
+                for (rgx in opts$accept_download) temp1 <- temp1 & vapply(all_dl_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                temp2 <- rep(length(opts$accept_download_extra) > 0, length(all_dl_links))
+                for (rgx in opts$accept_download_extra) temp2 <- temp2 & vapply(all_dl_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 download_idx <- temp1 | temp2
-                for (rgx in opts$reject_download) download_idx <- download_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                for (rgx in opts$reject_download) download_idx <- download_idx & !vapply(all_dl_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 ##cat("First 20 links to follow: "); print(head(follow_links, 20))
-                download_links <- all_links[download_idx]
+                download_links <- all_dl_links[download_idx]
                 download_links <- download_links[!download_links %in% download_queue]
-                ##cat("First 20 links to download: "); print(download_links)
+                ##cat("First 20 links to download: "); print(head(download_links, 20))
                 if (current_level < (opts$level - 1)) { ## -1 because we will download files linked from these pages, and those files will be current_level + 2
                     if (opts$verbose) cat(sprintf(" %d download links", length(download_links)))
                     follow_links <- setdiff(follow_links, download_links) ## can't be in both, treat as download?
