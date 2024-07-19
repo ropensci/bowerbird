@@ -172,3 +172,21 @@ s3_faux_inner <- function(bucket_browser_url, bucket, prefix, out = c(), seen = 
         c(out, obj$name)
     }
 }
+
+## internal helper function for calling aws.s3 functions
+## should perhaps consider using the paws-r package instead?
+aws_fun <- function(fun, ...) {
+    rgs <- list(...)
+    if (length(rgs) == 1 && is.list(rgs)) rgs <- rgs[[1]]
+    rgs <- rgs[names(rgs) %in% names(c(formals(fun), formals(aws.s3::s3HTTP)))]
+    m <- tryCatch({
+        out <- do.call(fun, rgs)
+        NULL
+    }, condition = function(m) m)
+    if (!is.null(m) && inherits(m, c("message", "error"))) {
+        ## HEAD aws.s3 operations return errors as messages: promote them back to errors
+        stop("Error in ", as.character(match.call(fun)[2]), ": ", conditionMessage(m), call. = FALSE)
+    }
+    out
+}
+

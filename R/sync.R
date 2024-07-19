@@ -51,7 +51,7 @@
 #' }
 #'
 #' @export
-bb_sync <- function(config,create_root=FALSE,verbose=FALSE,catch_errors=TRUE,confirm_downloads_larger_than=0.1,dry_run=FALSE) {
+bb_sync <- function(config, create_root = FALSE, verbose = FALSE, catch_errors = TRUE, confirm_downloads_larger_than = 0.1, dry_run = FALSE) {
     ## general synchronization handler
     assert_that(is(config,"bb_config"))
     assert_that(is.flag(create_root),!is.na(create_root))
@@ -134,7 +134,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
     }
 
     ## check that the root directory exists
-    if (!dir_exists(this_att$local_file_root)) {
+    if (!is_s3_target(bb_data_sources(this_dataset)) && !dir_exists(this_att$local_file_root)) {
         ## no, it does not exist
         ## unless create_root is TRUE, we won't create it, in case the user simply hasn't specified the right location
         if (create_root) {
@@ -148,7 +148,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
         if (!all(is.na(bb_data_sources(this_dataset)$source_url))) cat(sprintf("Source URL %s\n",bb_data_sources(this_dataset)$source_url))
         cat("--------------------------------------------------------------------------------------------\n\n")
     }
-    setwd(this_att$local_file_root)
+    if (!is_s3_target(bb_data_sources(this_dataset))) setwd(this_att$local_file_root)
 
     ## set proxy env vars
     if (!is.null(this_att$ftp_proxy) || !is.null(this_att$http_proxy)) {
@@ -195,53 +195,57 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
         if (is.na(ok) || !ok) {
             if (verbose) cat(" download failed or was interrupted: not running post-processing step\n")
         } else {
-            if (is.null(method_loot$files[[1]])) {
-                ## the method handler didn't return a list of files (likely a wget-based handler
-                ## so we'll figure it out for ourselves: build list of files in our directory
-                ## NOTE that this won't work if the data source downloaded files from a different server, because those files
-                ## won't be in this_path_no_trailing_sep. In those cases the bb_rget based method needs to be used
-                if (verbose) cat(sprintf(" building post-download file list of %s ... ", this_path_no_trailing_sep))
-                file_list_after <- file.info(list.files(path = this_path_no_trailing_sep, recursive = TRUE, full.names = TRUE))
-                if (file.exists(this_path_no_trailing_sep)) {
-                    ## in some cases this points directly to a file
-                    temp <- file.info(this_path_no_trailing_sep)
-                    temp <- temp[!temp$isdir, ]
-                    if (nrow(temp)>0) { file_list_after <- rbind(file_list_after, temp) }
-                }
-                if (verbose) cat(sprintf("done.\n"))
+            if (is_s3_target(bb_data_sources(this_dataset))) {
+                if (verbose) cat(" postprocessing not supported for s3 targets, ignoring\n")
             } else {
-                ## the handler has returned a list of files it found
-                ## these may have been downloaded, or may have existed previously
-                ## ultimately we should re-hash the postprocessing interface to better cope with this, but in the meantime we'll just coerce our list
-                ## of files into something that the existing postprocessors will understand
-                ## note that file paths returned by the handler are relative to the local_file_root
-                ## if we are doing a dry run, no postprocessing
-                if (dry_run) {
-                    file_list_before <- character()
-                    file_list_after <- character()
+                if (is.null(method_loot$files[[1]])) {
+                    ## the method handler didn't return a list of files (likely a wget-based handler
+                    ## so we'll figure it out for ourselves: build list of files in our directory
+                    ## NOTE that this won't work if the data source downloaded files from a different server, because those files
+                    ## won't be in this_path_no_trailing_sep. In those cases the bb_rget based method needs to be used
+                    if (verbose) cat(sprintf(" building post-download file list of %s ... ", this_path_no_trailing_sep))
+                    file_list_after <- file.info(list.files(path = this_path_no_trailing_sep, recursive = TRUE, full.names = TRUE))
+                    if (file.exists(this_path_no_trailing_sep)) {
+                        ## in some cases this points directly to a file
+                        temp <- file.info(this_path_no_trailing_sep)
+                        temp <- temp[!temp$isdir, ]
+                        if (nrow(temp)>0) { file_list_after <- rbind(file_list_after, temp) }
+                    }
+                    if (verbose) cat(sprintf("done.\n"))
                 } else {
-                    ## all files go into both file_list_after and file_list_before
-                    file_list_before <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files[[1]]$file))
-                    ## the ones that were downloaded need to be marked as changed in file_list_after
-                    file_list_after <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files[[1]]$file[method_loot$files[[1]]$was_downloaded]))
-                    if (nrow(file_list_after) > 0) file_list_after$size <- 0 ## just modify the size of these, that is enough to have them flagged as changed in the postprocessors
-                    file_list_after <- rbind(file_list_after, file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files[[1]]$file[!method_loot$files[[1]]$was_downloaded])))
+                    ## the handler has returned a list of files it found
+                    ## these may have been downloaded, or may have existed previously
+                    ## ultimately we should re-hash the postprocessing interface to better cope with this, but in the meantime we'll just coerce our list
+                    ## of files into something that the existing postprocessors will understand
+                    ## note that file paths returned by the handler are relative to the local_file_root
+                    ## if we are doing a dry run, no postprocessing
+                    if (dry_run) {
+                        file_list_before <- character()
+                        file_list_after <- character()
+                    } else {
+                        ## all files go into both file_list_after and file_list_before
+                        file_list_before <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files[[1]]$file))
+                        ## the ones that were downloaded need to be marked as changed in file_list_after
+                        file_list_after <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files[[1]]$file[method_loot$files[[1]]$was_downloaded]))
+                        if (nrow(file_list_after) > 0) file_list_after$size <- 0 ## just modify the size of these, that is enough to have them flagged as changed in the postprocessors
+                        file_list_after <- rbind(file_list_after, file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files[[1]]$file[!method_loot$files[[1]]$was_downloaded])))
+                    }
                 }
-            }
-            for (i in seq_len(length(pp))) {
-                ## postprocessing steps are passed as functions or calls
-                qq <- match.fun(pp[[i]][[1]]) ## the function to call
-                qq_args <- pp[[i]][-1]
-                res <- do.call(qq, c(list(config = this_dataset, file_list_before = file_list_before, file_list_after = file_list_after, verbose = verbose), qq_args))
-                ok <- ok && res$status
-                decompressed_files <- c(decompressed_files, res$files)
-                ## deal with our record of any deleted files now
-                if (length(res$deleted_files) > 0) {
-                    res$deleted_files <- std_path(res$deleted_files, case = TRUE)
-                    idx <- std_path(decompressed_files, case = TRUE) %in% res$deleted_files ## files that were deleted
-                    decompressed_files <- decompressed_files[!idx]
-                    idx <- std_path(method_loot$files[[1]]$file, case = TRUE) %in% res$deleted_files
-                    method_loot$files[[1]]$file <- method_loot$files[[1]]$file[!idx]
+                for (i in seq_len(length(pp))) {
+                    ## postprocessing steps are passed as functions or calls
+                    qq <- match.fun(pp[[i]][[1]]) ## the function to call
+                    qq_args <- pp[[i]][-1]
+                    res <- do.call(qq, c(list(config = this_dataset, file_list_before = file_list_before, file_list_after = file_list_after, verbose = verbose), qq_args))
+                    ok <- ok && res$status
+                    decompressed_files <- c(decompressed_files, res$files)
+                    ## deal with our record of any deleted files now
+                    if (length(res$deleted_files) > 0) {
+                        res$deleted_files <- std_path(res$deleted_files, case = TRUE)
+                        idx <- std_path(decompressed_files, case = TRUE) %in% res$deleted_files ## files that were deleted
+                        decompressed_files <- decompressed_files[!idx]
+                        idx <- std_path(method_loot$files[[1]]$file, case = TRUE) %in% res$deleted_files
+                        method_loot$files[[1]]$file <- method_loot$files[[1]]$file[!idx]
+                    }
                 }
             }
         }
@@ -249,9 +253,10 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
     ## merge decompressed_files with files
     if (!is.null(method_loot$files[[1]])) {
         temp <- method_loot$files[[1]]
+        ## for s3-target downloads, temp$file will be the bucket URL rather than a local filename
         temp$file <- std_path(temp$file) ## convert files to full paths
         ## if the download was aborted (e.g. by the user) then we will have entries in the file column that don't correspond to actual existing files
-        idx <- file.exists(temp$file)
+        idx <- file.exists(temp$file) | grepl("^(s3|https?)://", temp$file, ignore.case = TRUE)
         temp$file[!idx] <- NA_character_
         temp$note <- NA_character_
         temp$note[idx] <- ifelse(temp$was_downloaded[idx], "downloaded", "existing copy")

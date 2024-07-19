@@ -32,7 +32,8 @@ bb_rget(
   no_host = FALSE,
   cut_dirs = 0L,
   link_css = "a",
-  curl_opts
+  curl_opts,
+  s3_args
 )
 
 bb_rget_default_downloads()
@@ -91,6 +92,8 @@ bb_rget_default_downloads()
 \item{link_css}{string: css selector that identifies links (passed as the \code{css} parameter to \code{\link[rvest]{html_elements}}). Note that link elements must have an \code{href} attribute}
 
 \item{curl_opts}{named list: options to use with \code{curl} downloads, passed to the \code{.list} parameter of \code{curl::new_handle}}
+
+\item{s3_args}{list: named list or arguments to provide to \code{\link[aws.s3]{get_bucket_df}} and \code{\link[aws.s3]{put_object}}. Files will be uploaded into that bucket instead of the local filesystem}
 }
 \value{
 a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)

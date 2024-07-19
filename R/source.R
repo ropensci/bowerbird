@@ -97,16 +97,20 @@ bb_source <- function(id,name,description=NA_character_,doc_url,source_url,citat
     if (missing(postprocess) || is.null(postprocess)) {
         postprocess <- list()
     } else {
-        ## each element of the list should be a list, where the first element should resolve to a function and the rest are arguments. But we'll also accept a list element being a function, in which case we'll treat it as not needing extra args
-        assert_that(is.list(postprocess))
-        for (k in seq_len(length(postprocess))) {
-            if (is_a_fun(postprocess[[k]])) {
-                ## change this to a list with the function as its first (only) element
-                postprocess[[k]] <- list(postprocess[[k]])
-            } else if (is.list(postprocess[[k]]) && is_a_fun(postprocess[[k]][[1]])) {
-                ## ok, leave as is
-            } else {
-                stop("postprocess entry ",k," is not a function or a list with a function as its first element")
+        if ("bucket" %in% names(method$s3_args)) {
+            if (length(postprocess) > 0) warning("postprocessing not supported for s3 targets, ignoring\n")
+        } else {
+            ## each element of the list should be a list, where the first element should resolve to a function and the rest are arguments. But we'll also accept a list element being a function, in which case we'll treat it as not needing extra args
+            assert_that(is.list(postprocess))
+            for (k in seq_len(length(postprocess))) {
+                if (is_a_fun(postprocess[[k]])) {
+                    ## change this to a list with the function as its first (only) element
+                    postprocess[[k]] <- list(postprocess[[k]])
+                } else if (is.list(postprocess[[k]]) && is_a_fun(postprocess[[k]][[1]])) {
+                    ## ok, leave as is
+                } else {
+                    stop("postprocess entry ",k," is not a function or a list with a function as its first element")
+                }
             }
         }
     }
@@ -246,3 +250,6 @@ bb_modify_source <- function(src,...) {
     if ("warn_empty_auth" %in% pnames) newparms$warn_empty_auth <- parms$warn_empty_auth
     do.call(bb_source,newparms)
 }
+
+## internal, is a data source uploading to an s3 target rather than local file system?
+is_s3_target <- function(ds) "bucket" %in% names(ds$method[[1]]$s3_args)

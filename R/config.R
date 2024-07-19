@@ -6,6 +6,7 @@
 #'
 #' @param local_file_root string: location of data repository on local file system
 #' @param wget_global_flags list: wget flags that will be applied to all data sources that call \code{bb_wget}. These will be appended to the data-source-specific wget flags provided via the source's method argument
+#' @param s3_args list: arguments to pass to \code{aws.s3} function calls. Will be used for all data sets that are uploading to s3 targets
 #' @param http_proxy string: URL of HTTP proxy to use e.g. 'http://your.proxy:8080' (NULL for no proxy)
 #' @param ftp_proxy string: URL of FTP proxy to use e.g. 'http://your.proxy:21' (NULL for no proxy)
 #' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files
@@ -26,19 +27,22 @@
 #' }
 #'
 #' @export
-bb_config <- function(local_file_root,wget_global_flags=list(restrict_file_names="windows",progress="dot:giga"),http_proxy=NULL,ftp_proxy=NULL,clobber=1) {
-    assert_that(is.string(local_file_root))
-    assert_that(clobber %in% c(0,1,2))
+bb_config <- function(local_file_root, wget_global_flags = list(restrict_file_names = "windows", progress = "dot:giga"), s3_args = list(), http_proxy = NULL, ftp_proxy = NULL, clobber = 1) {
+    if (!missing(local_file_root) && !is.null(local_file_root)) {
+        assert_that(is.string(local_file_root))
+        local_file_root <- normalizePath(local_file_root, mustWork = FALSE)
+    } else {
+        local_file_root <- NULL
+    }
+    assert_that(clobber %in% c(0, 1, 2))
     assert_that(is.list(wget_global_flags))
-    structure(
-        list(data_sources=tibble(),
-             settings=list(
-                 wget_global_flags=wget_global_flags,
-                 http_proxy=http_proxy,
-                 ftp_proxy=ftp_proxy,
-                 local_file_root=normalizePath(local_file_root, mustWork = FALSE),
-                 clobber=clobber)),
-        class="bb_config")
+    assert_that(is.list(s3_args))
+    structure(list(data_sources = tibble(),
+                   settings = list(wget_global_flags = wget_global_flags,
+                                   s3_args = s3_args,
+                                   http_proxy = http_proxy, ftp_proxy = ftp_proxy,
+                                   local_file_root = local_file_root,
+                                   clobber = clobber)), class = "bb_config")
 }
 
 
@@ -139,7 +143,7 @@ bb_settings <- function(config) {
 }
 
 ## internal: the list of recognized config settings
-allowed_settings <- function() c("wget_global_flags","http_proxy","ftp_proxy","local_file_root","clobber","dry_run")
+allowed_settings <- function() c("wget_global_flags", "http_proxy", "ftp_proxy", "local_file_root", "clobber", "dry_run", "s3_args")
 
 
 #' Gets or sets a bowerbird configuration object's data sources
@@ -190,11 +194,11 @@ bb_settings_to_cols <- function(obj) {
     st <- bb_settings(obj)
     ## flags handled as lists
     ds$wget_global_flags <- rep(list(st$wget_global_flags), nrow(ds))
+    ds$s3_args <- rep(list(st$s3_args), nrow(ds))
     if (nrow(ds) > 0) {
-        for (nm in setdiff(names(st), c("wget_global_flags"))) {
+        for (nm in setdiff(names(st), c("wget_global_flags", "s3_args"))) {
             thisatt <- st[[nm]]
-            if (!is.null(thisatt))
-                ds[, nm] <- thisatt
+            if (!is.null(thisatt)) ds[, nm] <- thisatt
         }
     }
     ds

@@ -105,12 +105,13 @@ get_os <- function() {
 ## standardize file paths, so that they can be more reliably compared
 ## if case is TRUE and we are on windows, also convert to lower case
 std_path <- function(z, case = FALSE) {
-    z <- normalizePath(z, mustWork = FALSE)
+    idx <- !grepl("^(s3|https?)://", z, ignore.case = TRUE)
+    z[idx] <- normalizePath(z[idx], mustWork = FALSE)
     ## remove trailing file separators
-    z <- gsub("[/\\]+$", "", z)
+    z[idx] <- gsub("[/\\]+$", "", z[idx])
     if (case) {
         iswin <- tryCatch(get_os() == "windows", error = function(e) FALSE)
-        if (iswin) z <- tolower(z)
+        if (iswin) z[idx] <- tolower(z[idx])
     }
     z
 }
