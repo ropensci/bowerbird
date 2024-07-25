@@ -152,6 +152,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     my_curl_config$options$followlocation <- 1
     my_curl_config$options$cookiefile <- cookies_file ## reads cookies from here
     my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
+    my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname
     myfiles$local_filename <- vapply(paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename), oceandata_url_mapper, FUN.VALUE = "", USE.NAMES = FALSE) ## where local copy will go
     fidx <- file.exists(myfiles$local_filename)
     myfiles$existing_checksum <- NA_character_
