@@ -414,12 +414,12 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
     assert_that(is.string(sep))
     if (grepl("\\.L3m[_\\.]",this_url)) {
         ## mapped file
-        url_parts <- str_match(this_url,"/([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]_]+)\\.(L3m)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)[_\\.](9|4)(km)?\\.(bz2|nc)")
+        url_parts <- str_match(this_url,"/([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]_]+)\\.(L3m)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)[_\\.](9|4)(km)?\\..*?(bz2|nc)")
         ## e.g. [1,] "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km"
         ## [,2] [,3]      [,4]  [,5]  [,6]          [,7]
         ## "A"  "2002359" "L3m" "DAY" "CHL_chlor_a" "9"
-        url_parts <- as.data.frame(url_parts,stringsAsFactors=FALSE)
-        colnames(url_parts) <- c("full_url","platform","date","type","timeperiod","parm","spatial","spatial_unit")
+        url_parts <- as.data.frame(url_parts, stringsAsFactors = FALSE)
+        colnames(url_parts) <- c("full_url", "platform", "date", "type", "timeperiod", "parm", "spatial", "spatial_unit", "ext")
         ## map back to old sensor abbreviations, at least temporarily
         url_parts$platform <- oceandata_platform_to_abbrev(url_parts$platform)
     } else if (grepl("\\.L3b[_\\.]",this_url)) {
