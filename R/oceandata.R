@@ -178,7 +178,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                 ## use checksum rather than dates for this
                 if (f_exists[idx]) {
                     existing_checksum <- file_hash(myfiles$local_filename[idx], hash = "sha1")
-                    download_this <- myfiles$existing_checksum[idx] != myfiles$checksum[idx]
+                    download_this <- existing_checksum != myfiles$checksum[idx]
                 }
             } else {
                 download_this <- TRUE
@@ -186,7 +186,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         } else {
             download_this <- TRUE
         }
-        if (download_this) {
+        if (isTRUE(download_this)) {
             ## as of 2024-ish, files can be named *.NRT.nc, and these are eventually replaced by non-NRT versions
             ## don't download NRT files if the replacement exists, either locally or on the remote server
             non_nrt_file <- sub("\\.NRT\\.nc$", ".nc", this_fullfile)
@@ -226,7 +226,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                 cat("not downloading ", myfiles$filename[idx], ", dry_run is TRUE\n")
             }
         } else {
-            if (f_exists[idx] && verbose) cat("not downloading ", myfiles$filename[idx], ", local copy exists with identical checksum\n")
+            if (f_exists[idx] && verbose) cat("not downloading ", myfiles$filename[idx], ", local copy exists with identical checksum\n", sep = "")
         }
     }
     tibble(ok = ok, files = list(downloads), message = "")
@@ -535,13 +535,12 @@ bb_oceandata_cleanup_inner <- function(config, file_list_before, file_list_after
     to_delete <- to_delete[sub("\\.NRT\\.nc$", ".nc", to_delete) %in% file_list] ## but only those with equivalent non-NRT files
     if (verbose) {
         if (length(to_delete) > 0) {
-            if (verbose) cat(sprintf(" cleaning up files: %s\n", paste(to_delete, collapse = ",")))
+            if (verbose) cat(" cleaning up files: ", paste(to_delete, collapse = ", "), "\n")
         } else {
             if (verbose) cat(" cleanup: no files to remove\n")
         }
     }
-    ##list(status = unlink(to_delete) == 0, deleted_files = to_delete)
-    list(status = TRUE, deleted_files = to_delete) ## for testing
+    list(status = unlink(to_delete) == 0, deleted_files = to_delete)
 }
 
 ## unfinished function to create oceandata source definition given platform, parm, etc
