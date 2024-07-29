@@ -260,6 +260,24 @@ oceandata_platform_map <- function(abbrev,error_no_match=FALSE) {
     }
 }
 
+oceandata_alltp <- tribble(~abbrev, ~time_period,
+                           "WC", "8D_Climatology",
+                           "8D", "8Day",
+                           "YR", "Annual",
+                           "CU", "Cumulative",
+                           "DAY", "Daily",
+                           "MO", "Monthly",
+                           "MC", "Monthly_Climatology",
+                           "R32", "Rolling_32_Day",
+                           "SNSP", "Seasonal",
+                           "SNSU", "Seasonal",
+                           "SNAU", "Seasonal",
+                           "SNWI", "Seasonal",
+                           "SCSP", "Seasonal_Climatology",
+                           "SCSU", "Seasonal_Climatology",
+                           "SCAU", "Seasonal_Climatology",
+                           "SCWI", "Seasonal_Climatology")
+
 # Time periods and abbreviations used in Oceancolor URLs and file names
 # Oceancolor data file URLs need to be mapped to a file system hierarchy that mirrors the one used on the Oceancolor web site.
 # For example, \url{https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} or \url{https://oceandata.sci.gsfc.nasa.gov/ob/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (obtained from the Oceancolor visual browser or file search facility)
@@ -272,28 +290,11 @@ oceandata_platform_map <- function(abbrev,error_no_match=FALSE) {
 # @seealso \code{\link{oceandata_platform_map}}, \code{\link{oceandata_parameter_map}}
 # @export
 oceandata_timeperiod_map <- function(abbrev,error_no_match=FALSE) {
-    alltp <- tribble(~abbrev, ~time_period,
-                     "WC", "8D_Climatology",
-                     "8D", "8Day",
-                     "YR", "Annual",
-                     "CU", "Cumulative",
-                     "DAY", "Daily",
-                     "MO", "Monthly",
-                     "MC", "Monthly_Climatology",
-                     "R32", "Rolling_32_Day",
-                     "SNSP", "Seasonal",
-                     "SNSU", "Seasonal",
-                     "SNAU", "Seasonal",
-                     "SNWI", "Seasonal",
-                     "SCSP", "Seasonal_Climatology",
-                     "SCSU", "Seasonal_Climatology",
-                     "SCAU", "Seasonal_Climatology",
-                     "SCWI", "Seasonal_Climatology")
     if (missing(abbrev)) {
-        alltp
+        oceandata_alltp
     } else {
         assert_that(is.string(abbrev))
-        out <- alltp$time_period[alltp$abbrev==abbrev]
+        out <- oceandata_alltp$time_period[oceandata_alltp$abbrev==abbrev]
         if (error_no_match & length(out)<1) {
             stop("oceandata URL timeperiod token ",abbrev," not recognized")
         }
