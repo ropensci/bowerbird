@@ -100,11 +100,19 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                 }
                 out <- file.path(out, this_platform)
             }
-            if (grepl("L3m",search)) {
+            if (grepl("L3m", search)) {
                 out <- file.path(out, "Mapped")
-            } else if (grepl("L3",search)) {
+            } else if (grepl("L3", search)) {
                 out <- file.path(out, "L3BIN")
             }
+            ## time period, if it's specified in the search string
+            tp <- stringr::str_detect(src$method[[1]]$search, paste0("\\.", oceandata_alltp$abbrev, "\\."))
+            if (sum(tp, na.rm = TRUE) == 1) {
+                out <- file.path(out, oceandata_alltp$time_period[which(tp)])
+            }
+            ## spatial res
+            if (grepl("4km", search)) out <- file.path(out, "4km") else if (grepl("9km", search)) out <- file.path(out, "9km")
+            ## next level down is parameter name
         }
         return(file.path(this_att$local_file_root, out))
     }
