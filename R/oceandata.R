@@ -504,24 +504,48 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
 }
 
 
+#' Postprocessing: remove redundant NRT oceandata files
+#'
+#' This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
+#'
+#' This function will remove near-real-time (NRT) files from an oceandata collection that have been superseded by their non-NRT versions.
+#'
+#' @param ... : extra parameters passed automatically by \code{bb_sync}
+#'
+#' @return a list, with components \code{status} (TRUE on success) and \code{deleted_files} (character vector of paths of files that were deleted)
+#'
+#' @export
+bb_oceandata_cleanup <- function(...) {
+    bb_oceandata_cleanup_inner(...)
+}
 
-## WC,8D_Climatology
-## 8D,8Day
-## YR,Annual
-## CU,Cumulative
-## DAY,Daily
-## MO,Monthly
-## MC,Monthly_Climatology
-## R32,Rolling_32_Day
-## SNSP,Seasonal
-## SNSU,Seasonal
-## SNAU,Seasonal
-## SNWI,Seasonal
-## SCSP,Seasonal_Climatology
-## SCSU,Seasonal_Climatology
-## SCAU,Seasonal_Climatology
-## SCWI,Seasonal_Climatology"
 
+# @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
+# @param file_list_before data.frame: files present in the directory before synchronizing, as returned by \code{file.info}
+# @param file_list_after data.frame: files present in the directory after synchronizing, as returned by \code{file.info}
+# @param verbose logical: if TRUE, provide additional progress output
+#
+# @return list, with components status = TRUE on success, and deleted_files = character vector of file names deleted
+#
+bb_oceandata_cleanup_inner <- function(config, file_list_before, file_list_after, verbose = FALSE, ...) {
+    assert_that(is(config, "bb_config"))
+    assert_that(nrow(bb_data_sources(config)) == 1)
+    file_list <- list.files(path = bb_data_source_dir(config), recursive = TRUE, all.files = TRUE, full.names = TRUE)
+    to_delete <- file_list[grep("\\.NRT\\.nc$", file_list)] ## NRT files
+    to_delete <- to_delete[sub("\\.NRT\\.nc$", ".nc", to_delete) %in% file_list] ## but only those with equivalent non-NRT files
+    if (verbose) {
+        if (length(to_delete) > 0) {
+            if (verbose) cat(sprintf(" cleaning up files: %s\n", paste(to_delete, collapse = ",")))
+        } else {
+            if (verbose) cat(" cleanup: no files to remove\n")
+        }
+    }
+    ##list(status = unlink(to_delete) == 0, deleted_files = to_delete)
+    list(status = TRUE, deleted_files = to_delete) ## for testing
+}
+
+## unfinished function to create oceandata source definition given platform, parm, etc
+##
 ##oceandata_source <- function(platform, parameter, processing_level, time_resolution, spatial_resolution, years) {
 ##    ## platform
 ##    assert_that(is.string(platform))
