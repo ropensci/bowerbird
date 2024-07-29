@@ -156,7 +156,10 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     myfiles$local_filename <- vapply(paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename), oceandata_url_mapper, FUN.VALUE = "", USE.NAMES = FALSE) ## where local copy will go
     fidx <- file.exists(myfiles$local_filename)
     myfiles$existing_checksum <- NA_character_
-    myfiles$existing_checksum[fidx] <- vapply(myfiles$local_filename[fidx], file_hash, hash = "sha1", FUN.VALUE = "", USE.NAMES = FALSE)
+    if (!this_att$dry_run) {
+        ## we won't use the checksum on a dry run, and they can be slow to calculate
+        myfiles$existing_checksum[fidx] <- vapply(myfiles$local_filename[fidx], file_hash, hash = "sha1", FUN.VALUE = "", USE.NAMES = FALSE)
+    }
     for (idx in seq_len(nrow(myfiles))) {
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename[idx]) ## full URL
         downloads$url[idx] <- this_url
