@@ -162,37 +162,47 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
     my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname
     myfiles$local_filename <- vapply(paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename), oceandata_url_mapper, FUN.VALUE = "", USE.NAMES = FALSE) ## where local copy will go
-    fidx <- file.exists(myfiles$local_filename)
+    f_exists <- file.exists(myfiles$local_filename)
     myfiles$existing_checksum <- NA_character_
-    if (!this_att$dry_run) {
-        ## we won't use the checksum on a dry run, and they can be slow to calculate
-        myfiles$existing_checksum[fidx] <- vapply(myfiles$local_filename[fidx], file_hash, hash = "sha1", FUN.VALUE = "", USE.NAMES = FALSE)
-    }
     for (idx in seq_len(nrow(myfiles))) {
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename[idx]) ## full URL
         downloads$url[idx] <- this_url
         this_fullfile <- myfiles$local_filename[idx]
         downloads$file[idx] <- this_fullfile
-        if (!this_att$dry_run) {
-            this_exists <- !is.na(myfiles$existing_checksum[idx])
-            download_this <- !this_exists
-            if (this_att$clobber < 1) {
-                ## don't clobber existing
-            } else if (this_att$clobber == 1) {
-                ## replace existing if server copy newer than local copy
-                if (search_method == "api") {
-                    ## use checksum rather than dates for this
-                    if (this_exists) {
-                        download_this <- myfiles$existing_checksum[idx] != myfiles$checksum[idx]
-                    }
-                } else {
-                    download_this <- TRUE
+        download_this <- !f_exists[idx]
+        if (this_att$clobber < 1) {
+            ## don't clobber existing
+        } else if (this_att$clobber == 1) {
+            ## replace existing if server copy newer than local copy
+            if (search_method == "api") {
+                ## use checksum rather than dates for this
+                if (f_exists[idx]) {
+                    existing_checksum <- file_hash(myfiles$local_filename[idx], hash = "sha1")
+                    download_this <- myfiles$existing_checksum[idx] != myfiles$checksum[idx]
                 }
             } else {
                 download_this <- TRUE
             }
-            if (download_this) {
-                if (verbose) cat(sprintf("Downloading: %s ... \n", this_url))
+        } else {
+            download_this <- TRUE
+        }
+        if (download_this) {
+            ## as of 2024-ish, files can be named *.NRT.nc, and these are eventually replaced by non-NRT versions
+            ## don't download NRT files if the replacement exists, either locally or on the remote server
+            non_nrt_file <- sub("\\.NRT\\.nc$", ".nc", this_fullfile)
+            if (file.exists(non_nrt_file)) {
+                ## local non-NRT exists
+                if (verbose) cat("not downloading ", myfiles$filename[idx], ", non-NRT version exists\n", sep = "")
+                download_this <- FALSE
+            } else if (basename(non_nrt_file) %in% myfiles$filename) {
+                ## remote non-NRT is to be downloaded
+                if (verbose) cat("not downloading ", myfiles$filename[idx], ", non-NRT version exists on the remote server\n", sep = "")
+                download_this <- FALSE
+            }
+        }
+        if (download_this) {
+            if (!this_att$dry_run) {
+                if (verbose) cat("Downloading:", this_url, "... \n")
                 if (!dir.exists(dirname(this_fullfile))) dir.create(dirname(this_fullfile), recursive = TRUE)
                 myfun <- if (stop_on_download_error) stop else warning
                 if (search_method == "scrape") {
@@ -212,14 +222,12 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                     }
                 }
             } else {
-                if (this_exists) {
-                    if (verbose) cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))
-                }
+                ## dry run
+                cat("not downloading ", myfiles$filename[idx], ", dry_run is TRUE\n")
             }
+        } else {
+            if (f_exists[idx] && verbose) cat("not downloading ", myfiles$filename[idx], ", local copy exists with identical checksum\n")
         }
-    }
-    if (this_att$dry_run) {
-        cat(sprintf(" dry_run is TRUE, bb_handler_oceandata is not downloading the following files:\n %s\n", paste(downloads$url, collapse="\n ")))
     }
     tibble(ok = ok, files = list(downloads), message = "")
 }
