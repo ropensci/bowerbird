@@ -106,7 +106,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                 out <- file.path(out, "L3BIN")
             }
             ## time period, if it's specified in the search string
-            tp <- stringr::str_detect(src$method[[1]]$search, paste0("\\.", oceandata_alltp$abbrev, "\\."))
+            tp <- stringr::str_detect(search, paste0("\\.", oceandata_alltp$abbrev, "\\."))
             if (sum(tp, na.rm = TRUE) == 1) {
                 out <- file.path(out, oceandata_alltp$time_period[which(tp)])
             }
