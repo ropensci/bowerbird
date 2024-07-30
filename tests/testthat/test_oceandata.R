@@ -18,7 +18,7 @@ test_that("bb_handler_oceandata works",{
         data_group="Sea surface temperature")
     temp_root <- tempdir()
     ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
-    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km$",bb_data_source_dir(ocf)))
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/par$",bb_data_source_dir(ocf)))
     bb_sync(ocf, confirm_downloads_larger_than = NULL)
     fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/par/TERRA_MODIS.20000301_20000331.L3m.MO.PAR.par.9km.nc" ## relative file name
     expect_true(file.exists(file.path(temp_root,fnm)))
@@ -59,7 +59,7 @@ test_that("other oceandata handler tests", {
         user = "", password = "", warn_empty_auth = FALSE)
     temp_root <- tempdir()
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
-    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/Daily$", bb_data_source_dir(ocf)))
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/Daily/RRS$", bb_data_source_dir(ocf)))
 
     ods <- bb_source(name="Oceandata VIIRS Level-3 binned daily RRS",
                      id="VIIRS_L3b_DAY_SNPP_RRS",
@@ -70,7 +70,7 @@ test_that("other oceandata handler tests", {
                      method=list("bb_handler_oceandata", search = "SNPP_VIIRS*L3b.DAY.RRS.nc", sensor = "viirs", dtype = "L3b"),
                      user = "", password = "", warn_empty_auth = FALSE)
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
-    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/VIIRS/L3BIN/Daily$", bb_data_source_dir(ocf)))
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/VIIRS/L3BIN/Daily/RRS$", bb_data_source_dir(ocf)))
 
     ods <- bb_source(name="Oceandata MODIS Aqua Level-3 mapped daily 4km chl-a",
                      id="MODISA_L3m_DAY_CHL_chlor_a_4km",
@@ -81,7 +81,7 @@ test_that("other oceandata handler tests", {
                      method=list("bb_handler_oceandata",search="AQUA_MODIS*L3m.DAY.CHL.chlor_a.4km.nc", sensor = "aqua", dtype = "L3m"),
                      user = "", password = "", warn_empty_auth = FALSE)
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
-    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km$", bb_data_source_dir(ocf)))
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km/chlor$", bb_data_source_dir(ocf)))
 
     ods <- bb_source(name="Oceandata SeaWiFS Level-3 binned daily RRS",
                      id="SeaWiFS_L3b_DAY_RRS",
@@ -92,7 +92,7 @@ test_that("other oceandata handler tests", {
                      method=list("bb_handler_oceandata",search="SEASTAR_SEAWIFS_GAC*L3b.DAY.RRS.nc", sensor = "seawifs", dtype = "L3b"),
                      user = "", password = "", warn_empty_auth = FALSE)
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
-    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/SeaWiFS/L3BIN/Daily$", bb_data_source_dir(ocf)))
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/SeaWiFS/L3BIN/Daily/RRS$", bb_data_source_dir(ocf)))
 })
 
 test_that("bb_handler_oceandata works when no files match",{

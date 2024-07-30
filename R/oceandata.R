@@ -89,6 +89,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             }
             out <- file.path(temp$hostname, out[1], out[2])
         } else {
+            ## note that we can't use url_mapper here, because the search string in the source definition is unlikely to conform to the expected full pattern
             ## highest-level dir
             out <- "oceandata.sci.gsfc.nasa.gov"
             ## refine by platform. Find platform, either full or one-letter abbrev
@@ -113,10 +114,17 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             ## spatial res
             if (grepl("4km", search)) out <- file.path(out, "4km") else if (grepl("9km", search)) out <- file.path(out, "9km")
             ## next level down is parameter name
+            ptbl <- oceandata_parameters()
+            pn <- stringr::str_detect(search, ptbl$pattern)
+            if (sum(tp, na.rm = TRUE) > 0) {
+                dest_p <- unique(ptbl$parameter[which(pn)])
+                ## we can match on multiple parameters so long as they all map to the same parameter directory name
+                if (length(dest_p) == 1) out <- file.path(out, dest_p)
+            }
         }
         return(file.path(this_att$local_file_root, out))
     }
-    if (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password)) stop(sprintf("Oceandata sources now require an Earthdata login: provide your user and password in the source configuration"))
+    if (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password)) stop("Oceandata sources require an Earthdata login: provide your user and password in the source configuration")
     tries <- 0
     ## don't show progress for the file index
     my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = thisds$user, password = thisds$password)
@@ -423,18 +431,19 @@ oceandata_find_platform <- function(x) {
 # @param sep string: the path separator to use
 # @return Either the directory string corresponding to the URL code, if \code{abbrev} supplied, or a data.frame of all URL regexps and corresponding directory name strings if \code{urlparm} is missing
 # @export
-oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep) {
-    ## take getfile URL and return (relative) path to put the file into
-    ## this_url should look like: https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km.bz2
+oceandata_url_mapper <- function(this_url, path_only = FALSE, sep = .Platform$file.sep) {
+    ## take getfile URL or base filename and return (relative) path to put the file into
+    ## this_url should look like e.g. (old format) https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km.bz2
+    ## or (newer format) https://oceandata.sci.gsfc.nasa.gov/ob/getfile/AQUA_MODIS.20230109.L3b.DAY.RRS.nc
     ## Mapped files (L3m) should become oceandata.sci.gsfc.nasa.gov/platform/Mapped/timeperiod/spatial/parm/[yyyy/]basename
     ## [yyyy] only for 8Day,Daily,Rolling_32_Day
     ## Binned files (L3b) should become oceandata.sci.gsfc.nasa.gov/platform/L3BIN/yyyy/ddd/basename
     assert_that(is.string(this_url))
-    assert_that(is.flag(path_only),!is.na(path_only))
+    assert_that(is.flag(path_only), !is.na(path_only))
     assert_that(is.string(sep))
-    if (grepl("\\.L3m[_\\.]",this_url)) {
+    if (grepl("\\.L3m[_\\.]", this_url)) {
         ## mapped file
-        url_parts <- str_match(this_url,"/([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]_]+)\\.(L3m)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)[_\\.](9|4)(km)?\\..*?(bz2|nc)")
+        url_parts <- str_match(basename(this_url), "^([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]_]+)\\.(L3m)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)[_\\.](9|4)(km)?\\..*?(bz2|nc)")
         ## e.g. [1,] "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km"
         ## [,2] [,3]      [,4]  [,5]  [,6]          [,7]
         ## "A"  "2002359" "L3m" "DAY" "CHL_chlor_a" "9"
@@ -442,26 +451,26 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
         colnames(url_parts) <- c("full_url", "platform", "date", "type", "timeperiod", "parm", "spatial", "spatial_unit", "ext")
         ## map back to old sensor abbreviations, at least temporarily
         url_parts$platform <- oceandata_platform_to_abbrev(url_parts$platform)
-    } else if (grepl("\\.L3b[_\\.]",this_url)) {
+    } else if (grepl("\\.L3b[_\\.]", this_url)) {
 
-        url_parts <- str_match(this_url,"/([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]]+)\\.(L3b)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)\\.(bz2|nc)")
+        url_parts <- str_match(basename(this_url), "^([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]]+)\\.(L3b)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)\\.(bz2|nc)")
         ## https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A20090322009059.L3b_MO_KD490.main.bz2
 
         ## e.g. [1,] "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A20090322009059.L3b_MO_KD490.main.bz2" "A"  "20090322009059" "L3b" "MO" "KD490"
         ## https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2015016.L3b_DAY_RRS.nc
-        url_parts <- as.data.frame(url_parts,stringsAsFactors=FALSE)
-        colnames(url_parts) <- c("full_url","platform","date","type","timeperiod","parm")
+        url_parts <- as.data.frame(url_parts, stringsAsFactors = FALSE)
+        colnames(url_parts) <- c("full_url", "platform", "date", "type", "timeperiod", "parm")
         url_parts$platform <- oceandata_platform_to_abbrev(url_parts$platform)
     } else if (grepl("\\.L2", this_url)) {
       # "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2017002003000.L2_LAC_OC.nc"
-      url_parts <- str_match(this_url,"/([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]]+)\\.(L2)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)\\.(bz2|nc)")
-      url_parts <- as.data.frame(url_parts,stringsAsFactors=FALSE)
-      colnames(url_parts) <- c("full_url","platform","date","type","coverage","parm", "extension")
+      url_parts <- str_match(basename(this_url), "^([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]]+)\\.(L2)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)\\.(bz2|nc)")
+      url_parts <- as.data.frame(url_parts, stringsAsFactors = FALSE)
+      colnames(url_parts) <- c("full_url", "platform", "date", "type", "coverage", "parm", "extension")
         url_parts$platform <- oceandata_platform_to_abbrev(url_parts$platform)
     } else {
         stop("not a L2 or L3 binned or L3 mapped file")
     }
-    this_year <- substr(url_parts$date,1,4)
+    this_year <- substr(url_parts$date, 1, 4)
     if (is.na(url_parts$type)) {
         ## no type provided? we can't proceed with the download, anyway
         stop("cannot ascertain file type from oceancolor URL: ",this_url)
