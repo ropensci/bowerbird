@@ -89,6 +89,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             }
             out <- file.path(temp$hostname, out[1], out[2])
         } else {
+            ## note that we can't use url_mapper here, because the search string in the source definition is unlikely to conform to the expected full pattern
             ## highest-level dir
             out <- "oceandata.sci.gsfc.nasa.gov"
             ## refine by platform. Find platform, either full or one-letter abbrev
@@ -100,15 +101,30 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                 }
                 out <- file.path(out, this_platform)
             }
-            if (grepl("L3m",search)) {
+            if (grepl("L3m", search)) {
                 out <- file.path(out, "Mapped")
-            } else if (grepl("L3",search)) {
+            } else if (grepl("L3", search)) {
                 out <- file.path(out, "L3BIN")
+            }
+            ## time period, if it's specified in the search string
+            tp <- stringr::str_detect(search, paste0("\\.", oceandata_alltp$abbrev, "\\."))
+            if (sum(tp, na.rm = TRUE) == 1) {
+                out <- file.path(out, oceandata_alltp$time_period[which(tp)])
+            }
+            ## spatial res
+            if (grepl("4km", search)) out <- file.path(out, "4km") else if (grepl("9km", search)) out <- file.path(out, "9km")
+            ## next level down is parameter name
+            ptbl <- oceandata_parameters()
+            pn <- stringr::str_detect(search, ptbl$pattern)
+            if (sum(tp, na.rm = TRUE) > 0) {
+                dest_p <- unique(ptbl$parameter[which(pn)])
+                ## we can match on multiple parameters so long as they all map to the same parameter directory name
+                if (length(dest_p) == 1) out <- file.path(out, dest_p)
             }
         }
         return(file.path(this_att$local_file_root, out))
     }
-    if (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password)) stop(sprintf("Oceandata sources now require an Earthdata login: provide your user and password in the source configuration"))
+    if (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password)) stop("Oceandata sources require an Earthdata login: provide your user and password in the source configuration")
     tries <- 0
     ## don't show progress for the file index
     my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = thisds$user, password = thisds$password)
@@ -154,34 +170,47 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
     my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname
     myfiles$local_filename <- vapply(paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename), oceandata_url_mapper, FUN.VALUE = "", USE.NAMES = FALSE) ## where local copy will go
-    fidx <- file.exists(myfiles$local_filename)
+    f_exists <- file.exists(myfiles$local_filename)
     myfiles$existing_checksum <- NA_character_
-    myfiles$existing_checksum[fidx] <- vapply(myfiles$local_filename[fidx], file_hash, hash = "sha1", FUN.VALUE = "", USE.NAMES = FALSE)
     for (idx in seq_len(nrow(myfiles))) {
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename[idx]) ## full URL
         downloads$url[idx] <- this_url
         this_fullfile <- myfiles$local_filename[idx]
         downloads$file[idx] <- this_fullfile
-        if (!this_att$dry_run) {
-            this_exists <- !is.na(myfiles$existing_checksum[idx])
-            download_this <- !this_exists
-            if (this_att$clobber < 1) {
-                ## don't clobber existing
-            } else if (this_att$clobber == 1) {
-                ## replace existing if server copy newer than local copy
-                if (search_method == "api") {
-                    ## use checksum rather than dates for this
-                    if (this_exists) {
-                        download_this <- myfiles$existing_checksum[idx] != myfiles$checksum[idx]
-                    }
-                } else {
-                    download_this <- TRUE
+        download_this <- !f_exists[idx]
+        if (this_att$clobber < 1) {
+            ## don't clobber existing
+        } else if (this_att$clobber == 1) {
+            ## replace existing if server copy newer than local copy
+            if (search_method == "api") {
+                ## use checksum rather than dates for this
+                if (f_exists[idx]) {
+                    existing_checksum <- file_hash(myfiles$local_filename[idx], hash = "sha1")
+                    download_this <- existing_checksum != myfiles$checksum[idx]
                 }
             } else {
                 download_this <- TRUE
             }
-            if (download_this) {
-                if (verbose) cat(sprintf("Downloading: %s ... \n", this_url))
+        } else {
+            download_this <- TRUE
+        }
+        if (isTRUE(download_this)) {
+            ## as of 2024-ish, files can be named *.NRT.nc, and these are eventually replaced by non-NRT versions
+            ## don't download NRT files if the replacement exists, either locally or on the remote server
+            non_nrt_file <- sub("\\.NRT\\.nc$", ".nc", this_fullfile)
+            if (file.exists(non_nrt_file)) {
+                ## local non-NRT exists
+                if (verbose) cat("not downloading ", myfiles$filename[idx], ", non-NRT version exists\n", sep = "")
+                download_this <- FALSE
+            } else if (basename(non_nrt_file) %in% myfiles$filename) {
+                ## remote non-NRT is to be downloaded
+                if (verbose) cat("not downloading ", myfiles$filename[idx], ", non-NRT version exists on the remote server\n", sep = "")
+                download_this <- FALSE
+            }
+        }
+        if (download_this) {
+            if (!this_att$dry_run) {
+                if (verbose) cat("Downloading:", this_url, "... \n")
                 if (!dir.exists(dirname(this_fullfile))) dir.create(dirname(this_fullfile), recursive = TRUE)
                 myfun <- if (stop_on_download_error) stop else warning
                 if (search_method == "scrape") {
@@ -201,14 +230,12 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                     }
                 }
             } else {
-                if (this_exists) {
-                    if (verbose) cat(sprintf("not downloading %s, local copy exists with identical checksum\n",myfiles$filename[idx]))
-                }
+                ## dry run
+                cat("not downloading ", myfiles$filename[idx], ", dry_run is TRUE\n")
             }
+        } else {
+            if (f_exists[idx] && verbose) cat("not downloading ", myfiles$filename[idx], ", local copy exists with identical checksum\n", sep = "")
         }
-    }
-    if (this_att$dry_run) {
-        cat(sprintf(" dry_run is TRUE, bb_handler_oceandata is not downloading the following files:\n %s\n", paste(downloads$url, collapse="\n ")))
     }
     tibble(ok = ok, files = list(downloads), message = "")
 }
@@ -249,6 +276,24 @@ oceandata_platform_map <- function(abbrev,error_no_match=FALSE) {
     }
 }
 
+oceandata_alltp <- tribble(~abbrev, ~time_period,
+                           "WC", "8D_Climatology",
+                           "8D", "8Day",
+                           "YR", "Annual",
+                           "CU", "Cumulative",
+                           "DAY", "Daily",
+                           "MO", "Monthly",
+                           "MC", "Monthly_Climatology",
+                           "R32", "Rolling_32_Day",
+                           "SNSP", "Seasonal",
+                           "SNSU", "Seasonal",
+                           "SNAU", "Seasonal",
+                           "SNWI", "Seasonal",
+                           "SCSP", "Seasonal_Climatology",
+                           "SCSU", "Seasonal_Climatology",
+                           "SCAU", "Seasonal_Climatology",
+                           "SCWI", "Seasonal_Climatology")
+
 # Time periods and abbreviations used in Oceancolor URLs and file names
 # Oceancolor data file URLs need to be mapped to a file system hierarchy that mirrors the one used on the Oceancolor web site.
 # For example, \url{https://oceancolor.gsfc.nasa.gov/cgi/l3/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} or \url{https://oceandata.sci.gsfc.nasa.gov/ob/getfile/V2016044.L3m_DAY_NPP_PAR_par_9km.nc} (obtained from the Oceancolor visual browser or file search facility)
@@ -261,28 +306,11 @@ oceandata_platform_map <- function(abbrev,error_no_match=FALSE) {
 # @seealso \code{\link{oceandata_platform_map}}, \code{\link{oceandata_parameter_map}}
 # @export
 oceandata_timeperiod_map <- function(abbrev,error_no_match=FALSE) {
-    alltp <- tribble(~abbrev, ~time_period,
-                     "WC", "8D_Climatology",
-                     "8D", "8Day",
-                     "YR", "Annual",
-                     "CU", "Cumulative",
-                     "DAY", "Daily",
-                     "MO", "Monthly",
-                     "MC", "Monthly_Climatology",
-                     "R32", "Rolling_32_Day",
-                     "SNSP", "Seasonal",
-                     "SNSU", "Seasonal",
-                     "SNAU", "Seasonal",
-                     "SNWI", "Seasonal",
-                     "SCSP", "Seasonal_Climatology",
-                     "SCSU", "Seasonal_Climatology",
-                     "SCAU", "Seasonal_Climatology",
-                     "SCWI", "Seasonal_Climatology")
     if (missing(abbrev)) {
-        alltp
+        oceandata_alltp
     } else {
         assert_that(is.string(abbrev))
-        out <- alltp$time_period[alltp$abbrev==abbrev]
+        out <- oceandata_alltp$time_period[oceandata_alltp$abbrev==abbrev]
         if (error_no_match & length(out)<1) {
             stop("oceandata URL timeperiod token ",abbrev," not recognized")
         }
@@ -403,18 +431,19 @@ oceandata_find_platform <- function(x) {
 # @param sep string: the path separator to use
 # @return Either the directory string corresponding to the URL code, if \code{abbrev} supplied, or a data.frame of all URL regexps and corresponding directory name strings if \code{urlparm} is missing
 # @export
-oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep) {
-    ## take getfile URL and return (relative) path to put the file into
-    ## this_url should look like: https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km.bz2
+oceandata_url_mapper <- function(this_url, path_only = FALSE, sep = .Platform$file.sep) {
+    ## take getfile URL or base filename and return (relative) path to put the file into
+    ## this_url should look like e.g. (old format) https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km.bz2
+    ## or (newer format) https://oceandata.sci.gsfc.nasa.gov/ob/getfile/AQUA_MODIS.20230109.L3b.DAY.RRS.nc
     ## Mapped files (L3m) should become oceandata.sci.gsfc.nasa.gov/platform/Mapped/timeperiod/spatial/parm/[yyyy/]basename
     ## [yyyy] only for 8Day,Daily,Rolling_32_Day
     ## Binned files (L3b) should become oceandata.sci.gsfc.nasa.gov/platform/L3BIN/yyyy/ddd/basename
     assert_that(is.string(this_url))
-    assert_that(is.flag(path_only),!is.na(path_only))
+    assert_that(is.flag(path_only), !is.na(path_only))
     assert_that(is.string(sep))
-    if (grepl("\\.L3m[_\\.]",this_url)) {
+    if (grepl("\\.L3m[_\\.]", this_url)) {
         ## mapped file
-        url_parts <- str_match(this_url,"/([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]_]+)\\.(L3m)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)[_\\.](9|4)(km)?\\..*?(bz2|nc)")
+        url_parts <- str_match(basename(this_url), "^([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]_]+)\\.(L3m)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)[_\\.](9|4)(km)?\\..*?(bz2|nc)")
         ## e.g. [1,] "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km"
         ## [,2] [,3]      [,4]  [,5]  [,6]          [,7]
         ## "A"  "2002359" "L3m" "DAY" "CHL_chlor_a" "9"
@@ -422,26 +451,26 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
         colnames(url_parts) <- c("full_url", "platform", "date", "type", "timeperiod", "parm", "spatial", "spatial_unit", "ext")
         ## map back to old sensor abbreviations, at least temporarily
         url_parts$platform <- oceandata_platform_to_abbrev(url_parts$platform)
-    } else if (grepl("\\.L3b[_\\.]",this_url)) {
+    } else if (grepl("\\.L3b[_\\.]", this_url)) {
 
-        url_parts <- str_match(this_url,"/([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]]+)\\.(L3b)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)\\.(bz2|nc)")
+        url_parts <- str_match(basename(this_url), "^([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]]+)\\.(L3b)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)\\.(bz2|nc)")
         ## https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A20090322009059.L3b_MO_KD490.main.bz2
 
         ## e.g. [1,] "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A20090322009059.L3b_MO_KD490.main.bz2" "A"  "20090322009059" "L3b" "MO" "KD490"
         ## https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2015016.L3b_DAY_RRS.nc
-        url_parts <- as.data.frame(url_parts,stringsAsFactors=FALSE)
-        colnames(url_parts) <- c("full_url","platform","date","type","timeperiod","parm")
+        url_parts <- as.data.frame(url_parts, stringsAsFactors = FALSE)
+        colnames(url_parts) <- c("full_url", "platform", "date", "type", "timeperiod", "parm")
         url_parts$platform <- oceandata_platform_to_abbrev(url_parts$platform)
     } else if (grepl("\\.L2", this_url)) {
       # "https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2017002003000.L2_LAC_OC.nc"
-      url_parts <- str_match(this_url,"/([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]]+)\\.(L2)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)\\.(bz2|nc)")
-      url_parts <- as.data.frame(url_parts,stringsAsFactors=FALSE)
-      colnames(url_parts) <- c("full_url","platform","date","type","coverage","parm", "extension")
+      url_parts <- str_match(basename(this_url), "^([ASTCV]|AQUA_MODIS|SEASTAR_SEAWIFS_GAC|TERRA_MODIS|NIMBUS7_CZCS|SNPP_VIIRS|JPSS1_VIIRS)\\.?([[:digit:]]+)\\.(L2)[_\\.]([[:upper:][:digit:]]+)[_\\.](.*?)\\.(bz2|nc)")
+      url_parts <- as.data.frame(url_parts, stringsAsFactors = FALSE)
+      colnames(url_parts) <- c("full_url", "platform", "date", "type", "coverage", "parm", "extension")
         url_parts$platform <- oceandata_platform_to_abbrev(url_parts$platform)
     } else {
         stop("not a L2 or L3 binned or L3 mapped file")
     }
-    this_year <- substr(url_parts$date,1,4)
+    this_year <- substr(url_parts$date, 1, 4)
     if (is.na(url_parts$type)) {
         ## no type provided? we can't proceed with the download, anyway
         stop("cannot ascertain file type from oceancolor URL: ",this_url)
@@ -484,24 +513,24 @@ oceandata_url_mapper <- function(this_url,path_only=FALSE,sep=.Platform$file.sep
 }
 
 
+#' Postprocessing: remove redundant NRT oceandata files
+#'
+#' This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
+#'
+#' This function will remove near-real-time (NRT) files from an oceandata collection that have been superseded by their non-NRT versions.
+#'
+#' @param ... : extra parameters passed automatically by \code{bb_sync}
+#'
+#' @return a list, with components \code{status} (TRUE on success) and \code{deleted_files} (character vector of paths of files that were deleted)
+#'
+#' @export
+bb_oceandata_cleanup <- function(...) {
+    bb_nrt_cleanup_inner(findnrt = function(z) grep("\\.NRT\\.nc$", z), nrt2rt = function(z) sub("\\.NRT\\.nc$", ".nc", z), ...)
+}
 
-## WC,8D_Climatology
-## 8D,8Day
-## YR,Annual
-## CU,Cumulative
-## DAY,Daily
-## MO,Monthly
-## MC,Monthly_Climatology
-## R32,Rolling_32_Day
-## SNSP,Seasonal
-## SNSU,Seasonal
-## SNAU,Seasonal
-## SNWI,Seasonal
-## SCSP,Seasonal_Climatology
-## SCSU,Seasonal_Climatology
-## SCAU,Seasonal_Climatology
-## SCWI,Seasonal_Climatology"
 
+## unfinished function to create oceandata source definition given platform, parm, etc
+##
 ##oceandata_source <- function(platform, parameter, processing_level, time_resolution, spatial_resolution, years) {
 ##    ## platform
 ##    assert_that(is.string(platform))
