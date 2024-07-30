@@ -340,3 +340,28 @@ bb_cleanup_inner <- function(config, file_list_before, file_list_after, verbose 
     }
     list(status = unlink(to_delete) == 0, deleted_files = to_delete)
 }
+
+## internal function to clean up near-real-time files (i.e. files that appear early and marked as NRT, but are superseded later by quality-checked versions)
+## @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
+## @param findnrt function: a function that takes a vector of file paths (as returned by `list.files(..., full.names = TRUE)`) and returns an index of those entries that correspond to NRT files
+## @param nrt2rt function: a function that converts a vector of NRT file paths to their non-NRT counterparts
+## @param file_list_after data.frame: files present in the directory after synchronizing, as returned by \code{file.info}
+## @param verbose logical: if TRUE, provide additional progress output
+##
+## @return list, with components status = TRUE on success, and deleted_files = character vector of file names deleted
+bb_nrt_cleanup_inner <- function(config, findnrt, nrt2rt, file_list_after, verbose = FALSE, ...) {
+    assert_that(is(config, "bb_config"))
+    assert_that(nrow(bb_data_sources(config)) == 1)
+    ## could perhaps use file_list_after here, but better to explicitly list files?
+    file_list <- list.files(path = bb_data_source_dir(config), recursive = TRUE, all.files = TRUE, full.names = TRUE)
+    to_delete <- file_list[findnrt(file_list)] ## subset to NRT files
+    to_delete <- to_delete[nrt2rt(to_delete) %in% file_list] ## but only those with equivalent non-NRT files
+    if (verbose) {
+        if (length(to_delete) > 0) {
+            if (verbose) cat(" cleaning up files: ", paste(to_delete, collapse = ", "), "\n")
+        } else {
+            if (verbose) cat(" cleanup: no files to remove\n")
+        }
+    }
+    list(status = unlink(to_delete) == 0, deleted_files = to_delete)
+}
