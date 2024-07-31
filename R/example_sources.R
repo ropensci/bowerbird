@@ -39,9 +39,9 @@ bb_example_sources <- function(sources) {
                           description = "Weekly and monthly mean and long-term monthly mean SST data, 1-degree resolution, 1981 to present. Ice concentration data are also included, which are the ice concentration values input to the SST analysis",
                           doc_url = "http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html",
                           citation = "NOAA_OI_SST_V2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
-                          source_url = c("ftp://ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/*"),
+                          source_url = "https://downloads.psl.noaa.gov/Datasets/noaa.oisst.v2/",
                           license = "Please cite",
-                          method = list("bb_handler_wget",recursive=TRUE,level=1),
+                          method = list("bb_handler_wget", recursive = TRUE, level = 1),
                           postprocess = NULL,
                           access_function = "raster::raster",
                           collection_size = 0.9,
@@ -54,7 +54,7 @@ bb_example_sources <- function(sources) {
                           description = "Weekly and monthly mean and long-term monthly mean SST data, 1-degree resolution, 1981 to present. Ice concentration data are also included, which are the ice concentration values input to the SST analysis",
                           doc_url = "http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html",
                           citation = "NOAA_OI_SST_V2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
-                          source_url = "ftp://ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/",
+                          source_url = "https://downloads.psl.noaa.gov/Datasets/noaa.oisst.v2/",
                           license = "Please cite",
                           method = list("bb_handler_rget", level = 1),
                           postprocess = NULL,
@@ -88,23 +88,21 @@ bb_example_sources <- function(sources) {
                           collection_size = 0.01,
                           data_group = "Electoral")))
     }
-    if (missing(sources) || any(c("CMEMS global gridded SSH reprocessed (1993-ongoing)", "SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047") %in% sources)) {
+    if (missing(sources) || any(c("CMEMS global gridded SSH reprocessed (1993-ongoing)", "SEALEVEL_GLO_PHY_L4_MY_008_047") %in% sources)) {
         out <- c(out, list(bb_source(
-                          name = "CMEMS global gridded SSH reprocessed (1993-ongoing)",
-                          id = "SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047",
-                          description = "For the Global Ocean - Multimission altimeter satellite gridded sea surface heights and derived variables computed with respect to a twenty-year mean. Previously distributed by Aviso+, no change in the scientific content. All the missions are homogenized with respect to a reference mission which is currently OSTM/Jason-2.\nVARIABLES\n- sea_surface_height_above_sea_level (SSH)\n- surface_geostrophic_eastward_sea_water_velocity_assuming_sea_level_for_geoid (UVG)\n- surface_geostrophic_northward_sea_water_velocity_assuming_sea_level_for_geoid (UVG)\n- sea_surface_height_above_geoid (SSH)\n- surface_geostrophic_eastward_sea_water_velocity (UVG)\n- surface_geostrophic_northward_sea_water_velocity (UVG)",
-                         doc_url = "http://marine.copernicus.eu/services-portfolio/access-to-products/?option=com_csw&view=details&product_id=SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047",
-                          citation = "In case of any publication, the Licensee will ensure credit the Copernicus Marine Service in the following manner: \"This study has been conducted using E.U. Copernicus Marine Service Information\"",
-                          source_url = c("ftp://ftp.sltac.cls.fr/Core/SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047/dataset-duacs-rep-global-merged-allsat-phy-l4-v3/"),
-                          license = "See http://marine.copernicus.eu/services-portfolio/service-commitments-and-licence/",
-                          method = list("bb_handler_rget", level = 3),
-                          postprocess = list("bb_gunzip"),
-                          authentication_note = "Copernicus Marine login required, see http://marine.copernicus.eu/services-portfolio/register-now/",
-                          user = "",
-                          password = "",
-                          access_function = "raster::raster",
-                          collection_size = 310,
-                          data_group = "Altimetry", warn_empty_auth = FALSE)))
+                         name = "CMEMS global gridded SSH reprocessed (1993-ongoing)",
+                         id = "SEALEVEL_GLO_PHY_L4_MY_008_047",
+                         description = "For the Global Ocean - Multimission altimeter satellite gridded sea surface heights and derived variables computed with respect to a twenty-year mean. Previously distributed by Aviso+, no change in the scientific content. All the missions are homogenized with respect to a reference mission which is currently OSTM/Jason-2.\nVARIABLES\n- sea_surface_height_above_sea_level (SSH)\n- surface_geostrophic_eastward_sea_water_velocity_assuming_sea_level_for_geoid (UVG)\n- surface_geostrophic_northward_sea_water_velocity_assuming_sea_level_for_geoid (UVG)\n- sea_surface_height_above_geoid (SSH)\n- surface_geostrophic_eastward_sea_water_velocity (UVG)\n- surface_geostrophic_northward_sea_water_velocity (UVG)",
+                         doc_url = "https://data.marine.copernicus.eu/product/SEALEVEL_GLO_PHY_L4_MY_008_047/description",
+                         citation = "In case of any publication, the Licensee will ensure credit the Copernicus Marine Service and cite the DOIs links guaranteeing the traceability of the scientific studies and experiments, in the following manner: \"This study has been conducted using E.U. Copernicus Marine Service Information; https://doi.org/10.48670/moi-00148\"",
+                         license = "See http://marine.copernicus.eu/services-portfolio/service-commitments-and-licence/",
+                         method = list("bb_handler_copernicus", product = "SEALEVEL_GLO_PHY_L4_MY_008_047"),
+                         authentication_note = "Copernicus Marine login required, see http://marine.copernicus.eu/services-portfolio/register-now/",
+                         user = "",
+                         password = "",
+                         access_function = "raster::raster",
+                         collection_size = 310,
+                         data_group = "Altimetry", warn_empty_auth = FALSE)))
     }
     if (missing(sources) || any(c("Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a", "SeaWiFS_L3m_MO_CHL_chlor_a_9km") %in% sources)) {
         out <- c(out, list(bb_source(

@@ -192,50 +192,47 @@ test_that("authentication checks work",{
 
 test_that("bb_modify_source works",{
     ## use this one
-    src <- bb_example_sources("SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047")
+    src <- bb_example_sources("SEALEVEL_GLO_PHY_L4_MY_008_047")
     ## check src is as expected
-    expect_identical(src$method[[1]],list("bb_handler_rget", level = 3))
-    expect_identical(src$postprocess[[1]],list(list("bb_gunzip")))
+    expect_identical(src$method[[1]], list("bb_handler_copernicus", product = "SEALEVEL_GLO_PHY_L4_MY_008_047"))
 
-    expect_error(src %>% bb_modify_source(bilbo="baggins",frodo="also baggins"),"unexpected input parameters")
+    expect_error(src %>% bb_modify_source(bilbo = "baggins", frodo = "also baggins"), "unexpected input parameters")
 
     ## simple text parameters
-    expect_warning(temp <- src %>% bb_modify_source(user="me"),"requires authentication") ## needs both user and password
-    expect_warning(temp <- src %>% bb_modify_source(password="blah"),"requires authentication") ## needs both user and password
-    temp <- src %>% bb_modify_source(user="me",password="blah")
-    expect_identical(temp$user,"me")
-    expect_identical(temp$password,"blah")
+    expect_warning(temp <- src %>% bb_modify_source(user = "me"), "requires authentication") ## needs both user and password
+    expect_warning(temp <- src %>% bb_modify_source(password = "blah"), "requires authentication") ## needs both user and password
+    temp <- src %>% bb_modify_source(user = "me", password = "blah")
+    expect_identical(temp$user, "me")
+    expect_identical(temp$password, "blah")
     ## test mandatory parm made missing
-    expect_error(src %>% bb_modify_source(user="me",password="blah",doc_url=NULL),"provide a doc_url")
+    expect_error(src %>% bb_modify_source(user = "me", password = "blah", doc_url = NULL), "provide a doc_url")
     ## test source urls
     ## can't be a list
-    expect_error(src %>% bb_modify_source(user="me",password="blah",source_url=list("new_url1","new_url2")),"not a character vector")
-    temp <- src %>% bb_modify_source(user="me",password="blah",source_url=c("new_url1","new_url2"))
-    expect_identical(temp$source_url,list(c("new_url1","new_url2")))
+    expect_error(src %>% bb_modify_source(user = "me", password = "blah", source_url = list("new_url1", "new_url2")), "not a character vector")
+    temp <- src %>% bb_modify_source(user = "me", password = "blah", source_url = c("new_url1", "new_url2"))
+    expect_identical(temp$source_url, list(c("new_url1", "new_url2")))
 
     ## method is tricker, is a list
     ## pass illegal handler (not a function)
-    expect_error(src %>% bb_modify_source(user="me",password="blah",method=list("notafunction",a=1)),"resolves to a function")
-    temp <- src %>% bb_modify_source(user="me",password="blah",method=list("bb_handler_oceandata",a=1))
-    ## this should replace the method function name, and add a=1, but leave the existing recursive and level elements
-    expect_identical(temp$method[[1]],list("bb_handler_oceandata",level=3,a=1))
-    temp <- src %>% bb_modify_source(user="me",password="blah",method=list("bb_handler_wget",level=NULL)) ## should remove the level element
-    expect_equal(length(temp$method[[1]]), 1)
-    expect_equal(temp$method[[1]][[1]], "bb_handler_wget")
+    expect_error(src %>% bb_modify_source(user = "me", password = "blah", method = list("notafunction", a = 1)), "resolves to a function")
+    temp <- src %>% bb_modify_source(user = "me", password = "blah", method = list("bb_handler_oceandata", a = 1))
+    ## this should replace the method function name, and add a = 1, but leave the existing recursive and level elements
+    expect_identical(temp$method[[1]], list("bb_handler_oceandata", product = "SEALEVEL_GLO_PHY_L4_MY_008_047", a = 1))
 
     ## warn_empty_auth behaviour
-    expect_warning(src %>% bb_modify_source(),"requires authentication")
-    temp <- src %>% bb_modify_source(warn_empty_auth=FALSE) ## OK
+    expect_warning(src %>% bb_modify_source(), "requires authentication")
+    temp <- src %>% bb_modify_source(warn_empty_auth = FALSE) ## OK
 
     ## postprocess is also a list
-    expect_error(src %>% bb_modify_source(user="me",password="blah",postprocess=c()),"is not a list")
-    expect_identical(src,src %>% bb_modify_source(postprocess=list(),warn_empty_auth=FALSE)) ## identical
-    temp <- src %>% bb_modify_source(user="me",password="blah",postprocess=list("bb_cleanup")) ## new pp element
-    expect_equal(length(temp$postprocess[[1]]),2)
-    temp <- src %>% bb_modify_source(user="me",password="blah",postprocess=list(list("bb_cleanup",pattern="*.zip"))) ## new pp element with arg
-    expect_equal(length(temp$postprocess[[1]]),2)
-    expect_identical(temp$postprocess[[1]],list(list("bb_gunzip"),list("bb_cleanup",pattern="*.zip")))
-    temp <- src %>% bb_modify_source(user="me",password="blah",postprocess=list(list("bb_gunzip",delete=TRUE))) ## modify existing pp element
-    expect_equal(length(temp$postprocess[[1]]),1)
-    expect_identical(temp$postprocess[[1]],list(list("bb_gunzip",delete=TRUE)))
+    src <- bb_example_sources("greatlakes-superior-bathymetry")
+    expect_error(src %>% bb_modify_source(user = "me", password = "blah", postprocess = c()), "is not a list")
+    expect_identical(src, src %>% bb_modify_source(postprocess = list(), warn_empty_auth = FALSE)) ## identical
+    temp <- src %>% bb_modify_source(user = "me", password = "blah", postprocess = list("bb_cleanup")) ## new pp element
+    expect_equal(length(temp$postprocess[[1]]), 2)
+    temp <- src %>% bb_modify_source(user = "me", password = "blah", postprocess = list(list("bb_cleanup", pattern = "*.zip"))) ## new pp element with arg
+    expect_equal(length(temp$postprocess[[1]]), 2)
+    expect_identical(temp$postprocess[[1]], list(list("bb_gunzip"), list("bb_cleanup", pattern = "*.zip")))
+    temp <- src %>% bb_modify_source(user = "me", password = "blah", postprocess = list(list("bb_gunzip", delete = TRUE))) ## modify existing pp element
+    expect_equal(length(temp$postprocess[[1]]), 1)
+    expect_identical(temp$postprocess[[1]], list(list("bb_gunzip", delete = TRUE)))
 })
