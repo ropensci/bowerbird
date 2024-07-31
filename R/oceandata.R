@@ -83,7 +83,9 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     if (missing(s3_args) || is.null(s3_args)) s3_args <- list()
     if ("s3_args" %in% names(this_att)) s3_args <- c(s3_args, this_att$s3_args)
     ## are we syncing to an s3 target?
-    s3_target <- "bucket" %in% names(s3_args)
+    s3_target <- is_s3_target(s3_args)
+    if (s3_target) s3_args <- check_s3_args(s3_args)
+
 
     if (local_dir_only) {
         if (s3_target) {

@@ -158,7 +158,8 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     ## is this an s3 target (are we uploading to a bucket, rather than downloading to local file system?)
     ##  `s3_args` will contain any global s3_args set in bb_config, regardless of whether this particular data source is s3 or not
     ##  but the `bucket` name in s3_args should only be populated if this data source is an s3 target
-    s3_target <- !missing(s3_args) && !is.null(s3_args) && "bucket" %in% names(s3_args)
+    s3_target <- !missing(s3_args) && is_s3_target(s3_args)
+    if (s3_target) s3_args <- check_s3_args(s3_args)
 
     ## opts to pass to child function
     opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, no_parent_download = no_parent_download, debug = debug, link_css = link_css) ##robots_off = robots_off,

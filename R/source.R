@@ -250,6 +250,3 @@ bb_modify_source <- function(src,...) {
     if ("warn_empty_auth" %in% pnames) newparms$warn_empty_auth <- parms$warn_empty_auth
     do.call(bb_source,newparms)
 }
-
-## internal, is a data source uploading to an s3 target rather than local file system?
-is_s3_target <- function(ds) "bucket" %in% names(ds$method[[1]]$s3_args)

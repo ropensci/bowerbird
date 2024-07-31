@@ -207,3 +207,19 @@ aws_list_objects <- function(s3_args) {
     })
     bx
 }
+
+## helper function to see if a source has been specified as an s3 target
+is_s3_target <- function(x) {
+    ## `x` can be a data source, or just its method s3_args
+    if ("method" %in% names(x)) return("bucket" %in% names(x$method[[1]]$s3_args))
+    "bucket" %in% names(x)
+}
+
+## check s3 parms, insert defaults if missing?
+check_s3_args <- function(s3_args) {
+    if (length(s3_args) < 1 || !"bucket" %in% s3_args) return(s3_args)
+    if (is.null(s3_args$region)) s3_args$region <- "" ## default to empty string
+    reqd <- c("base_url", "region") ## "secret", "key" ## these aren't mandatory on open-access buckets?
+    if (!all(reqd %in% names(s3_args))) stop("s3_args is missing required parameter(s): ", paste(setdiff(reqd, names(s3_args)), collapse = ", "))
+    s3_args
+}
