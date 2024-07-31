@@ -203,11 +203,9 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
     my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname
     myfiles$local_filename <- vapply(myfiles$filename, oceandata_url_mapper, no_host = isTRUE(dots$no_host), FUN.VALUE = "", USE.NAMES = FALSE) ## where local copy will go
-    f_exists <- if (s3_target) {
-                    rep(FALSE, nrow(myfiles)) ## TODO use bucket list, see note below
-                    } else {
-                        file.exists(myfiles$local_filename)
-                    }
+
+    bx <- if (!isTRUE(this_att$dry_run) && s3_target) aws_list_objects(s3_args) else tibble(Key = character(), LastModified = as.POSIXct(c()))
+    f_exists <- if (s3_target) { myfiles$filename %in% basename(bx$Key) } else { file.exists(myfiles$local_filename) }
     myfiles$existing_checksum <- NA_character_
     ## iterate through file list and figure out which ones we'll actually download
     for (idx in seq_len(nrow(myfiles))) {
@@ -218,8 +216,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         download_this <- !f_exists[idx]
         ## - with search_method == "api", we can get a cdate (last-modified) for files on the oceandata side, and we can retrieve the local file last-modified dates (or retrieve the target bucket list with last-modified dates)
         ## - so we could either explicitly compare dates and only queue downloads for appropriate files
-        ## - or we can set clobber = 1 and rget will use the file or bucket last-modified date to set the if-modified-since header, which makes a lot more requests but the code is simpler here because we delegate the comparisons to the existing code in rget
-        ## TODO
+        ## - or we can set clobber = 1 and rget will use the file or bucket last-modified date to set the if-modified-since header, which makes a lot more requests but the code is simpler because we delegate the comparisons to the existing code in rget
         if (this_att$clobber < 1) {
             ## don't clobber existing
         } else if (this_att$clobber == 1) {
@@ -230,8 +227,13 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                     existing_checksum <- file_hash(myfiles$local_filename[idx], hash = "sha1")
                     download_this <- existing_checksum != myfiles$checksum[idx]
                 }
+            } else if (s3_target) {
+                ## check date of object in bucket list, download if oceandata's copy is newer
+                bidx <- which(basename(bx$Key) == myfiles$filename[idx])
+                if (length(bidx) == 1 && !is.na(myfiles$last_modified[idx]) && myfiles$last_modified[idx] > bx$LastModified[bidx]) {
+                    download_this <- TRUE
+                }
             } else {
-                ## TODO for s3_target, use bucket list
                 download_this <- TRUE
             }
         } else {
@@ -241,10 +243,13 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             ## as of 2024-ish, files can be named *.NRT.nc, and these are eventually replaced by non-NRT versions
             ## don't download NRT files if the replacement exists, either locally or on the remote server
             non_nrt_file <- sub("\\.NRT\\.nc$", ".nc", this_fullfile)
-            if (file.exists(non_nrt_file)) {
+            if (!s3_target && file.exists(non_nrt_file)) {
                 ## local non-NRT exists
-                ## TODO cope with s3_target
-                if (verbose) cat("not downloading ", myfiles$filename[idx], ", non-NRT version exists\n", sep = "")
+                if (verbose) cat("not downloading ", myfiles$filename[idx], ", non-NRT version exists in local collection\n", sep = "")
+                download_this <- FALSE
+            } else if (s3_target && basename(non_nrt_file) %in% basename(bx$Key)) {
+                ## non-NRT exists in bucket
+                if (verbose) cat("not downloading ", myfiles$filename[idx], ", non-NRT version exists in destination bucket\n", sep = "")
                 download_this <- FALSE
             } else if (basename(non_nrt_file) %in% myfiles$filename) {
                 ## remote non-NRT is to be downloaded
@@ -254,43 +259,17 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         }
         if (download_this) {
             if (!this_att$dry_run) {
-                ## if (verbose) cat("Downloading:", this_url, "... \n")
-                ## if (!dir.exists(dirname(this_fullfile))) dir.create(dirname(this_fullfile), recursive = TRUE)
-                ## myfun <- if (stop_on_download_error) stop else warning
-                ## if (search_method == "scrape") {
-                ##     res <- bb_rget(this_url, force_local_filename = this_fullfile, use_url_directory = FALSE, clobber = this_att$clobber, ##user = thisds$user, password = thisds$password,
-                ##                    curl_opts = my_curl_config$options, verbose = verbose)
-                ##     if (!res$ok) {
-                ##         myfun("Error downloading ", this_url, ": ", res$message)
-                ##     } else {
-                ##         downloads$was_downloaded[idx] <- TRUE
-                ##     }
-                ## } else {
-                ##     if (!s3_target) {
-                ##         ## handle the downloads directly here, to avoid multiple "downloading file 1 of 1" messages that we would get using rget
-                ##         req <- httr::with_config(my_curl_config, httr::GET(this_url, httr::write_disk(path = this_fullfile, overwrite = TRUE)))
-                ##         if (httr::http_error(req)) {
-                ##             myfun("Error downloading ", this_url, ": ", httr::http_status(req)$message)
-                ##         } else {
-                ##             downloads$was_downloaded[idx] <- TRUE
-                ##         }
-                ##     } else {
-                ##         ## wrap rget and let it handle the s3 uploading, but note that this gives us a series of "downloading file 1 of 1" messages
-                ##         res <- bb_rget(this_url, force_local_filename = this_fullfile, use_url_directory = FALSE, clobber = 2^^^L, curl_opts = my_curl_config$options, verbose = verbose, s3_args = s3_args)
-                ##         if (!res$ok) {
-                ##             myfun("Error downloading ", this_url, ": ", res$message)
-                ##         } else {
-                ##             downloads$was_downloaded[idx] <- TRUE
-                ##         }
-                ##     }
-                ## }
                 downloads$to_download[idx] <- TRUE
             } else {
                 ## dry run
                 cat("not downloading ", myfiles$filename[idx], ", dry_run is TRUE\n", sep = "")
             }
-        } else {
-            if (f_exists[idx] && verbose) cat("not downloading ", myfiles$filename[idx], ", local copy exists with identical checksum\n", sep = "")
+        } else if (verbose && f_exists[idx]) {
+            if (!s3_target) {
+                cat("not downloading ", myfiles$filename[idx], ", local copy exists with identical checksum\n", sep = "")
+            } else {
+                cat("not downloading ", myfiles$filename[idx], ", ", if (this_att$clobber == 1) "newer ", "copy exists in destination bucket\n", sep = "")
+            }
         }
     }
     to_download <- downloads$to_download
