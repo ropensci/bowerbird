@@ -65,4 +65,22 @@ test_that("rget works with multiple input URLs", {
     res1 <- bb_rget("https://github.com/ropensci/bowerbird/", accept_download = "\\.md$", no_parent = FALSE, level = 1)
     res2 <- bb_rget(c("https://github.com/ropensci/bowerbird/", "https://github.com/ropensci/bowerbird/"), accept_download = "\\.md$", no_parent = FALSE, level = 1)
     expect_identical(res1, res2)
+
+    ## multiple urls with multiple force_local_filenames
+    outdir <- tempfile()
+    dir.create(outdir)
+    res <- bb_rget(rep("https://raw.githubusercontent.com/ropensci/bowerbird/master/README.md", 2), force_local_filename = file.path(outdir, c("1.md", "2.md")), use_url_directory = FALSE)
+    expect_identical(res$files[[1]]$file, file.path(outdir, c("1.md", "2.md")))
+    expect_true(all(file.exists(res$files[[1]]$file)))
+
+    cwd <- getwd()
+    outdir <- tempfile()
+    dir.create(outdir)
+    setwd(outdir)
+    res <- bb_rget(rep("https://raw.githubusercontent.com/ropensci/bowerbird/master/README.md", 2), force_local_filename = c("1.md", "2.md"))
+    ## should save into directory given by url structure, but named by 1.md and 2.md
+    setwd(cwd)
+    ## entries in res$files will not be named with the absolute path, just relative to outdir
+    expect_identical(res$files[[1]]$file, file.path("raw.githubusercontent.com/ropensci/bowerbird/master", c("1.md", "2.md")))
+    expect_true(all(file.exists(file.path(outdir, res$files[[1]]$file))))
 })
