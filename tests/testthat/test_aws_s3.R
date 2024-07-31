@@ -79,6 +79,6 @@ test_that("bb_handler_aws_s3 works", {
     expect_identical(chk, as.raw(c(137, utf8ToInt("HDF\r\n"))))
 
     ## go again, it should not download anything
-    status2 <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
+    status <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
     expect_identical(status$files[[1]]$note, "existing copy")
 })
