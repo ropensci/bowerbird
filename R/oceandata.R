@@ -145,22 +145,41 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     if (verbose) cat("Downloading file list ... \n")
     if (search_method == "api") {
         ## this can be super slow for large queries, but it gives a checksum
+        api_post <- FALSE ## use GET/json
         while (tries<3) {
-            bdy <- list(cksum = 1, search = search)
-            if (!is.null(dtype)) bdy$dtype <- dtype
-            if (!is.null(sensor)) bdy$sensor <- sensor
-            myfiles <- httr::with_config(my_curl_config, httr::POST("https://oceandata.sci.gsfc.nasa.gov/api/file_search", body = bdy))
+            if (api_post) {
+                ## old
+                bdy <- list(cksum = 1, search = search)
+                if (!is.null(dtype)) bdy$dtype <- dtype
+                if (!is.null(sensor)) bdy$sensor <- sensor
+                myfiles <- httr::with_config(my_curl_config, httr::POST("https://oceandata.sci.gsfc.nasa.gov/api/file_search", body = bdy))
+            } else {
+                ## use json format, which gives us cdate
+                u <- httr::parse_url("https://oceandata.sci.gsfc.nasa.gov/api/file_search")
+                u$query <- Filter(Negate(is.null), list(search = search, dtype = if (!is.null(dtype)) dtype, sensor = if (!is.null(sensor)) sensor), format = "json", cksum = 1)
+                ## excluding cksum seems to limit the number of records to 50
+                myfiles <- httr::GET(httr::build_url(u))
+            }
             if (!httr::http_error(myfiles)) break
             tries <- tries + 1
         }
         if (httr::http_error(myfiles)) stop("error with oceancolour data file search: could not retrieve file list (query: ", search, ")")
         myfiles <- httr::content(myfiles, as = "text")
-        myfiles <- strsplit(myfiles,"\n")[[1]]
-        ## look for an empty body or "No files found" message
-        if (length(myfiles) < 1 || !any(nzchar(myfiles)) || any(tolower(myfiles) %in% "no results found")) stop("No files matched the supplied oceancolour data file search query (", search, ")")
-        myfiles <- do.call(rbind, lapply(myfiles, function(z) strsplit(z, "[[:space:]]+")[[1]])) ## split checksum and file name from each line
-        colnames(myfiles) <- c("checksum", "filename")
-        myfiles <- as_tibble(myfiles)
+        ## look for an empty body or "No results found" message
+        if (length(myfiles) < 1 || !any(nzchar(myfiles)) || any(grepl("no results found", myfiles, ignore.case = TRUE), na.rm = TRUE)) stop("No files matched the supplied oceancolour data file search query (", search, ")")
+        if (api_post) {
+            myfiles <- strsplit(myfiles,"\n")[[1]]
+            myfiles <- do.call(rbind, lapply(myfiles, function(z) strsplit(z, "[[:space:]]+")[[1]])) ## split checksum and file name from each line
+            colnames(myfiles) <- c("checksum", "filename")
+            myfiles <- as_tibble(myfiles)
+            myfiles$last_modified <- NA
+        } else {
+            myfiles <- jsonlite::fromJSON(myfiles)
+            myfiles <- cbind(do.call(rbind, lapply(myfiles, as_tibble)), filename = names(myfiles))
+            myfiles$checksum <- sub("^sha1:", "", myfiles$checksum)
+            names(myfiles)[which(names(myfiles) == "cdate")] <- "last_modified" ## cdate is (presumably) the last-modified date
+            myfiles <- myfiles[, c("checksum", "filename", "last_modified")]
+        }
     } else if (search_method == "scrape") {
         ## potentially override accept_download etc
         myfiles <- bb_rget(search, level = 3,
