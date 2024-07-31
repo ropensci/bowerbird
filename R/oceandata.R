@@ -156,7 +156,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             } else {
                 ## use json format, which gives us cdate
                 u <- httr::parse_url("https://oceandata.sci.gsfc.nasa.gov/api/file_search")
-                u$query <- Filter(Negate(is.null), list(search = search, dtype = if (!is.null(dtype)) dtype, sensor = if (!is.null(sensor)) sensor), format = "json", cksum = 1)
+                u$query <- Filter(Negate(is.null), list(search = search, dtype = if (!is.null(dtype)) dtype, sensor = if (!is.null(sensor)) sensor, format = "json", cksum = 1))
                 ## excluding cksum seems to limit the number of records to 50
                 myfiles <- httr::GET(httr::build_url(u))
             }
@@ -187,14 +187,14 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                            ## follow 3-digit (day of year) or 4-digit (year) folders by default
                            accept_follow = if ("accept_follow" %in% names(dots)) dots[["accept_follow"]] else "/[[:digit:]]{3}[[:digit:]]?/$",
                            dry_run = TRUE, no_parent = FALSE, relative = FALSE, verbose = FALSE)
-        myfiles <- tibble(filename = basename(myfiles$files[[1]]$url), checksum = NA_character_)
+        myfiles <- tibble(filename = basename(myfiles$files[[1]]$url), checksum = NA_character_, last_modified = NA)
     }
 
     myfiles <- myfiles[order(myfiles$filename), ]
     if (verbose) cat(sprintf("\n%d file%s to download\n", nrow(myfiles), if (nrow(myfiles)>1) "s" else ""))
     ## for each file, download if needed and store in appropriate directory
     ok <- TRUE
-    downloads <- tibble(url = NA_character_, file = myfiles$filename, was_downloaded = FALSE)
+    downloads <- tibble(url = NA_character_, file = myfiles$filename, was_downloaded = FALSE, to_download = FALSE)
     cookies_file <- tempfile()
     my_curl_config <- build_curl_config(debug = FALSE, show_progress = verbose, user = thisds$user, password = thisds$password, enforce_basic_auth = TRUE)
     ## and some more configs specifically for earthdata
@@ -202,26 +202,36 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     my_curl_config$options$cookiefile <- cookies_file ## reads cookies from here
     my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
     my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname
-    myfiles$local_filename <- vapply(paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename), oceandata_url_mapper, FUN.VALUE = "", USE.NAMES = FALSE) ## where local copy will go
-    f_exists <- file.exists(myfiles$local_filename)
+    myfiles$local_filename <- vapply(myfiles$filename, oceandata_url_mapper, no_host = isTRUE(dots$no_host), FUN.VALUE = "", USE.NAMES = FALSE) ## where local copy will go
+    f_exists <- if (s3_target) {
+                    rep(FALSE, nrow(myfiles)) ## TODO use bucket list, see note below
+                    } else {
+                        file.exists(myfiles$local_filename)
+                    }
     myfiles$existing_checksum <- NA_character_
+    ## iterate through file list and figure out which ones we'll actually download
     for (idx in seq_len(nrow(myfiles))) {
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename[idx]) ## full URL
         downloads$url[idx] <- this_url
         this_fullfile <- myfiles$local_filename[idx]
         downloads$file[idx] <- this_fullfile
         download_this <- !f_exists[idx]
+        ## - with search_method == "api", we can get a cdate (last-modified) for files on the oceandata side, and we can retrieve the local file last-modified dates (or retrieve the target bucket list with last-modified dates)
+        ## - so we could either explicitly compare dates and only queue downloads for appropriate files
+        ## - or we can set clobber = 1 and rget will use the file or bucket last-modified date to set the if-modified-since header, which makes a lot more requests but the code is simpler here because we delegate the comparisons to the existing code in rget
+        ## TODO
         if (this_att$clobber < 1) {
             ## don't clobber existing
         } else if (this_att$clobber == 1) {
             ## replace existing if server copy newer than local copy
-            if (search_method == "api") {
+            if (search_method == "api" && !s3_target) {
                 ## use checksum rather than dates for this
                 if (f_exists[idx]) {
                     existing_checksum <- file_hash(myfiles$local_filename[idx], hash = "sha1")
                     download_this <- existing_checksum != myfiles$checksum[idx]
                 }
             } else {
+                ## TODO for s3_target, use bucket list
                 download_this <- TRUE
             }
         } else {
@@ -233,6 +243,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             non_nrt_file <- sub("\\.NRT\\.nc$", ".nc", this_fullfile)
             if (file.exists(non_nrt_file)) {
                 ## local non-NRT exists
+                ## TODO cope with s3_target
                 if (verbose) cat("not downloading ", myfiles$filename[idx], ", non-NRT version exists\n", sep = "")
                 download_this <- FALSE
             } else if (basename(non_nrt_file) %in% myfiles$filename) {
@@ -243,31 +254,56 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         }
         if (download_this) {
             if (!this_att$dry_run) {
-                if (verbose) cat("Downloading:", this_url, "... \n")
-                if (!dir.exists(dirname(this_fullfile))) dir.create(dirname(this_fullfile), recursive = TRUE)
-                myfun <- if (stop_on_download_error) stop else warning
-                if (search_method == "scrape") {
-                    res <- bb_rget(this_url, force_local_filename = this_fullfile, use_url_directory = FALSE, clobber = this_att$clobber, ##user = thisds$user, password = thisds$password,
-                                   curl_opts = my_curl_config$options, verbose = verbose)
-                    if (!res$ok) {
-                        myfun("Error downloading ", this_url, ": ", res$message)
-                    } else {
-                        downloads$was_downloaded[idx] <- TRUE
-                    }
-                } else {
-                    req <- httr::with_config(my_curl_config, httr::GET(this_url, httr::write_disk(path = this_fullfile, overwrite = TRUE)))
-                    if (httr::http_error(req)) {
-                        myfun("Error downloading ", this_url, ": ", httr::http_status(req)$message)
-                    } else {
-                        downloads$was_downloaded[idx] <- TRUE
-                    }
-                }
+                ## if (verbose) cat("Downloading:", this_url, "... \n")
+                ## if (!dir.exists(dirname(this_fullfile))) dir.create(dirname(this_fullfile), recursive = TRUE)
+                ## myfun <- if (stop_on_download_error) stop else warning
+                ## if (search_method == "scrape") {
+                ##     res <- bb_rget(this_url, force_local_filename = this_fullfile, use_url_directory = FALSE, clobber = this_att$clobber, ##user = thisds$user, password = thisds$password,
+                ##                    curl_opts = my_curl_config$options, verbose = verbose)
+                ##     if (!res$ok) {
+                ##         myfun("Error downloading ", this_url, ": ", res$message)
+                ##     } else {
+                ##         downloads$was_downloaded[idx] <- TRUE
+                ##     }
+                ## } else {
+                ##     if (!s3_target) {
+                ##         ## handle the downloads directly here, to avoid multiple "downloading file 1 of 1" messages that we would get using rget
+                ##         req <- httr::with_config(my_curl_config, httr::GET(this_url, httr::write_disk(path = this_fullfile, overwrite = TRUE)))
+                ##         if (httr::http_error(req)) {
+                ##             myfun("Error downloading ", this_url, ": ", httr::http_status(req)$message)
+                ##         } else {
+                ##             downloads$was_downloaded[idx] <- TRUE
+                ##         }
+                ##     } else {
+                ##         ## wrap rget and let it handle the s3 uploading, but note that this gives us a series of "downloading file 1 of 1" messages
+                ##         res <- bb_rget(this_url, force_local_filename = this_fullfile, use_url_directory = FALSE, clobber = 2^^^L, curl_opts = my_curl_config$options, verbose = verbose, s3_args = s3_args)
+                ##         if (!res$ok) {
+                ##             myfun("Error downloading ", this_url, ": ", res$message)
+                ##         } else {
+                ##             downloads$was_downloaded[idx] <- TRUE
+                ##         }
+                ##     }
+                ## }
+                downloads$to_download[idx] <- TRUE
             } else {
                 ## dry run
-                cat("not downloading ", myfiles$filename[idx], ", dry_run is TRUE\n")
+                cat("not downloading ", myfiles$filename[idx], ", dry_run is TRUE\n", sep = "")
             }
         } else {
             if (f_exists[idx] && verbose) cat("not downloading ", myfiles$filename[idx], ", local copy exists with identical checksum\n", sep = "")
+        }
+    }
+    to_download <- downloads$to_download
+    downloads <- downloads[, setdiff(names(downloads), "to_download")]
+    if (!this_att$dry_run && any(to_download, na.rm = TRUE)) {
+        ## download all the files we identified above
+        idx <- which(to_download)
+        res <- bb_rget(downloads$url[idx], force_local_filename = downloads$file[idx], use_url_directory = FALSE, clobber = this_att$clobber, curl_opts = my_curl_config$options, verbose = verbose, s3_args = s3_args) ## TODO check are there any other args in dots to use here? dots[intersect(names(dots), names(formals("bb_rget")))]
+        ## merge res back into the downloads tibble
+        if (res$ok) {
+            downloads[idx, ] <- res$files[[1]]
+        } else {
+            ## do something sensible TODO
         }
     }
     tibble(ok = ok, files = list(downloads), message = "")
@@ -464,7 +500,7 @@ oceandata_find_platform <- function(x) {
 # @param sep string: the path separator to use
 # @return Either the directory string corresponding to the URL code, if \code{abbrev} supplied, or a data.frame of all URL regexps and corresponding directory name strings if \code{urlparm} is missing
 # @export
-oceandata_url_mapper <- function(this_url, path_only = FALSE, sep = .Platform$file.sep) {
+oceandata_url_mapper <- function(this_url, path_only = FALSE, no_host = FALSE, sep = .Platform$file.sep) {
     ## take getfile URL or base filename and return (relative) path to put the file into
     ## this_url should look like e.g. (old format) https://oceandata.sci.gsfc.nasa.gov/ob/getfile/A2002359.L3m_DAY_CHL_chlor_a_9km.bz2
     ## or (newer format) https://oceandata.sci.gsfc.nasa.gov/ob/getfile/AQUA_MODIS.20230109.L3b.DAY.RRS.nc
@@ -511,7 +547,7 @@ oceandata_url_mapper <- function(this_url, path_only = FALSE, sep = .Platform$fi
         switch(url_parts$type,
                L3m = {
                    this_parm_folder <- oceandata_parameter_map(url_parts$platform, url_parts$parm, error_no_match=TRUE)
-                   out <- paste("oceandata.sci.gsfc.nasa.gov", oceandata_platform_map(url_parts$platform, error_no_match=TRUE), "Mapped", oceandata_timeperiod_map(url_parts$timeperiod, error_no_match=TRUE), paste0(url_parts$spatial, "km"), this_parm_folder, sep=sep)
+                   out <- paste(if (isTRUE(no_host)) "" else "oceandata.sci.gsfc.nasa.gov", oceandata_platform_map(url_parts$platform, error_no_match=TRUE), "Mapped", oceandata_timeperiod_map(url_parts$timeperiod, error_no_match=TRUE), paste0(url_parts$spatial, "km"), this_parm_folder, sep=sep)
                    if (url_parts$timeperiod %in% c("8D", "DAY", "R32")) {
                        out <- paste(out, this_year, sep=sep)
                    }
@@ -523,7 +559,7 @@ oceandata_url_mapper <- function(this_url, path_only = FALSE, sep = .Platform$fi
                },
                L3b = {
                    this_doy <- if (nchar(url_parts$date) == 8) paste0(substr(url_parts$date, 5, 6), sep, substr(url_parts$date, 7, 8)) else substr(url_parts$date, 5, 7)
-                   out <- paste("oceandata.sci.gsfc.nasa.gov", oceandata_platform_map(url_parts$platform, error_no_match=TRUE), "L3BIN", this_year, this_doy, sep=sep)
+                   out <- paste(if (isTRUE(no_host)) "" else "oceandata.sci.gsfc.nasa.gov", oceandata_platform_map(url_parts$platform, error_no_match=TRUE), "L3BIN", this_year, this_doy, sep=sep)
                    if (!path_only) {
                        out <- paste(out, basename(this_url), sep=sep)
                    } else {
@@ -532,7 +568,7 @@ oceandata_url_mapper <- function(this_url, path_only = FALSE, sep = .Platform$fi
                },
                L2 = {
                    this_doy <- if (nchar(url_parts$date) == 8) paste0(substr(url_parts$date, 5, 6), sep, substr(url_parts$date, 7, 8)) else substr(url_parts$date, 5, 7)
-                   out <- paste("oceandata.sci.gsfc.nasa.gov", oceandata_platform_map(url_parts$platform, error_no_match=TRUE), "L2", this_year, this_doy, sep=sep)
+                   out <- paste(if (isTRUE(no_host)) "" else "oceandata.sci.gsfc.nasa.gov", oceandata_platform_map(url_parts$platform, error_no_match=TRUE), "L2", this_year, this_doy, sep=sep)
                    if (!path_only) {
                        out <- paste(out, basename(this_url), sep=sep)
                    } else {
@@ -542,7 +578,7 @@ oceandata_url_mapper <- function(this_url, path_only = FALSE, sep = .Platform$fi
                stop("unrecognized file type: ", url_parts$type, "\n", capture.output(str(url_parts)))
                )
     }
-    out
+    sub("^/", "", out)
 }
 
 

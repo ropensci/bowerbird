@@ -190,3 +190,20 @@ aws_fun <- function(fun, ...) {
     out
 }
 
+## internal helper, wrapper around get_bucket_df but checking/creating bucket first
+aws_list_objects <- function(s3_args) {
+    chk <- aws_fun(aws.s3::bucketlist, s3_args[setdiff(names(s3_args), "bucket")])
+    ##chk <- tryCatch(aws_fun(aws.s3::bucket_exists, s3_args), error = function(e) stop("no can do"))
+    ## bucket_exists returns 404 error if the bucket does not exist, 403 error if it exists but is inaccessible to these credentials?
+    if (nrow(chk) < 1 || !s3_args$bucket %in% chk$Bucket) {
+        chk <- tryCatch(aws_fun(aws.s3::put_bucket, s3_args), error = function(e) stop("Could not create bucket. ", conditionMessage(e)))
+    }
+    ## get bucket contents
+    tryCatch({
+        bx <- aws_fun(aws.s3::get_bucket_df, s3_args)
+        bx$LastModified <- lubridate::ymd_hms(bx$LastModified)
+    }, error = function(e) {
+        stop("Could not retrieve bucket contents. Error message was: ", conditionMessage(e))
+    })
+    bx
+}
