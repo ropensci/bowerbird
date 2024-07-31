@@ -81,7 +81,7 @@ bb_rget_default_downloads()
 
 \item{stop_on_download_error}{logical: if \code{TRUE}, the download process will stop if any file download fails. If \code{FALSE}, the process will issue a warning and continue to the next file to download}
 
-\item{force_local_filename}{string: if provided, then the \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with this name, in a local directory determined by the \code{url}}
+\item{force_local_filename}{character: if provided, then each \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with name given \code{force_local_filename}, in a local directory determined by the \code{url}. \code{force_local_filename} should be a character vector of the same length as the \code{url} vector}
 
 \item{use_url_directory}{logical: if \code{TRUE}, files will be saved into a local directory that follows the URL structure (e.g. files from \code{http://some.where/place} will be saved into directory \code{some.where/place}). If \code{FALSE}, files will be saved into the current directory}
 

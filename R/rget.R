@@ -110,7 +110,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param debug logical: if \code{TRUE}, will print additional debugging information. If bb_rget is not behaving as expected, try setting this to \code{TRUE}
 #' @param dry_run logical: if \code{TRUE}, spider the remote site and work out which files would be downloaded, but don't download them
 #' @param stop_on_download_error logical: if \code{TRUE}, the download process will stop if any file download fails. If \code{FALSE}, the process will issue a warning and continue to the next file to download
-#' @param force_local_filename string: if provided, then the \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with this name, in a local directory determined by the \code{url}
+#' @param force_local_filename character: if provided, then each \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with name given \code{force_local_filename}, in a local directory determined by the \code{url}. \code{force_local_filename} should be a character vector of the same length as the \code{url} vector
 #' @param use_url_directory logical: if \code{TRUE}, files will be saved into a local directory that follows the URL structure (e.g. files from \code{http://some.where/place} will be saved into directory \code{some.where/place}). If \code{FALSE}, files will be saved into the current directory
 #' @param no_host logical: if \code{use_url_directory = TRUE}, specifying \code{no_host = TRUE} will remove the host name from the directory (e.g. files from files from \code{http://some.where/place} will be saved into directory \code{place})
 #' @param cut_dirs integer: if \code{use_url_directory = TRUE}, specifying \code{cut_dirs} will remove this many directory levels from the path of the local directory where files will be saved (e.g. if \code{cut_dirs = 2}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{some.where/haa}. if \code{cut_dirs = 1} and \code{no_host = TRUE}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{baa/haa})
@@ -145,7 +145,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(is.flag(debug), !is.na(debug))
     assert_that(is.flag(dry_run), !is.na(dry_run))
     assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
-    if (!missing(force_local_filename)) assert_that(is.string(force_local_filename))
+    if (!missing(force_local_filename)) assert_that(is.character(force_local_filename), length(force_local_filename) == length(url))
     assert_that(is.flag(use_url_directory), !is.na(use_url_directory))
     assert_that(is.flag(no_host), !is.na(no_host))
     assert_that(cut_dirs >= 0)
