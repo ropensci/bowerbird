@@ -49,7 +49,7 @@ bb_handler_oceandata <- function(search, dtype, sensor, ...) {
 # @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, search_method = "api", dtype = NULL, sensor = NULL, stop_on_download_error = FALSE, ...) {
+bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, search_method = "api", dtype = NULL, sensor = NULL, stop_on_download_error = FALSE, s3_args, ...) {
     ## oceandata synchronization handler
 
     ## oceandata provides a file search interface, e.g.:
@@ -78,7 +78,18 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
 
     thisds <- bb_data_sources(config) ## user and password info will be in here
     this_att <- bb_settings(config)
+
+    ## handle s3_args
+    if (missing(s3_args) || is.null(s3_args)) s3_args <- list()
+    if ("s3_args" %in% names(this_att)) s3_args <- c(s3_args, this_att$s3_args)
+    ## are we syncing to an s3 target?
+    s3_target <- "bucket" %in% names(s3_args)
+
     if (local_dir_only) {
+        if (s3_target) {
+            ## if we are syncing to s3, then there is no concept of the target directory beyond the bucket. Objects in the bucket can be named with directory-like prefixes, but there are no directories in an s3 bucket
+            return(get_aws_s3_url(bucket = s3_args$bucket, region = s3_args$region, base_url = s3_args$base_url, path = ""))
+        }
         if (search_method == "scrape") {
             ## url will be https://oceandata.sci.gsfc.nasa.gov/SeaWiFS/Mapped/something
             ## we just want the host and first two path components
@@ -87,11 +98,12 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             if (is.null(temp$hostname) || !nzchar(temp$hostname) || length(out) < 2) {
                 stop("could not figure out local directory from scrape search URL")
             }
-            out <- file.path(temp$hostname, out[1], out[2])
+            out <- file.path(out[1], out[2])
+            if (!isTRUE(dots$no_host)) out <- c(temp$hostname, out)
         } else {
             ## note that we can't use url_mapper here, because the search string in the source definition is unlikely to conform to the expected full pattern
             ## highest-level dir
-            out <- "oceandata.sci.gsfc.nasa.gov"
+            out <- "" ## optional prefix with hostname, below
             ## refine by platform. Find platform, either full or one-letter abbrev
             this_platform <- oceandata_find_platform(search)
             if (!is.na(this_platform) && nchar(this_platform) > 0) {
@@ -121,8 +133,10 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                 ## we can match on multiple parameters so long as they all map to the same parameter directory name
                 if (length(dest_p) == 1) out <- file.path(out, dest_p)
             }
+            out <- sub("^/", "", out)
+            if (!isTRUE(dots$no_host)) out <- file.path("oceandata.sci.gsfc.nasa.gov", out)
         }
-        return(file.path(this_att$local_file_root, out))
+        return(file.path(this_att$local_file_root, sub("/$", "", out)))
     }
     if (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password)) stop("Oceandata sources require an Earthdata login: provide your user and password in the source configuration")
     tries <- 0

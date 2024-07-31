@@ -113,7 +113,7 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
         }, FUN.VALUE = TRUE)
         all_urls <- all_urls[idx]
     }
-        ## do all in one to avoid the repeated "downloading file 1 of 1" messages
+    ## do all in one to avoid the repeated "downloading file 1 of 1" messages
     dummy <- config
     dummy$data_sources$method[[1]] <- list("bb_rget")
     dummy$data_sources$source_url <- list(all_urls)
