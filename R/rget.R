@@ -189,11 +189,28 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             ## if doing a dry run no download, but do enumerate the list of files that would be downloaded
             downloads <- tibble(url = unique(rec$download_queue), file = NA_character_, was_downloaded = FALSE)
         } else {
-            ## force_local_filename is a special case: just download this one file
+            ## force_local_filename is a special case: just download one file per url
             downloads <- tibble(url = url, file = force_local_filename, was_downloaded = FALSE)
         }
         if (dry_run && verbose && length(downloads$url) > 0) {
             cat(sprintf(" dry_run is TRUE, bb_rget is not downloading the following files:\n %s\n", paste(downloads$url, collapse="\n ")))
+        }
+        ## for s3 target, check bucket existence and retrieve bucket contents now, no need to do it on every loop iteration
+        bx <- tibble()
+        if (!dry_run && s3_target) {
+            chk <- aws_fun(aws.s3::bucketlist, s3_args[setdiff(names(s3_args), "bucket")])
+            ##chk <- tryCatch(aws_fun(aws.s3::bucket_exists, s3_args), error = function(e) stop("no can do"))
+            ## bucket_exists returns 404 error if the bucket does not exist, 403 error if it exists but is inaccessible to these credentials?
+            if (nrow(chk) < 1 || !s3_args$bucket %in% chk$Bucket) {
+                chk <- tryCatch(aws_fun(aws.s3::put_bucket, s3_args), error = function(e) stop("Could not create bucket. ", conditionMessage(e)))
+            }
+            ## get bucket contents
+            tryCatch({
+                bx <- aws_fun(aws.s3::get_bucket_df, s3_args)
+                bx$LastModified <- lubridate::ymd_hms(bx$LastModified)
+            }, error = function(e) {
+                stop("Could not retrieve bucket contents. Error message was: ", conditionMessage(e))
+            })
         }
         ## download each file
         ## keep track of which were actually downloaded
@@ -217,26 +234,12 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             }
             if (!dry_run) {
                 if (s3_target) {
-                    chk <- aws_fun(aws.s3::bucketlist, s3_args[setdiff(names(s3_args), "bucket")])
-                    ##chk <- tryCatch(aws_fun(aws.s3::bucket_exists, s3_args), error = function(e) stop("no can do"))
-                    ## bucket_exists returns 404 error if the bucket does not exist, 403 error if it exists but is inaccessible to these credentials?
-                    if (nrow(chk) < 1 || !s3_args$bucket %in% chk$Bucket) {
-                        chk <- tryCatch(aws_fun(aws.s3::put_bucket, s3_args), error = function(e) stop("Could not create bucket. ", conditionMessage(e)))
-                    }
-                    ## get bucket contents
-                    tryCatch({
-                        bx <- aws_fun(aws.s3::get_bucket_df, s3_args)
-                        bx$LastModified <- lubridate::ymd_hms(bx$LastModified)
-                    }, error = function(e) {
-                        stop("Could not retrieve bucket contents. Error message was: ", conditionMessage(e))
-                    })
                     ## bx$Key contains the existing objects
                     existing_dt <- bx$LastModified[which(bx$Key == fname)]
                     if (length(existing_dt) > 1) existing_dt <- existing_dt[1] ## though should not happen because keys should be unique
                     do_download <- clobber >= 1 || length(existing_dt) < 1
                     if (length(existing_dt) < 1) existing_dt <- NA
                 } else {
-                    if (use_url_directory && !dir.exists(mydir)) dir.create(mydir, recursive = TRUE)
                     do_download <- clobber >= 1 || (!file.exists(fname))
                     existing_dt <- if (file.exists(fname)) file.info(fname)$mtime else NA
                 }
@@ -282,7 +285,9 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                                 rgs <- s3_args[names(s3_args) %in% names(c(formals(aws.s3::get_bucket_df), formals(aws.s3::s3HTTP)))]
                                 rgs$file <- req$content
                                 rgs$object <- fname
-                                s3_up_ok <- tryCatch(aws_fun(aws.s3::put_object, c(rgs, list(multipart = TRUE, show_progress = show_progress))), error = function(e) conditionMessage(e)) ## TRUE on success, error message otherwise
+                                s3_up_ok <- tryCatch(
+                                    aws_fun(aws.s3::put_object, c(rgs, list(multipart = TRUE))), error = function(e) conditionMessage(e)) ## TRUE on success, error message otherwise
+                                ## previously also passed show_progress = show_progress, but this somehow causes errors in some cases
                                 if (verbose) {
                                     if (identical(s3_up_ok, TRUE)) {
                                         cat(if (show_progress) "\n", "done.\n")
@@ -297,6 +302,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                             if (file.exists(dlf) && file.info(dlf)$size > 0) {
                                 ## file was updated
                                 downloads$was_downloaded[dfi] <- TRUE
+                                if (!dir.exists(dirname(fname))) dir.create(dirname(fname), recursive = TRUE)
                                 if (file.exists(fname)) file.remove(fname)
                                 file.copy(dlf, fname)
                                 ## delete temp file
