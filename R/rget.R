@@ -47,13 +47,6 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     assert_that(is.flag(verbose), !is.na(verbose))
     assert_that(is.flag(local_dir_only), !is.na(local_dir_only))
 
-    if (local_dir_only) {
-        mth <- bb_data_sources(config)$method[[1]]
-        no_host <- if ("no_host" %in% names(mth)) mth$no_host else FALSE
-        cut_dirs <- if ("cut_dirs" %in% names(mth)) mth$cut_dirs else 0L
-        return(file.path(bb_settings(config)$local_file_root,directory_from_url(bb_data_sources(config)$source_url, no_host = no_host, cut_dirs = cut_dirs)))
-    }
-
     cfrow <- bb_settings_to_cols(config)
     this_flags <- list(...)
 
@@ -66,16 +59,26 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- c(this_flags,list(password=cfrow$password))
 
     ## add global s3_args parms that were passed as part of the config to any that were passed as part of this particular data source
-    gflags <- cfrow$s3_args[[1]]
-    if (length(gflags) > 0) {
-        if (!"s3_args" %in% names(this_flags)) this_flags$s3_args <- list()
-        this_flags$s3_args <- c(this_flags$s3_args, cfrow$s3_args[[1]])
-    }
+    if (!"s3_args" %in% names(this_flags)) this_flags$s3_args <- list()
+    if (length(cfrow$s3_args[[1]]) > 0) this_flags$s3_args <- c(this_flags$s3_args, cfrow$s3_args[[1]])
 
     ## if dry_run, still call bb_rget
     if (!is.null(cfrow[["dry_run"]]) && !is.na(cfrow$dry_run)) {
         this_flags$dry_run <- cfrow$dry_run
     }
+
+    if (local_dir_only) {
+        if ("bucket" %in% names(this_flags$s3_args)) {
+            ## if we are syncing to s3, then there is no concept of the target directory beyond the bucket. Objects in the bucket can be named with directory-like prefixes, but there are no directories in an s3 bucket
+            return(get_aws_s3_url(bucket = this_flags$s3_args$bucket, region = this_flags$s3_args$region, base_url = this_flags$s3_args$base_url, path = ""))
+        } else {
+            mth <- bb_data_sources(config)$method[[1]]
+            no_host <- if ("no_host" %in% names(mth)) mth$no_host else FALSE
+            cut_dirs <- if ("cut_dirs" %in% names(mth)) mth$cut_dirs else 0L
+            return(file.path(bb_settings(config)$local_file_root, directory_from_url(bb_data_sources(config)$source_url, no_host = no_host, cut_dirs = cut_dirs)))
+        }
+    }
+
     this_urls <- if (is.list(cfrow$source_url) && length(cfrow$source_url) == 1) cfrow$source_url[[1]] else cfrow$source_url
     this_flags <- c(list(url = this_urls), this_flags, list(verbose = verbose))
     if (!"show_progress" %in% names(this_flags)) this_flags <- c(this_flags, list(show_progress = verbose && sink.number() < 1))
