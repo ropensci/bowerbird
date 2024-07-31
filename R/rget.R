@@ -196,22 +196,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             cat(sprintf(" dry_run is TRUE, bb_rget is not downloading the following files:\n %s\n", paste(downloads$url, collapse="\n ")))
         }
         ## for s3 target, check bucket existence and retrieve bucket contents now, no need to do it on every loop iteration
-        bx <- tibble()
-        if (!dry_run && s3_target) {
-            chk <- aws_fun(aws.s3::bucketlist, s3_args[setdiff(names(s3_args), "bucket")])
-            ##chk <- tryCatch(aws_fun(aws.s3::bucket_exists, s3_args), error = function(e) stop("no can do"))
-            ## bucket_exists returns 404 error if the bucket does not exist, 403 error if it exists but is inaccessible to these credentials?
-            if (nrow(chk) < 1 || !s3_args$bucket %in% chk$Bucket) {
-                chk <- tryCatch(aws_fun(aws.s3::put_bucket, s3_args), error = function(e) stop("Could not create bucket. ", conditionMessage(e)))
-            }
-            ## get bucket contents
-            tryCatch({
-                bx <- aws_fun(aws.s3::get_bucket_df, s3_args)
-                bx$LastModified <- lubridate::ymd_hms(bx$LastModified)
-            }, error = function(e) {
-                stop("Could not retrieve bucket contents. Error message was: ", conditionMessage(e))
-            })
-        }
+        bx <- if (!dry_run && s3_target) aws_list_objects(s3_args) else tibble()
         ## download each file
         ## keep track of which were actually downloaded
         for (dfi in seq_along(downloads$url)) {
@@ -281,7 +266,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                             } else {
                                 ## upload to destination s3 bucket
                                 downloads$was_downloaded[dfi] <- TRUE
-                                cat(if (show_progress) "\n", "Uploading to s3 target ... ", if (show_progress) "\n")
+                                cat(if (show_progress) "\n", "Uploading to s3 target ... ")##, if (show_progress) "\n")
                                 rgs <- s3_args[names(s3_args) %in% names(c(formals(aws.s3::get_bucket_df), formals(aws.s3::s3HTTP)))]
                                 rgs$file <- req$content
                                 rgs$object <- fname
