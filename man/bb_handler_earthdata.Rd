@@ -16,7 +16,7 @@ TRUE on success
 This is a handler function to be used with data sets from NASA's Earthdata system. This function is not intended to be called directly, but rather is specified as a \code{method} option in \code{\link{bb_source}}.
 }
 \details{
-This function uses \code{\link{bb_rget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_rget}} parameters.
+This function uses \code{\link{bb_rget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_rget}} parameters. Note that curl v5.2.1 introduced a breaking change to the default value of the `unrestricted_auth` option: see <https://github.com/jeroen/curl/issues/260>. Your Earthdata source definition might require `allow_unrestricted_auth = TRUE` as part of the method parameters.
 }
 \examples{
 \dontrun{
@@ -35,7 +35,7 @@ my_source <- bb_source(
     Note that you will also need to authorize the application 'nsidc-daacdata'
     (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
   method = list("bb_handler_earthdata", recursive = TRUE, level = 4, no_parent = TRUE,
-                relative = TRUE),
+                relative = TRUE, allow_unrestricted_auth = TRUE),
   user = "your_earthdata_username",
   password = "your_earthdata_password",
   collection_size = 0.02)

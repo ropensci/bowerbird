@@ -129,7 +129,7 @@ bb_example_sources <- function(sources) {
                           source_url = c("https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0192_seaice_trends_climo_v3/"),
                           license = "Please cite, see http://nsidc.org/about/use_copyright.html",
                           authentication_note = "Requires Earthdata login, see https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login . Note that you will also need to authorize the application 'nsidc-daacdata' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
-                          method = list("bb_handler_earthdata", level = 4, relative = TRUE, accept_download = "\\.(s|n|png|txt)$"),
+                          method = list("bb_handler_earthdata", level = 4, relative = TRUE, accept_download = "\\.(s|n|png|txt)$", allow_unrestricted_auth = TRUE),
                           user = "",
                           password = "",
                           postprocess = NULL,

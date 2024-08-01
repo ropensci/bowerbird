@@ -2,7 +2,7 @@
 #'
 #' This is a handler function to be used with data sets from NASA's Earthdata system. This function is not intended to be called directly, but rather is specified as a \code{method} option in \code{\link{bb_source}}.
 #'
-#' This function uses \code{\link{bb_rget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_rget}} parameters.
+#' This function uses \code{\link{bb_rget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_rget}} parameters. Note that curl v5.2.1 introduced a breaking change to the default value of the `unrestricted_auth` option: see <https://github.com/jeroen/curl/issues/260>. Your Earthdata source definition might require `allow_unrestricted_auth = TRUE` as part of the method parameters.
 #'
 #' @references https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login
 #' @param ... : parameters passed to \code{\link{bb_rget}}
@@ -26,7 +26,7 @@
 #'     Note that you will also need to authorize the application 'nsidc-daacdata'
 #'     (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
 #'   method = list("bb_handler_earthdata", recursive = TRUE, level = 4, no_parent = TRUE,
-#'                 relative = TRUE),
+#'                 relative = TRUE, allow_unrestricted_auth = TRUE),
 #'   user = "your_earthdata_username",
 #'   password = "your_earthdata_password",
 #'   collection_size = 0.02)
@@ -42,7 +42,7 @@ bb_handler_earthdata <- function(...) {
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 # @param use_wget logical: TRUE use wget (deprecated), FALSE use rget
-bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, use_wget = FALSE, allow_unrestricted_auth = FALSE, ...) {
+bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, use_wget = FALSE, allow_unrestricted_auth, ...) {
     assert_that(is(config, "bb_config"))
     assert_that(nrow(bb_data_sources(config)) == 1)
     assert_that(is.flag(verbose), !is.na(verbose))
@@ -78,6 +78,10 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
         ## but the second time it will authenticate using the stored cookie and proceed with the recursion
         do.call(bb_handler_wget,c(list(config,verbose=verbose),dummy$method[[1]][-1]))
     } else {
+        if (missing(allow_unrestricted_auth) || is.null(allow_unrestricted_auth)) {
+            allow_unrestricted_auth <- FALSE
+            warning("if your download does not find the files you are expecting, try adding `allow_unrestricted_auth = TRUE` to the method parameters. This is necessary for Earthdata servers that serve data from a different hostname to the landing hostname")
+        }
         my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = dummy$user, password = dummy$password, enforce_basic_auth = TRUE)
         ## and some more configs specifically for earthdata
         my_curl_config$options$followlocation <- 1
@@ -86,6 +90,7 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
         if (isTRUE(allow_unrestricted_auth)) my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname
         ## but we make this something that the source has to specifically set, because it's a security risk: https://curl.se/libcurl/c/CURLOPT_UNRESTRICTED_AUTH.html
         dummy$method[[1]]$allow_unrestricted_auth <- NULL ## remove this from the method parms being passed to rget
+        ## method should already contain s3_args if we are uploading to an s3 endpoint, so don't need to do anything further
         do.call(bb_handler_rget, c(list(config, verbose = verbose, curl_opts = my_curl_config$options), dummy$method[[1]][-1]))
     }
 }
