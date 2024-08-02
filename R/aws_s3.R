@@ -124,6 +124,7 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
 ## construct s3 URL
 get_aws_s3_url <- function(bucket, region = NULL, path, base_url, verbose = FALSE, use_https = TRUE) {
     if (missing(base_url)) base_url <- Sys.getenv("AWS_S3_ENDPOINT", "s3.amazonaws.com")
+    if (length(base_url) < 1) stop("base_url has not been provided for S3 endpoint")
     if (base_url != "s3.amazonaws.com") {
         if (!is.null(region) && nzchar(region)) base_url <- paste0(region, ".", base_url)
     } else {

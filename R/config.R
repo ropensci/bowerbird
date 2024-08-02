@@ -339,52 +339,59 @@ bb_summary <- function(config,file=tempfile(fileext=".html"),format="html",inc_l
 #' @method print bb_config
 #' @export
 print.bb_config <- function(x, ...) {
-    cat("Local file root:", x$settings$local_file_root, "\n")
+    if (!is.null(x$settings$local_file_root)) cat("Local file root:", x$settings$local_file_root, "\n")
+    if (length(x$settings$s3_args) > 0) {
+        ## wrap in try because some elements of s3 parms might be specified in individual data sources only
+        try(cat("Object store destination:", get_aws_s3_url(base_url = x$settings$s3_args$base_url, region = x$settings$s3_args$region,
+                                                        bucket = if (!is.null(x$settings$s3_args$bucket)) x$settings$s3_args$bucket else "",
+                                                        path = ""), "\n"), silent = TRUE)
+    }
     config <- bb_settings_to_cols(x)
     if (nrow(config) > 0) {
         mth <- config$method
-        config$local_file_paths <- vapply(seq_len(nrow(config)),function(z) {
-            no_host <- if ("no_host" %in% names(mth[[z]])) mth[[z]]$no_host else FALSE
-            cut_dirs <- if ("cut_dirs" %in% names(mth[[z]])) mth[[z]]$cut_dirs else 0L
-            temp <- directory_from_url(config$source_url[[z]], no_host = no_host, cut_dirs = cut_dirs)
+        config$local_file_paths <- vapply(seq_len(nrow(config)), function(z) {
+            temp <- x
+            temp$data_sources <- temp$data_sources[z, ]
+            temp <- bb_data_source_dir(temp)
             temp[is.na(temp)] <- ""
-            paste(unique(file.path(config$local_file_root[z],temp)),collapse=", ")},FUN.VALUE="")
+            paste(unique(temp), collapse = ", ")
+        }, FUN.VALUE = "")
         ## order by data group
-        config <- unique(config[,!names(config) %in% c("source_url","method","postprocess")]) ## drop cols, take unique rows
+        config <- unique(config[, !names(config) %in% c("source_url", "method", "postprocess")]) ## drop cols, take unique rows
         config$data_group[!nzchar(config$data_group)] <- NA ## so that these appear last
-        config <- config[order(config$data_group,config$name), ]
+        config <- config[order(config$data_group, config$name), ]
         config$data_group[is.na(config$data_group)] <- ""
 
         last_group <- "blah"
         for (k in seq_len(nrow(config))) {
-            if (last_group!=config$data_group[k]) {
+            if (last_group != config$data_group[k]) {
                 if (any(nzchar(config$data_group))) ## dont show this if NO sources have a data group defined
-                    cat("\n# Data group: ",config$data_group[k],"\n")
+                    cat("\n# Data group: ", config$data_group[k], "\n")
             }
             last_group <- config$data_group[k]
-            cat("\n## ",config$name[k],"\n")
-            cat(config$description[k],"\n")
+            cat("\n## ", config$name[k], "\n")
+            cat(config$description[k], "\n")
             if (!is.na(config$authentication_note[k]))
-                cat("\nAuthentication note:", config$authentication_note[k],"\n")
-            cat("Approximate size:", if (is.na(config$collection_size[k])) "not specified" else paste0(config$collection_size[k], " GB"),"\n")
-            cat("Documentation link: ",config$doc_url[k],"\n")
+                cat("\nAuthentication note:", config$authentication_note[k], "\n")
+            cat("Approximate size:", if (is.na(config$collection_size[k])) "not specified" else paste0(config$collection_size[k], " GB"), "\n")
+            cat("Documentation link: ", config$doc_url[k], "\n")
             this_citation <- config$citation[k]
             if (is.null(this_citation) || is.na(this_citation) || !nzchar(this_citation)) {
                 this_citation <- "No citation details provided"
             }
-            cat("Citation: ",this_citation,"\n")
+            cat("Citation: ", this_citation, "\n")
             this_license <- config$license[k]
             if (is.null(this_license) || is.na(this_license) || !nzchar(this_license)) {
                 this_license <- "No formal license details provided"
             }
-            cat("License: ",this_license,"\n")
+            cat("License: ", this_license, "\n")
             temp <- config$local_file_paths[[k]]
-            temp <- gsub("\\\\","/",temp)
-            temp <- unique(gsub("/+","/",temp))
-            cat("Local file system paths: ",temp,"\n",sep="")
+            temp <- gsub("\\\\", "/", temp)
+            temp <- unique(gsub("/+", "/", temp))
+            cat("Local file system paths: ", temp, "\n", sep = "")
             thisfun <- config$access_function[k]
             if (is.null(thisfun) || is.na(thisfun) || !nzchar(thisfun)) { thisfun <- "none suggested" }
-            cat("Associated access functions: ",thisfun,"\n")
+            cat("Associated access functions: ", thisfun, "\n")
         }
     } else {
         cat("Config contains no data sources.\n")
