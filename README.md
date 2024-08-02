@@ -25,6 +25,11 @@ A comprehensive introduction to bowerbird can be found at
 <https://docs.ropensci.org/bowerbird/articles/bowerbird.html>, along
 with full package documentation.
 
+This [blog post (2018-11-13)](https://ropensci.org/blog/2018/11/13/antarctic/)
+illustrates the process of setting up bowerbird from scratch and using
+it to obtain and work with several disparate data sets that overlap in
+space and time.
+
 ## Installing
 
 ``` r
