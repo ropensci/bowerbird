@@ -348,6 +348,28 @@ Recursion is a powerful tool but will sometimes download much more than you real
 
 It's up to you where you want your data collection kept, and to provide that location to bowerbird. A common use case for bowerbird is maintaining a central data collection for multiple users, in which case that location is likely to be some sort of networked file share. However, if you are keeping a collection for your own use, you might like to look at https://github.com/r-lib/rappdirs to help find a suitable directory location.
 
+### Synchronizing to object storage
+
+As of bowerbird v0.17 (August 2024) it is possible to synchronize directly into an object store like AWS S3, rather than to a directory on your local file system. This works for data sources using the `bb_handler_rget`, `bb_handler_earthdata`, or `bb_handler_oceandata` handlers. To do this, provide `s3_args` as part of your data source definition:
+
+```{r eval = FALSE}
+my_source <- bb_example_sources("Australian Election 2016 House of Representatives data") %>%
+   bb_modify_source(method = list(s3_args = list(base_url = "my.objectstore.com", region = "",
+                                                 bucket = "bucket", key = "KEY", secret = "SECRET"))
+```
+
+where the entries in `s3_args` are those required by functions from the `aws.s3` package (see `aws.s3::s3HTTP()` for an overview). Objects will be stored with keys that follow the directory hierarchy on the remote data source. For example, `http://www.somewhere.org/monkey/banana/dataset.zip` will be stored in the specified bucket with key `www.somewhere.org/monkey/banana/dataset.zip`. You can remove the host name from this key by adding `no_host = TRUE` to the data source's method parameters; similarly, leading levels of the directory hierarchy can be dropped with the `cut_dirs` parameter: see `bb_rget()` for details.
+
+`s3_args` can also be specified as part of `bb_config()` to avoid having to provide the same parameters to multiple data sources:
+
+```{r eval = FALSE}
+cf <- bb_config(s3_args = list(base_url = "my.objectstore.com", region = "",
+                               key = "KEY", secret = "SECRET")) %>%
+    bb_add(my_source_1 %>% bb_modify_source(method = list(s3_args = list(bucket = "bucket1")))) %>%
+    bb_add(my_source_2 %>% bb_modify_source(method = list(s3_args = list(bucket = "bucket2"))))
+
+```
+
 
 ### Post-processing
 
