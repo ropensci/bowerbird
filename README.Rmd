@@ -48,7 +48,7 @@ remotes::install_github("ropensci/bowerbird", build_vignettes = TRUE)
 
 ### Configuration
 
-Build up a configuration by first defining global options such as the destination on your local file system. Commonly you would choose this destination data directory to be a persistent location, suitable for a data library. For demonstration purposes here we'll just use a temporary directory::
+Build up a configuration by first defining global options such as the destination (a directory on your local file system, or an object store). Typically you would choose this destination data directory to be a persistent location, suitable for a data library. For demonstration purposes here we'll just use a temporary directory::
 
 ```{r include = FALSE}
 ## code not shown in the README: (1) use load_all() instead of library() for convenience, (2) use anonymous "temporary" dir, and (3) hide the progress bar

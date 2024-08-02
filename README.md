@@ -44,10 +44,10 @@ remotes::install_github("ropensci/bowerbird", build_vignettes = TRUE)
 ### Configuration
 
 Build up a configuration by first defining global options such as the
-destination on your local file system. Commonly you would choose this
-destination data directory to be a persistent location, suitable for a
-data library. For demonstration purposes here we’ll just use a temporary
-directory::
+destination (a directory on your local file system, or an object store).
+Typically you would choose this destination data directory to be a
+persistent location, suitable for a data library. For demonstration
+purposes here we’ll just use a temporary directory::
 
 ``` r
 library(bowerbird)
