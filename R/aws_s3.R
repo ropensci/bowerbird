@@ -212,8 +212,8 @@ aws_list_objects <- function(s3_args) {
 
 ## helper function to see if a source has been specified as an s3 target
 is_s3_target <- function(x) {
-    ## `x` can be a data source, or just its method s3_args
-    if ("method" %in% names(x)) return("bucket" %in% names(x$method[[1]]$s3_args))
+    ## `x` can be a data source, or just its method target_s3_args
+    if ("method" %in% names(x)) return("bucket" %in% names(x$method[[1]]$target_s3_args))
     "bucket" %in% names(x)
 }
 

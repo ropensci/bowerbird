@@ -57,17 +57,17 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     if (!is.na(cfrow$user) && nzchar(cfrow$user)) this_flags$user <- cfrow$user
     if (!is.na(cfrow$password) && nzchar(cfrow$password)) this_flags$password <- cfrow$password
 
-    ## add global s3_args parms that were passed as part of the config to any that were passed as part of this particular data source
-    if (!"s3_args" %in% names(this_flags)) this_flags$s3_args <- list()
-    if (length(cfrow$s3_args[[1]]) > 0) this_flags$s3_args <- c(this_flags$s3_args, cfrow$s3_args[[1]])
+    ## add global target_s3_args parms that were passed as part of the config to any that were passed as part of this particular data source
+    if (!"target_s3_args" %in% names(this_flags)) this_flags$target_s3_args <- list()
+    if (length(cfrow$target_s3_args[[1]]) > 0) this_flags$target_s3_args <- c(this_flags$target_s3_args, cfrow$target_s3_args[[1]])
 
     ## if dry_run, still call bb_rget
     if (!is.null(cfrow[["dry_run"]]) && !is.na(cfrow$dry_run)) this_flags$dry_run <- cfrow$dry_run
 
     if (local_dir_only) {
-        if ("bucket" %in% names(this_flags$s3_args)) {
+        if ("bucket" %in% names(this_flags$target_s3_args)) {
             ## if we are syncing to s3, then there is no concept of the target directory beyond the bucket. Objects in the bucket can be named with directory-like prefixes, but there are no directories in an s3 bucket
-            return(get_aws_s3_url(bucket = this_flags$s3_args$bucket, region = this_flags$s3_args$region, base_url = this_flags$s3_args$base_url, path = ""))
+            return(get_aws_s3_url(bucket = this_flags$target_s3_args$bucket, region = this_flags$target_s3_args$region, base_url = this_flags$target_s3_args$base_url, path = ""))
         } else {
             mth <- bb_data_sources(config)$method[[1]]
             no_host <- if ("no_host" %in% names(mth)) mth$no_host else FALSE
@@ -116,12 +116,12 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param cut_dirs integer: if \code{use_url_directory = TRUE}, specifying \code{cut_dirs} will remove this many directory levels from the path of the local directory where files will be saved (e.g. if \code{cut_dirs = 2}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{some.where/haa}. if \code{cut_dirs = 1} and \code{no_host = TRUE}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{baa/haa})
 #' @param link_css string: css selector that identifies links (passed as the \code{css} parameter to \code{\link[rvest]{html_elements}}). Note that link elements must have an \code{href} attribute
 #' @param curl_opts named list: options to use with \code{curl} downloads, passed to the \code{.list} parameter of \code{curl::new_handle}
-#' @param s3_args list: named list or arguments to provide to \code{\link[aws.s3]{get_bucket_df}} and \code{\link[aws.s3]{put_object}}. Files will be uploaded into that bucket instead of the local filesystem
+#' @param target_s3_args list: named list or arguments to provide to \code{\link[aws.s3]{get_bucket_df}} and \code{\link[aws.s3]{put_object}}. Files will be uploaded into that bucket instead of the local filesystem
 #'
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 #' @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_parent_download = no_parent, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, link_css = "a", curl_opts, s3_args) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_parent_download = no_parent, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, link_css = "a", curl_opts, target_s3_args) {
     assert_that(is.character(url))
     if (length(url) < 1) return(tibble(ok = TRUE, files = list(tibble(url = character(), file = character(), was_downloaded = logical())), message = ""))
     assert_that(is.numeric(level), level >= 0)
@@ -156,10 +156,10 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     }
 
     ## is this an s3 target (are we uploading to a bucket, rather than downloading to local file system?)
-    ##  `s3_args` will contain any global s3_args set in bb_config, regardless of whether this particular data source is s3 or not
-    ##  but the `bucket` name in s3_args should only be populated if this data source is an s3 target
-    s3_target <- !missing(s3_args) && is_s3_target(s3_args)
-    if (s3_target) s3_args <- check_s3_args(s3_args)
+    ##  `target_s3_args` will contain any global target_s3_args set in bb_config, regardless of whether this particular data source is s3 or not
+    ##  but the `bucket` name in target_s3_args should only be populated if this data source is an s3 target
+    s3_target <- !missing(target_s3_args) && is_s3_target(target_s3_args)
+    if (s3_target) target_s3_args <- check_s3_args(target_s3_args)
 
     ## opts to pass to child function
     opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, no_parent_download = no_parent_download, debug = debug, link_css = link_css) ##robots_off = robots_off,
@@ -202,7 +202,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             cat(sprintf(" dry_run is TRUE, bb_rget is not downloading the following files:\n %s\n", paste(downloads$url, collapse="\n ")))
         }
         ## for s3 target, check bucket existence and retrieve bucket contents now, no need to do it on every loop iteration
-        bx <- if (!dry_run && s3_target) aws_list_objects(s3_args) else tibble()
+        bx <- if (!dry_run && s3_target) aws_list_objects(target_s3_args) else tibble()
         ## download each file
         ## keep track of which were actually downloaded
         for (dfi in seq_along(downloads$url)) {
@@ -219,7 +219,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                          }
             }
             if (s3_target) {
-                downloads$file[dfi] <- get_aws_s3_url(bucket = s3_args$bucket, region = s3_args$region, base_url = s3_args$base_url, path = fname)
+                downloads$file[dfi] <- get_aws_s3_url(bucket = target_s3_args$bucket, region = target_s3_args$region, base_url = target_s3_args$base_url, path = fname)
             } else {
                 downloads$file[dfi] <- fname
             }
@@ -273,7 +273,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                                 ## upload to destination s3 bucket
                                 downloads$was_downloaded[dfi] <- TRUE
                                 cat(if (show_progress) "\n", "Uploading to s3 target ... ")##, if (show_progress) "\n")
-                                rgs <- s3_args[names(s3_args) %in% names(c(formals(aws.s3::get_bucket_df), formals(aws.s3::s3HTTP)))]
+                                rgs <- target_s3_args[names(target_s3_args) %in% names(c(formals(aws.s3::get_bucket_df), formals(aws.s3::s3HTTP)))]
                                 rgs$file <- req$content
                                 rgs$object <- fname
                                 s3_up_ok <- tryCatch(

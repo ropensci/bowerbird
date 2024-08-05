@@ -49,7 +49,7 @@ bb_handler_oceandata <- function(search, dtype, sensor, ...) {
 # @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, search_method = "api", dtype = NULL, sensor = NULL, stop_on_download_error = FALSE, s3_args, ...) {
+bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, search_method = "api", dtype = NULL, sensor = NULL, stop_on_download_error = FALSE, target_s3_args, ...) {
     ## oceandata synchronization handler
 
     ## oceandata provides a file search interface, e.g.:
@@ -79,18 +79,18 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     thisds <- bb_data_sources(config) ## user and password info will be in here
     this_att <- bb_settings(config)
 
-    ## handle s3_args
-    if (missing(s3_args) || is.null(s3_args)) s3_args <- list()
-    if ("s3_args" %in% names(this_att)) s3_args <- c(s3_args, this_att$s3_args)
+    ## handle target_s3_args
+    if (missing(target_s3_args) || is.null(target_s3_args)) target_s3_args <- list()
+    if ("target_s3_args" %in% names(this_att)) target_s3_args <- c(target_s3_args, this_att$target_s3_args)
     ## are we syncing to an s3 target?
-    s3_target <- is_s3_target(s3_args)
-    if (s3_target) s3_args <- check_s3_args(s3_args)
+    s3_target <- is_s3_target(target_s3_args)
+    if (s3_target) target_s3_args <- check_s3_args(target_s3_args)
 
 
     if (local_dir_only) {
         if (s3_target) {
             ## if we are syncing to s3, then there is no concept of the target directory beyond the bucket. Objects in the bucket can be named with directory-like prefixes, but there are no directories in an s3 bucket
-            return(get_aws_s3_url(bucket = s3_args$bucket, region = s3_args$region, base_url = s3_args$base_url, path = ""))
+            return(get_aws_s3_url(bucket = target_s3_args$bucket, region = target_s3_args$region, base_url = target_s3_args$base_url, path = ""))
         }
         if (search_method == "scrape") {
             ## url will be https://oceandata.sci.gsfc.nasa.gov/SeaWiFS/Mapped/something
@@ -187,7 +187,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname
     myfiles$local_filename <- vapply(myfiles$filename, oceandata_url_mapper, no_host = isTRUE(dots$no_host), FUN.VALUE = "", USE.NAMES = FALSE) ## where local copy will go
 
-    bx <- if (!isTRUE(this_att$dry_run) && s3_target) aws_list_objects(s3_args) else tibble(Key = character(), LastModified = as.POSIXct(c()))
+    bx <- if (!isTRUE(this_att$dry_run) && s3_target) aws_list_objects(target_s3_args) else tibble(Key = character(), LastModified = as.POSIXct(c()))
     f_exists <- if (s3_target) { myfiles$filename %in% basename(bx$Key) } else { file.exists(myfiles$local_filename) }
     myfiles$existing_checksum <- NA_character_
     ## iterate through file list and figure out which ones we'll actually download
@@ -260,7 +260,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     if (!this_att$dry_run && any(to_download, na.rm = TRUE)) {
         ## download all the files we identified above
         idx <- which(to_download)
-        res <- bb_rget(downloads$url[idx], force_local_filename = downloads$file[idx], use_url_directory = FALSE, clobber = this_att$clobber, curl_opts = my_curl_config$options, verbose = verbose, s3_args = s3_args) ## TODO check are there any other args in dots to use here? dots[intersect(names(dots), names(formals("bb_rget")))]
+        res <- bb_rget(downloads$url[idx], force_local_filename = downloads$file[idx], use_url_directory = FALSE, clobber = this_att$clobber, curl_opts = my_curl_config$options, verbose = verbose, target_s3_args = target_s3_args) ## TODO check are there any other args in dots to use here? dots[intersect(names(dots), names(formals("bb_rget")))]
         ## merge res back into the downloads tibble
         if (res$ok) {
             downloads[idx, ] <- res$files[[1]]

@@ -97,7 +97,7 @@ bb_source <- function(id,name,description=NA_character_,doc_url,source_url,citat
     if (missing(postprocess) || is.null(postprocess)) {
         postprocess <- list()
     } else {
-        if ("bucket" %in% names(method$s3_args)) {
+        if ("bucket" %in% names(method$target_s3_args)) {
             if (length(postprocess) > 0) warning("postprocessing not supported for s3 targets, ignoring\n")
         } else {
             ## each element of the list should be a list, where the first element should resolve to a function and the rest are arguments. But we'll also accept a list element being a function, in which case we'll treat it as not needing extra args

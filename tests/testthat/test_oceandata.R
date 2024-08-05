@@ -62,11 +62,11 @@ test_that("other oceandata handler tests", {
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/Daily/RRS$", bb_data_source_dir(ocf)))
 
     ## but if we are uploading to an s3 bucket, the bb_data_source_dir is just the bucket address
-    ods$method[[1]]$s3_args <- list(bucket = "bucketname")
-    ocf <- bb_add(bb_config(local_file_root = temp_root, s3_args = list(base_url = "s3.hostname", region = "")), ods)
+    ods$method[[1]]$target_s3_args <- list(bucket = "bucketname")
+    ocf <- bb_add(bb_config(local_file_root = temp_root, target_s3_args = list(base_url = "s3.hostname", region = "")), ods)
     expect_identical(bb_data_source_dir(ocf), "https://s3.hostname/bucketname/")
     ## local file root should be redundant in this case, too
-    ocf <- bb_add(bb_config(s3_args = list(base_url = "s3.hostname", region = "")), ods)
+    ocf <- bb_add(bb_config(target_s3_args = list(base_url = "s3.hostname", region = "")), ods)
     expect_identical(bb_data_source_dir(ocf), "https://s3.hostname/bucketname/")
     ods <- bb_source(name="Oceandata VIIRS Level-3 binned daily RRS",
                      id="VIIRS_L3b_DAY_SNPP_RRS",

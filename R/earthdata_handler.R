@@ -94,7 +94,7 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
         if (isTRUE(allow_unrestricted_auth)) my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname
         ## but we make this something that the source has to specifically set, because it's a security risk: https://curl.se/libcurl/c/CURLOPT_UNRESTRICTED_AUTH.html
         dummy$method[[1]]$allow_unrestricted_auth <- NULL ## remove this from the method parms being passed to rget
-        ## method should already contain s3_args if we are uploading to an s3 endpoint, so don't need to do anything further
+        ## method should already contain target_s3_args if we are uploading to an s3 endpoint, so don't need to do anything further
         do.call(bb_handler_rget, c(list(config, verbose = verbose, curl_opts = my_curl_config$options), dummy$method[[1]][-1]))
     }
 }

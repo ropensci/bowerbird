@@ -54,12 +54,12 @@ bb_get <- function(data_sources, local_file_root, clobber = 1, http_proxy = NULL
     ## local_file_root can be missing if we are only dealing with s3 targets
     if (missing(local_file_root)) {
         ## expect data_sources to all be s3 targets
-        ok <- all(vapply(data_sources$method, function(m) "bucket" %in% names(m$s3_args), FUN.VALUE = TRUE))
+        ok <- all(vapply(data_sources$method, function(m) "bucket" %in% names(m$target_s3_args), FUN.VALUE = TRUE))
         if (ok) local_file_root <- NULL ## otherwise leave it unset, which will trigger an error below
     }
     cf_args <- list(local_file_root = local_file_root, clobber = clobber, http_proxy = http_proxy, ftp_proxy = ftp_proxy)
     if ("wget_global_flags" %in% names(extra_args)) cf_args <- c(cf_args, list(wget_global_flags = extra_args[["wget_global_flags"]]))
-    if ("s3_args" %in% names(extra_args)) cf_args <- c(cf_args, list(s3_args = extra_args[["s3_args"]]))
+    if ("target_s3_args" %in% names(extra_args)) cf_args <- c(cf_args, list(target_s3_args = extra_args[["target_s3_args"]]))
     cf <- do.call(bb_config, cf_args)
     ## add source(s)
     cf <- bb_add(cf, data_sources)
