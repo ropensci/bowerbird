@@ -69,6 +69,9 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
     on.exit(file.remove(cookies_file))
     ## must use --auth-no-challenge (force basic auth) else the server redirects to the html login page, rather than accepting the provided credentials
     if (use_wget) {
+        ## potentially substitute username and password from env vars
+        dummy$user <- use_secret(dummy$user)
+        dummy$password <- use_secret(dummy$password)
         dummy$method <- list(list("bb_handler_wget", ..., extra_flags = c("--http-user", dummy$user, "--http-password", dummy$password, "--auth-no-challenge", "--load-cookies", cookies_file, "--save-cookies", cookies_file, "--keep-session-cookies"), reject = "index.html*", robots_off = TRUE))
         dummy$user <- NA_character_
         dummy$password <- NA_character_
@@ -82,6 +85,7 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
             allow_unrestricted_auth <- FALSE
             warning("if your download does not find the files you are expecting, try adding `allow_unrestricted_auth = TRUE` to the method parameters. This is necessary for Earthdata servers that serve data from a different hostname to the landing hostname")
         }
+        ## note that user and password will be substituted from env vars if appropriate inside the bb_handler_rget call
         my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = dummy$user, password = dummy$password, enforce_basic_auth = TRUE)
         ## and some more configs specifically for earthdata
         my_curl_config$options$followlocation <- 1

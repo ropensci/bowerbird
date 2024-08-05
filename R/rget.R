@@ -166,6 +166,11 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
 
     ## opts to pass to child function
     opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, no_parent_download = no_parent_download, debug = debug, link_css = link_css) ##robots_off = robots_off,
+
+    ## potentially substitute username and password from env vars
+    user <- use_secret(user)
+    password <- use_secret(password)
+
     ## curl options
     opts$curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password, remote_time = remote_time)
     ## we can handle multiple input URLs, but they can't be a mix of ftp/http

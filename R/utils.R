@@ -129,3 +129,13 @@ list_files <- function(path = ".", pattern = NULL, all.files = FALSE, full.names
     }
     as.character(out)
 }
+
+
+## helper function: usernames and password can be specified as environment variable names
+## @param x string: if an environment variable exists with this name, return the value of that environment variable, otherwise return x unchanged
+use_secret <- function(x) {
+    this <- Sys.getenv(x, unset = "")
+    idx <- nzchar(this)
+    x[idx] <- this[idx]
+    x
+}

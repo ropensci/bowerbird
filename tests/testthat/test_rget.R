@@ -84,3 +84,12 @@ test_that("rget works with multiple input URLs", {
     expect_identical(res$files[[1]]$file, file.path("raw.githubusercontent.com/ropensci/bowerbird/master", c("1.md", "2.md")))
     expect_true(all(file.exists(file.path(outdir, res$files[[1]]$file))))
 })
+
+test_that("env vars are substituted correctly", {
+    expect_identical(use_secret("bilbobaggins"), "bilbobaggins") ## no match
+    Sys.setenv(FrodoBaggins = "ABC123")
+    expect_identical(use_secret("FrodoBaggins"), "ABC123") ## match
+    expect_identical(use_secret("frodobaggins"), "frodobaggins") ## no match, case sensitive
+    expect_identical(use_secret(c("bilbobaggins", "FrodoBaggins", "frodobaggins", "", NA_character_)), c("bilbobaggins", "ABC123", "frodobaggins", "", NA_character_)) ## multiple
+    Sys.unsetenv("FrodoBaggins")
+})
