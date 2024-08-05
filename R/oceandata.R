@@ -108,7 +108,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             out <- "" ## optional prefix with hostname, below
             ## refine by platform. Find platform, either full or one-letter abbrev
             this_platform <- oceandata_find_platform(search)
-            if (!is.na(this_platform) && nchar(this_platform) > 0) {
+            if (!is.na(this_platform) && nzchar(this_platform)) {
                 ## want old platform name for backwards compatibility
                 if (!this_platform %in% oceandata_platform_map()$platform) {
                     this_platform <- oceandata_platform_map(oceandata_platform_to_abbrev(this_platform))
@@ -142,26 +142,15 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     }
     if (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password)) stop("Oceandata sources require an Earthdata login: provide your user and password in the source configuration")
     tries <- 0
-    ## don't show progress for the file index
-    my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = thisds$user, password = thisds$password)
     if (verbose) cat("Downloading file list ... \n")
     if (search_method == "api") {
         ## this can be super slow for large queries, but it gives a checksum
-        api_post <- FALSE ## use GET/json
-        while (tries<3) {
-            if (api_post) {
-                ## old
-                bdy <- list(cksum = 1, search = search)
-                if (!is.null(dtype)) bdy$dtype <- dtype
-                if (!is.null(sensor)) bdy$sensor <- sensor
-                myfiles <- httr::with_config(my_curl_config, httr::POST("https://oceandata.sci.gsfc.nasa.gov/api/file_search", body = bdy))
-            } else {
-                ## use json format, which gives us cdate
-                u <- httr::parse_url("https://oceandata.sci.gsfc.nasa.gov/api/file_search")
-                u$query <- Filter(Negate(is.null), list(search = search, dtype = if (!is.null(dtype)) dtype, sensor = if (!is.null(sensor)) sensor, format = "json", cksum = 1))
-                ## excluding cksum seems to limit the number of records to 50
-                myfiles <- httr::GET(httr::build_url(u))
-            }
+        while (tries < 3) {
+            ## previously we used a POST request to the api, but have switched to json format, which gives us cdate
+            u <- httr::parse_url("https://oceandata.sci.gsfc.nasa.gov/api/file_search")
+            u$query <- Filter(Negate(is.null), list(search = search, dtype = if (!is.null(dtype)) dtype, sensor = if (!is.null(sensor)) sensor, format = "json", cksum = 1))
+            ## excluding cksum seems to limit the number of records to 50
+            myfiles <- httr::GET(httr::build_url(u))
             if (!httr::http_error(myfiles)) break
             tries <- tries + 1
         }

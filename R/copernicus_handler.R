@@ -25,9 +25,9 @@ bb_handler_copernicus <- function(product, ctype = "stac", ...) { ##layer,
 }
 
 
-# @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
-# @param verbose logical: if TRUE, provide additional progress output
-# @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
+## @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
+## @param verbose logical: if TRUE, provide additional progress output
+## @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, product, ctype, ...) { ## layer = NULL
     assert_that(is(config, "bb_config"))
     assert_that(nrow(bb_data_sources(config)) == 1)
@@ -39,7 +39,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
     ##if (!is.null(layer)) assert_that(is.string(layer), nzchar(layer))
     dots <- list(...)
 
-    thisds <- bb_data_sources(config) ## user and password info will be in here
+    ## thisds <- bb_data_sources(config) ## user and password info will be in here, but we don't need it for the copernicus handler
     this_att <- bb_settings(config)
 
 
@@ -50,7 +50,6 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
         return(file.path(this_att$local_file_root, "data.marine.copernicus.eu", product))
     }
 
-##    if (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password)) stop(sprintf("Copernicus sources require a login: provide your user and password in the source configuration"))
     if (verbose) cat("Downloading file list ... \n")
     myfiles <- if (ctype == "file") cms_list_stac_single_file(product) else CopernicusMarine::cms_list_stac_files(product) ## layer is ignored in this?
     if (nrow(myfiles) < 1) stop("No files found for Copernicus Marine product: ", product)
@@ -65,7 +64,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
     if (verbose) cat("\n", nrow(myfiles), " file", if (nrow(myfiles) > 1) "s", " to download\n", sep = "")
     ## for each file, download if needed and store in appropriate directory
     ok <- TRUE
-    my_curl_config <- build_curl_config(debug = FALSE, show_progress = verbose) ##, user = thisds$user, password = thisds$password, enforce_basic_auth = TRUE)
+    my_curl_config <- build_curl_config(debug = FALSE, show_progress = verbose)
     fidx <- file.exists(myfiles$local_filename) & !is.na(myfiles$ETag)
     myfiles$existing_checksum <- NA_character_
     myfiles$existing_checksum[fidx] <- vapply(myfiles$local_filename[fidx], file_hash, hash = "md5", FUN.VALUE = "", USE.NAMES = FALSE)
@@ -103,8 +102,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
                         myfiles$was_downloaded[idx] <- TRUE
                     }
                 } else {
-                    res <- bb_rget(this_url, force_local_filename = this_fullfile, use_url_directory = FALSE, clobber = this_att$clobber, ##user = thisds$user, password = thisds$password,
-                                   curl_opts = my_curl_config$options, verbose = verbose)
+                    res <- bb_rget(this_url, force_local_filename = this_fullfile, use_url_directory = FALSE, clobber = this_att$clobber, curl_opts = my_curl_config$options, verbose = verbose)
                     if (!res$ok) {
                         myfun("Error downloading ", this_url, ": ", res$message)
                     } else {

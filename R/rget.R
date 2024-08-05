@@ -42,7 +42,7 @@ bb_handler_rget <- function(...) {
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
 bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, ...) {
-    assert_that(is(config,"bb_config"))
+    assert_that(is(config, "bb_config"))
     assert_that(nrow(bb_data_sources(config)) == 1)
     assert_that(is.flag(verbose), !is.na(verbose))
     assert_that(is.flag(local_dir_only), !is.na(local_dir_only))
@@ -51,21 +51,18 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     this_flags <- list(...)
 
     ## add flags for clobber behaviour
-    if (!is.null(cfrow$clobber) && !is.na(cfrow$clobber)) {
-        this_flags$clobber <- cfrow$clobber
-    }
+    if (!is.null(cfrow$clobber) && !is.na(cfrow$clobber)) this_flags$clobber <- cfrow$clobber
+
     ## add user, password flags
-    if (!is.na(cfrow$user) && nchar(cfrow$user)>0) this_flags <- c(this_flags,list(user=cfrow$user))
-    if (!is.na(cfrow$password) && nchar(cfrow$password)>0) this_flags <- c(this_flags,list(password=cfrow$password))
+    if (!is.na(cfrow$user) && nzchar(cfrow$user)) this_flags$user <- cfrow$user
+    if (!is.na(cfrow$password) && nzchar(cfrow$password)) this_flags$password <- cfrow$password
 
     ## add global s3_args parms that were passed as part of the config to any that were passed as part of this particular data source
     if (!"s3_args" %in% names(this_flags)) this_flags$s3_args <- list()
     if (length(cfrow$s3_args[[1]]) > 0) this_flags$s3_args <- c(this_flags$s3_args, cfrow$s3_args[[1]])
 
     ## if dry_run, still call bb_rget
-    if (!is.null(cfrow[["dry_run"]]) && !is.na(cfrow$dry_run)) {
-        this_flags$dry_run <- cfrow$dry_run
-    }
+    if (!is.null(cfrow[["dry_run"]]) && !is.na(cfrow$dry_run)) this_flags$dry_run <- cfrow$dry_run
 
     if (local_dir_only) {
         if ("bucket" %in% names(this_flags$s3_args)) {

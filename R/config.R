@@ -416,10 +416,11 @@ print.bb_config <- function(x, ...) {
 ## @seealso \code{\link{bb_config}}
 
 bb_validate <- function(config) {
-    assert_that(is(config,"bb_config"))
+    assert_that(is(config, "bb_config"))
     cfds <- bb_data_sources(config)
     idx <- !is.na(cfds$authentication_note) & (na_or_empty(cfds$user) | na_or_empty(cfds$password))
-    if (any(idx))
-        stop(paste(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s\n",cfds$name[idx],cfds$authentication_note[idx]),collapse="\n"))
+    if (any(idx)) {
+        stop(paste(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s\n", cfds$name[idx], cfds$authentication_note[idx]), collapse = "\n"))
+    }
     TRUE
 }

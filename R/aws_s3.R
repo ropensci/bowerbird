@@ -117,6 +117,7 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
     dummy <- config
     dummy$data_sources$method[[1]] <- list("bb_rget")
     dummy$data_sources$source_url <- list(all_urls)
+    ## NOTE to support providers that require authorization, we would need to set some extra headers on the curl call - see e.g. inside aws.s3::s3HTTP
     rget_args <- c(list(dummy, verbose = verbose), myargs[intersect(names(myargs), names(formals("bb_rget")))])
     do.call(bb_handler_rget, rget_args)
 }

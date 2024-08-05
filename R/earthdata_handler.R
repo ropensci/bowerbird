@@ -38,10 +38,10 @@ bb_handler_earthdata <- function(...) {
 }
 
 
-# @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
-# @param verbose logical: if TRUE, provide additional progress output
-# @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-# @param use_wget logical: TRUE use wget (deprecated), FALSE use rget
+## @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
+## @param verbose logical: if TRUE, provide additional progress output
+## @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
+## @param use_wget logical: TRUE use wget (deprecated), FALSE use rget
 bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, use_wget = FALSE, allow_unrestricted_auth, ...) {
     assert_that(is(config, "bb_config"))
     assert_that(nrow(bb_data_sources(config)) == 1)
@@ -62,7 +62,7 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
     }
 
     dummy <- bb_data_sources(config)
-    if (is.null(dummy$user) || is.null(dummy$password) || na_or_empty(dummy$user) || na_or_empty(dummy$password)) stop(sprintf("Earthdata source \"%s\" requires user and password", dummy$name))
+    if (is.null(dummy$user) || is.null(dummy$password) || na_or_empty(dummy$user) || na_or_empty(dummy$password)) stop("Earthdata source \"", dummy$name, "\" requires user and password")
     cookies_file <- gsub("\\\\", "/", tempfile()) ## probably don't need the gsub, was there for windows debugging
     ## create this file
     if (!file.exists(cookies_file)) cat("", file = cookies_file)
@@ -77,9 +77,9 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
         dummy$password <- NA_character_
         bb_data_sources(config) <- dummy
         ## must make the wget call twice: first time it will authenticate, and write the cookies, but then redirect to the original page and wget won't go further because it knows it's already been there and doesn't want to get into an infinite loop
-        do.call(bb_handler_wget,c(list(config,verbose=verbose),dummy$method[[1]][-1]))
+        do.call(bb_handler_wget, c(list(config, verbose = verbose), dummy$method[[1]][-1]))
         ## but the second time it will authenticate using the stored cookie and proceed with the recursion
-        do.call(bb_handler_wget,c(list(config,verbose=verbose),dummy$method[[1]][-1]))
+        do.call(bb_handler_wget, c(list(config, verbose = verbose), dummy$method[[1]][-1]))
     } else {
         if (missing(allow_unrestricted_auth) || is.null(allow_unrestricted_auth)) {
             allow_unrestricted_auth <- FALSE
