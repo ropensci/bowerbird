@@ -158,19 +158,11 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         myfiles <- httr::content(myfiles, as = "text")
         ## look for an empty body or "No results found" message
         if (length(myfiles) < 1 || !any(nzchar(myfiles)) || any(grepl("no results found", myfiles, ignore.case = TRUE), na.rm = TRUE)) stop("No files matched the supplied oceancolour data file search query (", search, ")")
-        if (api_post) {
-            myfiles <- strsplit(myfiles,"\n")[[1]]
-            myfiles <- do.call(rbind, lapply(myfiles, function(z) strsplit(z, "[[:space:]]+")[[1]])) ## split checksum and file name from each line
-            colnames(myfiles) <- c("checksum", "filename")
-            myfiles <- as_tibble(myfiles)
-            myfiles$last_modified <- NA
-        } else {
-            myfiles <- jsonlite::fromJSON(myfiles)
-            myfiles <- cbind(do.call(rbind, lapply(myfiles, as_tibble)), filename = names(myfiles))
-            myfiles$checksum <- sub("^sha1:", "", myfiles$checksum)
-            names(myfiles)[which(names(myfiles) == "cdate")] <- "last_modified" ## cdate is (presumably) the last-modified date
-            myfiles <- myfiles[, c("checksum", "filename", "last_modified")]
-        }
+        myfiles <- jsonlite::fromJSON(myfiles)
+        myfiles <- cbind(do.call(rbind, lapply(myfiles, as_tibble)), filename = names(myfiles))
+        myfiles$checksum <- sub("^sha1:", "", myfiles$checksum)
+        names(myfiles)[which(names(myfiles) == "cdate")] <- "last_modified" ## cdate is (presumably) the last-modified date
+        myfiles <- myfiles[, c("checksum", "filename", "last_modified")]
     } else if (search_method == "scrape") {
         ## potentially override accept_download etc
         myfiles <- bb_rget(search, level = 3,
