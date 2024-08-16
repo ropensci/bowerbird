@@ -32,21 +32,6 @@
 bb_example_sources <- function(sources) {
     if (!missing(sources)) assert_that(is.character(sources))
     out <- list()
-    if (!missing(sources) && any(c("NOAA OI SST V2 wget", "oisst.v2 wget") %in% sources)) {
-        out <- c(out, list(bb_source(
-                          name = "NOAA OI SST V2",
-                          id = "oisst.v2",
-                          description = "Weekly and monthly mean and long-term monthly mean SST data, 1-degree resolution, 1981 to present. Ice concentration data are also included, which are the ice concentration values input to the SST analysis",
-                          doc_url = "http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html",
-                          citation = "NOAA_OI_SST_V2 data provided by the NOAA/OAR/ESRL PSD, Boulder, Colorado, USA, from their web site at http://www.esrl.noaa.gov/psd/",
-                          source_url = "https://downloads.psl.noaa.gov/Datasets/noaa.oisst.v2/",
-                          license = "Please cite",
-                          method = list("bb_handler_wget", recursive = TRUE, level = 1),
-                          postprocess = NULL,
-                          access_function = "raster::raster",
-                          collection_size = 0.9,
-                          data_group = "Sea surface temperature")))
-    }
     if (missing(sources) || any(c("NOAA OI SST V2", "oisst.v2") %in% sources)) {
         out <- c(out, list(bb_source(
                           name = "NOAA OI SST V2",
@@ -74,19 +59,6 @@ bb_example_sources <- function(sources) {
                           method = list("bb_handler_rget", level = 1, accept_download = "\\.csv$"),
                           collection_size=0.01,
                           data_group="Electoral")))
-    }
-    if (!missing(sources) && any(c("Australian Election 2016 House of Representatives data wget", "aus-election-house-2016 wget") %in% sources)) {
-        out <- c(out, list(bb_source(
-                          name = "Australian Election 2016 House of Representatives data",
-                          id = "aus-election-house-2016",
-                          description = "House of Representatives results from the 2016 Australian election.",
-                          doc_url = "http://results.aec.gov.au/",
-                          citation = "Copyright Commonwealth of Australia 2017. As far as practicable, material for which the copyright is owned by a third party will be clearly labelled. The AEC has made all reasonable efforts to ensure that this material has been reproduced on this website with the full consent of the copyright owners.",
-                          source_url = c("http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm"),
-                          license = "CC-BY",
-                          method = list("bb_handler_wget",recursive=TRUE,level=1,accept="csv",reject_regex="Website/UserControls"),
-                          collection_size = 0.01,
-                          data_group = "Electoral")))
     }
     if (missing(sources) || any(c("CMEMS global gridded SSH reprocessed (1993-ongoing)", "SEALEVEL_GLO_PHY_L4_MY_008_047") %in% sources)) {
         out <- c(out, list(bb_source(
@@ -119,7 +91,7 @@ bb_example_sources <- function(sources) {
                           authentication_note = "Requires Earthdata login, see https://urs.earthdata.nasa.gov/. Note that you will also need to authorize the application 'OB.DAAC Data Access' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
                           data_group = "Ocean colour")))
     }
-    if (missing(sources) || any(c("Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3", "10.5067/EYICLBOAAJOU") %in% sources)) {
+    if (missing(sources) || any(c("Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3", "10.5067/IJ0T7HFHB9Y6") %in% sources)) {
         out <- c(out, list(bb_source(
                           name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3",
                           id = "10.5067/IJ0T7HFHB9Y6",
@@ -135,21 +107,6 @@ bb_example_sources <- function(sources) {
                           postprocess = NULL,
                           collection_size = 0.02,
                           data_group = "Sea ice", warn_empty_auth = FALSE)))
-    }
-    if (!missing(sources) && any(c("Bathymetry of Lake Superior wget", "greatlakes-superior-bathymetry wget") %in% sources)) {
-        out <- c(out, list(bb_source(
-                          name="Bathymetry of Lake Superior",
-                          id="greatlakes-superior-bathymetry",
-                          description="A draft version of the Lake Superior Bathymetry was compiled as a component of a NOAA project to rescue Great Lakes lake floor geological and geophysical data, and make it more accessible to the public. No time frame has been set for completing bathymetric contours of Lake Superior, though a 3 arc-second (~90 meter cell size) grid is available.",
-                          doc_url="https://www.ngdc.noaa.gov/mgg/greatlakes/superior.html",
-                          source_url=c("https://www.ngdc.noaa.gov/mgg/greatlakes/superior/data/"),
-                          citation="Publisher: DOC/NOAA/NESDIS/NCEI > National Centers for Environmental Information, NESDIS, NOAA, U.S. Department of Commerce",
-                          license="https://www.ngdc.noaa.gov/ngdcinfo/privacy.html#copyright",
-                          method=list("bb_handler_wget",recursive=TRUE,level=2,accept_regex="/netcdf/",reject="index.html*"),
-                          comment="Only the netcdf format data are retrieved here - adjust the accept_regex parameter in the method argument to get other formats",
-                          postprocess=list("bb_gunzip"),
-                          collection_size=0.03,
-                          data_group="Topography")))
     }
     if (missing(sources) || any(c("Bathymetry of Lake Superior", "greatlakes-superior-bathymetry") %in% sources)) {
         out <- c(out, list(bb_source(
