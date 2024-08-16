@@ -16,7 +16,7 @@
 #'
 #' my_source <- bb_source(
 #'   name = "Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3",
-#'   id = "10.5067/EYICLBOAAJOU",
+#'   id = "10.5067/IJ0T7HFHB9Y6",
 #'   description = "NSIDC provides this data set ... [truncated; see bb_example_data_sources()]",
 #'   doc_url = "https://nsidc.org/data/NSIDC-0192/versions/3",
 #'   citation = "Stroeve J, Meier WN (2018) ... [truncated; see bb_example_data_sources()]",
@@ -25,8 +25,8 @@
 #'   authentication_note = "Requires Earthdata login, see https://urs.earthdata.nasa.gov/.
 #'     Note that you will also need to authorize the application 'nsidc-daacdata'
 #'     (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)",
-#'   method = list("bb_handler_earthdata", recursive = TRUE, level = 4, no_parent = TRUE,
-#'                 relative = TRUE, allow_unrestricted_auth = TRUE),
+#'   method = list("bb_handler_earthdata", level = 4, relative = TRUE,
+#'                 accept_download = "\\.(s|n|png|txt)$", allow_unrestricted_auth = TRUE),
 #'   user = "your_earthdata_username",
 #'   password = "your_earthdata_password",
 #'   collection_size = 0.02)
