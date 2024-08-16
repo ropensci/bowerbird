@@ -177,7 +177,11 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     if (is_ftp) opts$curl_config$options$dirlistonly <- 1L
     ## apply any user-specified options (these can also be passed by other source-specific handlers, like the earthdata handler)
     if (!missing(curl_opts)) {
-        for (nm in names(curl_opts)) opts$curl_config$options[[nm]] <- curl_opts[[nm]]
+        for (nm in names(curl_opts)) {
+            this <- curl_opts[[nm]]
+            if (nm %in% c("user", "username", "password")) this <- use_secret(this)
+            opts$curl_config$options[[nm]] <- this
+        }
     }
     ## create curl handle here
     handle <- new_handle(.list = opts$curl_config$options)
@@ -202,7 +206,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             cat(sprintf(" dry_run is TRUE, bb_rget is not downloading the following files:\n %s\n", paste(downloads$url, collapse="\n ")))
         }
         ## for s3 target, check bucket existence and retrieve bucket contents now, no need to do it on every loop iteration
-        bx <- if (!dry_run && s3_target) aws_list_objects(target_s3_args) else tibble()
+        bx <- if (!dry_run && s3_target) aws_list_objects(target_s3_args, create = TRUE) else tibble()
         ## download each file
         ## keep track of which were actually downloaded
         for (dfi in seq_along(downloads$url)) {

@@ -187,7 +187,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname
     myfiles$local_filename <- vapply(myfiles$filename, oceandata_url_mapper, no_host = isTRUE(dots$no_host), FUN.VALUE = "", USE.NAMES = FALSE) ## where local copy will go
 
-    bx <- if (!isTRUE(this_att$dry_run) && s3_target) aws_list_objects(target_s3_args) else tibble(Key = character(), LastModified = as.POSIXct(c()))
+    bx <- if (!isTRUE(this_att$dry_run) && s3_target) aws_list_objects(target_s3_args, create = TRUE) else tibble(Key = character(), LastModified = as.POSIXct(c()))
     f_exists <- if (s3_target) { myfiles$filename %in% basename(bx$Key) } else { file.exists(myfiles$local_filename) }
     myfiles$existing_checksum <- NA_character_
     ## iterate through file list and figure out which ones we'll actually download

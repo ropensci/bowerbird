@@ -69,18 +69,7 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
     ## "key" and "secret" could go here but aren't (yet) propagated into the rget calls below
 
     if (local_dir_only) {
-        if (TRUE) {
-            this_url <- file.path(do.call(get_aws_s3_url, c(list(path = paste0("/", s3args$prefix)), s3HTTP_args)), "dummy")
-        } else {
-            ## make an s3HTTP call and get its URL
-            query <- s3args[names(s3args) %in% c("prefix", "delimiter", "marker", "use_https")]
-            query$`max-keys` <- 0L
-            r <- do.call(aws.s3::s3HTTP, c(list(verb = "GET", query = query, parse_response = FALSE), s3HTTP_args))
-            this_endpoint <- httr::parse_url(r$url)
-            this_endpoint$path <- gsub("//", "/", file.path(this_endpoint$path, this_endpoint$query$prefix, "dummy")) ## "dummy" to represent objects within this prefix space
-            this_endpoint$query <- NULL
-            this_url <- httr::build_url(this_endpoint)
-        }
+        this_url <- file.path(do.call(get_aws_s3_url, c(list(path = paste0("/", s3args$prefix)), s3HTTP_args)), "dummy")
         config$data_sources <- bb_modify_source(config$data_sources, method = list("bb_rget"), source_url = this_url)
         return(bb_handler_rget(config, verbose = verbose, local_dir_only = TRUE))
     }
@@ -192,13 +181,15 @@ aws_fun <- function(fun, ...) {
     out
 }
 
-## internal helper, wrapper around get_bucket_df but checking/creating bucket first
-aws_list_objects <- function(s3_args) {
+## internal helper, wrapper around get_bucket_df but checking bucket existence (and optionally creating bucket) first
+aws_list_objects <- function(s3_args, create = FALSE) {
     chk <- aws_fun(aws.s3::bucketlist, s3_args[setdiff(names(s3_args), "bucket")])
     ##chk <- tryCatch(aws_fun(aws.s3::bucket_exists, s3_args), error = function(e) stop("no can do"))
     ## bucket_exists returns 404 error if the bucket does not exist, 403 error if it exists but is inaccessible to these credentials?
-    if (nrow(chk) < 1 || !s3_args$bucket %in% chk$Bucket) {
+    if ((nrow(chk) < 1 || !s3_args$bucket %in% chk$Bucket) && isTRUE(create)) {
         chk <- tryCatch(aws_fun(aws.s3::put_bucket, s3_args), error = function(e) stop("Could not create bucket. ", conditionMessage(e)))
+    } else {
+        stop("bucket does not exist")
     }
     ## get bucket contents
     tryCatch({
