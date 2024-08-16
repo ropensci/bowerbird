@@ -139,11 +139,14 @@ s3_faux_bucket_list <- function(bucket_browser_url, bucket, prefix, s3HTTP_args)
         ## https://data.aad.gov.au/eds/api/dataset/UUID/object/download?prefix=OBJECTNAME
         paste0(sub("objects.*", "object/download?prefix=", bucket_browser_url), URLencode(out$name))
     } else {
+        ## nocov start
         ## (slow) recursive listing of objects, to emulate bucket listing for providers that don't support it
         objs <- s3_faux_inner(bucket_browser_url, bucket, prefix)
         vapply(objs, function(z) do.call(get_aws_s3_url, c(list(path = z), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
+        ## nocov end
     }
 }
+## nocov start - don't have any providers any more to test this against (but we'll leave the code intact in case some reappear)
 s3_faux_inner <- function(bucket_browser_url, bucket, prefix, out = c(), seen = c(), lv = 0L, max_lv = 99L) {
     if (lv >= max_lv) return(out)
     if (is.null(prefix)) prefix <- ""
@@ -163,6 +166,7 @@ s3_faux_inner <- function(bucket_browser_url, bucket, prefix, out = c(), seen = 
         c(out, obj$name)
     }
 }
+## nocov end
 
 ## internal helper function for calling aws.s3 functions
 ## should perhaps consider using the paws-r package instead?

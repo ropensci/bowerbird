@@ -1,29 +1,29 @@
 context("oceandata handler")
 
-test_that("bb_handler_oceandata works",{
-    skip("skipping oceandata test downloads, requires Earth data login")
-    ods <- bb_source(
-        id="bilbobaggins",
-        name="Oceandata test",
-        description="Monthly remote-sensing PAR from the MODIS Terra satellite at 9km spatial resolution",
-        doc_url= "https://oceancolor.gsfc.nasa.gov/",
-        citation="See https://oceancolor.gsfc.nasa.gov/cms/citations",
-        source_url="",
-        license="Please cite",
-        user = "YOUR_EARTHDATA_USERNAME", password = "YOUR_EARTHDATA_PASSWORD",
-        comment="",
-        method=list("bb_handler_oceandata",search="TERRA_MODIS.20000301_20000331.L3m.MO.PAR.par.9km.nc"),
-        postprocess=NULL,
-        access_function="",
-        data_group="Sea surface temperature")
+test_that("bb_handler_oceandata works", {
+    skip_if_not(nzchar(Sys.getenv("EARTHDATA_USER")), "skipping oceandata test downloads, requires Earth data login (set the EARTHDATA_USER and EARTHDATA_PASS environment variables)")
+    skip_if_not(nzchar(Sys.getenv("EARTHDATA_PASS")), "skipping oceandata test downloads, requires Earth data login (set the EARTHDATA_USER and EARTHDATA_PASS environment variables)")
+    ods <- bb_source(id = "bilbobaggins",
+                     name = "Oceandata test",
+                     description = "Monthly remote-sensing PAR from the MODIS Terra satellite at 9km spatial resolution",
+                     doc_url = "https://oceancolor.gsfc.nasa.gov/",
+                     citation = "See https://oceancolor.gsfc.nasa.gov/cms/citations",
+                     source_url = "",
+                     license = "Please cite",
+                     user = Sys.getenv("EARTHDATA_USER"), password = Sys.getenv("EARTHDATA_PASS"),
+                     comment = "",
+                     method = list("bb_handler_oceandata", search = "TERRA_MODIS.20000301_20000331.L3m.MO.PAR.par.9km.nc"),
+                     postprocess = NULL,
+                     access_function = "",
+                     data_group = "Sea surface temperature")
     temp_root <- tempdir()
-    ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
-    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/par$",bb_data_source_dir(ocf)))
-    bb_sync(ocf, confirm_downloads_larger_than = NULL)
+    ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
+    expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/par$", bb_data_source_dir(ocf)))
+    res <- bb_sync(ocf, confirm_downloads_larger_than = NULL)
     fnm <- "oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/par/TERRA_MODIS.20000301_20000331.L3m.MO.PAR.par.9km.nc" ## relative file name
-    expect_true(file.exists(file.path(temp_root,fnm)))
-    fi <- file.info(file.path(temp_root,fnm))
-    expect_gt(fi$size,6e6)
+    expect_true(file.exists(file.path(temp_root, fnm)))
+    fi <- file.info(file.path(temp_root, fnm))
+    expect_gt(fi$size, 6e6)
 })
 
 test_that("url mapper works", {
@@ -103,7 +103,6 @@ test_that("other oceandata handler tests", {
 })
 
 test_that("bb_handler_oceandata works when no files match",{
-    skip_on_appveyor() ## failing on AppVeyor for unknown reasons
     ods <- bb_source(id="bilbobaggins",
                      name="Oceandata test",
                      description="Monthly remote-sensing sea surface temperature from the MODIS Terra satellite at 9km spatial resolution",
