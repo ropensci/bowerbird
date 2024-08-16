@@ -89,3 +89,16 @@ test_that("bb_sync works with a sink() call in place",{
     ## sink file should contain direct cat output "Synchronizing dataset: test"
     expect_true(any(grepl("Synchronizing dataset: test",op)))
 })
+
+test_that("an ftp source works", {
+    src <- bb_source(id = "bilbobaggins", name = "test",
+                     description = "blah", doc_url = "http://some.where.org/",
+                     citation = "blah", license = "blah",
+                     method = list("bb_handler_rget", level = 1, accept_download = "README"),
+                     source_url = "ftp://ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/")
+    temp_root <- tempdir()
+    cf <- bb_add(bb_config(local_file_root = temp_root), src)
+    expect_true(grepl("ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/$", bb_data_source_dir(cf)))
+    res <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
+    expect_equal(nrow(res$files[[1]]), 1)
+})
