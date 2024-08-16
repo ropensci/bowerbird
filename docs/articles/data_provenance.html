@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Data provenance • bowerbird</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">bowerbird</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.15.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.16.1</span>
       </span>
     </div>
 
@@ -82,7 +82,7 @@
                         <h4 data-toc-skip class="author">Ben Raymond,
 Michael Sumner</h4>
             
-            <h4 data-toc-skip class="date">2024-03-08</h4>
+            <h4 data-toc-skip class="date">2024-08-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/ropensci/bowerbird/blob/HEAD/vignettes/data_provenance.Rmd" class="external-link"><code>vignettes/data_provenance.Rmd</code></a></small>
       <div class="hidden name"><code>data_provenance.Rmd</code></div>
@@ -130,8 +130,8 @@ assist with data provenance issues.</p>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>name <span class="op">=</span> <span class="va">cf</span><span class="op">$</span><span class="va">data_sources</span><span class="op">$</span><span class="va">name</span>, source_dir <span class="op">=</span> <span class="va">source_dirs</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
-<col width="34%">
-<col width="65%">
+<col width="44%">
+<col width="55%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">name</th>
@@ -140,7 +140,7 @@ assist with data provenance issues.</p>
 <tbody>
 <tr class="odd">
 <td align="left">NOAA OI SST V2</td>
-<td align="left">/some/local/path/ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/</td>
+<td align="left">/some/local/path/downloads.psl.noaa.gov/Datasets/noaa.oisst.v2/</td>
 </tr>
 <tr class="even">
 <td align="left">Australian Election 2016 House of Representatives
@@ -150,11 +150,11 @@ data</td>
 <tr class="odd">
 <td align="left">CMEMS global gridded SSH reprocessed
 (1993-ongoing)</td>
-<td align="left">/some/local/path/ftp.sltac.cls.fr/Core/SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047/dataset-duacs-rep-global-merged-allsat-phy-l4-v3/</td>
+<td align="left">/some/local/path/data.marine.copernicus.eu/SEALEVEL_GLO_PHY_L4_MY_008_047</td>
 </tr>
 <tr class="even">
 <td align="left">Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a</td>
-<td align="left">/some/local/path/oceandata.sci.gsfc.nasa.gov/SeaWiFS/Mapped</td>
+<td align="left">/some/local/path/oceandata.sci.gsfc.nasa.gov/SeaWiFS/Mapped/Monthly/9km/chlor</td>
 </tr>
 <tr class="odd">
 <td align="left">Sea Ice Trends and Climatologies from SMMR and
@@ -260,7 +260,7 @@ this change.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
       </footer>

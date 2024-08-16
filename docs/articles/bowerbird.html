@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bowerbird • bowerbird</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">bowerbird</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.15.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.16.1</span>
       </span>
     </div>
 
@@ -82,7 +82,7 @@
                         <h4 data-toc-skip class="author">Ben Raymond,
 Michael Sumner</h4>
             
-            <h4 data-toc-skip class="date">2024-03-08</h4>
+            <h4 data-toc-skip class="date">2024-08-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/ropensci/bowerbird/blob/HEAD/vignettes/bowerbird.Rmd" class="external-link"><code>vignettes/bowerbird.Rmd</code></a></small>
       <div class="hidden name"><code>bowerbird.Rmd</code></div>
@@ -673,6 +673,41 @@ like to look at <a href="https://github.com/r-lib/rappdirs" class="external-link
 suitable directory location.</p>
 </div>
 <div class="section level4">
+<h4 id="synchronizing-to-object-storage">Synchronizing to object storage<a class="anchor" aria-label="anchor" href="#synchronizing-to-object-storage"></a>
+</h4>
+<p>As of bowerbird v0.17 (August 2024) it is possible to synchronize
+directly into an object store like AWS S3, rather than to a directory on
+your local file system. This works for data sources using the
+<code>bb_handler_rget</code>, <code>bb_handler_earthdata</code>, or
+<code>bb_handler_oceandata</code> handlers. To do this, provide
+<code>target_s3_args</code> as part of your data source definition:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>my_source <span class="ot">&lt;-</span> <span class="fu">bb_example_sources</span>(<span class="st">"Australian Election 2016 House of Representatives data"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bb_modify_source</span>(<span class="at">method =</span> <span class="fu">list</span>(<span class="at">target_s3_args =</span> <span class="fu">list</span>(<span class="at">base_url =</span> <span class="st">"my.objectstore.com"</span>, <span class="at">region =</span> <span class="st">""</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">bucket =</span> <span class="st">"bucket"</span>, <span class="at">key =</span> <span class="st">"KEY"</span>, <span class="at">secret =</span> <span class="st">"SECRET"</span>))</span></code></pre></div>
+<p>where the entries in <code>target_s3_args</code> are those required
+by functions from the <code>aws.s3</code> package (see
+<code><a href="https://rdrr.io/pkg/aws.s3/man/s3HTTP.html" class="external-link">aws.s3::s3HTTP()</a></code> for an overview). Objects will be stored
+with keys that follow the directory hierarchy on the remote data source.
+For example,
+<code>http://www.somewhere.org/monkey/banana/dataset.zip</code> will be
+stored in the specified bucket with key
+<code>www.somewhere.org/monkey/banana/dataset.zip</code>. You can remove
+the host name from this key by adding <code>no_host = TRUE</code> to the
+data source’s method parameters; similarly, leading levels of the
+directory hierarchy can be dropped with the <code>cut_dirs</code>
+parameter: see <code><a href="../reference/bb_rget.html">bb_rget()</a></code> for details.</p>
+<p><code>target_s3_args</code> can also be specified as part of
+<code><a href="../reference/bb_config.html">bb_config()</a></code> to avoid having to provide the same parameters
+to multiple data sources:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bb_config.html">bb_config</a></span><span class="op">(</span>target_s3_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>base_url <span class="op">=</span> <span class="st">"my.objectstore.com"</span>, region <span class="op">=</span> <span class="st">""</span>,</span>
+<span>                                      key <span class="op">=</span> <span class="st">"KEY"</span>, secret <span class="op">=</span> <span class="st">"SECRET"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="../reference/bb_add.html">bb_add</a></span><span class="op">(</span><span class="va">my_source_1</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>             <span class="fu"><a href="../reference/bb_modify_source.html">bb_modify_source</a></span><span class="op">(</span>method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>target_s3_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>bucket <span class="op">=</span> <span class="st">"bucket1"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="../reference/bb_add.html">bb_add</a></span><span class="op">(</span><span class="va">my_source_2</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>             <span class="fu"><a href="../reference/bb_modify_source.html">bb_modify_source</a></span><span class="op">(</span>method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>target_s3_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>bucket <span class="op">=</span> <span class="st">"bucket2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level4">
 <h4 id="post-processing">Post-processing<a class="anchor" aria-label="anchor" href="#post-processing"></a>
 </h4>
 <div class="section level5">
@@ -710,7 +745,7 @@ remove unwanted files after downloading. See See
 should indicate when this is the case, including a reference (e.g. the
 URL via which an account can be obtained). For these sources, you will
 need to provide your user name and password, e.g.:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mysrc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span><span class="op">(</span><span class="st">"CMEMS global gridded SSH reprocessed (1993-ongoing)"</span><span class="op">)</span></span>
 <span><span class="va">mysrc</span><span class="op">$</span><span class="va">user</span> <span class="op">&lt;-</span> <span class="st">"yourusername"</span></span>
 <span><span class="va">mysrc</span><span class="op">$</span><span class="va">password</span> <span class="op">&lt;-</span> <span class="st">"yourpassword"</span></span>
@@ -740,7 +775,7 @@ that include the year information. It would be fairly easy to restrict
 ourselves to only the 2017 data using the <code>accept</code> option.
 Here we use the <code>bb_modify_source</code> helper function to do
 so:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mysrc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bb_example_sources.html">bb_example_sources</a></span><span class="op">(</span><span class="st">"CMEMS global gridded SSH reprocessed (1993-ongoing)"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/bb_modify_source.html">bb_modify_source</a></span><span class="op">(</span>user <span class="op">=</span> <span class="st">"yourusername"</span>, password <span class="op">=</span> <span class="st">"yourpassword"</span>,</span>
 <span>    method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>accept_follow <span class="op">=</span> <span class="st">"/2017"</span><span class="op">)</span><span class="op">)</span></span>
@@ -823,7 +858,7 @@ reference mission which is currently OSTM/Jason-2. VARIABLES</p>
 </ul>
 <p>Authentication note: Copernicus Marine login required, see <a href="http://marine.copernicus.eu/services-portfolio/register-now/" class="external-link uri">http://marine.copernicus.eu/services-portfolio/register-now/</a></p>
 <p>Approximate size: 310 GB</p>
-<p>Documentation link: <a href="http://marine.copernicus.eu/services-portfolio/access-to-products/?option=com_csw&amp;view=details&amp;product_id=SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047" class="external-link uri">http://marine.copernicus.eu/services-portfolio/access-to-products/?option=com_csw&amp;view=details&amp;product_id=SEALEVEL_GLO_PHY_L4_REP_OBSERVATIONS_008_047</a></p>
+<p>Documentation link: <a href="https://data.marine.copernicus.eu/product/SEALEVEL_GLO_PHY_L4_MY_008_047/description" class="external-link uri">https://data.marine.copernicus.eu/product/SEALEVEL_GLO_PHY_L4_MY_008_047/description</a></p>
 </div>
 </div>
 <div class="section level4">
@@ -927,7 +962,7 @@ though a 3 arc-second (~90 meter cell size) grid is available.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
       </footer>
