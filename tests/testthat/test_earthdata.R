@@ -10,6 +10,6 @@ test_that("bb_handler_earthdata works", {
     temp_root <- tempdir()
     res <- bb_get(src, local_file_root = temp_root)
 
-    expect_true(nrow(res$files[[1]]) == 12)
+    expect_equal(nrow(res$files[[1]]), 12)
     expect_true(all(file.exists(res$files[[1]]$file)))
 })
