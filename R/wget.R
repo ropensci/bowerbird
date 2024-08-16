@@ -106,6 +106,7 @@ bb_handler_wget_inner <- function(config,verbose=FALSE,local_dir_only=FALSE,...)
     tibble(ok = ok, files = list(NULL), msg = "")
 }
 
+## nocov start - wget is to be phased out, so don't count it in coverage tests
 
 
 #' Make a wget call
@@ -491,3 +492,5 @@ decode_wget_exit_status <- function(status) {
     }
     out
 }
+
+## nocov end
