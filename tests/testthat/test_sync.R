@@ -91,6 +91,10 @@ test_that("bb_sync works with a sink() call in place",{
 })
 
 test_that("an ftp source works", {
+    skip_on_os("mac")
+    ## seeing obscure CI failure on Mac only:
+    ##   *** caught segfault ***
+    ##   address 0x510000cd5f400ec7, cause 'invalid permissions'
     src <- bb_source(id = "bilbobaggins", name = "test",
                      description = "blah", doc_url = "http://some.where.org/",
                      citation = "blah", license = "blah",
