@@ -222,7 +222,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         } else {
             download_this <- TRUE
         }
-        if (isTRUE(download_this)) {
+        if (grepl("\\.NRT\\.", this_fullfile) && isTRUE(download_this)) {
             ## as of 2024-ish, files can be named *.NRT.nc, and these are eventually replaced by non-NRT versions
             ## don't download NRT files if the replacement exists, either locally or on the remote server
             non_nrt_file <- sub("\\.NRT\\.nc$", ".nc", this_fullfile)
