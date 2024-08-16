@@ -85,7 +85,19 @@ test_that("rget works with multiple input URLs", {
     expect_true(all(file.exists(file.path(outdir, res$files[[1]]$file))))
 })
 
-test_that("env vars are substituted correctly", {
+test_that("env vars are substituted correctly on windows", {
+    skip_on_os(c("mac", "linux", "solaris"))
+    expect_identical(use_secret("bilbobaggins"), "bilbobaggins") ## no match
+    Sys.setenv(FrodoBaggins = "ABC123")
+    expect_identical(use_secret("FrodoBaggins"), "ABC123") ## match
+    ## note that windows environment variables are not case sensitive, but linux/mac are
+    expect_identical(use_secret("frodobaggins"), "ABC123") ## match, case insensitive
+    expect_identical(use_secret(c("bilbobaggins", "FrodoBaggins", "frodobaggins", "", NA_character_)), c("bilbobaggins", "ABC123", "ABC123", "", NA_character_)) ## multiple
+    Sys.unsetenv("FrodoBaggins")
+})
+
+test_that("env vars are substituted correctly on non-windows", {
+    skip_on_os("windows")
     expect_identical(use_secret("bilbobaggins"), "bilbobaggins") ## no match
     Sys.setenv(FrodoBaggins = "ABC123")
     expect_identical(use_secret("FrodoBaggins"), "ABC123") ## match
