@@ -37,6 +37,9 @@ jobs:
           )
           covr::to_cobertura(cov)
         shell: Rscript {0}
+        env:
+          EARTHDATA_USER: ${{ secrets.EARTHDATA_USER }}
+          EARTHDATA_PASS: ${{ secrets.EARTHDATA_PASS }}
 
       - uses: codecov/codecov-action@v4
         with:
