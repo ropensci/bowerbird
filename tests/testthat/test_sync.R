@@ -98,7 +98,7 @@ test_that("an ftp source works", {
                      source_url = "ftp://ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/")
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
-    expect_true(grepl("ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/$", bb_data_source_dir(cf)))
+    expect_true(grepl("ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2", bb_data_source_dir(cf)))
     res <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
     expect_equal(nrow(res$files[[1]]), 1)
 })
