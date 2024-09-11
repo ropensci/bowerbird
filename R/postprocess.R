@@ -245,8 +245,8 @@ find_changed_files <- function(file_list_before, file_list_after, filename_patte
     ## detect changes on basis of ctime and size attributes
     ## returns names only
     ## discard any files that don't actually exist
-    file_list_before <- file_list_before[file.exists(rownames(file_list_before)), ]
-    file_list_after <- file_list_after[file.exists(rownames(file_list_after)), ]
+    if (nrow(file_list_before) > 0) file_list_before <- file_list_before[file.exists(rownames(file_list_before)), ]
+    if (nrow(file_list_after) > 0) file_list_after <- file_list_after[file.exists(rownames(file_list_after)), ]
     changed_files <- setdiff(rownames(file_list_after), rownames(file_list_before)) ## anything that has appeared afterwards
     for (thisf in intersect(rownames(file_list_after), rownames(file_list_before))) {
         ## files in both

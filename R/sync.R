@@ -220,8 +220,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
                     ## note that file paths returned by the handler are relative to the local_file_root
                     ## if we are doing a dry run, no postprocessing
                     if (dry_run) {
-                        file_list_before <- character()
-                        file_list_after <- character()
+                        file_list_before <- file_list_after <- data.frame()
                     } else {
                         ## all files go into both file_list_after and file_list_before
                         file_list_before <- file.info(file.path(bb_settings(this_dataset)$local_file_root, method_loot$files[[1]]$file))
