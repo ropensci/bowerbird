@@ -190,10 +190,12 @@ aws_list_objects <- function(s3_args, create = FALSE) {
     chk <- aws_fun(aws.s3::bucketlist, s3_args[setdiff(names(s3_args), "bucket")])
     ##chk <- tryCatch(aws_fun(aws.s3::bucket_exists, s3_args), error = function(e) stop("no can do"))
     ## bucket_exists returns 404 error if the bucket does not exist, 403 error if it exists but is inaccessible to these credentials?
-    if ((nrow(chk) < 1 || !s3_args$bucket %in% chk$Bucket) && isTRUE(create)) {
-        chk <- tryCatch(aws_fun(aws.s3::put_bucket, s3_args), error = function(e) stop("Could not create bucket. ", conditionMessage(e)))
-    } else {
-        stop("bucket does not exist")
+    if ((nrow(chk) < 1 || !s3_args$bucket %in% chk$Bucket)) {
+        if (isTRUE(create)) {
+            chk <- tryCatch(aws_fun(aws.s3::put_bucket, s3_args), error = function(e) stop("Could not create bucket. ", conditionMessage(e)))
+        } else {
+            stop("bucket does not exist")
+        }
     }
     ## get bucket contents
     tryCatch({
