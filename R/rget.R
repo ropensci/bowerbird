@@ -265,10 +265,10 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                         req <- fetch_disk_retries(retries = retries, is_ftp = is_ftp, url = df, path = dlf, handle = handle_setopt(curl::new_handle(), .list = myopts))
                         ## NOTE should be able to re-use handle there, not create a new handle. But it's not working (see https://github.com/ropensci/bowerbird/issues/27)
                     }
-                    if (httr::http_error(req$status_code)) {
+                    if (is.null(req) || httr::http_error(req$status_code)) {
                         ## don't throw error on download
                         myfun <- if (stop_on_download_error) stop else warning
-                        myfun("Error downloading ", df, ": ", httr::http_status(req$status_code)$message)
+                        myfun("Error downloading ", df, if (!is.null(req)) paste0(": ", httr::http_status(req$status_code)$message))
                     } else {
                         if (s3_target) {
                             ## if the file wasn't re-downloaded, req$content will be length 0 (and response code should be 304)
@@ -342,6 +342,7 @@ fetch_disk_retries <- function(retries = 0L, is_ftp = FALSE, ...) {
 }
 curl_with_retries <- function(curlfun, n_tries, is_ftp, ...) {
     this_ok <- FALSE
+    req <- NULL
     for (attempt in seq_len(n_tries)) {
         if (attempt > 1) Sys.sleep(attempt - 1) ## exponential backoff, pause by 1s on first retry, 2s on second, 4s on third, etc
         tryCatch({
@@ -400,10 +401,10 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                         stop(e$message)
                     }
                 })
-                if (is.null(x)) next
             } else {
                 x <- fetch_memory_retries(retries = retries, is_ftp = ftp, url = url, handle = handle)
             }
+            if (is.null(x)) next
             ## TODO check for error?
             if (ftp) {
                 ## treat as text (i.e. standard ftp directory listing)
