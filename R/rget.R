@@ -110,6 +110,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param debug logical: if \code{TRUE}, will print additional debugging information. If bb_rget is not behaving as expected, try setting this to \code{TRUE}
 #' @param dry_run logical: if \code{TRUE}, spider the remote site and work out which files would be downloaded, but don't download them
 #' @param stop_on_download_error logical: if \code{TRUE}, the download process will stop if any file download fails. If \code{FALSE}, the process will issue a warning and continue to the next file to download
+#' @param retries integer: number of times to retry a request if it fails with a transient error (similar to curl, a transient error means a timeout, an FTP 4xx response code, or an HTTP 5xx response code
 #' @param force_local_filename character: if provided, then each \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with name given \code{force_local_filename}, in a local directory determined by the \code{url}. \code{force_local_filename} should be a character vector of the same length as the \code{url} vector
 #' @param use_url_directory logical: if \code{TRUE}, files will be saved into a local directory that follows the URL structure (e.g. files from \code{http://some.where/place} will be saved into directory \code{some.where/place}). If \code{FALSE}, files will be saved into the current directory
 #' @param no_host logical: if \code{use_url_directory = TRUE}, specifying \code{no_host = TRUE} will remove the host name from the directory (e.g. files from files from \code{http://some.where/place} will be saved into directory \code{place})
@@ -121,7 +122,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 #' @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_parent_download = no_parent, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, link_css = "a", curl_opts, target_s3_args) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_parent_download = no_parent, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, retries = 0, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, link_css = "a", curl_opts, target_s3_args) {
     assert_that(is.character(url))
     if (length(url) < 1) return(tibble(ok = TRUE, files = list(tibble(url = character(), file = character(), was_downloaded = logical())), message = ""))
     assert_that(is.numeric(level), level >= 0)
@@ -154,6 +155,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
         assert_that(is.list(curl_opts))
         if (is.null(names(curl_opts)) || (length(names(curl_opts)) != length(curl_opts))) stop("curl_opts list must be named")
     }
+    assert_that(is.numeric(retries), retries >= 0)
 
     ## is this an s3 target (are we uploading to a bucket, rather than downloading to local file system?)
     ##  `target_s3_args` will contain any global target_s3_args set in bb_config, regardless of whether this particular data source is s3 or not
@@ -194,7 +196,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                 ## modify accept_follow, unless user has already overridden the defaults
                 opts$accept_follow <- "[^\\.]" ## anything without a .
             }
-            rec <- spider_curl(to_visit = url, opts = opts, ftp = is_ftp, handle = handle)
+            rec <- spider_curl(to_visit = url, opts = opts, ftp = is_ftp, handle = handle, retries = retries)
             ## download each file, or not depending on clobber behaviour
             ## if doing a dry run no download, but do enumerate the list of files that would be downloaded
             downloads <- tibble(url = unique(rec$download_queue), file = NA_character_, was_downloaded = FALSE)
@@ -253,15 +255,14 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                     }
                     if (s3_target) {
                         ## for s3 we can keep in memory before re-uploading to destination s3 bucket
-                        req <- curl::curl_fetch_memory(df, handle = handle_setopt(curl::new_handle(), .list = myopts))
+                        req <- fetch_memory_retries(retries = retries, is_ftp = is_ftp, url = df, handle = handle_setopt(curl::new_handle(), .list = myopts))
                     } else {
                         ## downloading to local file system
                         ## need to download to temp file, because a file of zero bytes will be written if not if-modified-since
                         dlf <- tempfile()
                         if (file.exists(fname)) file.copy(fname, dlf)
                         ## may need to suppressWarnings with ftp here
-                        ##req <- curl_fetch_disk(df, path = dlf, handle = handle_setopt(handle, .list = myopts))
-                        req <- curl_fetch_disk(df, path = dlf, handle = handle_setopt(curl::new_handle(), .list = myopts))
+                        req <- fetch_disk_retries(retries = retries, is_ftp = is_ftp, url = df, path = dlf, handle = handle_setopt(curl::new_handle(), .list = myopts))
                         ## NOTE should be able to re-use handle there, not create a new handle. But it's not working (see https://github.com/ropensci/bowerbird/issues/27)
                     }
                     if (httr::http_error(req$status_code)) {
@@ -332,7 +333,34 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     tibble(ok = ok, files = list(downloads), message = msg)
 }
 
-spider_curl <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0, ftp = FALSE, handle) {
+## curl_fetch_memory and _disk wrappers with retries
+fetch_memory_retries <- function(retries = 0L, is_ftp = FALSE, ...) {
+    curl_with_retries(curl::curl_fetch_memory, n_tries = retries + 1L, is_ftp = is_ftp, ...)
+}
+fetch_disk_retries <- function(retries = 0L, is_ftp = FALSE, ...) {
+    curl_with_retries(curl::curl_fetch_disk, n_tries = retries + 1L, is_ftp = is_ftp, ...)
+}
+curl_with_retries <- function(curlfun, n_tries, is_ftp, ...) {
+    this_ok <- FALSE
+    for (attempt in seq_len(n_tries)) {
+        if (attempt > 1) Sys.sleep(attempt - 1) ## exponential backoff, pause by 1s on first retry, 2s on second, 4s on third, etc
+        tryCatch({
+            req <- curlfun(...)
+            if (httr::http_error(req$status_code) && (grepl("^5", req$status_code) || (is_ftp && grepl("^4", req$status_code)))) {
+                ## transient error
+            } else {
+                this_ok <- TRUE
+            }
+        }, error = function(e) {
+            ## TODO check that the error was actually a timeout?
+        })
+        if (this_ok) break
+    }
+    req
+}
+
+
+spider_curl <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0, ftp = FALSE, retries = 0, handle) {
     ## TODO: check that opts has the names we expect
     to_visit <- to_visit[!to_visit %in% visited]
     if (length(to_visit) < 1) return(list(visited = visited, download_queue = download_queue))
@@ -361,9 +389,9 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 ## ftp is a bit funny - when recursing, we can't be sure if a link is a file or a directory
                 ## we have added trailing slashes, but if it was actually a file this will throw an error
                 ## also, suppress warnings else we get warnings about reading directory contents etc
-                x <- tryCatch(##suppressWarnings(
-                    curl_fetch_memory(url, handle = handle)##)
-                  , error = function(e) {
+                x <- tryCatch({
+                    fetch_memory_retries(retries = retries, is_ftp = ftp, url = url, handle = handle)
+                }, error = function(e) {
                     if (grepl("directory", e$message)) {
                         ## was probably a 'Server denied you to change to the given directory' message, ignore it
                         if (opts$verbose) cat(" (ignoring error: ", e$message, ") ... done.\n")
@@ -374,7 +402,7 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 })
                 if (is.null(x)) next
             } else {
-                x <- curl_fetch_memory(url, handle = handle)
+                x <- fetch_memory_retries(retries = retries, is_ftp = ftp, url = url, handle = handle)
             }
             ## TODO check for error?
             if (ftp) {
@@ -457,7 +485,7 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
     }
     if (length(next_level_to_visit) > 0) {
         ## recurse to next level
-        spider_curl(next_level_to_visit, visited = visited, download_queue = download_queue, opts = opts, current_level = current_level + 1, ftp = ftp, handle = handle)
+        spider_curl(next_level_to_visit, visited = visited, download_queue = download_queue, opts = opts, current_level = current_level + 1, ftp = ftp, retries = retries, handle = handle)
     } else {
         list(visited = visited, download_queue = download_queue)
     }

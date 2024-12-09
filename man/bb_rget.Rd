@@ -27,6 +27,7 @@ bb_rget(
   debug = FALSE,
   dry_run = FALSE,
   stop_on_download_error = FALSE,
+  retries = 0,
   force_local_filename,
   use_url_directory = TRUE,
   no_host = FALSE,
@@ -80,6 +81,8 @@ bb_rget_default_downloads()
 \item{dry_run}{logical: if \code{TRUE}, spider the remote site and work out which files would be downloaded, but don't download them}
 
 \item{stop_on_download_error}{logical: if \code{TRUE}, the download process will stop if any file download fails. If \code{FALSE}, the process will issue a warning and continue to the next file to download}
+
+\item{retries}{integer: number of times to retry a request if it fails with a transient error (similar to curl, a transient error means a timeout, an FTP 4xx response code, or an HTTP 5xx response code}
 
 \item{force_local_filename}{character: if provided, then each \code{url} will be treated as a single URL (no recursion will be conducted). It will be downloaded to a file with name given \code{force_local_filename}, in a local directory determined by the \code{url}. \code{force_local_filename} should be a character vector of the same length as the \code{url} vector}
 
