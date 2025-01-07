@@ -39,6 +39,8 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
     ##if (!is.null(layer)) assert_that(is.string(layer), nzchar(layer))
     dots <- list(...)
 
+    use_etags <- FALSE ## previously we used the ETag information to decide whether a file had changed since it was last downloaded. The ETags were md5 hashes of each file. But at some point during 2024 it seems that the ETags are not consistently populated as md5 hashes (either this changed, or it was never actually the case for all data sets). So now use last_modified times. The ETag code has been left here for reference temporarily but will be removed at some later date TODO
+
     ## thisds <- bb_data_sources(config) ## user and password info will be in here, but we don't need it for the copernicus handler
     this_att <- bb_settings(config)
 
@@ -53,8 +55,8 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
     if (verbose) cat("Downloading file list ... \n")
     myfiles <- if (ctype == "file") cms_list_stac_single_file(product) else CopernicusMarine::cms_list_stac_files(product) ## layer is ignored in this?
     if (nrow(myfiles) < 1) stop("No files found for Copernicus Marine product: ", product)
-    if (!all(c("home", "native", "current_path", "ETag") %in% names(myfiles))) stop("file list does not have the expected columns, has there been a change to the format returned by `CopernicusMarine::cms_list_stac_files()`?")
-    myfiles$ETag <- sub("^\"", "", sub("\"$", "", myfiles$ETag))
+    if (!all(c("home", "native", "current_path", if (use_etags) "ETag" else "LastModified") %in% names(myfiles))) stop("file list does not have the expected columns, has there been a change to the format returned by `CopernicusMarine::cms_list_stac_files()`?")
+    if (use_etags) myfiles$ETag <- sub("^\"", "", sub("\"$", "", myfiles$ETag))
     if (!"url" %in% names(myfiles)) myfiles$url <- paste0("https://", file.path(myfiles$home, myfiles$native, myfiles$current_path))
     ## take the `current_path` of each file and find the product ID
     pidx <- stringr::str_locate(myfiles$current_path, stringr::fixed(paste0(product, "/")))
@@ -65,26 +67,36 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
     ## for each file, download if needed and store in appropriate directory
     ok <- TRUE
     my_curl_config <- build_curl_config(debug = FALSE, show_progress = verbose)
-    fidx <- file.exists(myfiles$local_filename) & !is.na(myfiles$ETag)
-    myfiles$existing_checksum <- NA_character_
-    myfiles$existing_checksum[fidx] <- vapply(myfiles$local_filename[fidx], file_hash, hash = "md5", FUN.VALUE = "", USE.NAMES = FALSE)
+    if (use_etags) {
+        fidx <- file.exists(myfiles$local_filename) & !is.na(myfiles$ETag)
+        myfiles$existing_checksum <- NA_character_
+        myfiles$existing_checksum[fidx] <- vapply(myfiles$local_filename[fidx], file_hash, hash = "md5", FUN.VALUE = "", USE.NAMES = FALSE)
+    } else {
+        fidx <- file.exists(myfiles$local_filename)
+        myfiles$local_last_modified <- as.POSIXct(NA)
+        myfiles$local_last_modified[fidx] <- fs::file_info(myfiles$local_filename[fidx])$modification_time
+    }
     myfiles$would_actually_download <- FALSE ## only used with dry_run
     for (idx in seq_len(nrow(myfiles))) {
         this_url <- myfiles$url[idx]
         this_fullfile <- myfiles$local_filename[idx]
-        this_exists <- !is.na(myfiles$existing_checksum[idx])
+        this_exists <- if (use_etags) !is.na(myfiles$existing_checksum[idx]) else !is.na(myfiles$local_last_modified[idx])
         download_this <- !this_exists
         if (this_att$clobber < 1) {
             ## don't clobber existing
         } else if (this_att$clobber == 1) {
-            if (!is.na(myfiles$ETag[idx])) {
-                ## we have a remote hash, so replace existing if remote hash does not match that of local copy
-                if (this_exists) {
-                    download_this <- !isTRUE(myfiles$ETag[idx] == myfiles$existing_checksum[idx])
+            if (use_etags) {
+                if (!is.na(myfiles$ETag[idx])) {
+                    ## we have a remote hash, so replace existing if remote hash does not match that of local copy
+                    if (this_exists) download_this <- !isTRUE(myfiles$ETag[idx] == myfiles$existing_checksum[idx])
+                } else {
+                    ## no remote hash, so attempt the download and rely on timestamps
+                    download_this <- TRUE
                 }
             } else {
-                ## no remote hash, so attempt the download and rely on timestamps
-                download_this <- TRUE
+                ## download unless local copy has a newer timestamp than the remote copy
+                ## this is equivalent to no-clobber, but much faster because we won't issue a conditional download request for every file, we are checking modification times first and only requesting downloads of the modified files
+                download_this <- !isTRUE(myfiles$local_last_modified[idx] >= myfiles$LastModified[idx])
             }
         } else {
             download_this <- TRUE
@@ -94,7 +106,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
                 if (verbose) cat("Downloading:", this_url, "... \n")
                 if (!dir.exists(dirname(this_fullfile))) dir.create(dirname(this_fullfile), recursive = TRUE)
                 myfun <- warning ## if (stop_on_download_error) stop else warning
-                if (!is.na(myfiles$ETag[idx])) {
+                if (!use_etags || !is.na(myfiles$ETag[idx])) {
                     req <- httr::with_config(my_curl_config, httr::GET(this_url, httr::write_disk(path = this_fullfile, overwrite = TRUE)))
                     if (httr::http_error(req)) {
                         myfun("Error downloading ", this_url, ": ", httr::http_status(req)$message)
@@ -102,6 +114,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
                         myfiles$was_downloaded[idx] <- TRUE
                     }
                 } else {
+                    ## request with modified-since header so that timestamping check gets applied
                     res <- bb_rget(this_url, force_local_filename = this_fullfile, use_url_directory = FALSE, clobber = this_att$clobber, curl_opts = my_curl_config$options, verbose = verbose)
                     if (!res$ok) {
                         myfun("Error downloading ", this_url, ": ", res$message)
@@ -111,7 +124,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
                 }
             } else {
                 if (this_exists) {
-                    if (verbose) cat("not downloading ", myfiles$filename[idx], ", local copy exists with identical checksum\n", sep = "")
+                    if (verbose) cat("not downloading ", myfiles$local_filename[idx], ", local copy exists with identical checksum\n", sep = "")
                 }
             }
         } else {
