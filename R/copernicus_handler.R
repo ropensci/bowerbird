@@ -124,7 +124,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
                 }
             } else {
                 if (this_exists) {
-                    if (verbose) cat("not downloading ", myfiles$local_filename[idx], ", local copy exists with identical checksum\n", sep = "")
+                    if (verbose) cat("not downloading ", myfiles$local_filename[idx], ", local copy exists", if (use_etags) " with identical checksum", "\n", sep = "")
                 }
             }
         } else {
