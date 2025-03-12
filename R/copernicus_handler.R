@@ -54,7 +54,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
 
     if (verbose) cat("Downloading file list ... \n")
     myfiles <- if (ctype == "file") cms_list_stac_single_file(product) else CopernicusMarine::cms_list_stac_files(product) ## layer is ignored in this?
-    if (nrow(myfiles) < 1) stop("No files found for Copernicus Marine product: ", product)
+    if (is.null(myfiles) || nrow(myfiles) < 1) stop("No files found for Copernicus Marine product: ", product)
     if (!all(c("home", "native", "current_path", if (use_etags) "ETag" else "LastModified") %in% names(myfiles))) stop("file list does not have the expected columns, has there been a change to the format returned by `CopernicusMarine::cms_list_stac_files()`?")
     if (use_etags) myfiles$ETag <- sub("^\"", "", sub("\"$", "", myfiles$ETag))
     if (!"url" %in% names(myfiles)) myfiles$url <- paste0("https://", file.path(myfiles$home, myfiles$native, myfiles$current_path))
