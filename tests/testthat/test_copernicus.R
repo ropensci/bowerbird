@@ -1,22 +1,21 @@
 context("copernicus handler")
 
 test_that("bb_handler_copernicus works", {
-    skip("skipping Copernicus test temporarily, not sure if the test dataset is broken or Copernicus changes have broken our code more generally")
     src <- bb_source(
-        name = "Antarctic Sea Ice Extent from Reanalysis",
-        id = "ANTARCTIC_OMI_SI_extent",
-        description = "Estimates of Antarctic sea ice extent are obtained from the surface of oceans grid cells that have at least 15% sea ice concentration. These values are cumulated in the entire Southern Hemisphere (excluding ice lakes) and from 1993 up to real time aiming to: i) obtain the Antarctic sea ice extent as expressed in millions of km squared (106 km2) to monitor both the large-scale variability and mean state and change. ii) to monitor the change in sea ice extent as expressed in millions of km squared per decade (106 km2/decade), or in sea ice extent loss/gain since the beginning of the time series as expressed in percent per decade (%/decade; reference period being the first date of the key figure b) dot-dashed trend line, Vaughan et al., 2013))",
-        doc_url = "https://data.marine.copernicus.eu/product/ANTARCTIC_OMI_SI_extent/description",
-        citation = "In case of any publication, the Licensee will ensure credit the Copernicus Marine Service and cite the DOIs links guaranteeing the traceability of the scientific studies and experiments, in the following manner: \"This study has been conducted using E.U. Copernicus Marine Service Information; https://doi.org/10.48670/moi-00186\"",
+        name = "Global Ocean, extreme and mean significant wave height trends from satellite observations - seasonal trends",
+        id = "OMI_EXTREME_SEASTATE_GLOBAL_swh_mean_and_P95_obs",
+        description = "Significant wave height (SWH), expressed in metres, is the average height of the highest one-third of waves. This OMI provides time series of seasonal mean and extreme SWH values in three oceanic regions as well as their trends from 2002 to 2020, computed from the reprocessed global L4 SWH product (WAVE_GLO_PHY_SWH_L4_MY_014_007). The extreme SWH is defined as the 95th percentile of the daily maximum of SWH over the chosen period and region. The 95th percentile represents the value below which 95% of the data points fall, indicating higher wave heights than usual. The mean and the 95th percentile of SWH are calculated for two seasons of the year to take into account the seasonal variability of waves (January, February, and March, and July, August, and September) and are in m while the trends are in cm/yr.",
+        doc_url = "https://data.marine.copernicus.eu/product/OMI_EXTREME_SEASTATE_GLOBAL_swh_mean_and_P95_obs/description",
+        citation = "In case of any publication, the Licensee will ensure credit the Copernicus Marine Service and cite the DOIs links guaranteeing the traceability of the scientific studies and experiments, in the following manner: \"This study has been conducted using E.U. Copernicus Marine Service Information; https://doi.org/10.48670/mds-00352\"",
         license = "See http://marine.copernicus.eu/services-portfolio/service-commitments-and-licence/",
-        method = list("bb_handler_copernicus", product = "ANTARCTIC_OMI_SI_extent"),
+        method = list("bb_handler_copernicus", product = "OMI_EXTREME_SEASTATE_GLOBAL_swh_mean_and_P95_obs"),
         user = "",
         password = "",
-        data_group = "Sea surface temperature", warn_empty_auth = FALSE)
+        warn_empty_auth = FALSE)
 
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
-    expect_true(grepl("data.marine.copernicus.eu/ANTARCTIC_OMI_SI_extent$", bb_data_source_dir(cf)))
+    expect_true(grepl("data.marine.copernicus.eu/OMI_EXTREME_SEASTATE_GLOBAL_swh_mean_and_P95_obs$", bb_data_source_dir(cf)))
     res <- bb_sync(cf, confirm_downloads_larger_than = NULL)
     expect_equal(nrow(res$files[[1]]), 1)
     expect_true(all(file.exists(res$files[[1]]$file)))
