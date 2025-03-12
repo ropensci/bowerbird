@@ -346,7 +346,9 @@ curl_with_retries <- function(curlfun, n_tries, is_ftp, ...) {
     for (attempt in seq_len(n_tries)) {
         if (attempt > 1) Sys.sleep(attempt - 1) ## exponential backoff, pause by 1s on first retry, 2s on second, 4s on third, etc
         tryCatch({
-            req <- curlfun(...)
+            dots <- list(...)
+            if ("url" %in% names(dots)) dots$url <- URLencode(dots$url)
+            req <- do.call(curlfun, dots)
             if (httr::http_error(req$status_code) && (grepl("^5", req$status_code) || (is_ftp && grepl("^4", req$status_code)))) {
                 ## transient error
             } else {
