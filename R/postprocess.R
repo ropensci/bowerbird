@@ -214,9 +214,8 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                    if (unzip_this) {
                        ## wrap this in tryCatch block so that errors do not halt our whole process
                        tryCatch({
-                           fsize <- 1e7 ## needs to be the UNCOMPRESSED size, which is around 850k elements. Is allowed to be an overestimate, but the written file will be corrupt if this is an underestimate
-                           ff <- archive::file_read(thisf)
-                           open(ff,"rb") ## open in binary mode, so that readBin is happy
+                           fsize <- max(1e7, file.size(thisf) * 20) ## needs to be the UNCOMPRESSED size, which is around 850k elements. Is allowed to be an overestimate, but the written file will be corrupt if this is an underestimate
+                           ff <- archive::file_read(thisf, mode = "rb")
                            writeBin(readBin(ff, "raw", fsize), destfile)
                            close(ff)
                            if (grepl("delete", method)) {
