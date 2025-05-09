@@ -185,8 +185,6 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             opts$curl_config$options[[nm]] <- this
         }
     }
-    ## create curl handle here
-    handle <- new_handle(.list = opts$curl_config$options)
     ok <- FALSE
     msg <- "" ## error or other messages
     downloads <- tibble(url = character(), file = character(), was_downloaded = logical())
@@ -196,7 +194,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                 ## modify accept_follow, unless user has already overridden the defaults
                 opts$accept_follow <- "[^\\.]" ## anything without a .
             }
-            rec <- spider_curl(to_visit = url, opts = opts, ftp = is_ftp, handle = handle, retries = retries)
+            rec <- spider_curl(to_visit = url, opts = opts, ftp = is_ftp, retries = retries)
             ## download each file, or not depending on clobber behaviour
             ## if doing a dry run no download, but do enumerate the list of files that would be downloaded
             downloads <- tibble(url = unique(rec$download_queue), file = NA_character_, was_downloaded = FALSE)
@@ -255,15 +253,14 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                     }
                     if (s3_target) {
                         ## for s3 we can keep in memory before re-uploading to destination s3 bucket
-                        req <- fetch_memory_retries(retries = retries, is_ftp = is_ftp, url = df, handle = handle_setopt(curl::new_handle(), .list = myopts))
+                        req <- fetch_memory_retries(retries = retries, is_ftp = is_ftp, url = df, curl_opts = myopts)
                     } else {
                         ## downloading to local file system
                         ## need to download to temp file, because a file of zero bytes will be written if not if-modified-since
                         dlf <- tempfile()
                         if (file.exists(fname)) file.copy(fname, dlf)
                         ## may need to suppressWarnings with ftp here
-                        req <- fetch_disk_retries(retries = retries, is_ftp = is_ftp, url = df, path = dlf, handle = handle_setopt(curl::new_handle(), .list = myopts))
-                        ## NOTE should be able to re-use handle there, not create a new handle. But it's not working (see https://github.com/ropensci/bowerbird/issues/27)
+                        req <- fetch_disk_retries(retries = retries, is_ftp = is_ftp, url = df, path = dlf, curl_opts = myopts)
                     }
                     if (is.null(req) || httr::http_error(req$status_code)) {
                         ## don't throw error on download
@@ -334,13 +331,13 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
 }
 
 ## curl_fetch_memory and _disk wrappers with retries
-fetch_memory_retries <- function(retries = 0L, is_ftp = FALSE, ...) {
-    curl_with_retries(curl::curl_fetch_memory, n_tries = retries + 1L, is_ftp = is_ftp, ...)
+fetch_memory_retries <- function(retries = 0L, is_ftp = FALSE, curl_opts, ...) {
+    curl_with_retries(curl::curl_fetch_memory, n_tries = retries + 1L, is_ftp = is_ftp, curl_opts = curl_opts, ...)
 }
-fetch_disk_retries <- function(retries = 0L, is_ftp = FALSE, ...) {
-    curl_with_retries(curl::curl_fetch_disk, n_tries = retries + 1L, is_ftp = is_ftp, ...)
+fetch_disk_retries <- function(retries = 0L, is_ftp = FALSE, curl_opts, ...) {
+    curl_with_retries(curl::curl_fetch_disk, n_tries = retries + 1L, is_ftp = is_ftp, curl_opts = curl_opts, ...)
 }
-curl_with_retries <- function(curlfun, n_tries, is_ftp, ...) {
+curl_with_retries <- function(curlfun, n_tries, is_ftp, curl_opts, ...) {
     this_ok <- FALSE
     req <- NULL
     for (attempt in seq_len(n_tries)) {
@@ -348,7 +345,9 @@ curl_with_retries <- function(curlfun, n_tries, is_ftp, ...) {
         tryCatch({
             dots <- list(...)
             if ("url" %in% names(dots)) dots$url <- URLencode(dots$url)
+            dots$handle <- do.call(new_handle, curl_opts)
             req <- do.call(curlfun, dots)
+            ## cat("connect:", req$times[3], "\n") ## to check that connections are being re-used, connection time should be zero on subsequent connections to an already-visited host
             if (httr::http_error(req$status_code) && (grepl("^5", req$status_code) || (is_ftp && grepl("^4", req$status_code)))) {
                 ## transient error
             } else {
@@ -363,7 +362,7 @@ curl_with_retries <- function(curlfun, n_tries, is_ftp, ...) {
 }
 
 
-spider_curl <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0, ftp = FALSE, retries = 0, handle) {
+spider_curl <- function(to_visit, visited = character(), download_queue = character(), opts, current_level = 0, ftp = FALSE, retries = 0) {
     ## TODO: check that opts has the names we expect
     to_visit <- to_visit[!to_visit %in% visited]
     if (length(to_visit) < 1) return(list(visited = visited, download_queue = download_queue))
@@ -393,7 +392,7 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 ## we have added trailing slashes, but if it was actually a file this will throw an error
                 ## also, suppress warnings else we get warnings about reading directory contents etc
                 x <- tryCatch({
-                    fetch_memory_retries(retries = retries, is_ftp = ftp, url = url, handle = handle)
+                    fetch_memory_retries(retries = retries, is_ftp = ftp, url = url, curl_opts = opts$curl_config$options)
                 }, error = function(e) {
                     if (grepl("directory", e$message)) {
                         ## was probably a 'Server denied you to change to the given directory' message, ignore it
@@ -404,7 +403,7 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                     }
                 })
             } else {
-                x <- fetch_memory_retries(retries = retries, is_ftp = ftp, url = url, handle = handle)
+                x <- fetch_memory_retries(retries = retries, is_ftp = ftp, url = url, curl_opts = opts$curl_config$options)
             }
             if (is.null(x)) next
             ## TODO check for error?
@@ -488,7 +487,7 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
     }
     if (length(next_level_to_visit) > 0) {
         ## recurse to next level
-        spider_curl(next_level_to_visit, visited = visited, download_queue = download_queue, opts = opts, current_level = current_level + 1, ftp = ftp, retries = retries, handle = handle)
+        spider_curl(next_level_to_visit, visited = visited, download_queue = download_queue, opts = opts, current_level = current_level + 1, ftp = ftp, retries = retries)
     } else {
         list(visited = visited, download_queue = download_queue)
     }
