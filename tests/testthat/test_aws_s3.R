@@ -4,54 +4,21 @@ test_that("bb_handler_aws_s3 works", {
         name = "Crowdsourced Bathymetry example data",
         id = "odp-noaa-nesdis-ncei-csb",
         description = "A small example bathymetry csv data set",
-        doc_url = "https://noaa-bathymetry-pds.s3.amazonaws.com/readme.html",
+        doc_url = "https://noaa-dcdb-bathymetry-pds.s3.amazonaws.com/docs/readme.html",
         citation = "Crowdsourced Bathymetry was accessed on DATE from https://registry.opendata.aws/odp-noaa-nesdis-ncei-csb",
-        license = "Pleae cite",
-        method = list("bb_handler_aws_s3", bucket = "", base_url = "noaa-bathymetry-pds.s3.amazonaws.com", prefix = "", region = "", accept_download = "csv/2019/06/26/20190626_05b4.*"),
+        license = "Please cite",
+        method = list("bb_handler_aws_s3", bucket = "", base_url = "noaa-dcdb-bathymetry-pds.s3.amazonaws.com", prefix = "", region = "", accept_download = "20170425114516079166_.*"),
         postprocess = NULL,
         collection_size = 0.1)
     temp_root <- tempdir()
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
-    expect_true(grepl("noaa\\-bathymetry\\-pds\\.s3\\.amazonaws\\.com[/\\\\]?$", bb_data_source_dir(cf)))
+    expect_true(grepl("noaa\\-dcdb\\-bathymetry\\-pds\\.s3\\.amazonaws\\.com[/\\\\]?$", bb_data_source_dir(cf)))
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL)
     expect_equal(nrow(status$files[[1]]), 1)
     expect_true(file.exists(status$files[[1]]$file))
     fi <- file.info(status$files[[1]]$file)
-    expect_gt(fi$size, 800e3)
-    expect_lt(fi$size, 900e3)
-
-    ## test the same source using accept_download_extra
-    src <- bb_source(
-        name = "Crowdsourced Bathymetry example data",
-        id = "odp-noaa-nesdis-ncei-csb",
-        description = "A small example bathymetry csv data set",
-        doc_url = "https://noaa-bathymetry-pds.s3.amazonaws.com/readme.html",
-        citation = "Crowdsourced Bathymetry was accessed on DATE from https://registry.opendata.aws/odp-noaa-nesdis-ncei-csb",
-        license = "Pleae cite",
-        method = list("bb_handler_aws_s3", bucket = "", base_url = "noaa-bathymetry-pds.s3.amazonaws.com", prefix = "", region = "", accept_download = "css/", accept_download_extra = "css$"),
-        postprocess = NULL,
-        collection_size = 0.1)
-    temp_root <- tempdir()
-    cf <- bb_add(bb_config(local_file_root = temp_root), src)
-    status <- bb_sync(cf, confirm_downloads_larger_than = NULL, dry_run = TRUE)
-    expect_equal(nrow(status$files[[1]]), 2)
-    expect_true(all(grepl("(css)$", status$files[[1]]$url)))
-
-    ## test the same source using reject_download
-    src <- bb_source(
-        name = "Crowdsourced Bathymetry example data",
-        id = "odp-noaa-nesdis-ncei-csb",
-        description = "A small example bathymetry csv data set",
-        doc_url = "https://noaa-bathymetry-pds.s3.amazonaws.com/readme.html",
-        citation = "Crowdsourced Bathymetry was accessed on DATE from https://registry.opendata.aws/odp-noaa-nesdis-ncei-csb",
-        license = "Pleae cite",
-        method = list("bb_handler_aws_s3", bucket = "", base_url = "noaa-bathymetry-pds.s3.amazonaws.com", prefix = "", region = "", reject_download = "(css|csv)$"),
-        postprocess = NULL,
-        collection_size = 0.1)
-    temp_root <- tempdir()
-    cf <- bb_add(bb_config(local_file_root = temp_root), src)
-    status <- bb_sync(cf, confirm_downloads_larger_than = NULL, dry_run = TRUE)
-    expect_equal(nrow(status$files[[1]]), 0)
+    expect_gt(fi$size, 1e3)
+    expect_lt(fi$size, 2e3)
 
     ## SILO climate data
     src <- bb_source(

@@ -193,13 +193,13 @@ test_that("decompressing Z-compressed files works",{
         postprocess=list("bb_uncompress"))
 
     temp_root <- tempdir()
-    cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
-    bb_sync(cf,confirm_downloads_larger_than=NULL)
+    cf <- bb_add(bb_config(local_file_root = temp_root, clobber = 2), my_source)
+    res <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
 
     fp <- bb_data_source_dir(cf)
-    expect_true(file.exists(file.path(fp,"20170822.nc.Z")))
-    expect_true(file.exists(file.path(fp,"20170822.nc")))
-    expect_equal(file.info(file.path(fp,"20170822.nc"))$size,840508)
+    expect_true(file.exists(file.path(fp, "20170822.nc.Z")))
+    expect_true(file.exists(file.path(fp, "20170822.nc")))
+    expect_equal(file.size(file.path(fp, "20170822.nc")), 840508)
 })
 
 test_that("cleanup postprocessing works",{
