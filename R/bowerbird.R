@@ -15,7 +15,7 @@
 #' @importFrom stringr regex str_detect str_match str_split str_trim
 #' @importFrom R.utils bunzip2 gunzip
 #' @importFrom rmarkdown render
-#' @importFrom rvest html_elements html_attr
+#' @importFrom rvest html_elements html_attr html_attrs
 #' @importFrom stats na.omit
 #' @importFrom sys exec_wait exec_internal
 #' @importFrom tibble as_tibble tibble tribble

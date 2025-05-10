@@ -33,8 +33,10 @@ bb_rget(
   no_host = FALSE,
   cut_dirs = 0L,
   link_css = "a",
+  link_href = "href",
   curl_opts,
-  target_s3_args
+  target_s3_args,
+  download_link_preprocess
 )
 
 bb_rget_default_downloads()
@@ -92,18 +94,24 @@ bb_rget_default_downloads()
 
 \item{cut_dirs}{integer: if \code{use_url_directory = TRUE}, specifying \code{cut_dirs} will remove this many directory levels from the path of the local directory where files will be saved (e.g. if \code{cut_dirs = 2}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{some.where/haa}. if \code{cut_dirs = 1} and \code{no_host = TRUE}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{baa/haa})}
 
-\item{link_css}{string: css selector that identifies links (passed as the \code{css} parameter to \code{\link[rvest]{html_elements}}). Note that link elements must have an \code{href} attribute}
+\item{link_css}{string: css selector that identifies links (passed as the \code{css} parameter to \code{\link[rvest]{html_elements}}). Note that link elements must have an \code{link_href} attribute}
+
+\item{link_href}{string: the attribute of a link that gives the destination (i.e. the URL to follow)}
 
 \item{curl_opts}{named list: options to use with \code{curl} downloads, passed to the \code{.list} parameter of \code{curl::new_handle}}
 
 \item{target_s3_args}{list: named list or arguments to provide to \code{\link[aws.s3]{get_bucket_df}} and \code{\link[aws.s3]{put_object}}. Files will be uploaded into that bucket instead of the local filesystem}
+
+\item{download_link_preprocess}{function: if supplied, this function will be applied to each download link after it is scraped from the source page and expanded to an absolute URL but before it is checked against \code{accept_download}. This function should take two parameters:
+  \itemize{
+    \item \code{x} is a character vector of download link URLs
+    \item \code{url} is the starting URL (from which those download URLs were scraped)
+  }
+and it should return a copy of \code{x}, with entries appropriately modified.}
 }
 \value{
 a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 }
 \description{
-This function provides similar, but simplified, functionality to the the command-line \code{wget} utility. It is based on the \code{rvest} package.
-}
-\details{
-NOTE: this is still somewhat experimental.
+This function provides similar functionality to the the command-line \code{wget} utility.
 }

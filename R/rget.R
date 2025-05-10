@@ -85,9 +85,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 
 #' A recursive download utility
 #'
-#' This function provides similar, but simplified, functionality to the the command-line \code{wget} utility. It is based on the \code{rvest} package.
-#'
-#' NOTE: this is still somewhat experimental.
+#' This function provides similar functionality to the the command-line \code{wget} utility.
 #'
 #' @param url string: the URL to retrieve
 #' @param level integer >=0: recursively download to this maximum depth level. Specify 0 for no recursion
@@ -115,14 +113,21 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 #' @param use_url_directory logical: if \code{TRUE}, files will be saved into a local directory that follows the URL structure (e.g. files from \code{http://some.where/place} will be saved into directory \code{some.where/place}). If \code{FALSE}, files will be saved into the current directory
 #' @param no_host logical: if \code{use_url_directory = TRUE}, specifying \code{no_host = TRUE} will remove the host name from the directory (e.g. files from files from \code{http://some.where/place} will be saved into directory \code{place})
 #' @param cut_dirs integer: if \code{use_url_directory = TRUE}, specifying \code{cut_dirs} will remove this many directory levels from the path of the local directory where files will be saved (e.g. if \code{cut_dirs = 2}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{some.where/haa}. if \code{cut_dirs = 1} and \code{no_host = TRUE}, files from \code{http://some.where/place/baa/haa} will be saved into directory \code{baa/haa})
-#' @param link_css string: css selector that identifies links (passed as the \code{css} parameter to \code{\link[rvest]{html_elements}}). Note that link elements must have an \code{href} attribute
+#' @param link_css string: css selector that identifies links (passed as the \code{css} parameter to \code{\link[rvest]{html_elements}}). Note that link elements must have an \code{link_href} attribute
+#' @param link_href string: the attribute of a link that gives the destination (i.e. the URL to follow)
+#' @param download_link_preprocess function: if supplied, this function will be applied to each download link after it is scraped from the source page and expanded to an absolute URL but before it is checked against \code{accept_download}. This function should take two parameters:
+#'   \itemize{
+#'     \item \code{x} is a character vector of download link URLs
+#'     \item \code{url} is the starting URL (from which those download URLs were scraped)
+#'   }
+#' and it should return a copy of \code{x}, with entries appropriately modified.
 #' @param curl_opts named list: options to use with \code{curl} downloads, passed to the \code{.list} parameter of \code{curl::new_handle}
 #' @param target_s3_args list: named list or arguments to provide to \code{\link[aws.s3]{get_bucket_df}} and \code{\link[aws.s3]{put_object}}. Files will be uploaded into that bucket instead of the local filesystem
 #'
 #' @return a list with components 'ok' (TRUE/FALSE), 'files', and 'message' (error or other messages)
 #'
 #' @export
-bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_parent_download = no_parent, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, retries = 0, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, link_css = "a", curl_opts, target_s3_args) {
+bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_parent = TRUE, no_parent_download = no_parent, no_check_certificate = FALSE, relative = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, retries = 0, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, link_css = "a", link_href = "href", curl_opts, target_s3_args, download_link_preprocess) {
     assert_that(is.character(url))
     if (length(url) < 1) return(tibble(ok = TRUE, files = list(tibble(url = character(), file = character(), was_downloaded = logical())), message = ""))
     assert_that(is.numeric(level), level >= 0)
@@ -151,11 +156,14 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(is.flag(no_host), !is.na(no_host))
     assert_that(cut_dirs >= 0)
     assert_that(is.string(link_css))
+    assert_that(is.character(link_href)) ## undocumented, this can be char of multiple strings, not a single string
     if (!missing(curl_opts)) {
         assert_that(is.list(curl_opts))
         if (is.null(names(curl_opts)) || (length(names(curl_opts)) != length(curl_opts))) stop("curl_opts list must be named")
     }
     assert_that(is.numeric(retries), retries >= 0)
+    if (missing(download_link_preprocess)) download_link_preprocess <- I
+    assert_that(is.function(download_link_preprocess))
 
     ## is this an s3 target (are we uploading to a bucket, rather than downloading to local file system?)
     ##  `target_s3_args` will contain any global target_s3_args set in bb_config, regardless of whether this particular data source is s3 or not
@@ -164,7 +172,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     if (s3_target) target_s3_args <- check_s3_args(target_s3_args)
 
     ## opts to pass to child function
-    opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, no_parent_download = no_parent_download, debug = debug, link_css = link_css) ##robots_off = robots_off,
+    opts <- list(level = level, accept_follow = accept_follow, reject_follow = reject_follow, accept_download = accept_download, accept_download_extra = accept_download_extra, reject_download = reject_download, wait = wait, verbose = verbose, show_progress = show_progress, relative = relative, no_parent = no_parent, no_parent_download = no_parent_download, debug = debug, link_css = link_css, link_href = link_href, download_link_preprocess = download_link_preprocess) ##robots_off = robots_off,
 
     ## potentially substitute username and password from env vars
     user <- use_secret(user)
@@ -441,7 +449,11 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 if (links_from == "text") {
                     all_links <- strsplit(x, "[\r\n]+")[[1]]
                 } else {
-                    all_links <- unique(na.omit(vapply(html_elements(x, opts$link_css), function(z) html_attr(z, "href"), FUN.VALUE = "", USE.NAMES = FALSE)))
+                    all_links <- unique(na.omit(vapply(html_elements(x, opts$link_css), function(z) {
+                        this_attrs <- html_attrs(z)
+                        this_attrs <- this_attrs[names(this_attrs) %in% opts$link_href]
+                        if (length(this_attrs) < 1) NA_character_ else this_attrs[1]
+                    }, FUN.VALUE = "", USE.NAMES = FALSE)))
                 }
                 ##cat("First 20 links: "); print(head(all_links, 20))
                 ## discard non-relative links, if opts$relative
@@ -455,6 +467,7 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 for (rgx in opts$reject_follow) follow_idx <- follow_idx & !vapply(all_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 follow_links <- all_links[follow_idx]
                 all_dl_links <- if (opts$no_parent_download) all_links else all_links_inc_parent ## all potential download links, now we'll filter them
+                all_dl_links <- opts$download_link_preprocess(all_dl_links, url = url)
                 temp1 <- rep(length(opts$accept_download) > 0, length(all_dl_links))
                 for (rgx in opts$accept_download) temp1 <- temp1 & vapply(all_dl_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 temp2 <- rep(length(opts$accept_download_extra) > 0, length(all_dl_links))
