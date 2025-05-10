@@ -162,7 +162,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
         if (is.null(names(curl_opts)) || (length(names(curl_opts)) != length(curl_opts))) stop("curl_opts list must be named")
     }
     assert_that(is.numeric(retries), retries >= 0)
-    if (missing(download_link_preprocess)) download_link_preprocess <- I
+    if (missing(download_link_preprocess)) download_link_preprocess <- function(x, ...) x
     assert_that(is.function(download_link_preprocess))
 
     ## is this an s3 target (are we uploading to a bucket, rather than downloading to local file system?)
