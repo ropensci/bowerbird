@@ -21,7 +21,9 @@ my_source <- bb_source(
     id = "10.15770/EUM_SAF_OSI_NRT_2007",
     description = "Example dataset.",
     doc_url = "https://osi-saf.eumetsat.int/products/osi-405-c",
-    source_url = "https://thredds.met.no/thredds/catalog/osisaf/met.no/ice/drift_lr/merged/2009/catalog.html",
+    ## just the 2009 subset for demo purposes
+    source_url =
+    "https://thredds.met.no/thredds/catalog/osisaf/met.no/ice/drift_lr/merged/2009/catalog.html",
     citation = "See https://doi.org/10.15770/EUM_SAF_OSI_NRT_2007",
     license = "Please cite",
     method = list("bb_handler_thredds", level = 2),

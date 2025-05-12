@@ -14,7 +14,9 @@
 #'     id = "10.15770/EUM_SAF_OSI_NRT_2007",
 #'     description = "Example dataset.",
 #'     doc_url = "https://osi-saf.eumetsat.int/products/osi-405-c",
-#'     source_url = "https://thredds.met.no/thredds/catalog/osisaf/met.no/ice/drift_lr/merged/2009/catalog.html",
+#'     ## just the 2009 subset for demo purposes
+#'     source_url =
+#'     "https://thredds.met.no/thredds/catalog/osisaf/met.no/ice/drift_lr/merged/2009/catalog.html",
 #'     citation = "See https://doi.org/10.15770/EUM_SAF_OSI_NRT_2007",
 #'     license = "Please cite",
 #'     method = list("bb_handler_thredds", level = 2),
@@ -71,27 +73,36 @@ bb_handler_thredds_inner <- function(config, verbose = FALSE, local_dir_only = F
     this_urls <- if (is.list(cfrow$source_url) && length(cfrow$source_url) == 1) cfrow$source_url[[1]] else cfrow$source_url
     this_urls <- sub("catalog\\.html$", "catalog.xml", this_urls) ## we will use the xml, not the html catalog
 
-    ## the links in the xml document (given as the `urlPath` attribute of each dataset entity) are relative to the thredds base URL plus the HTTPServer service base attribute (typically "/thredds/fileServer/"
+    ## we could work directly with the catalog xml as an actual xml document, but then we would have to re-implement much of the functionality in bb_rget(). Instead let's treat the xml as html, and use bb_rget with some workarounds for the fact that it's not actually html so the e.g. link syntax is different
+
+    ## the links in the xml document (given as the `urlPath` attribute of each dataset entity) are relative to the thredds base URL plus the HTTPServer service base attribute (typically "/thredds/fileServer/")
     ## for example, a dataset urlPath is:
     ##   osisaf/met.no/ice/drift_lr/merged/2009/12/ice_drift_nh_polstere-625_multi-oi_200912291200-200912311200.nc
     ## extracted from the catalog.xml URL at
     ##   https://thredds.met.no/thredds/catalog/osisaf/met.no/ice/drift_lr/merged/2009/12/catalog.xml
     ## so we need to:
-    ##   1. trim the catalog URL back to "https://thredds.met.no", (noting that this might NOT be just the host, there could be some additional path on the end of it)
-    ##   2. append "/thredds/fileServer/" plus the dataset urlPath
+    ##   1. trim the catalog URL back to "https://thredds.met.no", (noting that this might NOT be just the host, there could be an additional path appended to it) ??? No, according to <https://docs.unidata.ucar.edu/tds/current/userguide/basic_client_catalog.html#constructing-an-access-url> there can't be any extra path elements, dataset URLs are always constructed relative to the server root http(s)://hostname:port
+    ##   2. append the HTTPServer base attribute ("/thredds/fileServer/") plus the dataset urlPath
 
     ## we can use rget almost as-is, but we will need to preprocess download links to follow that procedure
     this_flags <- c(list(url = this_urls), this_flags,
                     list(verbose = verbose,
                          link_css = "catalogref, dataset", link_href = c("xlink:href", "urlpath"),
                          accept_follow = "catalog\\.xml", no_parent_download = FALSE,
-                         download_link_preprocess = function(x, url) {
-                             ## find thredds installation base URL from url
-                             thredds_base <- sub("^(.+)/catalog/.+$", "\\1", url)
-                             if (thredds_base == url) stop("could not identify thredds base installation URL")
-                             ## x will contain links constructed relative to url, but we need to make them relative to thredds_base with /fileServer/ added
-                             ## this seems rather fragile! TODO use the HTTPServer service base fragment, as described above, rather than hard-coding
-                             paste0(thredds_base, "/fileServer/", fs::path_rel(x, start = fs::path_dir(url)))
+                         download_link_rewrite = function(x, url, content) {
+                             ## find the HTTPServer base attribute
+                             ## content is a document as returned by read_html
+                             httpserver_base <- tryCatch({
+                                 xml2::xml_attr(xml2::xml_find_all(content, ".//service[@name='HTTPServer']"), "base")
+                             }, error = function(e) NULL)
+                             if (length(httpserver_base) != 1 || is.na(httpserver_base)) httpserver_base <- "/thredds/fileServer/" ## fallback
+                             ## find the server root
+                             temp <- httr::parse_url(url)
+                             temp$path <- temp$query <- temp$params <- temp$fragment <- NULL ## just the scheme, hostname, port (and username, password if set)
+                             thredds_base <- sub("/+$", "", httr::build_url(temp))
+                             ## finally get the dataset urlpath, which was given directly in the xml but we are working here with absolute URLs that have been constructed from the urlPath plus the catalog url
+                             dataset_urlpath <- fs::path_rel(x, start = fs::path_dir(url))
+                             paste0(thredds_base, httpserver_base, dataset_urlpath)
                          }
                          ))
     if (!"show_progress" %in% names(this_flags)) this_flags <- c(this_flags, list(show_progress = verbose && sink.number() < 1))

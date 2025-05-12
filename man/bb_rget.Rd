@@ -36,7 +36,7 @@ bb_rget(
   link_href = "href",
   curl_opts,
   target_s3_args,
-  download_link_preprocess
+  download_link_rewrite
 )
 
 bb_rget_default_downloads()
@@ -102,10 +102,11 @@ bb_rget_default_downloads()
 
 \item{target_s3_args}{list: named list or arguments to provide to \code{\link[aws.s3]{get_bucket_df}} and \code{\link[aws.s3]{put_object}}. Files will be uploaded into that bucket instead of the local filesystem}
 
-\item{download_link_preprocess}{function: if supplied, this function will be applied to each download link after it is scraped from the source page and expanded to an absolute URL but before it is checked against \code{accept_download}. This function should take two parameters:
+\item{download_link_rewrite}{function: if supplied, this function will be applied to each download link after it is scraped from the source page and expanded to an absolute URL but before it is checked against \code{accept_download}. This function should take three parameters:
   \itemize{
     \item \code{x} is a character vector of download link URLs
     \item \code{url} is the starting URL (from which those download URLs were scraped)
+    \item \code{content} is the content of the starting URL, as an XML document as returned by [xml2::read_html()]
   }
 and it should return a copy of \code{x}, with entries appropriately modified.}
 }
