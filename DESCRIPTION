@@ -1,7 +1,7 @@
 Package: bowerbird
 Type: Package
 Title: Keep a Collection of Sparkly Data Resources
-Version: 0.17.0
+Version: 0.17.0.9900
 Authors@R: c(person("Ben", "Raymond", email = "ben.raymond@aad.gov.au", role = c("aut", "cre")),
              person("Michael", "Sumner", role = "aut"),
              person("Miles", "McBain", email = "miles.mcbain@gmail.com", role = c("rev", "ctb")),
@@ -27,6 +27,7 @@ Imports:
     openssl,
     R.utils,
     rmarkdown,
+    rstac,
     rvest (>= 1.0.0),
     stringr,
     sys (>= 1.4.9000),

@@ -6,7 +6,7 @@
 #'
 #' @param ... : parameters passed to \code{\link{bb_rget}}
 #'
-#' @return TRUE on success
+#' @return A tibble with columns \code{ok}, \code{files}, \code{message}
 #'
 #' @seealso \code{\link{bb_rget}}, \code{\link{bb_source}}, \code{\link{bb_sync}}
 #'
