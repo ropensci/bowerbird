@@ -28,7 +28,7 @@ my_source <- bb_source(
   name = "Nimbus Ice Edge Points from Nimbus Visible Imagery",
   id = "10.5067/NIMBUS/NmIcEdg2",
   description = "This data set (NmIcEdg2) ... [truncated; see sources_seaice()]",
-  doc_url = "",
+  doc_url = "http://nsidc.org/data/nmicedg2/",
   citation = "Gallaher D and Campbell G ... [truncated; see sources_seaice()]",
   license = "Please cite, see http://nsidc.org/about/use_copyright.html",
   authentication_note = "Requires Earthdata login, see https://urs.earthdata.nasa.gov/.

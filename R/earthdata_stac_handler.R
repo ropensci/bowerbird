@@ -21,7 +21,7 @@
 #'   name = "Nimbus Ice Edge Points from Nimbus Visible Imagery",
 #'   id = "10.5067/NIMBUS/NmIcEdg2",
 #'   description = "This data set (NmIcEdg2) ... [truncated; see sources_seaice()]",
-#'   doc_url = "",
+#'   doc_url = "http://nsidc.org/data/nmicedg2/",
 #'   citation = "Gallaher D and Campbell G ... [truncated; see sources_seaice()]",
 #'   license = "Please cite, see http://nsidc.org/about/use_copyright.html",
 #'   authentication_note = "Requires Earthdata login, see https://urs.earthdata.nasa.gov/.
@@ -54,8 +54,12 @@ bb_handler_earthdata_stac_inner <- function(config, verbose = FALSE, local_dir_o
     ## https://nsidc.org/support/faq/what-options-are-available-bulk-downloading-data-https-earthdata-login-enabled
 
     if (local_dir_only) {
-        ## TODO needs fixing, we need to download the stac catalog to know the source URLs (?)
-        return(bb_handler_rget(config, verbose = verbose, local_dir_only = TRUE, ...))
+        ## we need to download the stac catalog to know the source URLs
+        ## note that this only uses the first few items and takes their common path as the storage directory, so it might be too specific (first few items all live in a subdirectory of the true output) or even outright wrong (later items live elsewhere)
+        st <- rstac::stac(paste0("https://cmr.earthdata.nasa.gov/stac/", stac_id)) %>%
+            rstac::stac_search(collections = collection_id) %>%
+            rstac::get_request()
+        return(fs::path_common(earthdata_get_stac_items_download_urls(st$features)))
     }
 
     tempds <- bb_data_sources(config)
@@ -84,9 +88,13 @@ bb_handler_earthdata_stac_inner <- function(config, verbose = FALSE, local_dir_o
 }
 
 earthdata_get_stac_item_urls <- function(stac_id, collection_id, ...) {
-    ## can pass other parms to stac_search via ..., e.g. `limit` (which seems to be the page size not the whole result set size?)
+    ## can pass other parms to stac_search via ...
     st <- rstac::stac(paste0("https://cmr.earthdata.nasa.gov/stac/", stac_id)) %>%
         rstac::stac_search(collections = collection_id, ...) %>%
-        rstac::post_request() %>% rstac::items_fetch() ## this is slow with large collections. Is it paging through results?
-    sapply(st$features, function(z) unname(unlist(lapply(z$assets, function(ast) if (isTRUE(tolower(ast$title) == "direct download")) ast$href))))
+        rstac::post_request() %>% rstac::items_fetch() ## this is slow with large collections, items_fetch gets ALL matched items, paging through results
+    earthdata_get_stac_items_download_urls(st$features)
+}
+
+earthdata_get_stac_items_download_urls <- function(items) {
+    sapply(if (inherits(items, "doc_items")) items$features else items, function(z) unname(unlist(lapply(z$assets, function(ast) if (isTRUE(tolower(ast$title) == "direct download")) ast$href))))
 }
