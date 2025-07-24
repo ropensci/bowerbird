@@ -72,6 +72,7 @@ bb_handler_earthdata_stac_inner <- function(config, verbose = FALSE, local_dir_o
     ## note that user and password will be substituted from env vars if appropriate inside the bb_handler_rget call
     my_curl_config <- build_curl_config(debug = FALSE, show_progress = FALSE, user = tempds$user, password = tempds$password, enforce_basic_auth = TRUE)
     ## and some more configs specifically for earthdata
+    my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname. Stac-based won't work without this
     my_curl_config$options$followlocation <- 1
     my_curl_config$options$cookiefile <- cookies_file ## reads cookies from here
     my_curl_config$options$cookiejar <- cookies_file ## saves cookies here
