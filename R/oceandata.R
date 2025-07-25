@@ -146,11 +146,12 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     if (search_method == "api") {
         ## this can be super slow for large queries, but it gives a checksum
         while (tries < 3) {
-            ## previously we used a POST request to the api, but have switched to json format, which gives us cdate
-            u <- httr::parse_url("https://oceandata.sci.gsfc.nasa.gov/api/file_search")
-            u$query <- Filter(Negate(is.null), list(search = search, dtype = if (!is.null(dtype)) dtype, sensor = if (!is.null(sensor)) sensor, format = "json", cksum = 1))
-            ## excluding cksum seems to limit the number of records to 50
-            myfiles <- httr::GET(httr::build_url(u))
+            ## previously we used a GET request but this no longer seems to deliver json format with cdate, but POST does
+            qry <- Filter(Negate(is.null), list(search = search, dtype = if (!is.null(dtype)) dtype, sensor = if (!is.null(sensor)) sensor, format = "json", cksum = 1))
+            myfiles <- httr::POST("https://oceandata.sci.gsfc.nasa.gov/api/file_search",
+                                  body = paste(sapply(seq_along(qry), function(i) paste0(names(qry)[i], "=", qry[i])), collapse = "&"),
+                                  encode = "form", httr::content_type("application/x-www-form-urlencoded"), httr::accept("*/*"))
+            ## httr::accept("*/*") seems to be necessary to receive json format
             if (!httr::http_error(myfiles)) break
             tries <- tries + 1
         }
