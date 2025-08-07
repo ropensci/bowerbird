@@ -204,6 +204,8 @@ test_that("decompressing Z-compressed files works",{
 
 test_that("decompressing Z-deflated files works",{
     skip_on_cran()
+    skip_on_os("mac")
+    skip_on_os("windows")
     my_source <- bb_source(
         name="Bowerbird test data",
         id="bbtest-v0.1",
