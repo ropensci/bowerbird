@@ -202,6 +202,29 @@ test_that("decompressing Z-compressed files works",{
     expect_equal(file.size(file.path(fp, "20170822.nc")), 840508)
 })
 
+test_that("decompressing Z-deflated files works",{
+    skip_on_cran()
+    my_source <- bb_source(
+        name="Bowerbird test data",
+        id="bbtest-v0.1",
+        description="These are just some trivial test files provided with the bowerbird package.",
+        doc_url="https://github.com/ropensci/bowerbird",
+        citation="No citation needed.",
+        source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/20231030.nc.Z",
+        license="MIT",
+        method=list("bb_handler_rget", level = 1),
+        postprocess=list("bb_inflate"))
+
+    temp_root <- tempdir()
+    cf <- bb_add(bb_config(local_file_root = temp_root, clobber = 2), my_source)
+    res <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
+
+    fp <- bb_data_source_dir(cf)
+    expect_true(file.exists(file.path(fp, "20231030.nc.Z")))
+    expect_true(file.exists(file.path(fp, "20231030.nc")))
+    expect_equal(file.size(file.path(fp, "20231030.nc")), 840496)
+})
+
 test_that("cleanup postprocessing works",{
     skip_on_cran()
     skip_on_appveyor() ## fails for unknown reasons

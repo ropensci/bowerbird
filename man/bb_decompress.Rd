@@ -6,6 +6,7 @@
 \alias{bb_gunzip}
 \alias{bb_bunzip2}
 \alias{bb_uncompress}
+\alias{bb_inflate}
 \alias{bb_untar}
 \title{Postprocessing: decompress zip, gz, bz2, tar, Z files and optionally delete the compressed copy}
 \usage{
@@ -18,6 +19,8 @@ bb_gunzip(...)
 bb_bunzip2(...)
 
 bb_uncompress(...)
+
+bb_inflate(...)
 
 bb_untar(...)
 }

@@ -26,7 +26,7 @@
 bb_decompress <- function(method, delete = FALSE, ...) {
     assert_that(is.flag(delete), !is.na(delete))
     assert_that(is.string(method))
-    method <- match.arg(tolower(method), c("unzip", "gunzip", "bunzip2", "uncompress", "untar"))
+    method <- match.arg(tolower(method), c("unzip", "gunzip", "bunzip2", "uncompress", "inflate", "untar"))
     do.call(bb_decompress_inner, list(..., method = method, delete = delete))
 }
 
@@ -45,16 +45,25 @@ bb_decompress_inner <- function(config, file_list_before, file_list_after, verbo
     assert_that(nrow(bb_data_sources(config)) == 1)
     assert_that(is.flag(delete), !is.na(delete))
     assert_that(is.string(method))
-    method <- match.arg(tolower(method), c("unzip", "gunzip", "bunzip2", "uncompress", "untar"))
+    method <- match.arg(tolower(method), c("unzip", "gunzip", "bunzip2", "uncompress", "inflate", "untar"))
+    ## note: "inflate" are .Z files but which have been generated using "deflate" compression rather than "compress" - e.g. ifremer sea ice concentration files. These need to be handled separately because the archive package cannot (yet) handle deflate (see https://github.com/r-lib/archive/issues/114)
     ignore_case <- method == "unzip"
     file_pattern <- switch(method,
                            "unzip" = "\\.zip$",
                            "gunzip" = "\\.gz$",
                            "bunzip2" = "\\.bz2$",
                            "uncompress" = "\\.Z$",
+                           "inflate" = "\\.Z$",
                            "untar" = "\\.(tar|tar\\.gz|tar\\.bz2|tar\\.xz|tgz)$",
                            stop("unrecognized decompression")
                            )
+    if (method == "inflate") {
+        ## can't process with archive::file_read, need to use system `uncompress`
+        suppressWarnings(chk <- system2("which", "uncompress", stdout = NULL, stderr = NULL))
+        if (chk != 0) {
+            stop("cannot find a system installation of the `uncompress` utility, which is required for decompressing \"deflate\" files")
+        }
+    }
     if (delete) {
         mth <- bb_data_sources(config)$method[[1]]
         no_host <- if ("no_host" %in% names(mth)) mth$no_host else FALSE
@@ -80,7 +89,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
     ## decompress (unzip/gunzip) compressed files
     ## this function overwrites existing decompressed files if overwrite is TRUE
     assert_that(is.string(method))
-    method <- match.arg(method, c("unzip", "unzip_delete", "gunzip", "gunzip_delete", "bunzip2", "bunzip2_delete", "uncompress", "uncompress_delete", "untar", "untar_delete"))
+    method <- match.arg(method, c("unzip", "unzip_delete", "gunzip", "gunzip_delete", "bunzip2", "bunzip2_delete", "uncompress", "uncompress_delete", "inflate", "inflate_delete", "untar", "untar_delete"))
     ## unzip() issues warnings in some cases when operations have errors, and sometimes issues actual errors
     warn <- getOption("warn") ## save current setting
     options(warn = 0) ## so that we can be sure that last.warning will be set
@@ -115,7 +124,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                            ## extract only files that don't exist
                            files_to_extract <- files_to_extract[!file.exists(file.path(target_dir, files_to_extract))]
                        }
-                       if (length(files_to_extract)>0) {
+                       if (length(files_to_extract) > 0) {
                            if (verbose) cat(sprintf('extracting %d files into %s ... ', length(files_to_extract), target_dir))
                            temp <- unzfun(thisf, files = files_to_extract, exdir = target_dir) ## now actually unzip them
                            was_ok <- is.null(last.warning[[1]]) && all(file.info(file.path(target_dir, files_to_extract))$size>0)
@@ -127,7 +136,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                    }, error = function(e) {
                        ## an error here might be because of an incompletely-downloaded file. Is there something more sensible to do in this case?
                        ## but don't treat as a full blown error, since we'll want to proceed with the remaining zip files
-                       if (verbose) cat(sprintf("  %s failed to %s (it may be incompletely-downloaded?)\n Error message was: %s", thisf, meth_str, e))
+                       if (verbose) cat("  ", thisf, " failed to ", meth_str, " (it may be incompletely-downloaded?)\n Error message was: ", conditionMessage(e), sep = "")
                    })
                    if (grepl("_delete", method)) {
                        ## if all looks OK, delete zip/tar file
@@ -141,6 +150,24 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                    }
                    all_OK <- all_OK && was_ok
                },
+               "inflate_delete" =,
+               "inflate" = {
+                   ## system call to `uncompress` with -k flag (unless we are deleting the compressed file)
+                   ## note that it will uncompress to the same directory as the .Z file
+                   del_flag <- if (grepl("_delete", method)) NULL else "-k" ## -k to keep the .Z file
+                   was_ok <- FALSE
+                   tryCatch({
+                       chk <- sys::exec_wait("uncompress", c(del_flag, thisf), std_out = FALSE, std_err = FALSE)
+                       if (chk != 0) {
+                           if (verbose) cat("  ", thisf, " failed to inflate", sep = "")
+                       } else {
+                           was_ok <- TRUE
+                       }
+                   }, error = function(e) {
+                       if (verbose) cat("  ", thisf, " failed to inflate.\n Error message was: ", conditionMessage(e), sep = "")
+                   })
+                   all_OK <- all_OK && was_ok
+               },
                "gunzip_delete" =,
                "gunzip" = {
                    ## gunzip takes care of deleting the compressed file if remove is TRUE
@@ -151,7 +178,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                    if (!overwrite) {
                        ## check if file exists, so that we can issue a more informative trace message to the user
                        if (file.exists(destfile)) {
-                           if (verbose) cat(sprintf(" uncompressed file exists, skipping ... "))
+                           if (verbose) cat(" uncompressed file exists, skipping ... ")
                            unzip_this <- FALSE
                            was_ok <- TRUE
                        }
@@ -279,6 +306,10 @@ bb_bunzip2 <- function(...) bb_decompress(..., method = "bunzip2")
 #' @rdname bb_decompress
 #' @export
 bb_uncompress <- function(...) bb_decompress(..., method = "uncompress")
+
+#' @rdname bb_decompress
+#' @export
+bb_inflate <- function(...) bb_decompress(..., method = "inflate")
 
 #' @rdname bb_decompress
 #' @export
