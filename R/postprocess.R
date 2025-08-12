@@ -100,7 +100,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
     deleted_files <- character()
     for (thisf in files) {
         ## decompress, check for errors in doing so
-        if (verbose) cat(sprintf("  decompressing: %s ... ", thisf))
+        if (verbose) cat("  decompressing:", thisf, "... ")
         switch(method,
                "untar" =,
                "untar_delete" =,
@@ -125,27 +125,27 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                            files_to_extract <- files_to_extract[!file.exists(file.path(target_dir, files_to_extract))]
                        }
                        if (length(files_to_extract) > 0) {
-                           if (verbose) cat(sprintf('extracting %d files into %s ... ', length(files_to_extract), target_dir))
+                           if (verbose) cat("extracting",  length(files_to_extract), "files into", target_dir, "... ")
                            temp <- unzfun(thisf, files = files_to_extract, exdir = target_dir) ## now actually unzip them
                            was_ok <- is.null(last.warning[[1]]) && all(file.info(file.path(target_dir, files_to_extract))$size>0)
                        } else {
-                           if (verbose) cat(sprintf('no new files to extract (not overwriting existing files) ... '))
+                           if (verbose) cat("no new files to extract (not overwriting existing files) ... ")
                            was_ok <- TRUE
                        }
                        if (verbose) cat("done.\n")
                    }, error = function(e) {
                        ## an error here might be because of an incompletely-downloaded file. Is there something more sensible to do in this case?
                        ## but don't treat as a full blown error, since we'll want to proceed with the remaining zip files
-                       if (verbose) cat("  ", thisf, " failed to ", meth_str, " (it may be incompletely-downloaded?)\n Error message was: ", conditionMessage(e), sep = "")
+                       if (verbose) cat("  ", thisf, " failed to ", meth_str, " (it may be incompletely-downloaded?)\n Error message was: ", conditionMessage(e), "\n", sep = "")
                    })
                    if (grepl("_delete", method)) {
                        ## if all looks OK, delete zip/tar file
                        if (was_ok) {
-                           if (verbose) cat(sprintf("  %s of %s appears OK, deleting\n", meth_str, thisf))
+                           if (verbose) cat("  ", meth_str, " of ", thisf, " appears OK, deleting\n", sep = "")
                            unlink(thisf)
                            deleted_files <- c(deleted_files, thisf)
                        } else {
-                           if (verbose) cat(sprintf("  problem with %s of %s, not deleting\n", meth_str, thisf))
+                           if (verbose) cat("  problem with ", meth_str, " of ", thisf, ", not deleting\n", sep = "")
                        }
                    }
                    all_OK <- all_OK && was_ok
@@ -159,12 +159,12 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                    tryCatch({
                        chk <- sys::exec_wait("uncompress", c(del_flag, thisf), std_out = FALSE, std_err = FALSE)
                        if (chk != 0) {
-                           if (verbose) cat("  ", thisf, " failed to inflate", sep = "")
+                           if (verbose) cat("  ", thisf, " failed to inflate (error message was: ", conditionMessage(e), ")\n", sep = "")
                        } else {
                            was_ok <- TRUE
                        }
                    }, error = function(e) {
-                       if (verbose) cat("  ", thisf, " failed to inflate.\n Error message was: ", conditionMessage(e), sep = "")
+                       if (verbose) cat("  ", thisf, " failed to inflate.\n Error message was: ", conditionMessage(e), "\n", sep = "")
                    })
                    all_OK <- all_OK && was_ok
                },
@@ -190,11 +190,11 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                            if (method == "gunzip_delete") deleted_files <- c(deleted_files, thisf)
                            was_ok <- TRUE
                        }, error = function(e){
-                           if (verbose) cat(sprintf("  problem gunzipping %s: %s", thisf, e))
+                           if (verbose) cat("  problem gunzipping ", thisf, ": ", e, " ... ", sep = "")
                        })
                    }
                    all_OK <- all_OK && was_ok
-                   if (verbose) cat(sprintf("done\n"))
+                   if (verbose) cat("done\n")
                },
                "bunzip2_delete" =,
                "bunzip2" = {
@@ -205,7 +205,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                    if (!overwrite) {
                        ## check if file exists, so that we can issue a more informative trace message to the user
                        if (file.exists(destfile)) {
-                           if (verbose) cat(sprintf(" uncompressed file exists, skipping ... "))
+                           if (verbose) cat(" uncompressed file exists, skipping ... ")
                            unzip_this <- FALSE
                            was_ok <- TRUE
                        }
@@ -218,11 +218,11 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                            if (method == "bunzip2_delete") deleted_files <- c(deleted_files, thisf)
                            was_ok <- TRUE
                        }, error = function(e){
-                           if (verbose) cat(sprintf("  problem bunzipping %s: %s", thisf, e))
+                           if (verbose) cat("  problem bunzipping ", thisf, ": ", e, " ... ", sep = "")
                        })
                    }
                    all_OK <- all_OK && was_ok
-                   if (verbose) cat(sprintf("done\n"))
+                   if (verbose) cat("done\n")
                },
                "uncompress_delete" =,
                "uncompress" = {
@@ -233,7 +233,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                    if (!overwrite) {
                        ## check if file exists, so that we can issue a more informative trace message to the user
                        if (file.exists(destfile)) {
-                           if (verbose) cat(sprintf(" uncompressed file exists, skipping ... "))
+                           if (verbose) cat(" uncompressed file exists, skipping ... ")
                            unzip_this <- FALSE
                            was_ok <- TRUE
                        }
@@ -252,11 +252,11 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                            was_ok <- TRUE
                        },
                        error = function(e){
-                           if (verbose) cat(sprintf("  problem uncompressing %s: %s", thisf, e))
+                           if (verbose) cat("  problem uncompressing ", thisf, ": ", e, " ... ")
                        })
                    }
                    all_OK <- all_OK && was_ok
-                   if (verbose) cat(sprintf("done\n"))
+                   if (verbose) cat("done\n")
                },
                stop("unsupported decompress method ", method)
                )
@@ -363,7 +363,7 @@ bb_cleanup_inner <- function(config, file_list_before, file_list_after, verbose 
     to_delete <- list.files(path = bb_data_source_dir(config), pattern = pattern, recursive = recursive, ignore.case = ignore_case, all.files = all_files, full.names = TRUE)
     if (verbose) {
         if (length(to_delete) > 0) {
-            if (verbose) cat(sprintf(" cleaning up files: %s\n", paste(to_delete, collapse = ",")))
+            if (verbose) cat(" cleaning up files: ", paste(to_delete, collapse = ","), "\n")
         } else {
             if (verbose) cat(" cleanup: no files to remove\n")
         }
