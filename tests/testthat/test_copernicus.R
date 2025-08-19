@@ -1,6 +1,7 @@
 context("copernicus handler")
 
 test_that("bb_handler_copernicus works", {
+    skip() ## until https://github.com/pepijn-devries/CopernicusMarine/issues/66 resolved
     src <- bb_source(
         name = "Global Ocean, extreme and mean significant wave height trends from satellite observations - seasonal trends",
         id = "OMI_EXTREME_SEASTATE_GLOBAL_swh_mean_and_P95_obs",

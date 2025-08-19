@@ -159,7 +159,7 @@ do_decompress_files <- function(method, files, overwrite = TRUE, verbose = FALSE
                    tryCatch({
                        chk <- sys::exec_wait("uncompress", c(del_flag, thisf), std_out = FALSE, std_err = FALSE)
                        if (chk != 0) {
-                           if (verbose) cat("  ", thisf, " failed to inflate (error message was: ", conditionMessage(e), ")\n", sep = "")
+                           if (verbose) cat("  ", thisf, " failed to inflate\n", sep = "")
                        } else {
                            was_ok <- TRUE
                        }

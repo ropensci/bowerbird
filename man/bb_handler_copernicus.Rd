@@ -4,10 +4,16 @@
 \alias{bb_handler_copernicus}
 \title{Handler for Copernicus Marine datasets}
 \usage{
-bb_handler_copernicus(product, ctype, ...)
+bb_handler_copernicus(product, layer, prefix = "", pattern = "", ctype, ...)
 }
 \arguments{
 \item{product}{string: the desired Copernicus marine product. See \code{\link[CopernicusMarine]{cms_products_list}}}
+
+\item{layer}{string: (required if the product contains more than one layer) the layer within a product. See \code{\link[CopernicusMarine]{cms_product_details}}}
+
+\item{prefix}{string: (optional) as for \code{\link[CopernicusMarine]{cms_list_native_files}}}
+
+\item{pattern}{string: (optional) as for \code{\link[CopernicusMarine]{cms_list_native_files}}}
 
 \item{ctype}{legacy parameter, ignored}
 

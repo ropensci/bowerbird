@@ -6,34 +6,39 @@
 #'
 #' @references https://help.marine.copernicus.eu/en/collections/4060068-copernicus-marine-toolbox
 #' @param product string: the desired Copernicus marine product. See \code{\link[CopernicusMarine]{cms_products_list}}
+#' @param layer string: (required if the product contains more than one layer) the layer within a product. See \code{\link[CopernicusMarine]{cms_product_details}}
+#' @param prefix string: (optional) as for \code{\link[CopernicusMarine]{cms_list_native_files}}
+#' @param pattern string: (optional) as for \code{\link[CopernicusMarine]{cms_list_native_files}}
 #' @param ctype legacy parameter, ignored
-# @param layer string: (optional) the layer within a product. See \code{\link[CopernicusMarine]{cms_product_details}}
 #' @param ... : parameters passed to \code{\link{bb_rget}}
 #'
 #' @return TRUE on success
 #'
 #' @export
-bb_handler_copernicus <- function(product, ctype, ...) { ##layer,
+bb_handler_copernicus <- function(product, layer, prefix = "", pattern = "", ctype, ...) {
     assert_that(is.string(product), nzchar(product))
-    ##if (!missing(layer)) {
-    ##    if (!is.null(layer)) assert_that(is.string(layer), nzchar(layer))
-    ##} else {
-    ##    layer <- NULL
-    ##}
-    bb_handler_copernicus_inner(..., product = product) ##, layer = layer))
+    if (!missing(layer)) {
+        if (!is.null(layer)) assert_that(is.string(layer), nzchar(layer))
+    } else {
+        layer <- ""
+    }
+    assert_that(is.string(prefix))
+    assert_that(is.string(pattern))
+    assert_that(is.string(layer))
+    bb_handler_copernicus_inner(..., product = product, layer = layer, pattern = pattern, prefix = prefix)
 }
 
 
 ## @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 ## @param verbose logical: if TRUE, provide additional progress output
 ## @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, product, ...) { ## layer = NULL
+bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, product, layer = NULL, pattern = "", prefix = "", ...) {
     assert_that(is(config, "bb_config"))
     assert_that(nrow(bb_data_sources(config)) == 1)
     assert_that(is.flag(verbose), !is.na(verbose))
     assert_that(is.flag(local_dir_only), !is.na(local_dir_only))
     assert_that(is.string(product), nzchar(product))
-    ##if (!is.null(layer)) assert_that(is.string(layer), nzchar(layer))
+    if (!is.null(layer)) assert_that(is.string(layer))
     dots <- list(...)
 
     use_etags <- FALSE ## previously we used the ETag information to decide whether a file had changed since it was last downloaded. The ETags were md5 hashes of each file. But at some point during 2024 it seems that the ETags are not consistently populated as md5 hashes (either this changed, or it was never actually the case for all data sets). So now use last_modified times. The ETag code has been left here for reference temporarily but will be removed at some later date TODO
@@ -45,12 +50,12 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
     if (local_dir_only) {
         ## actual source URLs look like e.g. https://s3.waw3-1.cloudferro.com/mdl-native-07/native/SEALEVEL_GLO_PHY_L4_NRT_008_046/cmems_obs-sl_glo_phy-ssh_nrt_allsat-l4-duacs-0.25deg_P1D_202311/2022/01/nrt_global_allsat_phy_l4_20220101_20220107.nc
         ## but it seems plausible that the server/bucket might change over time
-        ## so we will store locally under data.marine.copernicus.eu/<product>/
-        return(file.path(this_att$local_file_root, "data.marine.copernicus.eu", product))
+        ## so we will store locally under data.marine.copernicus.eu/<product>/<layer>
+        return(do.call(file.path, Filter(Negate(is.null), list(this_att$local_file_root, "data.marine.copernicus.eu", product, if (!is.null(layer)) layer))))
     }
 
     if (verbose) cat("Downloading file list ... \n")
-    myfiles <- CopernicusMarine::cms_list_native_files(product)
+    myfiles <- CopernicusMarine::cms_list_native_files(product, layer, pattern = pattern, prefix = prefix)
     if (is.null(myfiles) || nrow(myfiles) < 1) stop("No files found for Copernicus Marine product: ", product)
     names(myfiles) <- tolower(names(myfiles))
     if (!all(c("base_url", "bucket", "key", if (use_etags) "etag" else "lastmodified") %in% names(myfiles))) stop("file list does not have the expected columns, has there been a change to the format returned by `CopernicusMarine::cms_list_native_files()`?")
