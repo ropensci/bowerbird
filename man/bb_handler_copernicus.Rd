@@ -4,7 +4,7 @@
 \alias{bb_handler_copernicus}
 \title{Handler for Copernicus Marine datasets}
 \usage{
-bb_handler_copernicus(product, layer, prefix = "", pattern = "", ctype, ...)
+bb_handler_copernicus(product, layer, prefix = NULL, pattern = "", ctype, ...)
 }
 \arguments{
 \item{product}{string: the desired Copernicus marine product. See \code{\link[CopernicusMarine]{cms_products_list}}}

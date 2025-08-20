@@ -15,14 +15,14 @@
 #' @return TRUE on success
 #'
 #' @export
-bb_handler_copernicus <- function(product, layer, prefix = "", pattern = "", ctype, ...) {
+bb_handler_copernicus <- function(product, layer, prefix = NULL, pattern = "", ctype, ...) {
     assert_that(is.string(product), nzchar(product))
     if (!missing(layer)) {
         if (!is.null(layer)) assert_that(is.string(layer), nzchar(layer))
     } else {
         layer <- ""
     }
-    assert_that(is.string(prefix))
+    assert_that(is.string(prefix) || is.null(prefix))
     assert_that(is.string(pattern))
     assert_that(is.string(layer))
     bb_handler_copernicus_inner(..., product = product, layer = layer, pattern = pattern, prefix = prefix)
@@ -32,7 +32,7 @@ bb_handler_copernicus <- function(product, layer, prefix = "", pattern = "", cty
 ## @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 ## @param verbose logical: if TRUE, provide additional progress output
 ## @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, product, layer = NULL, pattern = "", prefix = "", ...) {
+bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, product, layer = NULL, pattern = "", prefix = NULL, ...) {
     assert_that(is(config, "bb_config"))
     assert_that(nrow(bb_data_sources(config)) == 1)
     assert_that(is.flag(verbose), !is.na(verbose))
@@ -51,7 +51,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
         ## actual source URLs look like e.g. https://s3.waw3-1.cloudferro.com/mdl-native-07/native/SEALEVEL_GLO_PHY_L4_NRT_008_046/cmems_obs-sl_glo_phy-ssh_nrt_allsat-l4-duacs-0.25deg_P1D_202311/2022/01/nrt_global_allsat_phy_l4_20220101_20220107.nc
         ## but it seems plausible that the server/bucket might change over time
         ## so we will store locally under data.marine.copernicus.eu/<product>/<layer>
-        return(do.call(file.path, Filter(Negate(is.null), list(this_att$local_file_root, "data.marine.copernicus.eu", product, if (!is.null(layer)) layer))))
+        return(do.call(file.path, Filter(Negate(is.null), list(this_att$local_file_root, "data.marine.copernicus.eu", product, if (!is.null(layer) && nzchar(layer)) layer))))
     }
 
     if (verbose) cat("Downloading file list ... \n")
