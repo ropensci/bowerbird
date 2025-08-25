@@ -194,9 +194,9 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             opts$curl_config$options[[nm]] <- this
         }
     }
-    ok <- FALSE
     msg <- "" ## error or other messages
     downloads <- tibble(url = character(), file = character(), was_downloaded = logical())
+    ok <- TRUE
     tryCatch({
         if (missing(force_local_filename)) {
             if (is_ftp && missing(accept_follow)) {
@@ -272,9 +272,14 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                         req <- fetch_disk_retries(retries = retries, is_ftp = is_ftp, url = df, path = dlf, curl_opts = myopts)
                     }
                     if (is.null(req) || httr::http_error(req$status_code)) {
-                        ## don't throw error on download
-                        myfun <- if (stop_on_download_error) stop else warning
-                        myfun("Error downloading ", df, if (!is.null(req)) paste0(": ", httr::http_status(req$status_code)$message))
+                        ok <- FALSE
+                        ermsg <- paste0("Error downloading ", df, if (!is.null(req)) paste0(": ", httr::http_status(req$status_code)$message))
+                        if (stop_on_download_error) {
+                            stop(ermsg)
+                        } else {
+                            warning(ermsg)
+                            if (verbose) cat(ermsg, "\n")
+                        }
                     } else {
                         if (s3_target) {
                             ## if the file wasn't re-downloaded, req$content will be length 0 (and response code should be 304)
@@ -324,7 +329,6 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
                 }
             }
         }
-        ok <- TRUE
     }, error = function(e) {
         ## if download was aborted, use NA for ok
         ok <<- if (grepl("callback aborted", e$message, ignore.case = TRUE)) NA else FALSE
