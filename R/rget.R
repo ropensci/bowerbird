@@ -416,6 +416,14 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
             }
             if (is.null(x)) next
             ## TODO check for error?
+            ## did the request redirect?
+            hdrs <- curl::parse_headers(rawToChar(x$headers), multiple = TRUE)
+            redirs <- unlist(lapply(hdrs, function(z) if (any(grepl("^HTTP.*[[:space::]3[[:digit:]][[:digit:]]", z))) na.omit(stringr::str_match(z, "^Location[[:space:]]*:[[:space:]]*(.+)")[, 2])))
+            if (length(redirs) > 0) {
+                ## where did it redirect to? We might have had multiple redirects, but the last one is the relevant one
+                ## our `url` variable needs to take this value, so that when we construct absolute URLs (relative to this base) they are correct
+                url <- tail(redirs, 1)
+            }
             if (ftp) {
                 ## treat as text (i.e. standard ftp directory listing)
                 ## except if it comes back as text/html, try parsing it as html
