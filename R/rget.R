@@ -79,9 +79,109 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     this_urls <- if (is.list(cfrow$source_url) && length(cfrow$source_url) == 1) cfrow$source_url[[1]] else cfrow$source_url
     this_flags <- c(list(url = this_urls), this_flags, list(verbose = verbose))
     if (!"show_progress" %in% names(this_flags)) this_flags <- c(this_flags, list(show_progress = verbose && sink.number() < 1))
-    do.call(bb_rget, this_flags)
+    if ("snapshot" %in% names(cfrow)) {
+        ## syncing against a previous snapshot, without re-spidering the remote site
+        this_flags$snapshot <- cfrow$snapshot
+        this_flags$url <- NULL
+        do.call(bb_rget_from_snapshot, this_flags)
+    } else {
+        ## normal sync
+        do.call(bb_rget, this_flags)
+    }
 }
 
+bb_rget_from_snapshot <- function(snapshot, wait = 0, accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_check_certificate = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, retries = 0, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, curl_opts, target_s3_args, ...) {
+    ## parameters from bb_rget that are ignored here: level = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), no_parent = TRUE, no_parent_download = no_parent, relative = FALSE, download_link_rewrite, link_css, link_href. These parameters control the spidering process and are not used here
+    assert_that(is.data.frame(snapshot))
+    assert_that(is.character(accept_download))
+    assert_that(is.character(accept_download_extra))
+    assert_that(is.character(reject_download))
+    if (missing(user)) user <- NA_character_
+    assert_that(is.string(user))
+    if (missing(password)) password <- NA_character_
+    assert_that(is.string(password))
+    assert_that(clobber %in% c(0, 1, 2))
+    assert_that(is.flag(no_check_certificate), !is.na(no_check_certificate))
+    assert_that(is.flag(remote_time), !is.na(remote_time))
+    assert_that(is.numeric(wait))
+    assert_that(is.flag(verbose), !is.na(verbose))
+    assert_that(is.flag(debug), !is.na(debug))
+    assert_that(is.flag(dry_run), !is.na(dry_run))
+    assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
+    if (!missing(force_local_filename)) {
+        assert_that(is.character(force_local_filename), length(force_local_filename) == nrow(snapshot$files[[1]]))
+    } else {
+        force_local_filename <- NULL
+    }
+    assert_that(is.flag(use_url_directory), !is.na(use_url_directory))
+    assert_that(is.flag(no_host), !is.na(no_host))
+    assert_that(cut_dirs >= 0)
+    if (!missing(curl_opts)) {
+        assert_that(is.list(curl_opts))
+        if (is.null(names(curl_opts)) || (length(names(curl_opts)) != length(curl_opts))) stop("curl_opts list must be named")
+    }
+    assert_that(is.numeric(retries), retries >= 0)
+
+    ## is this an s3 target (are we uploading to a bucket, rather than downloading to local file system?)
+    ##  `target_s3_args` will contain any global target_s3_args set in bb_config, regardless of whether this particular data source is s3 or not
+    ##  but the `bucket` name in target_s3_args should only be populated if this data source is an s3 target
+    s3_target <- !missing(target_s3_args) && is_s3_target(target_s3_args)
+    if (s3_target) target_s3_args <- check_s3_args(target_s3_args)
+
+    ## potentially substitute username and password from env vars
+    user <- use_secret(user)
+    password <- use_secret(password)
+
+    ## curl options
+    curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password, remote_time = remote_time)
+    ## we can handle multiple input URLs, but they can't be a mix of ftp/http
+    url <- snapshot$files[[1]]$url
+    is_ftp <- grepl("^ftp", url, ignore.case = TRUE)
+    if (any(is_ftp) && !all(is_ftp)) stop("bb_rget can't handle a mixture of ftp/http URLs")
+    is_ftp <- is_ftp[1]
+    if (is_ftp) curl_config$options$dirlistonly <- 1L
+    ## apply any user-specified options (these can also be passed by other source-specific handlers, like the earthdata handler)
+    if (!missing(curl_opts)) {
+        for (nm in names(curl_opts)) {
+            this <- curl_opts[[nm]]
+            if (nm %in% c("user", "username", "password")) this <- use_secret(this)
+            curl_config$options[[nm]] <- this
+        }
+    }
+    msg <- "" ## error or other messages
+    ## construct the downloads tibble from the snapshot, rather than spidering the remote site as the usual bb_rget does
+    downloads <- tibble(url = snapshot$files[[1]]$url,
+                        file = if (is.null(force_local_filename)) NA_character_ else force_local_filename, ## force_local_filename is a special case: just download one file per url
+                        was_downloaded = NA)
+    if (is.null(force_local_filename)) {
+        ## allow parms to change between the snapshot run and this download run. e.g. we might snapshot an entire site but only download a subset of files
+        ## deal with accept_download, accept_download_extra, reject_download
+        temp1 <- rep(length(accept_download) > 0, nrow(downloads))
+        for (rgx in accept_download) temp1 <- temp1 & vapply(downloads$url, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+        temp2 <- rep(length(accept_download_extra) > 0, nrow(downloads))
+        for (rgx in accept_download_extra) temp2 <- temp2 & vapply(downloads$url, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+        download_idx <- temp1 | temp2
+        for (rgx in reject_download) download_idx <- download_idx & !vapply(downloads$url, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+        downloads <- downloads[download_idx, ]
+    } else {
+        ## as with normal bb_rget, if force_local_filename has been supplied then the accept_download etc filters are not applied
+    }
+    ok <- TRUE
+    tryCatch({
+        downloads <- rget_do_downloads(downloads = downloads, use_url_directory = use_url_directory, no_host = no_host, cut_dirs = cut_dirs, target_s3_args = target_s3_args, verbose = verbose, show_progress = show_progress, dry_run = dry_run, clobber = clobber, curl_config = curl_config, wait = wait, retries = retries, stop_on_download_error = stop_on_download_error, remote_time = remote_time)
+    }, error = function(e) {
+        ## if download was aborted, use NA for ok
+        ok <<- if (grepl("callback aborted", conditionMessage(e), ignore.case = TRUE)) NA else FALSE
+        msg <<- conditionMessage(e)
+        if (verbose) {
+            ## echo the error message but don't throw it as a full blown error
+            ## what happens when download is interrupted
+            ## often these are unimportant (e.g. 404 response codes during recursion) so we don't want to halt the entire process
+            cat(" bb_rget exited with an error (", conditionMessage(e), ")\n", sep = "")
+        }
+    })
+    tibble(ok = ok, files = list(downloads), message = msg)
+}
 
 #' A recursive download utility
 #'

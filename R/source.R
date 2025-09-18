@@ -195,8 +195,7 @@ bb_modify_source <- function(src,...) {
     ## simple parameters (strings, etc) are taken from parms if provided, otherwise from src
     new_or_old <- function(prm) if (prm %in% pnames) parms[[prm]] else src[[prm]]
     newparms <- list()
-    for (p in c("id","name","description","doc_url","citation","license","comment","authentication_note","user","password","access_function","data_group","collection_size"))
-        newparms[[p]] <- new_or_old(p)
+    for (p in c("id", "name", "description", "doc_url", "citation", "license", "comment", "authentication_note", "user", "password", "access_function", "data_group", "collection_size")) newparms[[p]] <- new_or_old(p)
     ## source_url is a character vector, but stored in src as a list containing that vector
     newparms$source_url <- if ("source_url" %in% pnames) parms$source_url else src$source_url[[1]]
     ## method is a list-col in src, of the form list("handler_function_name",parm1=value1)
@@ -248,5 +247,39 @@ bb_modify_source <- function(src,...) {
         newparms$postprocess <- src$postprocess[[1]]
     }
     if ("warn_empty_auth" %in% pnames) newparms$warn_empty_auth <- parms$warn_empty_auth
-    do.call(bb_source,newparms)
+    out <- do.call(bb_source, newparms)
+    if ("snapshot" %in% names(src)) out$snapshot <- src$snapshot
+    out
+}
+
+
+#' Add a snapshot to a source
+#'
+#' Experimental! Allows the results of a previous sync run to be added to a source, so that it can be used next time instead of re-indexing the remote site.
+#'
+#' @param src data.frame or tibble: a single-row data source (as returned by \code{bb_source})
+#' @param snapshot data.frame: as returned by \code{\link{bb_get}}
+#'
+#' @return A modified copy of \code{src}
+#'
+#' @examples
+#' \dontrun{
+#'   ## general usage: first define a source
+#'   src <- bb_source(...)
+#'   ## sync it once to index the remote site. This can be done as a dry run
+#'   result <- bb_get(src, ..., dry_run = TRUE)
+#'   ## add the snapshot to the source
+#'   src <- bb_add_snapshot(src, result)
+#'   ## now the sync can be run again, and the remote site does not need to be re-indexed
+#'   result2 <- bb_get(src, ...)
+#' }
+#'
+#' @export
+bb_add_snapshot <- function(src, snapshot) {
+    if (nrow(snapshot) != 1) stop("snapshot should be the result from syncing a single data source")
+    if (!isTRUE(snapshot$name == src$name)) stop("snapshot name does not match src name")
+    ## drop the file column from the snapshot (alternatively could convert it to a relative path (relative to local_file_root)?)
+    snapshot$files[[1]]$file <- NULL
+    src$snapshot <- snapshot
+    src
 }
