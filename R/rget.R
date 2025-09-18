@@ -211,124 +211,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
             ## force_local_filename is a special case: just download one file per url
             downloads <- tibble(url = url, file = force_local_filename, was_downloaded = FALSE)
         }
-        if (dry_run && verbose && length(downloads$url) > 0) {
-            cat(sprintf(" dry_run is TRUE, bb_rget is not downloading the following files:\n %s\n", paste(downloads$url, collapse="\n ")))
-        }
-        ## for s3 target, check bucket existence and retrieve bucket contents now, no need to do it on every loop iteration
-        bx <- if (!dry_run && s3_target) aws_list_objects(target_s3_args, create = TRUE) else tibble()
-        ## download each file
-        ## keep track of which were actually downloaded
-        for (dfi in seq_along(downloads$url)) {
-            df <- downloads$url[dfi]
-            mydir <- if (use_url_directory) sub("[\\/]$", "", directory_from_url(df, no_host = no_host, cut_dirs = cut_dirs)) else "" ## no trailing filesep
-            if (is.na(downloads$file[dfi])) {
-                fname <- if (use_url_directory) file.path(mydir, basename(df)) else basename(df)
-            } else {
-                ## filename has already been given, by force_local_filename
-                fname <- if (use_url_directory) {
-                             file.path(mydir, downloads$file[dfi]) ## prepend local path
-                         } else {
-                             downloads$file[dfi]
-                         }
-            }
-            if (s3_target) {
-                downloads$file[dfi] <- get_aws_s3_url(bucket = target_s3_args$bucket, region = target_s3_args$region, base_url = target_s3_args$base_url, path = fname)
-            } else {
-                downloads$file[dfi] <- fname
-            }
-            if (!dry_run) {
-                if (s3_target) {
-                    ## bx$Key contains the existing objects
-                    existing_dt <- bx$LastModified[which(bx$Key == fname)]
-                    if (length(existing_dt) > 1) existing_dt <- existing_dt[1] ## though should not happen because keys should be unique
-                    do_download <- clobber >= 1 || length(existing_dt) < 1
-                    if (length(existing_dt) < 1) existing_dt <- NA
-                } else {
-                    do_download <- clobber >= 1 || (!file.exists(fname))
-                    existing_dt <- if (file.exists(fname)) file.info(fname)$mtime else NA
-                }
-                ## if clobber == 1, we set the if-modified-since option, so we can ask for download and it will not re-download unless needed
-                if (do_download) {
-                    if (verbose) cat(sprintf(" downloading file %d of %d: %s ... ", dfi, nrow(downloads), df), if (show_progress) "\n")
-                    myopts <- opts$curl_config$options ## curl options for this particular file, may be modified below depending on clobber
-                    if (is_ftp) myopts$dirlistonly <- 0L
-                    if (!is.na(existing_dt)) { ##file.exists(fname)) {
-                        if (clobber == 1) {
-                            ## timestamping via curl if-modified-since option
-                            ## if this doesn't work, do a head request to get file modified time, and compare explicitly to local file
-                            myopts$timevalue <- as.numeric(existing_dt)
-                            myopts$timecondition <- 3L ## CURL_TIMECOND_IFMODSINCE is value 3
-                        }
-                    }
-                    if (s3_target) {
-                        ## for s3 we can keep in memory before re-uploading to destination s3 bucket
-                        req <- fetch_memory_retries(retries = retries, is_ftp = is_ftp, url = df, curl_opts = myopts)
-                    } else {
-                        ## downloading to local file system
-                        ## need to download to temp file, because a file of zero bytes will be written if not if-modified-since
-                        dlf <- tempfile()
-                        if (file.exists(fname)) file.copy(fname, dlf)
-                        ## may need to suppressWarnings with ftp here
-                        req <- fetch_disk_retries(retries = retries, is_ftp = is_ftp, url = df, path = dlf, curl_opts = myopts)
-                    }
-                    if (is.null(req) || httr::http_error(req$status_code)) {
-                        ok <- FALSE
-                        ermsg <- paste0("Error downloading ", df, if (!is.null(req)) paste0(": ", httr::http_status(req$status_code)$message))
-                        if (stop_on_download_error) {
-                            stop(ermsg)
-                        } else {
-                            warning(ermsg)
-                            if (verbose) cat(ermsg, "\n")
-                        }
-                    } else {
-                        if (s3_target) {
-                            ## if the file wasn't re-downloaded, req$content will be length 0 (and response code should be 304)
-                            if (length(req$content) < 1) {
-                                if (verbose) cat(if (show_progress) "\n", "file unchanged on server, not downloading.\n")
-                            } else {
-                                ## upload to destination s3 bucket
-                                downloads$was_downloaded[dfi] <- TRUE
-                                cat(if (show_progress) "\n", "Uploading to s3 target ... ")##, if (show_progress) "\n")
-                                rgs <- target_s3_args[names(target_s3_args) %in% names(c(formals(aws.s3::get_bucket_df), formals(aws.s3::s3HTTP)))]
-                                rgs$file <- req$content
-                                rgs$object <- fname
-                                s3_up_ok <- tryCatch(
-                                    aws_fun(aws.s3::put_object, c(rgs, list(multipart = TRUE))), error = function(e) conditionMessage(e)) ## TRUE on success, error message otherwise
-                                ## previously also passed show_progress = show_progress, but this somehow causes errors in some cases
-                                if (verbose) {
-                                    if (identical(s3_up_ok, TRUE)) {
-                                        cat(if (show_progress) "\n", "done.\n")
-                                    } else {
-                                        cat(if (show_progress) "\n", "ERROR: file could not be uploaded to s3 target: ", s3_up_ok, "\n")
-                                    }
-                                }
-                            }
-                        } else {
-                            ## if the file wasn't re-downloaded, dlf will be zero bytes
-                            ## we should have received a 304 Not Modified response
-                            if (file.exists(dlf) && file.info(dlf)$size > 0) {
-                                ## file was updated
-                                downloads$was_downloaded[dfi] <- TRUE
-                                if (!dir.exists(dirname(fname))) dir.create(dirname(fname), recursive = TRUE)
-                                if (file.exists(fname)) file.remove(fname)
-                                file.copy(dlf, fname)
-                                ## delete temp file
-                                file.remove(dlf)
-                                ## set local file time if appropriate
-                                ## setting the filetime option in the curl request does not appear to modify the local file timestamp
-                                if (remote_time) set_file_timestamp(path = fname, hdrs = parse_headers_list(req$headers))
-                                if (verbose) cat(if (show_progress) "\n", "done.\n")
-                            } else {
-                                file.remove(dlf)
-                                if (verbose) cat(if (show_progress) "\n", "file unchanged on server, not downloading.\n")
-                            }
-                        }
-                    }
-                } else {
-                    if (verbose) cat(" file already exists, not downloading:", df, "\n", df)
-                }
-            }
-        }
+        downloads <- rget_do_downloads(downloads = downloads, use_url_directory = use_url_directory, no_host = no_host, cut_dirs = cut_dirs, target_s3_args = target_s3_args, verbose = verbose, show_progress = show_progress, dry_run = dry_run, clobber = clobber, curl_config = opts$curl_config, wait = wait, retries = retries, stop_on_download_error = stop_on_download_error, remote_time = remote_time)
     }, error = function(e) {
         ## if download was aborted, use NA for ok
         ok <<- if (grepl("callback aborted", e$message, ignore.case = TRUE)) NA else FALSE
@@ -341,6 +224,131 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
         }
     })
     tibble(ok = ok, files = list(downloads), message = msg)
+}
+
+rget_do_downloads <- function(downloads, use_url_directory, no_host, cut_dirs, target_s3_args, verbose, show_progress, dry_run, clobber, curl_config, wait, retries, stop_on_download_error, remote_time) {
+    if (dry_run && verbose && length(downloads$url) > 0) {
+        cat(" dry_run is TRUE, bb_rget is not downloading the following files:\n ", paste(downloads$url, collapse="\n "), "\n", sep = "")
+    }
+    s3_target <- !missing(target_s3_args) && is_s3_target(target_s3_args)
+    ## for s3 target, check bucket existence and retrieve bucket contents now, no need to do it on every loop iteration
+    bx <- if (!dry_run && s3_target) aws_list_objects(target_s3_args, create = TRUE) else tibble()
+    ## download each file
+    ## keep track of which were actually downloaded
+    for (dfi in seq_along(downloads$url)) {
+        df <- downloads$url[dfi]
+        mydir <- if (use_url_directory) sub("[\\/]$", "", directory_from_url(df, no_host = no_host, cut_dirs = cut_dirs)) else "" ## no trailing filesep
+        if (is.na(downloads$file[dfi])) {
+            fname <- if (use_url_directory) file.path(mydir, basename(df)) else basename(df)
+        } else {
+            ## filename has already been given, by force_local_filename
+            fname <- if (use_url_directory) {
+                         file.path(mydir, downloads$file[dfi]) ## prepend local path
+                     } else {
+                         downloads$file[dfi]
+                     }
+        }
+        if (s3_target) {
+            downloads$file[dfi] <- get_aws_s3_url(bucket = target_s3_args$bucket, region = target_s3_args$region, base_url = target_s3_args$base_url, path = fname)
+        } else {
+            downloads$file[dfi] <- fname
+        }
+        if (!dry_run) {
+            if (s3_target) {
+                ## bx$Key contains the existing objects
+                existing_dt <- bx$LastModified[which(bx$Key == fname)]
+                if (length(existing_dt) > 1) existing_dt <- existing_dt[1] ## though should not happen because keys should be unique
+                do_download <- clobber >= 1 || length(existing_dt) < 1
+                if (length(existing_dt) < 1) existing_dt <- NA
+            } else {
+                do_download <- clobber >= 1 || (!file.exists(fname))
+                existing_dt <- if (file.exists(fname)) file.info(fname)$mtime else NA
+            }
+            ## if clobber == 1, we set the if-modified-since option, so we can ask for download and it will not re-download unless needed
+            if (do_download) {
+                if (verbose) cat(" downloading file ", dfi, " of ", nrow(downloads), ": ", df, " ... ", if (show_progress) "\n", sep = "")
+                myopts <- curl_config$options ## curl options for this particular file, may be modified below depending on clobber
+                is_ftp <- grepl("^ftp", df, ignore.case = TRUE)
+                if (is_ftp) myopts$dirlistonly <- 0L
+                if (!is.na(existing_dt)) {
+                    if (clobber == 1) {
+                        ## timestamping via curl if-modified-since option
+                        ## if this doesn't work, do a head request to get file modified time, and compare explicitly to local file
+                        myopts$timevalue <- as.numeric(existing_dt)
+                        myopts$timecondition <- 3L ## CURL_TIMECOND_IFMODSINCE is value 3
+                    }
+                }
+                if (s3_target) {
+                    ## for s3 we can keep in memory before re-uploading to destination s3 bucket
+                    req <- fetch_memory_retries(retries = retries, is_ftp = is_ftp, url = df, curl_opts = myopts)
+                } else {
+                    ## downloading to local file system
+                    ## need to download to temp file, because a file of zero bytes will be written if not if-modified-since
+                    dlf <- tempfile()
+                    if (file.exists(fname)) file.copy(fname, dlf)
+                    ## may need to suppressWarnings with ftp here
+                    req <- fetch_disk_retries(retries = retries, is_ftp = is_ftp, url = df, path = dlf, curl_opts = myopts)
+                }
+                if (is.null(req) || httr::http_error(req$status_code)) {
+                    ok <- FALSE
+                    ermsg <- paste0("Error downloading ", df, if (!is.null(req)) paste0(": ", httr::http_status(req$status_code)$message))
+                    if (stop_on_download_error) {
+                        stop(ermsg)
+                    } else {
+                        warning(ermsg)
+                        if (verbose) cat(ermsg, "\n")
+                    }
+                } else {
+                    if (s3_target) {
+                        ## if the file wasn't re-downloaded, req$content will be length 0 (and response code should be 304)
+                        if (length(req$content) < 1) {
+                            if (verbose) cat(if (show_progress) "\n", "file unchanged on server, not downloading.\n")
+                        } else {
+                            ## upload to destination s3 bucket
+                            downloads$was_downloaded[dfi] <- TRUE
+                            cat(if (show_progress) "\n", "Uploading to s3 target ... ")##, if (show_progress) "\n")
+                            rgs <- target_s3_args[names(target_s3_args) %in% names(c(formals(aws.s3::get_bucket_df), formals(aws.s3::s3HTTP)))]
+                            rgs$file <- req$content
+                            rgs$object <- fname
+                            s3_up_ok <- tryCatch(
+                                aws_fun(aws.s3::put_object, c(rgs, list(multipart = TRUE))), error = function(e) conditionMessage(e)) ## TRUE on success, error message otherwise
+                            ## previously also passed show_progress = show_progress, but this somehow causes errors in some cases
+                            if (verbose) {
+                                if (identical(s3_up_ok, TRUE)) {
+                                    cat(if (show_progress) "\n", "done.\n")
+                                } else {
+                                    cat(if (show_progress) "\n", "ERROR: file could not be uploaded to s3 target: ", s3_up_ok, "\n")
+                                }
+                            }
+                        }
+                    } else {
+                        ## if the file wasn't re-downloaded, dlf will be zero bytes
+                        ## we should have received a 304 Not Modified response
+                        if (file.exists(dlf) && file.info(dlf)$size > 0) {
+                            ## file was updated
+                            downloads$was_downloaded[dfi] <- TRUE
+                            if (!dir.exists(dirname(fname))) dir.create(dirname(fname), recursive = TRUE)
+                            if (file.exists(fname)) file.remove(fname)
+                            file.copy(dlf, fname)
+                            ## delete temp file
+                            file.remove(dlf)
+                            ## set local file time if appropriate
+                            ## setting the filetime option in the curl request does not appear to modify the local file timestamp
+                            if (remote_time) set_file_timestamp(path = fname, hdrs = parse_headers_list(req$headers))
+                            if (verbose) cat(if (show_progress) "\n", "done.\n")
+                        } else {
+                            file.remove(dlf)
+                            if (verbose) cat(if (show_progress) "\n", "file unchanged on server, not downloading.\n")
+                        }
+                    }
+                }
+                if (wait > 0) Sys.sleep(wait)
+            } else {
+                if (verbose) cat(" file already exists, not downloading:", df, "\n", df)
+            }
+        }
+    }
+    downloads
 }
 
 ## curl_fetch_memory and _disk wrappers with retries
