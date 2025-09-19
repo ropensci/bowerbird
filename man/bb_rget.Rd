@@ -52,11 +52,11 @@ bb_rget_default_downloads()
 
 \item{reject_follow}{character: as for \code{accept_follow}, but specifying URL regular expressions to reject}
 
-\item{accept_download}{character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs that match all entries will be accepted for download. By default the \code{accept_download} parameter is that returned by \code{bb_rget_default_downloads}: use \code{bb_rget_default_downloads()} to see what that is}
+\item{accept_download}{character or function: if a character vector with one or more entries, each entry specifies a regular expression that is applied to the complete URL. URLs that match all entries will be accepted for download. By default the \code{accept_download} parameter is that returned by \code{bb_rget_default_downloads}: use \code{bb_rget_default_downloads()} to see what that is. Otherwise \code{accept_download} can be provided as a function that accepts a character vector of URLs and returns a logical vector of the same length. Elements of the returned vector should be \code{TRUE} (the associated URL is a download link and should be downloaded), \code{FALSE} (a download link that should not be downloaded), or \code{NA} (not a download link). Note that if \code{accept_download} is a function, then \code{accept_download_extra} and \code{reject_download} are ignored}
 
-\item{accept_download_extra}{character: character vector with one or more entries. If provided, URLs will be accepted for download if they match all entries in \code{accept_download} OR all entries in \code{accept_download_extra}. This is a convenient method to add one or more extra download types, without needing to re-specify the defaults in \code{accept_download}}
+\item{accept_download_extra}{character: character vector with one or more entries. If provided, URLs will be accepted for download if they match all entries in \code{accept_download} OR all entries in \code{accept_download_extra}. This is a convenient method to add one or more extra download types, without needing to re-specify the defaults in \code{accept_download}. Ignored if \code{accept_download} is a function}
 
-\item{reject_download}{character: as for \code{accept_regex}, but specifying URL regular expressions to reject}
+\item{reject_download}{character: as for \code{accept_download}, but specifying URL regular expressions to reject. Ignored if \code{accept_download} is a function}
 
 \item{user}{string: username used to authenticate to the remote server}
 

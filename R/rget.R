@@ -93,7 +93,7 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
 bb_rget_from_snapshot <- function(snapshot, wait = 0, accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_check_certificate = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, retries = 0, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, curl_opts, target_s3_args, ...) {
     ## parameters from bb_rget that are ignored here: level = 0, accept_follow = c("(/|\\.html?)$"), reject_follow = character(), no_parent = TRUE, no_parent_download = no_parent, relative = FALSE, download_link_rewrite, link_css, link_href. These parameters control the spidering process and are not used here
     assert_that(is.data.frame(snapshot))
-    assert_that(is.character(accept_download))
+    assert_that(is.character(accept_download) || is.function(accept_download))
     assert_that(is.character(accept_download_extra))
     assert_that(is.character(reject_download))
     if (missing(user)) user <- NA_character_
@@ -156,13 +156,17 @@ bb_rget_from_snapshot <- function(snapshot, wait = 0, accept_download = bb_rget_
     if (is.null(force_local_filename)) {
         ## allow parms to change between the snapshot run and this download run. e.g. we might snapshot an entire site but only download a subset of files
         ## deal with accept_download, accept_download_extra, reject_download
-        temp1 <- rep(length(accept_download) > 0, nrow(downloads))
-        for (rgx in accept_download) temp1 <- temp1 & vapply(downloads$url, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-        temp2 <- rep(length(accept_download_extra) > 0, nrow(downloads))
-        for (rgx in accept_download_extra) temp2 <- temp2 & vapply(downloads$url, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-        download_idx <- temp1 | temp2
-        for (rgx in reject_download) download_idx <- download_idx & !vapply(downloads$url, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-        downloads <- downloads[download_idx, ]
+        if (is.function(accept_download)) {
+            download_idx <- accept_download(downloads$url) ## elements can be TRUE, FALSE, or NA
+        } else {
+            temp1 <- rep(length(accept_download) > 0, nrow(downloads))
+            for (rgx in accept_download) temp1 <- temp1 & vapply(downloads$url, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+            temp2 <- rep(length(accept_download_extra) > 0, nrow(downloads))
+            for (rgx in accept_download_extra) temp2 <- temp2 & vapply(downloads$url, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+            download_idx <- temp1 | temp2
+            for (rgx in reject_download) download_idx <- download_idx & !vapply(downloads$url, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+        }
+        downloads <- downloads[which(download_idx), ]
     } else {
         ## as with normal bb_rget, if force_local_filename has been supplied then the accept_download etc filters are not applied
     }
@@ -192,9 +196,9 @@ bb_rget_from_snapshot <- function(snapshot, wait = 0, accept_download = bb_rget_
 #' @param wait numeric >=0: wait this number of seconds between successive retrievals. This option may help with servers that block users making too many requests in a short period of time
 #' @param accept_follow character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs matching all entries will be followed during the spidering process. Note that the first URL (provided via the \code{url} parameter) will always be visited, unless it matches the download criteria
 #' @param reject_follow character: as for \code{accept_follow}, but specifying URL regular expressions to reject
-#' @param accept_download character: character vector with one or more entries. Each entry specifies a regular expression that is applied to the complete URL. URLs that match all entries will be accepted for download. By default the \code{accept_download} parameter is that returned by \code{bb_rget_default_downloads}: use \code{bb_rget_default_downloads()} to see what that is
-#' @param accept_download_extra character: character vector with one or more entries. If provided, URLs will be accepted for download if they match all entries in \code{accept_download} OR all entries in \code{accept_download_extra}. This is a convenient method to add one or more extra download types, without needing to re-specify the defaults in \code{accept_download}
-#' @param reject_download character: as for \code{accept_regex}, but specifying URL regular expressions to reject
+#' @param accept_download character or function: if a character vector with one or more entries, each entry specifies a regular expression that is applied to the complete URL. URLs that match all entries will be accepted for download. By default the \code{accept_download} parameter is that returned by \code{bb_rget_default_downloads}: use \code{bb_rget_default_downloads()} to see what that is. Otherwise \code{accept_download} can be provided as a function that accepts a character vector of URLs and returns a logical vector of the same length. Elements of the returned vector should be \code{TRUE} (the associated URL is a download link and should be downloaded), \code{FALSE} (a download link that should not be downloaded), or \code{NA} (not a download link). Note that if \code{accept_download} is a function, then \code{accept_download_extra} and \code{reject_download} are ignored
+#' @param accept_download_extra character: character vector with one or more entries. If provided, URLs will be accepted for download if they match all entries in \code{accept_download} OR all entries in \code{accept_download_extra}. This is a convenient method to add one or more extra download types, without needing to re-specify the defaults in \code{accept_download}. Ignored if \code{accept_download} is a function
+#' @param reject_download character: as for \code{accept_download}, but specifying URL regular expressions to reject. Ignored if \code{accept_download} is a function
 #' @param user string: username used to authenticate to the remote server
 #' @param password string: password used to authenticate to the remote server
 #' @param clobber numeric: 0=do not overwrite existing files, 1=overwrite if the remote file is newer than the local copy, 2=always overwrite existing files
@@ -234,7 +238,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(is.numeric(level), level >= 0)
     assert_that(is.character(accept_follow))
     assert_that(is.character(reject_follow))
-    assert_that(is.character(accept_download))
+    assert_that(is.character(accept_download) || is.function(accept_download))
     assert_that(is.character(accept_download_extra))
     assert_that(is.character(reject_download))
     if (missing(user)) user <- NA_character_
@@ -492,16 +496,24 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
     for (url in to_visit) {
         if (url %in% visited && opts$verbose) { cat("  already visited: ", url, ", skipping\n", sep = ""); next }
         ## first check that this isn't a download file
-        temp1 <- length(opts$accept_download) > 0
-        for (rgx in opts$accept_download) temp1 <- temp1 & grepl(rgx, url)
-        temp2 <- length(opts$accept_download_extra) > 0
-        for (rgx in opts$accept_download_extra) temp2 <- temp2 & grepl(rgx, url)
-        is_dl <- temp1 || temp2
-        for (rgx in opts$reject_download) is_dl <- is_dl & !grepl(rgx, url)
-        if (is_dl) {
+        do_follow <- FALSE
+        if (is.function(opts$accept_download)) {
+            is_dl <- opts$accept_download(url) ## can be TRUE, FALSE, or NA
+            do_follow <- is.na(is_dl) ## NA entries are non-download links, so follow these
+        } else {
+            temp1 <- length(opts$accept_download) > 0
+            for (rgx in opts$accept_download) temp1 <- temp1 && grepl(rgx, url)
+            temp2 <- length(opts$accept_download_extra) > 0
+            for (rgx in opts$accept_download_extra) temp2 <- temp2 && grepl(rgx, url)
+            is_dl <- temp1 || temp2
+            for (rgx in opts$reject_download) is_dl <- is_dl && !grepl(rgx, url)
+            do_follow <- !is_dl ## in this case, TRUE is a download link and FALSE is a non-download link
+            ## TODO if we are given a download (e.g. a .nc file) that matches reject_download, it will be added to do_follow here, but it's not a followable link. Does that matter? We should not have things in the to_visit queue that don't match accept_follow, so generally it should be ok?
+        }
+        if (isTRUE(is_dl)) {
             ## don't visit it, add to download queue
             download_queue <- c(download_queue, url)
-        } else {
+        } else if (do_follow) {
             if (first_req && current_level < 1) {
                 first_req <- FALSE
             } else {
@@ -589,16 +601,22 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                 follow_links <- all_links[follow_idx]
                 all_dl_links <- if (opts$no_parent_download) all_links else all_links_inc_parent ## all potential download links, now we'll filter them
                 all_dl_links <- opts$download_link_rewrite(all_dl_links, url = url, content = x)
-                temp1 <- rep(length(opts$accept_download) > 0, length(all_dl_links))
-                for (rgx in opts$accept_download) temp1 <- temp1 & vapply(all_dl_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-                temp2 <- rep(length(opts$accept_download_extra) > 0, length(all_dl_links))
-                for (rgx in opts$accept_download_extra) temp2 <- temp2 & vapply(all_dl_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-                download_idx <- temp1 | temp2
-                for (rgx in opts$reject_download) download_idx <- download_idx & !vapply(all_dl_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                if (is.function(opts$accept_download)) {
+                    download_idx <- opts$accept_download(all_dl_links) ## can be TRUE, FALSE, or NA
+                    download_idx[is.na(download_idx)] <- FALSE ## NA to FALSE
+                } else {
+                    temp1 <- rep(length(opts$accept_download) > 0, length(all_dl_links))
+                    for (rgx in opts$accept_download) temp1 <- temp1 & vapply(all_dl_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                    temp2 <- rep(length(opts$accept_download_extra) > 0, length(all_dl_links))
+                    for (rgx in opts$accept_download_extra) temp2 <- temp2 & vapply(all_dl_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                    download_idx <- temp1 | temp2
+                    for (rgx in opts$reject_download) download_idx <- download_idx & !vapply(all_dl_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+                }
                 ##cat("First 20 links to follow: "); print(head(follow_links, 20))
                 download_links <- all_dl_links[download_idx]
                 download_links <- download_links[!download_links %in% download_queue]
                 ##cat("First 20 links to download: "); print(head(download_links, 20))
+                ## TODO - download_links are not mutually exclusive from follow_links (a given link could theoretically appear in both, if the accept_follow and accept_download filters allow that). Should that be forcibly disallowed?
                 if (current_level < (opts$level - 1)) { ## -1 because we will download files linked from these pages, and those files will be current_level + 2
                     if (opts$verbose) cat(sprintf(" %d download links", length(download_links)))
                     follow_links <- setdiff(follow_links, download_links) ## can't be in both, treat as download?
