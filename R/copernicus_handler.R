@@ -143,3 +143,46 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
     names(fls)[2] <- "file"
     tibble(ok = ok, files = list(fls), message = "")
 }
+
+#' Postprocessing: remove redundant Copernicus files
+#'
+#' This function is not intended to be called directly, but rather is specified as a \code{postprocess} option in \code{\link{bb_source}}.
+#'
+#' This function will remove files from a Copernicus collection that have been superseded by a more recently-processed version. You might see, for example, the file \code{nrt_global_allsat_phy_l4_20250910_20250910.nc} which is then superseded by \code{nrt_global_allsat_phy_l4_20250910_20250913.nc} at a later date.
+#'
+#' @param ... : extra parameters passed automatically by \code{bb_sync}
+#'
+#' @return a list, with components \code{status} (TRUE on success) and \code{deleted_files} (character vector of paths of files that were deleted)
+#'
+#' @export
+bb_copernicus_cleanup <- function(...) bb_copernicus_cleanup_inner( ...)
+
+bb_copernicus_cleanup_inner <- function(config, verbose = FALSE, ...) {
+    assert_that(is(config, "bb_config"))
+    assert_that(nrow(bb_data_sources(config)) == 1)
+    ## could perhaps use file_list_after here, but better to explicitly list files?
+    file_list <- list.files(path = bb_data_source_dir(config), recursive = TRUE, all.files = TRUE, full.names = TRUE)
+
+    ## intermediate files can appear, particularly with near-real-time data sets, e.g.
+    ## nrt_global_allsat_phy_l4_20250910_20250910.nc
+    ## nrt_global_allsat_phy_l4_20250910_20250913.nc
+    ## nrt_global_allsat_phy_l4_20250910_20250916.nc
+    ## we just want the last of these, noting that (i) a superseded file has to be in the same directory as its replacement
+    proc_date <- stringr::str_match(file_list, "_([[:digit:]]{8})\\.nc$")[, 2]
+    data_date <- stringr::str_match(file_list, "_([[:digit:]]{8})_[[:digit:]]{8}\\.nc$")[, 2]
+    file_path_stub <- sub("_[[:digit:]]{8}\\.nc$", "", file_list)
+    to_delete <- rep(FALSE, length(file_list))
+    for (uf in unique(file_path_stub)) {
+        idx <- which(file_path_stub == uf)
+        if (length(idx) > 1) to_delete[idx[which(proc_date[idx] < max(proc_date[idx], na.rm = TRUE))]] <- TRUE
+    }
+    to_delete <- file_list[which(to_delete)]
+    if (verbose) {
+        if (length(to_delete) > 0) {
+            if (verbose) cat(" cleaning up files: ", paste(to_delete, collapse = ", "), "\n")
+        } else {
+            if (verbose) cat(" cleanup: no files to remove\n")
+        }
+    }
+    list(status = unlink(to_delete) == 0, deleted_files = to_delete)
+}
