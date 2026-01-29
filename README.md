@@ -1,16 +1,16 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/ropensci/bowerbird/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ropensci/bowerbird/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/ropensci/bowerbird/graph/badge.svg)](https://app.codecov.io/gh/ropensci/bowerbird)
+[![Codecov test
+coverage](https://codecov.io/gh/ropensci/bowerbird/graph/badge.svg)](https://app.codecov.io/gh/ropensci/bowerbird)
 [![](https://badges.ropensci.org/139_status.svg)](https://github.com/ropensci/onboarding/issues/139)
 <!-- badges: end -->
 
 # Bowerbird
 
-<img align="right" src="https://rawgit.com/ropensci/bowerbird/master/inst/extdata/bowerbird.svg" />
+<img align="right" src="https://github.com/ropensci/bowerbird/raw/refs/heads/master/inst/extdata/bowerbird.svg" />
 
 Often it’s desirable to have local copies of third-party data sets.
 Fetching data on the fly from remote sources can be a great strategy,
@@ -24,7 +24,8 @@ A comprehensive introduction to bowerbird can be found at
 <https://docs.ropensci.org/bowerbird/articles/bowerbird.html>, along
 with full package documentation.
 
-This [blog post (2018-11-13)](https://ropensci.org/blog/2018/11/13/antarctic/)
+This [blog post
+(2018-11-13)](https://ropensci.org/blog/2018/11/13/antarctic/)
 illustrates the process of setting up bowerbird from scratch and using
 it to obtain and work with several disparate data sets that overlap in
 space and time.
@@ -79,22 +80,22 @@ status <- bb_sync(cf, verbose = TRUE)
 ```
 
     ##  
-    ## Tue Nov 30 16:32:35 2021 
+    ## Fri Jan 30 08:04:14 2026 
     ## Synchronizing dataset: Australian Election 2016 House of Representatives data 
     ## Source URL http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm 
     ## -------------------------------------------------------------------------------------------- 
     ##  
     ##  this dataset path is: /tmp/data/results.aec.gov.au/20499/Website 
     ##  visiting http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm ... done. 
-    ##  downloading file 1 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseCandidatesDownload-20499.csv ...  done. 
-    ##  downloading file 2 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseMembersElectedDownload-20499.csv ...  done. 
-    ##  downloading file 3 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseNominationsByStateDownload-20499.csv ...  done. 
+    ##  downloading file 1 of 47: https://results.aec.gov.au/20499/Website/Downloads/HouseCandidatesDownload-20499.csv ...  done. 
+    ##  downloading file 2 of 47: https://results.aec.gov.au/20499/Website/Downloads/HouseMembersElectedDownload-20499.csv ...  done. 
+    ##  downloading file 3 of 47: https://results.aec.gov.au/20499/Website/Downloads/HouseNominationsByStateDownload-20499.csv ...  done. 
     ##  
     ##  [... output truncated] 
     ##  
-    ## Tue Nov 30 16:32:49 2021 dataset synchronization complete: Australian Election 2016 House of Representatives data
+    ## Fri Jan 30 08:04:19 2026 dataset synchronization complete: Australian Election 2016 House of Representatives data
 
-Congratulations\! You now have your own local copy of your chosen data
+Congratulations! You now have your own local copy of your chosen data
 set. This particular example is fairly small (about 10MB), so it should
 not take too long to download. Details of the files in this data set are
 given in the `status$files` object:
@@ -102,20 +103,21 @@ given in the `status$files` object:
 ``` r
 status$files
 ## [[1]]
-## # A tibble: 47 × 3
-##    url                                file                               note   
-##    <chr>                              <chr>                              <chr>  
-##  1 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…
-##  2 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…
-##  3 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…
-##  4 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…
-##  5 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…
-##  6 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…
-##  7 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…
-##  8 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…
-##  9 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…
-## 10 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…
-## # … with 37 more rows
+## # A tibble: 47
+## #   × 3
+##    url                                                               file  note 
+##    <chr>                                                             <chr> <chr>
+##  1 https://results.aec.gov.au/20499/Website/Downloads/HouseCandidat… /tmp… down…
+##  2 https://results.aec.gov.au/20499/Website/Downloads/HouseMembersE… /tmp… down…
+##  3 https://results.aec.gov.au/20499/Website/Downloads/HouseNominati… /tmp… down…
+##  4 https://results.aec.gov.au/20499/Website/Downloads/HouseNominati… /tmp… down…
+##  5 https://results.aec.gov.au/20499/Website/Downloads/HouseNominati… /tmp… down…
+##  6 https://results.aec.gov.au/20499/Website/Downloads/HousePartyRep… /tmp… down…
+##  7 https://results.aec.gov.au/20499/Website/Downloads/HouseSeatsWhi… /tmp… down…
+##  8 https://results.aec.gov.au/20499/Website/Downloads/HouseSeatsDec… /tmp… down…
+##  9 https://results.aec.gov.au/20499/Website/Downloads/HouseSeatsDec… /tmp… down…
+## 10 https://results.aec.gov.au/20499/Website/Downloads/HouseNonClass… /tmp… down…
+## # ℹ 37 more rows
 ```
 
 At a later time you can re-run this synchronization process. If the
@@ -144,48 +146,47 @@ time of writing) access to 85 ecological data sets. A quick comparison:
 
 ### rdataretriever
 
-  - requires `retriever` to be installed, either as a Python package or
-    via a platform-specific installer (see
-    <http://www.data-retriever.org/>)
+- requires `retriever` to be installed, either as a Python package or
+  via a platform-specific installer (see
+  <http://www.data-retriever.org/>)
 
-  - makes efforts to clean and standardize the data that it downloads,
-    and get them into a consistent format on the user’s system
+- makes efforts to clean and standardize the data that it downloads, and
+  get them into a consistent format on the user’s system
 
-  - designed to make it easy for users to get on with the business of
-    using those data sets
+- designed to make it easy for users to get on with the business of
+  using those data sets
 
-  - carries the tradeoff that adding new data sets (and maintaining the
-    existing ones) takes a bit of effort, and it can be cumbersome to
-    deal with data sets that contain many files, particularly if new
-    files get added on a regular basis (e.g. satellite environmental
-    data).
+- carries the tradeoff that adding new data sets (and maintaining the
+  existing ones) takes a bit of effort, and it can be cumbersome to deal
+  with data sets that contain many files, particularly if new files get
+  added on a regular basis (e.g. satellite environmental data).
 
 ### bowerbird
 
-  - pure R, no other system dependencies
+- pure R, no other system dependencies
 
-  - designed to make it easy for users to keep a local, up-to-date
-    collection of files from remote providers. It can do recursive
-    downloads, and so is particularly suitable for collections that are
-    structured as a large number of individual files in yearly or other
-    subdirectories (typical of e.g. satellite or climate model data)
+- designed to make it easy for users to keep a local, up-to-date
+  collection of files from remote providers. It can do recursive
+  downloads, and so is particularly suitable for collections that are
+  structured as a large number of individual files in yearly or other
+  subdirectories (typical of e.g. satellite or climate model data)
 
-  - simply mirrors remote data to your local system, without attempting
-    to reformat the data files or do anything else clever with them
-    (other than uncompress, if needed). It just grabs them and saves
-    them in whatever format the provider uses
+- simply mirrors remote data to your local system, without attempting to
+  reformat the data files or do anything else clever with them (other
+  than uncompress, if needed). It just grabs them and saves them in
+  whatever format the provider uses
 
-  - the upside is that it is intended to be easy to write bowerbird
-    definitions for new data sources. In many cases, it is only
-    necessary to specify some metadata and the top-level URL, and
-    bowerbird can recursively download linked resources from there
+- the upside is that it is intended to be easy to write bowerbird
+  definitions for new data sources. In many cases, it is only necessary
+  to specify some metadata and the top-level URL, and bowerbird can
+  recursively download linked resources from there
 
-  - bowerbird itself contains only a few example data sets, but data
-    definitions are available from other packages
-    (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant),
-    \~55 marine/Southern Ocean data sets).
+- bowerbird itself contains only a few example data sets, but data
+  definitions are available from other packages
+  (e.g. [blueant](https://github.com/AustralianAntarcticDivision/blueant),
+  ~55 marine/Southern Ocean data sets).
 
 The rdataretriever and bowerbird packages are both part of the rOpenSci
 project.
 
-[![ropensci\_footer](https://ropensci.org/public_images/scar_footer.png)](https://ropensci.org)
+[![ropensci_footer](https://ropensci.org/public_images/scar_footer.png)](https://ropensci.org)

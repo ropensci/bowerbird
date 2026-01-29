@@ -19,7 +19,7 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">bowerbird</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.16.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.18.5</span>
       </span>
     </div>
 
@@ -48,7 +48,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -62,7 +62,7 @@
 <li>
   <a href="https://github.com/ropensci/bowerbird/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -73,7 +73,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="contents col-md-9">
@@ -82,7 +82,7 @@
 <div class="section level1">
 <div class="page-header"><h1 id="bowerbird">Bowerbird<a class="anchor" aria-label="anchor" href="#bowerbird"></a>
 </h1></div>
-<p><img align="right" src="https://rawgit.com/ropensci/bowerbird/master/inst/extdata/bowerbird.svg"></p>
+<p><img align="right" src="https://github.com/ropensci/bowerbird/raw/refs/heads/master/inst/extdata/bowerbird.svg"></p>
 <p>Often it’s desirable to have local copies of third-party data sets. Fetching data on the fly from remote sources can be a great strategy, but for speed or other reasons it may be better to have local copies. This is particularly common in environmental and other sciences that deal with large data sets (e.g. satellite or global climate model products). Bowerbird is an R package for maintaining a local collection of data sets from a range of data providers.</p>
 <p>A comprehensive introduction to bowerbird can be found at <a href="https://docs.ropensci.org/bowerbird/articles/bowerbird.html" class="external-link uri">https://docs.ropensci.org/bowerbird/articles/bowerbird.html</a>, along with full package documentation.</p>
 <p>This <a href="https://ropensci.org/blog/2018/11/13/antarctic/" class="external-link">blog post (2018-11-13)</a> illustrates the process of setting up bowerbird from scratch and using it to obtain and work with several disparate data sets that overlap in space and time.</p>
@@ -120,39 +120,40 @@
 <p>Once the configuration has been defined and the data source added to it, we can run the sync process. We set <code>verbose = TRUE</code> here so that we see additional progress output:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">status</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/bb_sync.html">bb_sync</a></span><span class="op">(</span><span class="va">cf</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">##  </span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Tue Nov 30 16:32:35 2021 </span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Synchronizing dataset: Australian Election 2016 House of Representatives data </span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Source URL http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm </span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="do">## -------------------------------------------------------------------------------------------- </span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="do">##  </span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="do">##  this dataset path is: /tmp/data/results.aec.gov.au/20499/Website </span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="do">##  visiting http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm ... done. </span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="do">##  downloading file 1 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseCandidatesDownload-20499.csv ...  done. </span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="do">##  downloading file 2 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseMembersElectedDownload-20499.csv ...  done. </span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="do">##  downloading file 3 of 47: http://results.aec.gov.au/20499/Website/Downloads/HouseNominationsByStateDownload-20499.csv ...  done. </span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="do">##  </span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="do">##  [... output truncated] </span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="do">##  </span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="do">## Tue Nov 30 16:32:49 2021 dataset synchronization complete: Australian Election 2016 House of Representatives data</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="do">##  </span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="do">## Fri Jan 30 08:04:14 2026 </span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="do">## Synchronizing dataset: Australian Election 2016 House of Representatives data </span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="do">## Source URL http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm </span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="do">## -------------------------------------------------------------------------------------------- </span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="do">##  </span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="do">##  this dataset path is: /tmp/data/results.aec.gov.au/20499/Website </span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="do">##  visiting http://results.aec.gov.au/20499/Website/HouseDownloadsMenu-20499-Csv.htm ... done. </span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="do">##  downloading file 1 of 47: https://results.aec.gov.au/20499/Website/Downloads/HouseCandidatesDownload-20499.csv ...  done. </span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="do">##  downloading file 2 of 47: https://results.aec.gov.au/20499/Website/Downloads/HouseMembersElectedDownload-20499.csv ...  done. </span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="do">##  downloading file 3 of 47: https://results.aec.gov.au/20499/Website/Downloads/HouseNominationsByStateDownload-20499.csv ...  done. </span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="do">##  </span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="do">##  [... output truncated] </span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="do">##  </span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="do">## Fri Jan 30 08:04:19 2026 dataset synchronization complete: Australian Election 2016 House of Representatives data</span></span></code></pre></div>
 <p>Congratulations! You now have your own local copy of your chosen data set. This particular example is fairly small (about 10MB), so it should not take too long to download. Details of the files in this data set are given in the <code>status$files</code> object:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">status</span><span class="op">$</span><span class="va">files</span></span>
 <span><span class="co">## [[1]]</span></span>
-<span><span class="co">## # A tibble: 47 × 3</span></span>
-<span><span class="co">##    url                                file                               note   </span></span>
-<span><span class="co">##    &lt;chr&gt;                              &lt;chr&gt;                              &lt;chr&gt;  </span></span>
-<span><span class="co">##  1 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…</span></span>
-<span><span class="co">##  2 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…</span></span>
-<span><span class="co">##  3 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…</span></span>
-<span><span class="co">##  4 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…</span></span>
-<span><span class="co">##  5 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…</span></span>
-<span><span class="co">##  6 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…</span></span>
-<span><span class="co">##  7 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…</span></span>
-<span><span class="co">##  8 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…</span></span>
-<span><span class="co">##  9 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…</span></span>
-<span><span class="co">## 10 http://results.aec.gov.au/20499/W… /tmp/data/results.aec.gov.au/2049… downlo…</span></span>
-<span><span class="co">## # … with 37 more rows</span></span></code></pre></div>
+<span><span class="co">## # A tibble: 47</span></span>
+<span><span class="co">## #   × 3</span></span>
+<span><span class="co">##    url                                                               file  note </span></span>
+<span><span class="co">##    &lt;chr&gt;                                                             &lt;chr&gt; &lt;chr&gt;</span></span>
+<span><span class="co">##  1 https://results.aec.gov.au/20499/Website/Downloads/HouseCandidat… /tmp… down…</span></span>
+<span><span class="co">##  2 https://results.aec.gov.au/20499/Website/Downloads/HouseMembersE… /tmp… down…</span></span>
+<span><span class="co">##  3 https://results.aec.gov.au/20499/Website/Downloads/HouseNominati… /tmp… down…</span></span>
+<span><span class="co">##  4 https://results.aec.gov.au/20499/Website/Downloads/HouseNominati… /tmp… down…</span></span>
+<span><span class="co">##  5 https://results.aec.gov.au/20499/Website/Downloads/HouseNominati… /tmp… down…</span></span>
+<span><span class="co">##  6 https://results.aec.gov.au/20499/Website/Downloads/HousePartyRep… /tmp… down…</span></span>
+<span><span class="co">##  7 https://results.aec.gov.au/20499/Website/Downloads/HouseSeatsWhi… /tmp… down…</span></span>
+<span><span class="co">##  8 https://results.aec.gov.au/20499/Website/Downloads/HouseSeatsDec… /tmp… down…</span></span>
+<span><span class="co">##  9 https://results.aec.gov.au/20499/Website/Downloads/HouseSeatsDec… /tmp… down…</span></span>
+<span><span class="co">## 10 https://results.aec.gov.au/20499/Website/Downloads/HouseNonClass… /tmp… down…</span></span>
+<span><span class="co">## # ℹ 37 more rows</span></span></code></pre></div>
 <p>At a later time you can re-run this synchronization process. If the remote files have not changed, and assuming that your configuration has the <code>clobber</code> parameter set to 0 (“do not overwrite existing files”) or 1 (“overwrite only if the remote file is newer than the local copy”) then the sync process will run more quickly because it will not need to re-download any data files.</p>
 </div>
 </div>
@@ -229,8 +230,8 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Ben Raymond <br><small class="roles"> Author, maintainer </small>  </li>
-<li>Michael Sumner <br><small class="roles"> Author </small>  </li>
+<li>Ben Raymond <br><small class="roles"> Author, maintainer </small>   </li>
+<li>Michael Sumner <br><small class="roles"> Author </small>   </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
@@ -239,7 +240,7 @@
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://github.com/ropensci/bowerbird/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/ropensci/bowerbird/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://codecov.io/gh/ropensci/bowerbird?branch=master" class="external-link"><img src="https://codecov.io/gh/ropensci/bowerbird/branch/master/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://app.codecov.io/gh/ropensci/bowerbird" class="external-link"><img src="https://codecov.io/gh/ropensci/bowerbird/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://github.com/ropensci/onboarding/issues/139" class="external-link"><img src="https://badges.ropensci.org/139_status.svg"></a></li>
 </ul>
 </div>
@@ -255,16 +256,16 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>
