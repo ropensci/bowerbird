@@ -172,15 +172,18 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
     this_path_no_trailing_sep <- sub("[\\/]$","",bb_data_source_dir(this_dataset))
     if (verbose) cat(sprintf(" this dataset path is: %s\n",this_path_no_trailing_sep))
     ## build file list if postprocessing required
-    if (length(pp)>0) {
+    if (length(pp) > 0) {
         ## take snapshot of this directory before we start syncing
         if (verbose) cat(sprintf(" building file list ... "))
-        file_list_before <- file.info(list.files(path=this_path_no_trailing_sep,recursive=TRUE,full.names=TRUE)) ## full.names TRUE so that names are relative to current working directory
-        if (file.exists(this_path_no_trailing_sep)) {
-            ## in some cases this points directly to a file
-            temp <- file.info(this_path_no_trailing_sep)
-            temp <- temp[!temp$isdir,]
-            if (nrow(temp)>0) { file_list_before <- rbind(file_list_before,temp) }
+        file_list_before <- file.info(list.files(path = this_path_no_trailing_sep, recursive = TRUE, full.names = TRUE))
+        ## full.names TRUE so that names are relative to current working directory
+        for (tp in this_path_no_trailing_sep) {
+            if (file.exists(tp)) {
+                ## in some cases this points directly to a file
+                temp <- file.info(tp)
+                temp <- temp[!temp$isdir, ]
+                if (nrow(temp) > 0) { file_list_before <- rbind(file_list_before, temp) }
+            }
         }
         if (verbose) cat(sprintf("done.\n"))
     }

@@ -1,7 +1,8 @@
 #' Generate a bowerbird data source object for an Australian Antarctic Data Centre data set
 #'
 #' @param metadata_id string: the metadata ID of the data set. Browse the AADC's collection at https://data.aad.gov.au/metadata/records/ to find the relevant \code{metadata_id}
-#' @param eds_id integer: specify one or more \code{eds_id}s if the metadata record has multiple data assets attached to it and you don't want all of them
+#' @param eds_id integer: (optional) specify one or more \code{eds_id}s if the metadata record has multiple data assets attached to it and you don't want all of them
+#' @param filter expression: (optional) an expression to use in a \code{subset} operation, which will be applied to the datasource metadata data frame. You can view this metadata using \code{bb_aadc_datasource_meta()}
 #' @param id_is_metadata_id logical: if TRUE, use the \code{metadata_id} as the data source ID, otherwise use its DOI
 #' @param ... : passed to \code{\link{bb_source}}
 #'
@@ -20,16 +21,24 @@
 #'   dir.create(data_dir)
 #'   res <- bb_get(src, local_file_root = data_dir, verbose = TRUE)
 #'   res$files
+#'
+#'  ## generate the CPR data set source, which has two components
+#'  ##  but we want to exclude the logbooks and only retrieve the actual data
+#'   src <- bb_aadc_source("AADC-00099", filter = !grepl("logbooks", dataset_name))
 #' }
 #'
 #' @export
-bb_aadc_source <- function(metadata_id, eds_id, id_is_metadata_id = FALSE, ...) {
+bb_aadc_source <- function(metadata_id, eds_id, id_is_metadata_id = FALSE, filter, ...) {
     assert_that(is.string(metadata_id))
     if (grepl("^http", metadata_id)) metadata_id <- basename(metadata_id)
     md <- get_aadc_md(metadata_id)
     uuid <- tryCatch({
-        temp <- get_json(paste0("https://data.aad.gov.au/eds/api/metadata/", metadata_id, "?format=json"))
+        temp <- bb_aadc_datasource_meta(metadata_id)
         if (nrow(temp) > 1 && !missing(eds_id)) temp <- temp[temp$eds_id %in% eds_id, ]
+        if (nrow(temp) > 1 && !missing(filter)) {
+            if (!tryCatch(inherits(filter, "call"), error = function(e) FALSE)) filter <- substitute(filter)
+            temp <- subset(temp, eval(filter, envir = temp))
+        }
         temp$uuid
     }, error = function(e) NULL)
     if (length(uuid) < 1) stop("could not find record UUID")
@@ -43,8 +52,8 @@ bb_aadc_source <- function(metadata_id, eds_id, id_is_metadata_id = FALSE, ...) 
             if (is.data.frame(this)) this else NULL
         })) ## data.frame of files
         if (is.data.frame(s3x)) {
-            if (any(grepl("\\.zip$", s3x$name, ignore.case = TRUE))) postproc <- c(postproc, list("unzip"))
-            if (any(grepl("\\.gz$", s3x$name, ignore.case = TRUE))) postproc <- c(postproc, list("gunzip"))
+            if (any(grepl("\\.zip$", s3x$name, ignore.case = TRUE))) postproc <- c(postproc, list("bb_unzip"))
+            if (any(grepl("\\.gz$", s3x$name, ignore.case = TRUE))) postproc <- c(postproc, list("bb_gunzip"))
             sz <- sum(s3x$size, na.rm = TRUE)/1024^3 ## in GB
             if (!is.na(sz)) ceiling(sz*10)/10 else NA_real_
         } else {
@@ -64,9 +73,16 @@ bb_aadc_source <- function(metadata_id, eds_id, id_is_metadata_id = FALSE, ...) 
               collection_size = csize, ...)
 }
 
+#' @export
+#' @rdname bb_aadc_source
+bb_aadc_datasource_meta <- function(metadata_id) {
+    get_json(paste0("https://data.aad.gov.au/eds/api/metadata/", metadata_id, "?format=json"))
+}
+
 get_aadc_md <- function(metadata_id) {
     get_json(paste0("https://data.aad.gov.au/metadata/api/records/", metadata_id, "?format=json"))
 }
+
 
 get_json <- function(url) {
     out <- curl::curl_fetch_memory(url, handle = curl::new_handle(ssl_verifypeer = 0L))

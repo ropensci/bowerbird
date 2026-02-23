@@ -53,10 +53,10 @@ bb_handler_aws_s3 <- function(...) {
 # @return TRUE on success or the directory name if local_dir_only is TRUE
 bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, ...) {
 
-    assert_that(is(config,"bb_config"))
-    assert_that(nrow(bb_data_sources(config))==1)
-    assert_that(is.flag(verbose),!is.na(verbose))
-    assert_that(is.flag(local_dir_only),!is.na(local_dir_only))
+    assert_that(is(config, "bb_config"))
+    assert_that(nrow(bb_data_sources(config)) == 1)
+    assert_that(is.flag(verbose), !is.na(verbose))
+    assert_that(is.flag(local_dir_only), !is.na(local_dir_only))
 
     myargs <- list(...)
     if (is.null(myargs[["accept_download"]])) myargs$accept_download <- bowerbird::bb_rget_default_downloads()
@@ -67,7 +67,6 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
     ## args to pass to all s3HTTP calls
     s3HTTP_args <- s3args[intersect(names(s3args), c("bucket", "base_url", "region", "use_https"))]
     ## "key" and "secret" could go here but aren't (yet) propagated into the rget calls below
-
     if (local_dir_only) {
         this_url <- file.path(do.call(get_aws_s3_url, c(list(path = paste0("/", s3args$prefix)), s3HTTP_args)), "dummy")
         config$data_sources <- bb_modify_source(config$data_sources, method = list("bb_rget"), source_url = this_url)
@@ -77,11 +76,13 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
     ## get list of objects in bucket that match our specs
     if (!is.null(myargs$bucketlist_json)) warning("the `bucketlist_json` parameter has been replaced by `bucket_browser_url`, ignoring")
     if (is.null(myargs$bucket_browser_url)) {
+        ## TODO handle multiple buckets (in s3HTTP_args)
         bx <- do.call(aws.s3::get_bucket, c(s3args[intersect(names(s3args), c("max", "prefix"))], s3HTTP_args, list(verbose = TRUE)))
         all_urls <- vapply(bx, function(z) do.call(get_aws_s3_url, c(list(path = paste0("/", z$Key)), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
+        ## haven't tried or tested sources with hierarchical structure
     } else {
         ## for providers that don't support bucket indexing
-        all_urls <- s3_faux_bucket_list(bucket_browser_url = myargs$bucket_browser_url, bucket = s3args$bucket, prefix = s3args$prefix, s3HTTP_args = s3HTTP_args)
+        all_urls <- unlist(lapply(seq_along(myargs$bucket_browser_url), function(bi) s3_faux_bucket_list(bucket_browser_url = myargs$bucket_browser_url[bi], bucket = s3args$bucket[bi], prefix = s3args$prefix, s3HTTP_args = s3HTTP_args)))
     }
     ## apply accept_download etc filters
     idx <- rep(TRUE, length(all_urls))
@@ -121,12 +122,12 @@ get_aws_s3_url <- function(bucket, region = NULL, path, base_url, verbose = FALS
         if (!is.null(region) && nzchar(region) && region != "us-east-1") base_url <- paste0("s3-", region, ".amazonaws.com")
     }
     url <- paste0("http", if (isTRUE(use_https)) "s", "://", base_url)
-    if (nzchar(bucket)) url <- paste0(url, "/", bucket)
+    url <- sapply(bucket, function(b) if (nzchar(b)) paste0(url, "/", b) else url, USE.NAMES = FALSE) ## multiple buckets OK, but we'll return multiple URLs
     terminal_slash <- grepl("/$", path)
     path <- if (nzchar(path)) paste(vapply(strsplit(path, "/")[[1]], function(i) URLencode(i, TRUE), USE.NAMES = FALSE, FUN.VALUE = ""), collapse = "/") else "/"
     url <- if (grepl("^[\\/].*", path)) paste0(url, path) else paste(url, path, sep = "/")
     if (isTRUE(terminal_slash)) url <- paste0(url, "/")
-  url
+    url
 }
 
 ## this is a horrible workaround for providers that do not implement the standard endpoint for listing objects in a bucket
