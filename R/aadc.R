@@ -22,8 +22,8 @@
 #'   res <- bb_get(src, local_file_root = data_dir, verbose = TRUE)
 #'   res$files
 #'
-#'  ## generate the CPR data set source, which has two components
-#'  ##  but we want to exclude the logbooks and only retrieve the actual data
+#'   ## generate the CPR data set source, which has two components
+#'   ##  but we want to exclude the logbooks and only retrieve the actual data
 #'   src <- bb_aadc_source("AADC-00099", filter = !grepl("logbooks", dataset_name))
 #' }
 #'

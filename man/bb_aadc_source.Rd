@@ -16,7 +16,7 @@ bb_aadc_datasource_meta(metadata_id)
 
 \item{id_is_metadata_id}{logical: if TRUE, use the \code{metadata_id} as the data source ID, otherwise use its DOI}
 
-\item{filter}{expression: (optional) an expression to apply to a \code{subset} operation on the datasource metadata data frame. You can view this metadata using \code{bb_aadc_datasource_meta()}}
+\item{filter}{expression: (optional) an expression to use in a \code{subset} operation, which will be applied to the datasource metadata data frame. You can view this metadata using \code{bb_aadc_datasource_meta()}}
 
 \item{...}{: passed to \code{\link{bb_source}}}
 }
@@ -38,8 +38,8 @@ Generate a bowerbird data source object for an Australian Antarctic Data Centre 
   res <- bb_get(src, local_file_root = data_dir, verbose = TRUE)
   res$files
 
- ## generate the CPR data set source, which has two components
- ##  but we want to exclude the logbooks and only retrieve the actual data
+  ## generate the CPR data set source, which has two components
+  ##  but we want to exclude the logbooks and only retrieve the actual data
   src <- bb_aadc_source("AADC-00099", filter = !grepl("logbooks", dataset_name))
 }
 
