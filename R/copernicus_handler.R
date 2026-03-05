@@ -55,7 +55,14 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
     }
 
     if (verbose) cat("Downloading file list ... \n")
-    myfiles <- CopernicusMarine::cms_list_native_files(product, layer, pattern = pattern, prefix = prefix)
+    if (is.null(layer) || !nzchar(layer)) {
+        ## user has specified only the product, which in some cases can have multiple layers
+        ## CopernicusMarine can only handle a single layer per product, so here we iterate over all layers
+        services <- CopernicusMarine::cms_product_services(product)
+        myfiles <- do.call(rbind, lapply(services$id, function(id) CopernicusMarine::cms_list_native_files(product = product, layer = id, pattern = pattern, prefix = prefix)))
+    } else {
+        myfiles <- CopernicusMarine::cms_list_native_files(product, layer, pattern = pattern, prefix = prefix)
+    }
     if (is.null(myfiles) || nrow(myfiles) < 1) stop("No files found for Copernicus Marine product: ", product)
     names(myfiles) <- tolower(names(myfiles))
     if (!all(c("base_url", "bucket", "key", if (use_etags) "etag" else "lastmodified") %in% names(myfiles))) stop("file list does not have the expected columns, has there been a change to the format returned by `CopernicusMarine::cms_list_native_files()`?")
