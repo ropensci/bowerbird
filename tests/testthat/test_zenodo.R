@@ -1,7 +1,8 @@
 context("Zenodo sources")
 test_that("A small Zenodo source works", {
     src <- bb_zenodo_source(3533328)
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
     expect_true(all(grepl("zenodo.org/api/records/3533328/files", bb_data_source_dir(cf))))
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL)
@@ -9,6 +10,7 @@ test_that("A small Zenodo source works", {
     expect_true(all(file.exists(status$files[[1]]$file)))
     fi <- file.size(status$files[[1]]$file)
     expect_true(all(fi > 0))
+    unlink(temp_root, recursive = TRUE)
 })
 
 

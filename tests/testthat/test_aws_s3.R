@@ -10,7 +10,8 @@ test_that("bb_handler_aws_s3 works", {
         method = list("bb_handler_aws_s3", bucket = "", base_url = "noaa-dcdb-bathymetry-pds.s3.amazonaws.com", prefix = "", region = "", accept_download = "20170425114516079166_.*"),
         postprocess = NULL,
         collection_size = 0.1)
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
     expect_true(grepl("noaa\\-dcdb\\-bathymetry\\-pds\\.s3\\.amazonaws\\.com[/\\\\]?$", bb_data_source_dir(cf)))
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL)
@@ -19,6 +20,7 @@ test_that("bb_handler_aws_s3 works", {
     fi <- file.info(status$files[[1]]$file)
     expect_gt(fi$size, 1e3)
     expect_lt(fi$size, 2e3)
+    unlink(temp_root, recursive = TRUE)
 
     ## SILO climate data
     src <- bb_source(
@@ -32,7 +34,8 @@ test_that("bb_handler_aws_s3 works", {
         postprocess = NULL,
         collection_size = 0.02,
         data_group = "Climate")
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
     expect_true(grepl("silo-open-data.s3.amazonaws.com/Official/annual/monthly_rain/?$", bb_data_source_dir(cf)))
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
@@ -48,4 +51,5 @@ test_that("bb_handler_aws_s3 works", {
     ## go again, it should not download anything
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
     expect_identical(status$files[[1]]$note, "existing copy")
+    unlink(temp_root, recursive = TRUE)
 })

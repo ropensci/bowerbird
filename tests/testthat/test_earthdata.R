@@ -7,9 +7,11 @@ test_that("bb_handler_earthdata works", {
     src <- bb_example_sources("Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3") %>%
         bb_modify_source(user = Sys.getenv("EARTHDATA_USER"), password = Sys.getenv("EARTHDATA_PASS"),
                          method = list(level = 3, accept_download = "monthly-climatology/.+\\.s\\.png"))
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     res <- bb_get(src, local_file_root = temp_root)
 
     expect_equal(nrow(res$files[[1]]), 12)
     expect_true(all(file.exists(res$files[[1]]$file)))
+    unlink(temp_root, recursive = TRUE)
 })

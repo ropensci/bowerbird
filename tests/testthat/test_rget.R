@@ -28,6 +28,8 @@ test_that("rget's remote_time option works",{
     bowerbird:::set_file_timestamp(f2, httr::headers(res))
     finf2 <- file.info(c(f1, f2))
     expect_true(as.numeric(difftime(finf2$mtime[2], finf2$mtime[1], units = "secs")) < -10) ## less than -10, i.e. remote time stamp is more than 10s earlier than now
+    unlink(f1)
+    unlink(f2)
 
     ## and same deal, handled within the rget function
     test_url <- "https://www.google.com.au/robots.txt"
@@ -49,7 +51,8 @@ test_that("rget's remote_time option works",{
 test_that("rget use_url_directory parameter works", {
     skip_on_cran()
     test_url <- "https://www.google.com.au/robots.txt"
-    outdir <- tempdir()
+    outdir <- tempfile()
+    dir.create(outdir)
     if (file.exists(file.path(outdir, "robots.txt"))) file.remove(file.path(outdir, "robots.txt"))
     withdir <- function(cwd = getwd()) {
         on.exit(setwd(cwd))
@@ -58,31 +61,50 @@ test_that("rget use_url_directory parameter works", {
     }
     res <- withdir()
     expect_true(file.exists(file.path(outdir, "robots.txt")))
+    unlink(outdir, recursive = TRUE)
 })
 
 test_that("rget works with multiple input URLs", {
     expect_error(bb_rget(c("http://blah", "ftp://hah")), "bb_rget can't handle a mixture of ftp/http")
-    res1 <- bb_rget("https://github.com/ropensci/bowerbird/", accept_download = "\\.md$", no_parent = FALSE, level = 1)
-    res2 <- bb_rget(c("https://github.com/ropensci/bowerbird/", "https://github.com/ropensci/bowerbird/"), accept_download = "\\.md$", no_parent = FALSE, level = 1)
-    expect_identical(res1, res2)
+    outdir <- tempfile()
+    dir.create(outdir)
+    withdir <- function(cwd = getwd()) {
+        on.exit(setwd(cwd))
+        setwd(outdir)
+        res1 <- bb_rget("https://github.com/ropensci/bowerbird/", accept_download = "\\.md$", no_parent = FALSE, level = 1)
+        res2 <- bb_rget(c("https://github.com/ropensci/bowerbird/", "https://github.com/ropensci/bowerbird/"), accept_download = "\\.md$", no_parent = FALSE, level = 1)
+        list(res1, res2)
+    }
+    res <- withdir()
+    expect_identical(res$res1, res$res2)
+    unlink(outdir, recursive = TRUE)
 
     ## multiple urls with multiple force_local_filenames
     outdir <- tempfile()
     dir.create(outdir)
-    res <- bb_rget(rep("https://raw.githubusercontent.com/ropensci/bowerbird/master/README.md", 2), force_local_filename = file.path(outdir, c("1.md", "2.md")), use_url_directory = FALSE)
+    withdir <- function(cwd = getwd()) {
+        on.exit(setwd(cwd))
+        setwd(outdir)
+        bb_rget(rep("https://raw.githubusercontent.com/ropensci/bowerbird/master/README.md", 2), force_local_filename = file.path(outdir, c("1.md", "2.md")), use_url_directory = FALSE)
+    }
+    res <- withdir()
     expect_identical(res$files[[1]]$file, file.path(outdir, c("1.md", "2.md")))
     expect_true(all(file.exists(res$files[[1]]$file)))
+    unlink(outdir, recursive = TRUE)
 
-    cwd <- getwd()
     outdir <- tempfile()
     dir.create(outdir)
-    setwd(outdir)
-    res <- bb_rget(rep("https://raw.githubusercontent.com/ropensci/bowerbird/master/README.md", 2), force_local_filename = c("1.md", "2.md"))
+    withdir <- function(cwd = getwd()) {
+        on.exit(setwd(cwd))
+        setwd(outdir)
+        bb_rget(rep("https://raw.githubusercontent.com/ropensci/bowerbird/master/README.md", 2), force_local_filename = c("1.md", "2.md"))
+    }
+    res <- withdir()
     ## should save into directory given by url structure, but named by 1.md and 2.md
-    setwd(cwd)
     ## entries in res$files will not be named with the absolute path, just relative to outdir
     expect_identical(res$files[[1]]$file, file.path("raw.githubusercontent.com/ropensci/bowerbird/master", c("1.md", "2.md")))
     expect_true(all(file.exists(file.path(outdir, res$files[[1]]$file))))
+    unlink(outdir, recursive = TRUE)
 })
 
 test_that("env vars are substituted correctly on windows", {

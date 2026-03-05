@@ -2,21 +2,23 @@ context("sync")
 
 test_that("bb_sync works with dry run",{
     skip_on_cran()
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_config(local_file_root=temp_root)
     cf <- cf %>% bb_add(bb_example_sources()[1,])
     res <- bb_sync(cf,catch_errors=FALSE,confirm_downloads_larger_than=NULL,dry_run=TRUE)
     expect_true(res$status)
     expect_true(all(is.na(res$files[[1]]$file)))
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("bb_sync fails when given an empty config",{
     cf <- bb_config(local_file_root="/does/not/matter")
-    expect_warning(bb_sync(cf,catch_errors=FALSE),"config has no data sources")
+    expect_warning(bb_sync(cf, catch_errors = FALSE), "config has no data sources")
 })
 
 test_that("bb_sync behaves correctly when root does not exist",{
-    td <- tempfile(pattern="dir") ## use this as a dir name
+    td <- tempfile(pattern = "dir") ## use this as a dir name
     ## it should not yet exist
     if (!dir.exists(td) && !file.exists(td)) {
         cf <- bb_config(local_file_root=td)
@@ -24,12 +26,14 @@ test_that("bb_sync behaves correctly when root does not exist",{
         expect_error(bb_sync(cf,catch_errors=FALSE,confirm_downloads_larger_than=NULL,dry_run=TRUE),"does not exist")
         ## ok if we tell bb_sync to create it
         blah <- bb_sync(cf,catch_errors=FALSE,confirm_downloads_larger_than=NULL,dry_run=TRUE,create_root=TRUE)
+        unlink(td, recursive = TRUE)
     }
 })
 
 test_that("bb_sync is quiet when asked",{
     skip_on_cran()
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_config(local_file_root=temp_root)
     myds <- bb_source(
         id="bilbobaggins",
@@ -56,6 +60,7 @@ test_that("bb_sync is quiet when asked",{
         source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data.zip")
     cf <- cf %>% bb_add(myds)
     expect_silent(bb_sync(cf,verbose=FALSE,confirm_downloads_larger_than=NULL))
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("bb_sync errors on a source that is missing required authentication info",{
@@ -81,13 +86,15 @@ test_that("bb_sync works with a sink() call in place",{
         license="blah",
         method=list("bb_handler_wget",recursive=TRUE,level=1),
         source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data.zip") ## just some file to download
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),myds)
     bb_sync(cf,verbose=TRUE,confirm_downloads_larger_than=NULL)
     sink()
     op <- readLines(sinkfile)
     ## sink file should contain direct cat output "Synchronizing dataset: test"
     expect_true(any(grepl("Synchronizing dataset: test",op)))
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("an ftp source works", {
@@ -100,9 +107,11 @@ test_that("an ftp source works", {
                      citation = "blah", license = "blah",
                      method = list("bb_handler_rget", level = 1, accept_download = "README"),
                      source_url = "ftp://ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/")
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
     expect_true(grepl("ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2", bb_data_source_dir(cf)))
     res <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
     expect_equal(nrow(res$files[[1]]), 1)
+    unlink(temp_root, recursive = TRUE)
 })

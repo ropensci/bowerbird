@@ -16,7 +16,8 @@ test_that("bb_handler_oceandata works", {
                      postprocess = NULL,
                      access_function = "",
                      data_group = "Sea surface temperature")
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODIST/Mapped/Monthly/9km/par$", bb_data_source_dir(ocf)))
     res <- bb_sync(ocf, confirm_downloads_larger_than = NULL)
@@ -24,6 +25,7 @@ test_that("bb_handler_oceandata works", {
     expect_true(file.exists(file.path(temp_root, fnm)))
     fi <- file.info(file.path(temp_root, fnm))
     expect_gt(fi$size, 6e6)
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("url mapper works", {
@@ -116,9 +118,11 @@ test_that("bb_handler_oceandata works when no files match",{
                      postprocess=NULL,
                      access_function="",
                      data_group="Sea surface temperature")
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
     expect_error(bb_sync(ocf, confirm_downloads_larger_than = NULL, catch_errors = FALSE), "No files matched")
     expect_warning(chk <- bb_sync(ocf, confirm_downloads_larger_than = NULL), "No files matched")
     expect_false(chk$status)
+    unlink(temp_root, recursive = TRUE)
 })

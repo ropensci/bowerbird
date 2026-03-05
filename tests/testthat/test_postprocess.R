@@ -14,7 +14,8 @@ test_that("decompressing zip files works",{
         method=list("bb_handler_rget", level = 0),
         postprocess=list("bb_unzip"))
 
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root = temp_root, clobber = 2), my_source)
     res <- bb_sync(cf, confirm_downloads_larger_than = NULL)
 
@@ -26,6 +27,7 @@ test_that("decompressing zip files works",{
     ## should also have direct paths to those files in the res$files object
     expect_true(bowerbird:::std_path(file.path(fp, "example_data.zip"), case = TRUE) %in% bowerbird:::std_path(res$files[[1]]$file, case = TRUE))
     expect_true(bowerbird:::std_path(file.path(fp, "example_data_was_zipped.csv"), case = TRUE) %in% bowerbird:::std_path(res$files[[1]]$file, case = TRUE))
+    unlink(temp_root, recursive = TRUE)
 })
 
 ## same thing, using wget
@@ -43,7 +45,8 @@ test_that("decompressing zip files works (wget)",{
         method=list("bb_handler_wget", recursive = TRUE, level = 1, robots_off = TRUE),
         postprocess=list("bb_unzip"))
 
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root = temp_root, clobber = 2), my_source)
     res <- bb_sync(cf, confirm_downloads_larger_than = NULL)
 
@@ -52,6 +55,7 @@ test_that("decompressing zip files works (wget)",{
     expect_true(file.exists(file.path(fp, "example_data_was_zipped.csv")))
     x <- read.csv(file.path(fp, "example_data_was_zipped.csv"))
     expect_named(x, c("a", "b", "c"))
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("decompressing gzipped files works",{
@@ -68,7 +72,8 @@ test_that("decompressing gzipped files works",{
         method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_gunzip"))
 
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
     bb_sync(cf,confirm_downloads_larger_than=NULL)
 
@@ -77,6 +82,7 @@ test_that("decompressing gzipped files works",{
     expect_true(file.exists(file.path(fp,"example_data_was_gzipped.csv")))
     x <- read.csv(file.path(fp,"example_data_was_gzipped.csv"))
     expect_named(x,c("a","b","c"))
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("decompressing tar files works",{
@@ -93,7 +99,8 @@ test_that("decompressing tar files works",{
         method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_untar"))
 
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
     bb_sync(cf,confirm_downloads_larger_than=NULL)
 
@@ -102,6 +109,7 @@ test_that("decompressing tar files works",{
     expect_true(file.exists(file.path(fp,"example_data_was_tarred.csv")))
     x <- read.csv(file.path(fp,"example_data_was_tarred.csv"))
     expect_named(x,c("a","b","c"))
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("decompressing tgz files works",{
@@ -118,7 +126,8 @@ test_that("decompressing tgz files works",{
         method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_untar"))
 
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
     bb_sync(cf,confirm_downloads_larger_than=NULL)
 
@@ -127,6 +136,7 @@ test_that("decompressing tgz files works",{
     expect_true(file.exists(file.path(fp,"example_data_was_tgzed.csv")))
     x <- read.csv(file.path(fp,"example_data_was_tgzed.csv"))
     expect_named(x,c("a","b","c"))
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("decompressing tar.gz files works",{
@@ -143,7 +153,8 @@ test_that("decompressing tar.gz files works",{
         method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_untar"))
 
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
     bb_sync(cf,confirm_downloads_larger_than=NULL)
 
@@ -152,6 +163,7 @@ test_that("decompressing tar.gz files works",{
     expect_true(file.exists(file.path(fp,"example_data_was_targzipped.csv")))
     x <- read.csv(file.path(fp,"example_data_was_targzipped.csv"))
     expect_named(x,c("a","b","c"))
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("decompressing bzipped files works",{
@@ -168,7 +180,8 @@ test_that("decompressing bzipped files works",{
         method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_bunzip2"))
 
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
     bb_sync(cf,confirm_downloads_larger_than=NULL)
 
@@ -177,6 +190,7 @@ test_that("decompressing bzipped files works",{
     expect_true(file.exists(file.path(fp,"example_data_was_bzipped.csv")))
     x <- read.csv(file.path(fp,"example_data_was_bzipped.csv"))
     expect_named(x,c("a","b","c"))
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("decompressing Z-compressed files works",{
@@ -192,7 +206,8 @@ test_that("decompressing Z-compressed files works",{
         method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_uncompress"))
 
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root = temp_root, clobber = 2), my_source)
     res <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
 
@@ -200,6 +215,7 @@ test_that("decompressing Z-compressed files works",{
     expect_true(file.exists(file.path(fp, "20170822.nc.Z")))
     expect_true(file.exists(file.path(fp, "20170822.nc")))
     expect_equal(file.size(file.path(fp, "20170822.nc")), 840508)
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("decompressing Z-deflated files works",{
@@ -217,7 +233,8 @@ test_that("decompressing Z-deflated files works",{
         method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_inflate"))
 
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root = temp_root, clobber = 2), my_source)
     res <- bb_sync(cf, confirm_downloads_larger_than = NULL, verbose = TRUE)
 
@@ -225,6 +242,7 @@ test_that("decompressing Z-deflated files works",{
     expect_true(file.exists(file.path(fp, "20231030.nc.Z")))
     expect_true(file.exists(file.path(fp, "20231030.nc")))
     expect_equal(file.size(file.path(fp, "20231030.nc")), 840496)
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("cleanup postprocessing works",{
@@ -242,7 +260,8 @@ test_that("cleanup postprocessing works",{
         method=list("bb_handler_rget", level = 1),
         postprocess=list("bb_unzip",list("bb_cleanup",pattern="\\.csv$"))
     )
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root=temp_root,clobber=2),my_source)
     res <- bb_sync(cf,confirm_downloads_larger_than=NULL)
 
@@ -268,4 +287,5 @@ test_that("cleanup postprocessing works",{
     fp <- bb_data_source_dir(cf)
     expect_true(file.exists(file.path(fp,"example_data_was_zipped.csv")))
 
+    unlink(temp_root, recursive = TRUE)
 })

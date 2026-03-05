@@ -1,7 +1,8 @@
 context("AADC sources")
 test_that("A small AADC source works", {
     src <- bb_aadc_source("AADC-00009")
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
     expect_true(grepl("data.aad.gov.au/eds/api/dataset/869C18A1-663F-4439-9D5E-0A8056443E91/AADC-00009/?$", bb_data_source_dir(cf)))
     status <- bb_sync(cf, confirm_downloads_larger_than = NULL)
@@ -9,4 +10,5 @@ test_that("A small AADC source works", {
     expect_true(all(file.exists(status$files[[1]]$file)))
     fi <- file.size(status$files[[1]]$file)
     expect_true(all(fi > 1e3))
+    unlink(temp_root, recursive = TRUE)
 })

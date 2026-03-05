@@ -12,7 +12,8 @@ test_that("bb_handler_thredds works", {
         license = "Please cite",
         method = list("bb_handler_thredds", level = 2))
 
-    temp_root <- tempdir()
+    temp_root <- tempfile()
+    dir.create(temp_root)
     res <- bb_get(my_source, local_file_root = temp_root, dry_run = TRUE)
     expect_true(nrow(res$files[[1]]) == 24)
 
@@ -22,4 +23,5 @@ test_that("bb_handler_thredds works", {
     expect_true(nrow(res$files[[1]]) == 1)
     expect_true(file.exists(res$files[[1]]$file))
     expect_true(file.size(res$files[[1]]$file) > 500e3)
+    unlink(temp_root, recursive = TRUE)
 })
