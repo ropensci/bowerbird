@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">bowerbird</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.18.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.18.6</span>
       </span>
     </div>
 
@@ -38,6 +38,9 @@
       <a href="../articles/data_provenance.html">Data provenance</a>
     </li>
   </ul></li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/ropensci/bowerbird/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
@@ -63,7 +66,9 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bb_aadc_source</span><span class="op">(</span><span class="va">metadata_id</span>, <span class="va">eds_id</span>, id_is_metadata_id <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bb_aadc_source</span><span class="op">(</span><span class="va">metadata_id</span>, <span class="va">eds_id</span>, id_is_metadata_id <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">filter</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">bb_aadc_datasource_meta</span><span class="op">(</span><span class="va">metadata_id</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -75,11 +80,15 @@
 
 
 <dt id="arg-eds-id">eds_id<a class="anchor" aria-label="anchor" href="#arg-eds-id"></a></dt>
-<dd><p>integer: specify one or more <code>eds_id</code>s if the metadata record has multiple data assets attached to it and you don't want all of them</p></dd>
+<dd><p>integer: (optional) specify one or more <code>eds_id</code>s if the metadata record has multiple data assets attached to it and you don't want all of them</p></dd>
 
 
 <dt id="arg-id-is-metadata-id">id_is_metadata_id<a class="anchor" aria-label="anchor" href="#arg-id-is-metadata-id"></a></dt>
 <dd><p>logical: if TRUE, use the <code>metadata_id</code> as the data source ID, otherwise use its DOI</p></dd>
+
+
+<dt id="arg-filter">filter<a class="anchor" aria-label="anchor" href="#arg-filter"></a></dt>
+<dd><p>expression: (optional) an expression to use in a <code>subset</code> operation, which will be applied to the datasource metadata data frame. You can view this metadata using <code>bb_aadc_datasource_meta()</code></p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -107,6 +116,10 @@
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">data_dir</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="bb_get.html">bb_get</a></span><span class="op">(</span><span class="va">src</span>, local_file_root <span class="op">=</span> <span class="va">data_dir</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">res</span><span class="op">$</span><span class="va">files</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co">## generate the CPR data set source, which has two components</span></span></span>
+<span class="r-in"><span>  <span class="co">##  but we want to exclude the logbooks and only retrieve the actual data</span></span></span>
+<span class="r-in"><span>  <span class="va">src</span> <span class="op">&lt;-</span> <span class="fu">bb_aadc_source</span><span class="op">(</span><span class="st">"AADC-00099"</span>, filter <span class="op">=</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"logbooks"</span>, <span class="va">dataset_name</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
