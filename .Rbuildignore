@@ -11,3 +11,4 @@
 ^docs$
 ^codemeta\.json$
 ^\.github$
+^pkgdown$

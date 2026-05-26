@@ -1,7 +1,7 @@
 Package: bowerbird
 Type: Package
 Title: Keep a Collection of Sparkly Data Resources
-Version: 0.18.7
+Version: 0.19.0
 Authors@R: c(person("Ben", "Raymond", email = "ben.raymond@aad.gov.au", role = c("aut", "cre")),
              person("Michael", "Sumner", role = "aut"),
              person("Miles", "McBain", email = "miles.mcbain@gmail.com", role = c("rev", "ctb")),
@@ -35,7 +35,6 @@ Imports:
     xml2
 LazyLoad: yes
 Encoding: UTF-8
-RoxygenNote: 7.3.2
 Suggests:
     covr,
     knitr,
@@ -45,3 +44,4 @@ Remotes: cloudyr/aws.s3, pepijn-devries/CopernicusMarine
 X-schema.org-applicationCategory: Antarctic/Southern Ocean
 X-schema.org-keywords: ropensci, Antarctic, Southern Ocean, data, environmental, satellite, climate
 X-schema.org-isPartOf: https://ropensci.org, https://scar.org
+Config/roxygen2/version: 8.0.0

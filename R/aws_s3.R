@@ -103,6 +103,14 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
         }, FUN.VALUE = TRUE)
         all_urls <- all_urls[idx]
     }
+    ## for aadc sources, we need to force local file names, otherwise they are named with the ?prefix=... nonsense
+    ## (hierarchical sources should look like e.g.  https://data.aad.gov.au/dataset/UUID//object/download?prefix=multi/level/structure/file.xyz, so this still works)
+    local_fnames <- if (!is.null(myargs$bucket_browser_url) && all(grepl("data.aad.gov.au", all_urls)) && all(grepl("\\?prefix=[^&]+$", all_urls))) {
+                        stringr::str_match(all_urls, "\\?prefix=(.+)$")[, 2]
+                    } else {
+                        NULL
+                    }
+    if (length(local_fnames) > 0) myargs$force_local_filename <- local_fnames
     ## do all in one to avoid the repeated "downloading file 1 of 1" messages
     dummy <- config
     dummy$data_sources$method[[1]] <- list("bb_rget")

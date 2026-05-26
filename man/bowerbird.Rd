@@ -25,6 +25,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Ben Raymond \email{ben.raymond@aad.gov.au}
   \item Michael Sumner
 }
 
