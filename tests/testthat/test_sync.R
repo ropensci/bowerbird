@@ -42,12 +42,17 @@ test_that("bb_sync is quiet when asked",{
         doc_url= "http://some.where.org/",
         citation="blah",
         license="blah",
-        method=list("bb_handler_wget",recursive=TRUE,no_check_certificate=TRUE,level=1),
-        source_url="https://github.com/ropensci/bowerbird/blob/master/README.Rmd") ## just some file to download
+        method=list("bb_handler_rget", level = 1),
+        source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data.zip")
     cf <- cf %>% bb_add(myds)
     expect_silent(bb_sync(cf,verbose=FALSE,confirm_downloads_larger_than=NULL))
-
-    ## and same with rget
+    unlink(temp_root, recursive = TRUE)
+})
+test_that("bb_sync is quiet when asked (wget)",{
+    skip_on_cran()
+    skip_if_not(!is.null(bb_find_wget(install = FALSE, error = FALSE))) ## only if we have wget
+    temp_root <- tempfile()
+    dir.create(temp_root)
     cf <- bb_config(local_file_root=temp_root)
     myds <- bb_source(
         id="bilbobaggins",
@@ -56,11 +61,10 @@ test_that("bb_sync is quiet when asked",{
         doc_url= "http://some.where.org/",
         citation="blah",
         license="blah",
-        method=list("bb_handler_rget", level = 1),
-        source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data.zip")
+        method=list("bb_handler_wget",recursive=TRUE,no_check_certificate=TRUE,level=1),
+        source_url="https://github.com/ropensci/bowerbird/blob/master/README.Rmd") ## just some file to download
     cf <- cf %>% bb_add(myds)
     expect_silent(bb_sync(cf,verbose=FALSE,confirm_downloads_larger_than=NULL))
-    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("bb_sync errors on a source that is missing required authentication info",{
@@ -84,7 +88,7 @@ test_that("bb_sync works with a sink() call in place",{
         doc_url= "http://some.where.org/",
         citation="blah",
         license="blah",
-        method=list("bb_handler_wget",recursive=TRUE,level=1),
+        method=list("bb_handler_rget",recursive=TRUE,level=1),
         source_url="https://raw.githubusercontent.com/ropensci/bowerbird/master/inst/extdata/example_data.zip") ## just some file to download
     temp_root <- tempfile()
     dir.create(temp_root)

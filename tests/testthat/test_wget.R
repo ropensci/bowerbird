@@ -36,9 +36,4 @@ test_that("internal resolve_wget_clobber_flags function behaves",{
                  c("blah","--timestamping"))
     expect_equal(bowerbird:::resolve_wget_clobber_flags(c("blah","--no-clobber"),c("--timestamping")),
                  c("blah","--no-clobber"))
-
-    ## skip these temporarily - failing under covr for unknown reasons
-    ##expect_equal(bowerbird:::resolve_wget_clobber_flags(c("blah"),c("-nc")),c("blah","-nc"))
-    ##expect_equal(bowerbird:::resolve_wget_clobber_flags(c("blah","-N"),c("-nc")),c("blah","-N"))
-    ##expect_equal(bowerbird:::resolve_wget_clobber_flags(c("blah","-nc"),c("-N")),c("blah","-nc"))
 })
