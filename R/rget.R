@@ -588,7 +588,10 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                         if (length(this_attrs) < 1) NA_character_ else this_attrs[1]
                     }, FUN.VALUE = "", USE.NAMES = FALSE)))
                 }
-                ##cat("First 20 links: "); print(head(all_links, 20))
+                if (isTRUE(opts$debug)) {
+                    cat(if (length(all_links) > 20) "First 20 links" else "Links", "found:")
+                    print(head(all_links, 20))
+                }
                 ## discard non-relative links, if opts$relative
                 if (opts$relative) all_links <- all_links[vapply(all_links, is_relative_url, FUN.VALUE = TRUE, USE.NAMES = FALSE)]
                 ## get all links as absolute URLs, discarding anchors (fragments)
@@ -612,10 +615,16 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
                     download_idx <- temp1 | temp2
                     for (rgx in opts$reject_download) download_idx <- download_idx & !vapply(all_dl_links, function(z) grepl(rgx, z), FUN.VALUE = TRUE, USE.NAMES = FALSE)
                 }
-                ##cat("First 20 links to follow: "); print(head(follow_links, 20))
+                if (isTRUE(opts$debug)) {
+                    cat(if (length(all_links) > 20) "First 20 links" else "Links", "to follow:")
+                    print(head(follow_links, 20))
+                }
                 download_links <- all_dl_links[download_idx]
                 download_links <- download_links[!download_links %in% download_queue]
-                ##cat("First 20 links to download: "); print(head(download_links, 20))
+                if (isTRUE(opts$debug)) {
+                    cat(if (length(all_links) > 20) "First 20 links" else "Links", "to download:")
+                    print(head(download_links, 20))
+                }
                 ## TODO - download_links are not mutually exclusive from follow_links (a given link could theoretically appear in both, if the accept_follow and accept_download filters allow that). Should that be forcibly disallowed?
                 if (current_level < (opts$level - 1)) { ## -1 because we will download files linked from these pages, and those files will be current_level + 2
                     if (opts$verbose) cat(sprintf(" %d download links", length(download_links)))
