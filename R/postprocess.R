@@ -376,16 +376,21 @@ bb_cleanup_inner <- function(config, file_list_before, file_list_after, verbose 
 ## @param findnrt function: a function that takes a vector of file paths (as returned by `list.files(..., full.names = TRUE)`) and returns an index of those entries that correspond to NRT files
 ## @param nrt2rt function: a function that converts a vector of NRT file paths to their non-NRT counterparts
 ## @param file_list_after data.frame: files present in the directory after synchronizing, as returned by \code{file.info}
+## @param delay scalar: in days, only remove the NRT file if the associated quality-checked file is at least this many days old. This allows some margin for file lists to be updated (to include the quality-checked file) before deleting the NRT file
 ## @param verbose logical: if TRUE, provide additional progress output
 ##
 ## @return list, with components status = TRUE on success, and deleted_files = character vector of file names deleted
-bb_nrt_cleanup_inner <- function(config, findnrt, nrt2rt, file_list_after, verbose = FALSE, ...) {
+bb_nrt_cleanup_inner <- function(config, findnrt, nrt2rt, file_list_after, delay = 0, verbose = FALSE, ...) {
     assert_that(is(config, "bb_config"))
     assert_that(nrow(bb_data_sources(config)) == 1)
     ## could perhaps use file_list_after here, but better to explicitly list files?
     file_list <- list.files(path = bb_data_source_dir(config), recursive = TRUE, all.files = TRUE, full.names = TRUE)
     to_delete <- file_list[findnrt(file_list)] ## subset to NRT files
     to_delete <- to_delete[nrt2rt(to_delete) %in% file_list] ## but only those with equivalent non-NRT files
+    if (delay > 0 && length(to_delete) > 0) {
+        file_age <- as.numeric(difftime(Sys.time(), file.info(to_delete)$ctime, units = "days"))
+        to_delete <- to_delete[which(file_age >= delay)]
+    }
     if (verbose) {
         if (length(to_delete) > 0) {
             if (verbose) cat(" cleaning up files: ", paste(to_delete, collapse = ", "), "\n")

@@ -164,7 +164,7 @@ bb_handler_copernicus_inner <- function(config, verbose = FALSE, local_dir_only 
 #' @export
 bb_copernicus_cleanup <- function(...) bb_copernicus_cleanup_inner( ...)
 
-bb_copernicus_cleanup_inner <- function(config, verbose = FALSE, ...) {
+bb_copernicus_cleanup_inner <- function(config, verbose = FALSE, delay = 0, ...) {
     assert_that(is(config, "bb_config"))
     assert_that(nrow(bb_data_sources(config)) == 1)
     ## could perhaps use file_list_after here, but better to explicitly list files?
@@ -184,6 +184,10 @@ bb_copernicus_cleanup_inner <- function(config, verbose = FALSE, ...) {
         if (length(idx) > 1) to_delete[idx[which(proc_date[idx] < max(proc_date[idx], na.rm = TRUE))]] <- TRUE
     }
     to_delete <- file_list[which(to_delete)]
+    if (delay > 0 && length(to_delete) > 0) {
+        file_age <- as.numeric(difftime(Sys.time(), file.info(to_delete)$ctime, units = "days"))
+        to_delete <- to_delete[which(file_age >= delay)]
+    }
     if (verbose) {
         if (length(to_delete) > 0) {
             if (verbose) cat(" cleaning up files: ", paste(to_delete, collapse = ", "), "\n")
