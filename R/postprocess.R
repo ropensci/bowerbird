@@ -388,8 +388,8 @@ bb_nrt_cleanup_inner <- function(config, findnrt, nrt2rt, file_list_after, delay
     to_delete <- file_list[findnrt(file_list)] ## subset to NRT files
     to_delete <- to_delete[nrt2rt(to_delete) %in% file_list] ## but only those with equivalent non-NRT files
     if (delay > 0 && length(to_delete) > 0) {
-        file_age <- as.numeric(difftime(Sys.time(), file.info(to_delete)$ctime, units = "days"))
-        to_delete <- to_delete[which(file_age >= delay)]
+        rt_file_age <- as.numeric(difftime(Sys.time(), file.info(nrt2rt(to_delete))$ctime, units = "days")) ## age of the non-nrt files corresponding to our potential-deletion-nrt files
+        to_delete <- to_delete[which(rt_file_age >= delay)] ## only delete those nrt files where the non-nrt file is at least as old as `delay`
     }
     if (verbose) {
         if (length(to_delete) > 0) {

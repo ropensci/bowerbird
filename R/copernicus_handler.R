@@ -174,20 +174,26 @@ bb_copernicus_cleanup_inner <- function(config, verbose = FALSE, delay = 0, ...)
     ## nrt_global_allsat_phy_l4_20250910_20250910.nc
     ## nrt_global_allsat_phy_l4_20250910_20250913.nc
     ## nrt_global_allsat_phy_l4_20250910_20250916.nc
-    ## we just want the last of these, noting that (i) a superseded file has to be in the same directory as its replacement
+    ## we just want the last of these, noting that a superseded file has to be in the same directory as its replacement
     proc_date <- stringr::str_match(file_list, "_([[:digit:]]{8})\\.nc$")[, 2]
     data_date <- stringr::str_match(file_list, "_([[:digit:]]{8})_[[:digit:]]{8}\\.nc$")[, 2]
     file_path_stub <- sub("_[[:digit:]]{8}\\.nc$", "", file_list)
     to_delete <- rep(FALSE, length(file_list))
     for (uf in unique(file_path_stub)) {
         idx <- which(file_path_stub == uf)
-        if (length(idx) > 1) to_delete[idx[which(proc_date[idx] < max(proc_date[idx], na.rm = TRUE))]] <- TRUE
+        if (length(idx) > 1) {
+            ## multiple files
+            ## delete any that are NOT the latest one, and if delay > 0, are least delay days old
+            del_in_idx <- rep(FALSE, length(idx))
+            del_in_idx[which(proc_date[idx] < max(proc_date[idx], na.rm = TRUE))] <- TRUE
+            if (delay > 0) {
+                this_file_age <- as.numeric(difftime(Sys.time(), file.info(file_list[idx])$ctime, units = "days")) ## age of all of these files
+                del_in_idx[which(is.na(this_file_age) | this_file_age < delay)] <- FALSE
+            }
+            to_delete[idx[del_in_idx]] <- TRUE
+        }
     }
     to_delete <- file_list[which(to_delete)]
-    if (delay > 0 && length(to_delete) > 0) {
-        file_age <- as.numeric(difftime(Sys.time(), file.info(to_delete)$ctime, units = "days"))
-        to_delete <- to_delete[which(file_age >= delay)]
-    }
     if (verbose) {
         if (length(to_delete) > 0) {
             if (verbose) cat(" cleaning up files: ", paste(to_delete, collapse = ", "), "\n")
