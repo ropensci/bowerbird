@@ -159,6 +159,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         myfiles <- httr::content(myfiles, as = "text")
         ## look for an empty body or "No results found" message
         if (length(myfiles) < 1 || !any(nzchar(myfiles)) || any(grepl("no results found", myfiles, ignore.case = TRUE), na.rm = TRUE)) stop("No files matched the supplied oceancolour data file search query (", search, ")")
+        if (any(grepl("the database had an error", myfiles, ignore.case = TRUE), na.rm = TRUE)) stop("The oceancolour data file search failed with a database error: try again later and/or check the status page at https://www.earthdata.nasa.gov/data/alerts-outages")
         myfiles <- jsonlite::fromJSON(myfiles)
         myfiles <- cbind(do.call(rbind, lapply(myfiles, as_tibble)), filename = names(myfiles))
         myfiles$checksum <- sub("^sha1:", "", myfiles$checksum)

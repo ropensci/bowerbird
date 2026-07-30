@@ -12,6 +12,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom methods is
 #' @importFrom openssl sha1 md5
+#' @importFrom paws.storage s3
 #' @importFrom stringr regex str_detect str_match str_split str_trim
 #' @importFrom R.utils bunzip2 gunzip
 #' @importFrom rmarkdown render
