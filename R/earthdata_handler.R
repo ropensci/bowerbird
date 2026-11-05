@@ -4,6 +4,8 @@
 #'
 #' This function uses \code{\link{bb_rget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_rget}} parameters. Note that curl v5.2.1 introduced a breaking change to the default value of the `unrestricted_auth` option: see <https://github.com/jeroen/curl/issues/260>. Your Earthdata source definition might require `allow_unrestricted_auth = TRUE` as part of the method parameters.
 #'
+#' Earthdata user and password are required for downloads. A dry run (\code{dry_run = TRUE} in \code{\link{bb_sync}} or \code{\link{bb_get}}) can be done without them: the remote listings are spidered without authentication, which works for servers whose listings are public (e.g. CMR virtual directories).
+#'
 #' @references https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+With+Earthdata+Login
 #' @param ... : parameters passed to \code{\link{bb_rget}}
 #'
@@ -62,7 +64,18 @@ bb_handler_earthdata_inner <- function(config, verbose = FALSE, local_dir_only =
     }
 
     dummy <- bb_data_sources(config)
-    if (is.null(dummy$user) || is.null(dummy$password) || na_or_empty(dummy$user) || na_or_empty(dummy$password)) stop("Earthdata source \"", dummy$name, "\" requires user and password")
+    no_credentials <- is.null(dummy$user) || is.null(dummy$password) || na_or_empty(dummy$user) || na_or_empty(dummy$password)
+    if (no_credentials) {
+        if (!isTRUE(bb_settings(config)$dry_run)) stop("Earthdata source \"", dummy$name, "\" requires user and password")
+        ## a dry run only needs the remote directory listings, and some of these are public (e.g. CMR virtual directories)
+        ## so spider without credentials, and leave it to the server to refuse if it does need a login
+        if (verbose) cat(" no Earthdata user and password provided, doing an unauthenticated dry run\n")
+        if (use_wget) {
+            return(bb_handler_wget(config, verbose = verbose, ...))
+        } else {
+            return(bb_handler_rget(config, verbose = verbose, ...))
+        }
+    }
     cookies_file <- gsub("\\\\", "/", tempfile()) ## probably don't need the gsub, was there for windows debugging
     ## create this file
     if (!file.exists(cookies_file)) cat("", file = cookies_file)

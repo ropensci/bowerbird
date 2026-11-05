@@ -17,6 +17,8 @@ This is a handler function to be used with data sets from NASA's Earthdata syste
 }
 \details{
 This function uses \code{\link{bb_rget}}, and so data sources using this function will need to provide appropriate \code{\link{bb_rget}} parameters. Note that curl v5.2.1 introduced a breaking change to the default value of the `unrestricted_auth` option: see <https://github.com/jeroen/curl/issues/260>. Your Earthdata source definition might require `allow_unrestricted_auth = TRUE` as part of the method parameters.
+
+Earthdata user and password are required for downloads. A dry run (\code{dry_run = TRUE} in \code{\link{bb_sync}} or \code{\link{bb_get}}) can be done without them: the remote listings are spidered without authentication, which works for servers whose listings are public (e.g. CMR virtual directories).
 }
 \examples{
 \dontrun{
