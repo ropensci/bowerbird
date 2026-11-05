@@ -282,9 +282,11 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     ## potentially substitute username and password from env vars
     user <- use_secret(user)
     password <- use_secret(password)
+    opts$have_auth <- !na_or_empty(user) && !na_or_empty(password) ## did the user provide credentials? If not and while spidering we get redirected to an auth page, we will raise an error
 
     ## curl options
     opts$curl_config <- build_curl_config(debug = debug, show_progress = show_progress, no_check_certificate = no_check_certificate, user = user, password = password, remote_time = remote_time)
+
     ## we can handle multiple input URLs, but they can't be a mix of ftp/http
     is_ftp <- grepl("^ftp", url, ignore.case = TRUE)
     if (any(is_ftp) && !all(is_ftp)) stop("bb_rget can't handle a mixture of ftp/http URLs")
@@ -544,6 +546,11 @@ spider_curl <- function(to_visit, visited = character(), download_queue = charac
             hdrs <- curl::parse_headers(rawToChar(x$headers), multiple = TRUE)
             redirs <- unlist(lapply(hdrs, function(z) if (any(grepl("^HTTP.*[[:space::]3[[:digit:]][[:digit:]]", z))) na.omit(stringr::str_match(z, "^Location[[:space:]]*:[[:space:]]*(.+)")[, 2])))
             if (length(redirs) > 0) {
+                ## was it an authorization redirect (e.g. earthdata)?
+                ## TODO this pattern probably needs generalization to handle other auth redirect patterns
+                if (isTRUE(any(grepl("oauth/authorize", redirs, ignore.case = TRUE))) && !isTRUE(opts$have_auth)) {
+                    stop("your query has redirected to an authorization page. You might need to provide `user` and `password` credentials: see the `authentication_note` component of this source or `help(\"bb_source\")`")
+                }
                 ## where did it redirect to? We might have had multiple redirects, but the last one is the relevant one
                 ## our `url` variable needs to take this value, so that when we construct absolute URLs (relative to this base) they are correct
                 url <- tail(redirs, 1)

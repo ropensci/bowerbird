@@ -17,14 +17,13 @@ test_that("bb_handler_earthdata works", {
 })
 
 test_that("bb_handler_earthdata requires credentials unless doing a dry run", {
-    src <- suppressWarnings(bb_example_sources("Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3") %>%
-        bb_modify_source(user = "", password = ""))
+    src <- bb_example_sources("Sea Ice Trends and Climatologies from SMMR and SSM/I-SSMIS, Version 3")
     temp_root <- tempfile()
     dir.create(temp_root)
     on.exit(unlink(temp_root, recursive = TRUE))
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
     expect_error(bb_sync(cf, catch_errors = FALSE, confirm_downloads_larger_than = NULL), "requires authentication")
-    ## validation passes for a dry run
+    ## validation passes for a dry run (whether a dry run is actually possible or not depends on the public status of the earthdata resource, so we can only find out at runtime)
     st <- bb_settings(cf)
     st$dry_run <- TRUE
     bb_settings(cf) <- st
@@ -33,8 +32,11 @@ test_that("bb_handler_earthdata requires credentials unless doing a dry run", {
     st$dry_run <- FALSE
     bb_settings(cf) <- st
     expect_error(bb_handler_earthdata(cf), "requires user and password")
+    ## actually trying that dry run will fail because this resource does actually require credentials, even for dry run
+    res <- bb_get(src, local_file_root = tempdir(), dry_run = TRUE)
+    expect_false(res$status)
     ## other sources requiring authentication still fail validation in a dry run
-    src2 <- suppressWarnings(bb_example_sources("Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a") %>% bb_modify_source(user = "", password = ""))
+    src2 <- bb_example_sources("Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a")
     cf2 <- bb_add(bb_config(local_file_root = temp_root), src2)
     st2 <- bb_settings(cf2)
     st2$dry_run <- TRUE
