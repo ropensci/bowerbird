@@ -4,14 +4,34 @@
 \alias{bb_handler_oceandata}
 \title{Handler for Oceandata data sets}
 \usage{
-bb_handler_oceandata(search, dtype, sensor, ...)
+bb_handler_oceandata(
+  search,
+  dtype,
+  sensor,
+  period,
+  resolution_id,
+  prod_id,
+  sdate,
+  edate,
+  ...
+)
 }
 \arguments{
-\item{search}{string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/api/file_search)}
+\item{search}{string: the search string (file name pattern). This is probably not needed: it seems to be better to specify the target files using the other search parameters}
 
-\item{dtype}{string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are aquarius, seawifs, aqua, terra, meris, octs, czcs, hico, viirs (for snpp), viirsj1, s3olci (for sentinel-3a), s3bolci (see https://oceancolor.gsfc.nasa.gov/data/download_methods/)}
+\item{dtype}{string: the sensor, e.g. "SeaWiFS", "MODISA", "MODIST", "VIIRS", "CZCS", "MERIS", etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}}
 
-\item{sensor}{string: (optional) the sensor (e.g. "seawifs") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)}
+\item{sensor}{string: the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)}
+
+\item{period}{string: the time period, one of "DAY", (daily) "8D" (8-day), "MO", (monthly) "MC" (monthly climatology), "YR" (yearly), "SN" (seasonal), "SC" (seasonal climatology), etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}}
+
+\item{resolution_id}{string: "9km" or "4km"}
+
+\item{prod_id}{string: product, e.g. "par", "chlor_a", etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}}
+
+\item{sdate}{string: start date in "YYYY-MM-DD" format}
+
+\item{edate}{string: end date in "YYYY-MM-DD" format}
 
 \item{...}{: extra parameters passed automatically by \code{bb_sync}}
 }
@@ -22,26 +42,31 @@ TRUE on success
 This is a handler function to be used with data sets from NASA's Oceandata system. This function is not intended to be called directly, but rather is specified as a \code{method} option in \code{\link{bb_source}}.
 }
 \details{
-Note that users will need an Earthdata login, see https://urs.earthdata.nasa.gov/. Users will also need to authorize the application 'OB.DAAC Data Access' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)
+Note that users will need an Earthdata login, see \url{https://urs.earthdata.nasa.gov/}. Users will also need to authorize the application 'OB.DAAC Data Access' (see 'My Applications' at \url{https://urs.earthdata.nasa.gov/profile}). Dry runs (listing files but not downloading them) can be performed without authentication.
 
-Oceandata uses standardized file naming conventions (see https://oceancolor.gsfc.nasa.gov/docs/format/), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the \code{search} argument. Note that the \code{bb_handler_oceandata} does not take need `source_url` to be specified in the \code{bb_source} call.
+Previously it was possible to search based on filename pattern alone, e.g. "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. However, as of June 2026 the OB.DAAC search API requires other parameters to be set, in order to reduce the search load on the server, see \url{https://www.earthdata.nasa.gov/data/alerts-outages/ob.daac-file-search-utility-now-requires-more-specificity}. It is not obvious which or how many parameters are required for a given search. If you are constructing an oceandata bowerbird source you are advised to use the file search web page \url{https://oceandata.sci.gsfc.nasa.gov/api/file_search} and its help page \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/} to help find the correct parameters.
+
+Note that the \code{bb_handler_oceandata} does not take need `source_url` to be specified in the \code{bb_source} call.
 }
 \examples{
 
 my_source <- bb_source(
-  name="Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a",
-  id="SeaWiFS_L3m_MO_CHL_chlor_a_9km",
-  description="Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at
+  name = "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a",
+  id = "SeaWiFS_L3m_MO_CHL_chlor_a_9km",
+  description = "Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at
     9km spatial resolution",
-  doc_url="https://oceancolor.gsfc.nasa.gov/",
-  citation="See https://oceancolor.gsfc.nasa.gov/citations",
-  license="Please cite",
-  method=list("bb_handler_oceandata",search="S*L3m_MO_CHL_chlor_a_9km.nc"),
-  postprocess=NULL,
-  collection_size=7.2,
-  data_group="Ocean colour")
+  doc_url = "https://oceancolor.gsfc.nasa.gov/",
+  citation = "See https://oceancolor.gsfc.nasa.gov/citations",
+  license = "Please cite",
+  method = list("bb_handler_oceandata", sensor = "SeaWiFS", dtype = "L3m",
+                period = "MO", resolution_id = "9km", prod_id = "chlor_a",
+                sdate = "1997-09-01", edate = "2011-01-01"),
+  postprocess = NULL,
+  collection_size = 7.2,
+  user = "USERNAME", password = "PASSWORD",
+  data_group = "Ocean colour")
 
 }
 \references{
-https://oceandata.sci.gsfc.nasa.gov/
+\url{https://oceandata.sci.gsfc.nasa.gov/}, \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}, \url{https://www.earthdata.nasa.gov/data/alerts-outages/ob.daac-file-search-utility-now-requires-more-specificity}
 }

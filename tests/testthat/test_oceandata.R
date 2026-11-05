@@ -12,7 +12,7 @@ test_that("bb_handler_oceandata works", {
                      license = "Please cite",
                      user = Sys.getenv("EARTHDATA_USER"), password = Sys.getenv("EARTHDATA_PASS"),
                      comment = "",
-                     method = list("bb_handler_oceandata", search = "TERRA_MODIS.20000301_20000331.L3m.MO.PAR.par.9km.nc"),
+                     method = list("bb_handler_oceandata", dtype = "L3m", sensor = "MODIST", sdate = "2000-03-01", edate = "2000-03-01", prod_id = "par", resolution_id = "9km", period = "MO"),
                      postprocess = NULL,
                      access_function = "",
                      data_group = "Sea surface temperature")
@@ -57,7 +57,7 @@ test_that("other oceandata handler tests", {
         doc_url="http://oceancolor.gsfc.nasa.gov/",
         citation="See https://oceancolor.gsfc.nasa.gov/citations",
         license="Please cite",
-        method=list("bb_handler_oceandata",search="AQUA_MODIS*L3b.DAY.RRS.nc", sensor = "aqua", dtype = "L3b"),
+        method=list("bb_handler_oceandata",search="AQUA_MODIS*L3b.DAY.RRS.nc", sensor = "MODISA", dtype = "L3b"),
         user = "", password = "", warn_empty_auth = FALSE)
     temp_root <- tempdir()
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
@@ -76,7 +76,7 @@ test_that("other oceandata handler tests", {
                      doc_url="http://oceancolor.gsfc.nasa.gov/",
                      citation="See https://oceancolor.gsfc.nasa.gov/citations",
                      license="Please cite",
-                     method=list("bb_handler_oceandata", search = "SNPP_VIIRS*L3b.DAY.RRS.nc", sensor = "viirs", dtype = "L3b"),
+                     method=list("bb_handler_oceandata", search = "SNPP_VIIRS*L3b.DAY.RRS.nc", sensor = "VIIRS", dtype = "L3b"),
                      user = "", password = "", warn_empty_auth = FALSE)
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/VIIRS/L3BIN/Daily/RRS$", bb_data_source_dir(ocf)))
@@ -87,7 +87,7 @@ test_that("other oceandata handler tests", {
                      doc_url="http://oceancolor.gsfc.nasa.gov/",
                      citation="See https://oceancolor.gsfc.nasa.gov/citations",
                      license="Please cite",
-                     method=list("bb_handler_oceandata",search="AQUA_MODIS*L3m.DAY.CHL.chlor_a.4km.nc", sensor = "aqua", dtype = "L3m"),
+                     method=list("bb_handler_oceandata",search="AQUA_MODIS*L3m.DAY.CHL.chlor_a.4km.nc", sensor = "MODISA", dtype = "L3m"),
                      user = "", password = "", warn_empty_auth = FALSE)
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km/chlor$", bb_data_source_dir(ocf)))
@@ -98,7 +98,7 @@ test_that("other oceandata handler tests", {
                      doc_url="http://oceancolor.gsfc.nasa.gov/",
                      citation="See https://oceancolor.gsfc.nasa.gov/citations",
                      license="Please cite",
-                     method=list("bb_handler_oceandata",search="SEASTAR_SEAWIFS_GAC*L3b.DAY.RRS.nc", sensor = "seawifs", dtype = "L3b"),
+                     method=list("bb_handler_oceandata",search="SEASTAR_SEAWIFS_GAC*L3b.DAY.RRS.nc", sensor = "SeaWiFS", dtype = "L3b"),
                      user = "", password = "", warn_empty_auth = FALSE)
     ocf <- bb_add(bb_config(local_file_root = temp_root), ods)
     expect_true(grepl("oceandata.sci.gsfc.nasa.gov/SeaWiFS/L3BIN/Daily/RRS$", bb_data_source_dir(ocf)))
@@ -121,8 +121,8 @@ test_that("bb_handler_oceandata works when no files match",{
     temp_root <- tempfile()
     dir.create(temp_root)
     ocf <- bb_add(bb_config(local_file_root=temp_root),ods)
-    expect_error(bb_sync(ocf, confirm_downloads_larger_than = NULL, catch_errors = FALSE), "No files matched")
-    expect_warning(chk <- bb_sync(ocf, confirm_downloads_larger_than = NULL), "No files matched")
+    expect_error(bb_sync(ocf, confirm_downloads_larger_than = NULL, catch_errors = FALSE), "(No files matched|database error)")
+    expect_warning(chk <- bb_sync(ocf, confirm_downloads_larger_than = NULL), "(No files matched|database error)")
     expect_false(chk$status)
     unlink(temp_root, recursive = TRUE)
 })

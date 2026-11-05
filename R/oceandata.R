@@ -2,14 +2,22 @@
 #'
 #' This is a handler function to be used with data sets from NASA's Oceandata system. This function is not intended to be called directly, but rather is specified as a \code{method} option in \code{\link{bb_source}}.
 #'
-#' Note that users will need an Earthdata login, see https://urs.earthdata.nasa.gov/. Users will also need to authorize the application 'OB.DAAC Data Access' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)
+#' Note that users will need an Earthdata login, see \url{https://urs.earthdata.nasa.gov/}. Users will also need to authorize the application 'OB.DAAC Data Access' (see 'My Applications' at \url{https://urs.earthdata.nasa.gov/profile}). Dry runs (listing files but not downloading them) can be performed without authentication.
 #'
-#' Oceandata uses standardized file naming conventions (see https://oceancolor.gsfc.nasa.gov/docs/format/), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the \code{search} argument. Note that the \code{bb_handler_oceandata} does not take need `source_url` to be specified in the \code{bb_source} call.
+#' Previously it was possible to search based on filename pattern alone, e.g. "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. However, as of June 2026 the OB.DAAC search API requires other parameters to be set, in order to reduce the search load on the server, see \url{https://www.earthdata.nasa.gov/data/alerts-outages/ob.daac-file-search-utility-now-requires-more-specificity}. It is not obvious which or how many parameters are required for a given search. If you are constructing an oceandata bowerbird source you are advised to use the file search web page \url{https://oceandata.sci.gsfc.nasa.gov/api/file_search} and its help page \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/} to help find the correct parameters.
 #'
-#' @references https://oceandata.sci.gsfc.nasa.gov/
-#' @param search string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/api/file_search)
-#' @param dtype string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are aquarius, seawifs, aqua, terra, meris, octs, czcs, hico, viirs (for snpp), viirsj1, s3olci (for sentinel-3a), s3bolci (see https://oceancolor.gsfc.nasa.gov/data/download_methods/)
-#' @param sensor string: (optional) the sensor (e.g. "seawifs") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)
+#' Note that the \code{bb_handler_oceandata} does not take need `source_url` to be specified in the \code{bb_source} call.
+#'
+#' @references \url{https://oceandata.sci.gsfc.nasa.gov/}, \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}, \url{https://www.earthdata.nasa.gov/data/alerts-outages/ob.daac-file-search-utility-now-requires-more-specificity}
+#'
+#' @param search string: the search string (file name pattern). This is probably not needed: it seems to be better to specify the target files using the other search parameters
+#' @param dtype string: the sensor, e.g. "SeaWiFS", "MODISA", "MODIST", "VIIRS", "CZCS", "MERIS", etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}
+#' @param sensor string: the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)
+#' @param period string: the time period, one of "DAY", (daily) "8D" (8-day), "MO", (monthly) "MC" (monthly climatology), "YR" (yearly), "SN" (seasonal), "SC" (seasonal climatology), etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}
+#' @param resolution_id string: "9km" or "4km"
+#' @param prod_id string: product, e.g. "par", "chlor_a", etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}
+#' @param sdate string: start date in "YYYY-MM-DD" format
+#' @param edate string: end date in "YYYY-MM-DD" format
 #' @param ... : extra parameters passed automatically by \code{bb_sync}
 #'
 #' @return TRUE on success
@@ -17,39 +25,49 @@
 #' @examples
 #'
 #' my_source <- bb_source(
-#'   name="Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a",
-#'   id="SeaWiFS_L3m_MO_CHL_chlor_a_9km",
-#'   description="Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at
+#'   name = "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a",
+#'   id = "SeaWiFS_L3m_MO_CHL_chlor_a_9km",
+#'   description = "Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at
 #'     9km spatial resolution",
-#'   doc_url="https://oceancolor.gsfc.nasa.gov/",
-#'   citation="See https://oceancolor.gsfc.nasa.gov/citations",
-#'   license="Please cite",
-#'   method=list("bb_handler_oceandata",search="S*L3m_MO_CHL_chlor_a_9km.nc"),
-#'   postprocess=NULL,
-#'   collection_size=7.2,
-#'   data_group="Ocean colour")
+#'   doc_url = "https://oceancolor.gsfc.nasa.gov/",
+#'   citation = "See https://oceancolor.gsfc.nasa.gov/citations",
+#'   license = "Please cite",
+#'   method = list("bb_handler_oceandata", sensor = "SeaWiFS", dtype = "L3m",
+#'                 period = "MO", resolution_id = "9km", prod_id = "chlor_a",
+#'                 sdate = "1997-09-01", edate = "2011-01-01"),
+#'   postprocess = NULL,
+#'   collection_size = 7.2,
+#'   user = "USERNAME", password = "PASSWORD",
+#'   data_group = "Ocean colour")
 #'
 #' @export
-bb_handler_oceandata <- function(search, dtype, sensor, ...) {
-    assert_that(is.string(search), nzchar(search))
-    if (!missing(dtype)) {
-        if (!is.null(dtype)) assert_that(is.string(dtype), nzchar(dtype))
-    } else {
-        dtype <- NULL
-    }
-    if (!missing(sensor)) {
-        if (!is.null(sensor)) assert_that(is.string(sensor), nzchar(sensor))
-    } else {
-        sensor <- NULL
-    }
-    do.call(bb_handler_oceandata_inner, list(..., search = search, dtype = dtype, sensor = sensor))
+bb_handler_oceandata <- function(search, dtype, sensor, period, resolution_id, prod_id, sdate, edate, ...) {
+    if (missing(search)) search <- NULL
+    if (!is.null(search)) assert_that(is.string(search), nzchar(search))
+    if (missing(dtype)) dtype <- NULL
+    if (!is.null(dtype)) assert_that(is.string(dtype), nzchar(dtype))
+    if (missing(sensor)) sensor <- NULL
+    if (!is.null(sensor)) assert_that(is.string(sensor), nzchar(sensor))
+    if (missing(period)) period <- NULL
+    if (!is.null(period)) assert_that(is.string(period), nzchar(period))
+    if (missing(resolution_id)) resolution_id <- NULL
+    if (!is.null(resolution_id)) assert_that(is.string(resolution_id), nzchar(resolution_id))
+    if (missing(prod_id)) prod_id <- NULL
+    if (!is.null(prod_id)) assert_that(is.string(prod_id), nzchar(prod_id))
+    if (missing(sdate)) sdate <- NULL
+    if (!is.null(sdate)) assert_that(is.string(sdate), nzchar(sdate))
+    if (missing(edate)) edate <- NULL
+    if (!is.null(edate)) assert_that(is.string(edate), nzchar(edate))
+    do.call(bb_handler_oceandata_inner, list(..., search = search, dtype = dtype, sensor = sensor, period = period, resolution_id = resolution_id,
+                                             prod_id = prod_id, sdate = sdate, edate = edate))
 }
 
 
 # @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, search_method = "api", dtype = NULL, sensor = NULL, stop_on_download_error = FALSE, target_s3_args, ...) {
+bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, search_method = "api", dtype = NULL, sensor = NULL,
+                                       period = NULL, resolution_id = NULL, prod_id = NULL, sdate = NULL, edate = NULL, stop_on_download_error = FALSE, target_s3_args, ...) {
     ## oceandata synchronization handler
 
     ## oceandata provides a file search interface, e.g.:
@@ -68,7 +86,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     assert_that(nrow(bb_data_sources(config)) == 1)
     assert_that(is.flag(verbose), !is.na(verbose))
     assert_that(is.flag(local_dir_only), !is.na(local_dir_only))
-    assert_that(is.string(search), nzchar(search))
+    if (!is.null(search)) assert_that(is.string(search), nzchar(search))
     assert_that(is.string(search_method), nzchar(search_method))
     search_method <- match.arg(tolower(search_method), c("api", "scrape"))
     if (!is.null(dtype)) assert_that(is.string(dtype), nzchar(dtype))
@@ -107,33 +125,52 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             ## highest-level dir
             out <- "" ## optional prefix with hostname, below
             ## refine by platform. Find platform, either full or one-letter abbrev
-            this_platform <- oceandata_find_platform(search)
-            if (!is.na(this_platform) && nzchar(this_platform)) {
-                ## want old platform name for backwards compatibility
-                if (!this_platform %in% oceandata_platform_map()$platform) {
-                    this_platform <- oceandata_platform_map(oceandata_platform_to_abbrev(this_platform))
-                }
+            if (!is.null(sensor)) {
+                this_platform <- sensor
                 out <- file.path(out, this_platform)
+            } else {
+                this_platform <- oceandata_find_platform(search)
+                if (!is.na(this_platform) && nzchar(this_platform)) {
+                    ## want old platform name for backwards compatibility
+                    if (!this_platform %in% oceandata_platform_map()$platform) {
+                        this_platform <- oceandata_platform_map(oceandata_platform_to_abbrev(this_platform))
+                    }
+                    out <- file.path(out, this_platform)
+                }
             }
-            if (grepl("L3m", search)) {
+            if (isTRUE(dtype == "L3m") || grepl("L3m", search)) {
                 out <- file.path(out, "Mapped")
-            } else if (grepl("L3", search)) {
+            } else if (isTRUE(dtype == "L3b") || grepl("L3", search)) {
                 out <- file.path(out, "L3BIN")
             }
             ## time period, if it's specified in the search string
-            tp <- stringr::str_detect(search, paste0("\\.", oceandata_alltp$abbrev, "\\."))
-            if (sum(tp, na.rm = TRUE) == 1) {
-                out <- file.path(out, oceandata_alltp$time_period[which(tp)])
+            if (!is.null(period)) {
+                if (period %in% oceandata_alltp$abbrev) {
+                    out <- file.path(out, oceandata_alltp$time_period[oceandata_alltp$abbrev == period])
+                }
+            } else {
+                tp <- stringr::str_detect(search, paste0("\\.", oceandata_alltp$abbrev, "\\."))
+                if (sum(tp, na.rm = TRUE) == 1) {
+                    out <- file.path(out, oceandata_alltp$time_period[which(tp)])
+                }
             }
             ## spatial res
-            if (grepl("4km", search)) out <- file.path(out, "4km") else if (grepl("9km", search)) out <- file.path(out, "9km")
+            if (!is.null(resolution_id)) {
+                out <- file.path(out, resolution_id)
+            } else {
+                if (grepl("4km", search)) out <- file.path(out, "4km") else if (grepl("9km", search)) out <- file.path(out, "9km")
+            }
             ## next level down is parameter name
-            ptbl <- oceandata_parameters()
-            pn <- stringr::str_detect(search, ptbl$pattern)
-            if (sum(tp, na.rm = TRUE) > 0) {
-                dest_p <- unique(ptbl$parameter[which(pn)])
-                ## we can match on multiple parameters so long as they all map to the same parameter directory name
-                if (length(dest_p) == 1) out <- file.path(out, dest_p)
+            if (!is.null(prod_id)) {
+                out <- file.path(out, prod_id)
+            } else {
+                ptbl <- oceandata_parameters()
+                pn <- stringr::str_detect(search, ptbl$pattern)
+                if (sum(tp, na.rm = TRUE) > 0) {
+                    dest_p <- unique(ptbl$parameter[which(pn)])
+                    ## we can match on multiple parameters so long as they all map to the same parameter directory name
+                    if (length(dest_p) == 1) out <- file.path(out, dest_p)
+                }
             }
             out <- sub("^/", "", out)
             if (!isTRUE(dots$no_host)) out <- file.path("oceandata.sci.gsfc.nasa.gov", out)
@@ -147,10 +184,8 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         ## this can be super slow for large queries, but it gives a checksum
         while (tries < 3) {
             ## previously we used a GET request but this no longer seems to deliver json format with cdate, but POST does
-            qry <- Filter(Negate(is.null), list(search = search, dtype = if (!is.null(dtype)) dtype, sensor = if (!is.null(sensor)) sensor, format = "json", cksum = 1))
-            myfiles <- httr::POST("https://oceandata.sci.gsfc.nasa.gov/api/file_search",
-                                  body = paste(sapply(seq_along(qry), function(i) paste0(names(qry)[i], "=", qry[i])), collapse = "&"),
-                                  encode = "form", httr::content_type("application/x-www-form-urlencoded"), httr::accept("*/*"))
+            qry <- Filter(Negate(is.null), list(search = search, dtype = dtype, sensor = sensor, period = period, resolution_id = resolution_id, prod_id = prod_id, sdate = sdate, edate = edate, format = "json", cksum = 1))
+            myfiles <- httr::POST("https://oceandata.sci.gsfc.nasa.gov/api/file_search", body = paste(sapply(seq_along(qry), function(i) paste0(names(qry)[i], "=", qry[i])), collapse = "&"), encode = "form", httr::content_type("application/x-www-form-urlencoded"), httr::accept("*/*"))
             ## httr::accept("*/*") seems to be necessary to receive json format
             if (!httr::http_error(myfiles)) break
             tries <- tries + 1

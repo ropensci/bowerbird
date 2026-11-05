@@ -84,7 +84,7 @@ bb_example_sources <- function(sources) {
                           doc_url = "https://oceancolor.gsfc.nasa.gov/",
                           citation = "See https://oceancolor.gsfc.nasa.gov/citations",
                           license = "Please cite",
-                          method = list("bb_handler_oceandata", search="SEASTAR_SEAWIFS_GAC*L3m.MO.CHL.chlor_a.9km.nc", sensor = "seawifs", dtype = "L3m"),
+                          method = list("bb_handler_oceandata", sensor = "SeaWiFS", dtype = "L3m", period = "MO", resolution_id = "9km", prod_id = "chlor_a", sdate = "1997-09-01", edate = "2011-01-01"),
                           postprocess = NULL,
                           collection_size = 7.2,
                           user = "", password = "", warn_empty_auth = FALSE,
