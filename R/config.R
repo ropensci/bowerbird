@@ -422,7 +422,8 @@ bb_validate <- function(config) {
     if (any(idx) && isTRUE(bb_settings(config)$dry_run)) {
         ## earthdata dry runs can spider public listings without credentials
         is_earthdata <- vapply(cfds$method, function(z) isTRUE(tryCatch(check_method_is(z[[1]], bb_handler_earthdata), error = function(e) FALSE)), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-        idx <- idx & !is_earthdata
+        is_oceandata <- vapply(cfds$method, function(z) isTRUE(tryCatch(check_method_is(z[[1]], bb_handler_oceandata), error = function(e) FALSE)), FUN.VALUE = TRUE, USE.NAMES = FALSE)
+        idx <- idx & !is_earthdata && !is_oceandata
     }
     if (any(idx)) {
         stop(paste(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s\n", cfds$name[idx], cfds$authentication_note[idx]), collapse = "\n"))

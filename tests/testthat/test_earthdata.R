@@ -36,12 +36,21 @@ test_that("bb_handler_earthdata requires credentials unless doing a dry run", {
     res <- bb_get(src, local_file_root = tempdir(), dry_run = TRUE)
     expect_false(res$status)
     ## other sources requiring authentication still fail validation in a dry run
-    src2 <- bb_example_sources("Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a")
+    src2 <- bb_source(name = "CMEMS global gridded SSH reprocessed (1993-ongoing) test",
+                      id = "SEALEVEL_GLO_PHY_L4_MY_008_047-test",
+                      description = "Test",
+                      doc_url = "https://data.marine.copernicus.eu/product/SEALEVEL_GLO_PHY_L4_MY_008_047/description",
+                      citation = "Test",
+                      license = "Test",
+                      method = list("bb_handler_copernicus", product = "SEALEVEL_GLO_PHY_L4_MY_008_047"),
+                      authentication_note = "Requires authentication",
+                      user = "", password = "", warn_empty_auth = FALSE)
     cf2 <- bb_add(bb_config(local_file_root = temp_root), src2)
     st2 <- bb_settings(cf2)
     st2$dry_run <- TRUE
     bb_settings(cf2) <- st2
     expect_error(bowerbird:::bb_validate(cf2), "requires authentication")
+    expect_error(res <- bb_get(src2, local_file_root = tempdir(), dry_run = TRUE), "requires authentication")
 })
 
 test_that("bb_handler_earthdata dry run works without credentials", {

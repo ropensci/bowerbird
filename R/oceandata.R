@@ -177,7 +177,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         }
         return(file.path(this_att$local_file_root, sub("/$", "", out)))
     }
-    if (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password)) stop("Oceandata sources require an Earthdata login: provide your user and password in the source configuration")
+    if (!isTRUE(this_att$dry_run) && (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password))) stop("Oceandata sources require an Earthdata login: provide your user and password in the source configuration")
     tries <- 0
     if (verbose) cat("Downloading file list ... \n")
     if (search_method == "api") {
