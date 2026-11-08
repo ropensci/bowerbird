@@ -2,6 +2,7 @@
 % Please edit documentation in R/oceandata_api.R
 \name{bb_oceandata_filesearch}
 \alias{bb_oceandata_filesearch}
+\alias{bb_oceandata_dtid_table}
 \title{Query the NASA/OB.DAAC Oceancolor file search API}
 \usage{
 bb_oceandata_filesearch(
@@ -16,6 +17,8 @@ bb_oceandata_filesearch(
   sdate = NULL,
   edate = NULL
 )
+
+bb_oceandata_dtid_table()
 }
 \arguments{
 \item{search}{character: the search string (file name pattern). Note that relying on the search string tends to yield slower searches: specify the target files as tightly as possible using the other search parameters. But you might still need the search string to impose additional filtering on the results}
@@ -24,7 +27,7 @@ bb_oceandata_filesearch(
 
 \item{dtype}{character: the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)}
 
-\item{dtid}{integer: data type ID, see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}. Note that providing the \code{dtid} typically gives a much faster search}
+\item{dtid}{integer: data type ID, see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}. Note that providing the \code{dtid} typically gives a much faster search. The \code{bb_oceandata_dtid_table()} function will (with luck) dynamically scrape the full table of \code{dtid} values that can be used here}
 
 \item{period}{character: the time period, one of "DAY", (daily) "8D" (8-day), "MO", (monthly) "MC" (monthly climatology), "YR" (yearly), "SN" (seasonal), "SC" (seasonal climatology), etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}}
 

@@ -9,7 +9,7 @@
 #' @param search character: the search string (file name pattern). Note that relying on the search string tends to yield slower searches: specify the target files as tightly as possible using the other search parameters. But you might still need the search string to impose additional filtering on the results
 #' @param sensor character: the sensor, e.g. "SeaWiFS", "MODISA", "MODIST", "VIIRS", "CZCS", "MERIS", etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}
 #' @param dtype character: the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)
-#' @param dtid integer: data type ID, see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}. Note that providing the \code{dtid} typically gives a much faster search
+#' @param dtid integer: data type ID, see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}. Note that providing the \code{dtid} typically gives a much faster search. The \code{bb_oceandata_dtid_table()} function will (with luck) dynamically scrape the full table of \code{dtid} values that can be used here
 #' @param period character: the time period, one of "DAY", (daily) "8D" (8-day), "MO", (monthly) "MC" (monthly climatology), "YR" (yearly), "SN" (seasonal), "SC" (seasonal climatology), etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}
 #' @param resolution_id character: "9km" or "4km"
 #' @param prod_id character: product, e.g. "par", "chlor_a", etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}
@@ -79,4 +79,17 @@ bb_oceandata_filesearch <- function(search = NULL, sensor = NULL, dtype = NULL, 
         myfiles$last_modified <- lubridate::ymd_hms(myfiles$last_modified, tz = "UTC")
         myfiles
     }
+}
+
+#' @export
+#' @rdname bb_oceandata_filesearch
+bb_oceandata_dtid_table <- function() {
+    x <- rvest::read_html("https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/")
+    tx <- rvest::html_elements(x, xpath = "//td[contains(text(), 'Data Type ID')]/parent::tr/parent::table")
+    ## drop the main table
+    tx <- tx[vapply(tx, function(z) !grepl("id[[:space:]]*=[[:space:]]*['\"]file-search-help['\"]", substr(as.character(z), 1, 1000)), FUN.VALUE = TRUE)]
+    tx <- rvest::html_table(tx, header = TRUE)[[1]]
+    names(tx) <- gsub("[[:space:][:punct:]]+", "_", tolower(names(tx)))
+    names(tx)[names(tx) == "data type id"] <- "dtid"
+    tx
 }
