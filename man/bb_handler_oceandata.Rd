@@ -6,32 +6,38 @@
 \usage{
 bb_handler_oceandata(
   search,
-  dtype,
   sensor,
+  dtype,
+  dtid,
   period,
   resolution_id,
   prod_id,
+  suite_id,
   sdate,
   edate,
   ...
 )
 }
 \arguments{
-\item{search}{string: the search string (file name pattern). This is probably not needed: it seems to be better to specify the target files using the other search parameters}
+\item{search}{character: the search string (file name pattern). Note that relying on the search string tends to yield slower searches: specify the target files as tightly as possible using the other search parameters. But you might still need the search string to impose additional filtering on the results}
 
-\item{dtype}{string: the sensor, e.g. "SeaWiFS", "MODISA", "MODIST", "VIIRS", "CZCS", "MERIS", etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}}
+\item{sensor}{character: the sensor, e.g. "SeaWiFS", "MODISA", "MODIST", "VIIRS", "CZCS", "MERIS", etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}}
 
-\item{sensor}{string: the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)}
+\item{dtype}{character: the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)}
 
-\item{period}{string: the time period, one of "DAY", (daily) "8D" (8-day), "MO", (monthly) "MC" (monthly climatology), "YR" (yearly), "SN" (seasonal), "SC" (seasonal climatology), etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}}
+\item{dtid}{integer: data type ID, see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}. Note that providing the \code{dtid} typically gives a much faster search}
 
-\item{resolution_id}{string: "9km" or "4km"}
+\item{period}{character: the time period, one of "DAY", (daily) "8D" (8-day), "MO", (monthly) "MC" (monthly climatology), "YR" (yearly), "SN" (seasonal), "SC" (seasonal climatology), etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}}
 
-\item{prod_id}{string: product, e.g. "par", "chlor_a", etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}}
+\item{resolution_id}{character: "9km" or "4km"}
 
-\item{sdate}{string: start date in "YYYY-MM-DD" format}
+\item{prod_id}{character: product, e.g. "par", "chlor_a", etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}}
 
-\item{edate}{string: end date in "YYYY-MM-DD" format}
+\item{suite_id}{character: product suite, e.g. "RRS", etc: see \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/}}
+
+\item{sdate}{Date or character: start date (in "YYYY-MM-DD" format, if provided as a string)}
+
+\item{edate}{Date or character: end date (in "YYYY-MM-DD" format, if provided as a string). If not specified it will default to the current date}
 
 \item{...}{: extra parameters passed automatically by \code{bb_sync}}
 }
@@ -46,6 +52,8 @@ Note that users will need an Earthdata login, see \url{https://urs.earthdata.nas
 
 Previously it was possible to search based on filename pattern alone, e.g. "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. However, as of June 2026 the OB.DAAC search API requires other parameters to be set, in order to reduce the search load on the server, see \url{https://www.earthdata.nasa.gov/data/alerts-outages/ob.daac-file-search-utility-now-requires-more-specificity}. It is not obvious which or how many parameters are required for a given search. If you are constructing an oceandata bowerbird source you are advised to use the file search web page \url{https://oceandata.sci.gsfc.nasa.gov/api/file_search} and its help page \url{https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/} to help find the correct parameters.
 
+It is possible to provide multiple values for one or more search parameters: the POST request to the file search API will be repeated for all possible combinations of parameters (constructed via \code{expand.grid}). This might be helpful, for example, by allowing \code{dtid} to be specified as a two-element vector with one value for refined data and the second for NRT data. Specifying two \code{dtid} values will yield a much faster search than omitting \code{dtid} and relying on the \code{search} parameter to achieve the same refined/NRT file inclusions.
+
 Note that the \code{bb_handler_oceandata} does not take need `source_url` to be specified in the \code{bb_source} call.
 }
 \examples{
@@ -59,7 +67,7 @@ my_source <- bb_source(
   citation = "See https://oceancolor.gsfc.nasa.gov/citations",
   license = "Please cite",
   method = list("bb_handler_oceandata", sensor = "SeaWiFS", dtype = "L3m",
-                period = "MO", resolution_id = "9km", prod_id = "chlor_a",
+                dtid = 1123, period = "MO", resolution_id = "9km", prod_id = "chlor_a",
                 sdate = "1997-09-01", edate = "2011-01-01"),
   postprocess = NULL,
   collection_size = 7.2,
