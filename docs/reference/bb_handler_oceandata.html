@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">bowerbird</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.19.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.20.0</span>
       </span>
     </div>
 
@@ -66,7 +66,19 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bb_handler_oceandata</span><span class="op">(</span><span class="va">search</span>, <span class="va">dtype</span>, <span class="va">sensor</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bb_handler_oceandata</span><span class="op">(</span></span>
+<span>  <span class="va">search</span>,</span>
+<span>  <span class="va">sensor</span>,</span>
+<span>  <span class="va">dtype</span>,</span>
+<span>  <span class="va">dtid</span>,</span>
+<span>  <span class="va">period</span>,</span>
+<span>  <span class="va">resolution_id</span>,</span>
+<span>  <span class="va">prod_id</span>,</span>
+<span>  <span class="va">suite_id</span>,</span>
+<span>  <span class="va">sdate</span>,</span>
+<span>  <span class="va">edate</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -74,15 +86,43 @@
 
 
 <dl><dt id="arg-search">search<a class="anchor" aria-label="anchor" href="#arg-search"></a></dt>
-<dd><p>string: (required) the search string to pass to the oceancolor file searcher (https://oceandata.sci.gsfc.nasa.gov/api/file_search)</p></dd>
-
-
-<dt id="arg-dtype">dtype<a class="anchor" aria-label="anchor" href="#arg-dtype"></a></dt>
-<dd><p>string: (optional) the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are aquarius, seawifs, aqua, terra, meris, octs, czcs, hico, viirs (for snpp), viirsj1, s3olci (for sentinel-3a), s3bolci (see https://oceancolor.gsfc.nasa.gov/data/download_methods/)</p></dd>
+<dd><p>character: the search string (file name pattern). Note that relying on the search string tends to yield slower searches: specify the target files as tightly as possible using the other search parameters. But you might still need the search string to impose additional filtering on the results</p></dd>
 
 
 <dt id="arg-sensor">sensor<a class="anchor" aria-label="anchor" href="#arg-sensor"></a></dt>
-<dd><p>string: (optional) the sensor (e.g. "seawifs") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)</p></dd>
+<dd><p>character: the sensor, e.g. "SeaWiFS", "MODISA", "MODIST", "VIIRS", "CZCS", "MERIS", etc: see <a href="https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/" class="external-link">https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/</a></p></dd>
+
+
+<dt id="arg-dtype">dtype<a class="anchor" aria-label="anchor" href="#arg-dtype"></a></dt>
+<dd><p>character: the data type (e.g. "L3m") to pass to the oceancolor file searcher. Valid options at the time of writing are L0, L1, L2, L3b (for binned data), L3m (for mapped data), MET (for ancillary data), misc (for sundry products)</p></dd>
+
+
+<dt id="arg-dtid">dtid<a class="anchor" aria-label="anchor" href="#arg-dtid"></a></dt>
+<dd><p>integer: data type ID, see <a href="https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/" class="external-link">https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/</a>. Note that providing the <code>dtid</code> typically gives a much faster search</p></dd>
+
+
+<dt id="arg-period">period<a class="anchor" aria-label="anchor" href="#arg-period"></a></dt>
+<dd><p>character: the time period, one of "DAY", (daily) "8D" (8-day), "MO", (monthly) "MC" (monthly climatology), "YR" (yearly), "SN" (seasonal), "SC" (seasonal climatology), etc: see <a href="https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/" class="external-link">https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/</a></p></dd>
+
+
+<dt id="arg-resolution-id">resolution_id<a class="anchor" aria-label="anchor" href="#arg-resolution-id"></a></dt>
+<dd><p>character: "9km" or "4km"</p></dd>
+
+
+<dt id="arg-prod-id">prod_id<a class="anchor" aria-label="anchor" href="#arg-prod-id"></a></dt>
+<dd><p>character: product, e.g. "par", "chlor_a", etc: see <a href="https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/" class="external-link">https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/</a></p></dd>
+
+
+<dt id="arg-suite-id">suite_id<a class="anchor" aria-label="anchor" href="#arg-suite-id"></a></dt>
+<dd><p>character: product suite, e.g. "RRS", etc: see <a href="https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/" class="external-link">https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/</a></p></dd>
+
+
+<dt id="arg-sdate">sdate<a class="anchor" aria-label="anchor" href="#arg-sdate"></a></dt>
+<dd><p>Date or character: start date (in "YYYY-MM-DD" format, if provided as a string)</p></dd>
+
+
+<dt id="arg-edate">edate<a class="anchor" aria-label="anchor" href="#arg-edate"></a></dt>
+<dd><p>Date or character: end date (in "YYYY-MM-DD" format, if provided as a string). If not specified it will default to the current date</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -95,29 +135,34 @@
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>Note that users will need an Earthdata login, see https://urs.earthdata.nasa.gov/. Users will also need to authorize the application 'OB.DAAC Data Access' (see 'My Applications' at https://urs.earthdata.nasa.gov/profile)</p>
-<p>Oceandata uses standardized file naming conventions (see https://oceancolor.gsfc.nasa.gov/docs/format/), so once you know which products you want you can construct a suitable file name pattern to search for. For example, "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. This pattern is passed as the <code>search</code> argument. Note that the <code>bb_handler_oceandata</code> does not take need `source_url` to be specified in the <code>bb_source</code> call.</p>
+    <p>Note that users will need an Earthdata login, see <a href="https://urs.earthdata.nasa.gov/" class="external-link">https://urs.earthdata.nasa.gov/</a>. Users will also need to authorize the application 'OB.DAAC Data Access' (see 'My Applications' at <a href="https://urs.earthdata.nasa.gov/profile" class="external-link">https://urs.earthdata.nasa.gov/profile</a>). Dry runs (listing files but not downloading them) can be performed without authentication.</p>
+<p>Previously it was possible to search based on filename pattern alone, e.g. "S*L3m_MO_CHL_chlor_a_9km.nc" would match monthly level-3 mapped chlorophyll data from the SeaWiFS satellite at 9km resolution, in netcdf format. However, as of June 2026 the OB.DAAC search API requires other parameters to be set, in order to reduce the search load on the server, see <a href="https://www.earthdata.nasa.gov/data/alerts-outages/ob.daac-file-search-utility-now-requires-more-specificity" class="external-link">https://www.earthdata.nasa.gov/data/alerts-outages/ob.daac-file-search-utility-now-requires-more-specificity</a>. It is not obvious which or how many parameters are required for a given search. If you are constructing an oceandata bowerbird source you are advised to use the file search web page <a href="https://oceandata.sci.gsfc.nasa.gov/api/file_search" class="external-link">https://oceandata.sci.gsfc.nasa.gov/api/file_search</a> and its help page <a href="https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/" class="external-link">https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/</a> to help find the correct parameters.</p>
+<p>It is possible to provide multiple values for one or more search parameters: the POST request to the file search API will be repeated for all possible combinations of parameters (constructed via <code>expand.grid</code>). This might be helpful, for example, by allowing <code>dtid</code> to be specified as a two-element vector with one value for refined data and the second for NRT data. Specifying two <code>dtid</code> values will yield a much faster search than omitting <code>dtid</code> and relying on the <code>search</code> parameter to achieve the same refined/NRT file inclusions.</p>
+<p>Note that the <code>bb_handler_oceandata</code> does not take need `source_url` to be specified in the <code>bb_source</code> call.</p>
     </div>
     <div id="references">
     <h2>References</h2>
-    <p>https://oceandata.sci.gsfc.nasa.gov/</p>
+    <p><a href="https://oceandata.sci.gsfc.nasa.gov/" class="external-link">https://oceandata.sci.gsfc.nasa.gov/</a>, <a href="https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/" class="external-link">https://oceandata.sci.gsfc.nasa.gov/file_search/file_search_help/</a>, <a href="https://www.earthdata.nasa.gov/data/alerts-outages/ob.daac-file-search-utility-now-requires-more-specificity" class="external-link">https://www.earthdata.nasa.gov/data/alerts-outages/ob.daac-file-search-utility-now-requires-more-specificity</a></p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">my_source</span> <span class="op">&lt;-</span> <span class="fu"><a href="bb_source.html">bb_source</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  name<span class="op">=</span><span class="st">"Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a"</span>,</span></span>
-<span class="r-in"><span>  id<span class="op">=</span><span class="st">"SeaWiFS_L3m_MO_CHL_chlor_a_9km"</span>,</span></span>
-<span class="r-in"><span>  description<span class="op">=</span><span class="st">"Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at</span></span></span>
+<span class="r-in"><span>  name <span class="op">=</span> <span class="st">"Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a"</span>,</span></span>
+<span class="r-in"><span>  id <span class="op">=</span> <span class="st">"SeaWiFS_L3m_MO_CHL_chlor_a_9km"</span>,</span></span>
+<span class="r-in"><span>  description <span class="op">=</span> <span class="st">"Monthly remote-sensing chlorophyll-a from the SeaWiFS satellite at</span></span></span>
 <span class="r-in"><span><span class="st">    9km spatial resolution"</span>,</span></span>
-<span class="r-in"><span>  doc_url<span class="op">=</span><span class="st">"https://oceancolor.gsfc.nasa.gov/"</span>,</span></span>
-<span class="r-in"><span>  citation<span class="op">=</span><span class="st">"See https://oceancolor.gsfc.nasa.gov/citations"</span>,</span></span>
-<span class="r-in"><span>  license<span class="op">=</span><span class="st">"Please cite"</span>,</span></span>
-<span class="r-in"><span>  method<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"bb_handler_oceandata"</span>,search<span class="op">=</span><span class="st">"S*L3m_MO_CHL_chlor_a_9km.nc"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  postprocess<span class="op">=</span><span class="cn">NULL</span>,</span></span>
-<span class="r-in"><span>  collection_size<span class="op">=</span><span class="fl">7.2</span>,</span></span>
-<span class="r-in"><span>  data_group<span class="op">=</span><span class="st">"Ocean colour"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  doc_url <span class="op">=</span> <span class="st">"https://oceancolor.gsfc.nasa.gov/"</span>,</span></span>
+<span class="r-in"><span>  citation <span class="op">=</span> <span class="st">"See https://oceancolor.gsfc.nasa.gov/citations"</span>,</span></span>
+<span class="r-in"><span>  license <span class="op">=</span> <span class="st">"Please cite"</span>,</span></span>
+<span class="r-in"><span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"bb_handler_oceandata"</span>, sensor <span class="op">=</span> <span class="st">"SeaWiFS"</span>, dtype <span class="op">=</span> <span class="st">"L3m"</span>,</span></span>
+<span class="r-in"><span>                dtid <span class="op">=</span> <span class="fl">1123</span>, period <span class="op">=</span> <span class="st">"MO"</span>, resolution_id <span class="op">=</span> <span class="st">"9km"</span>, prod_id <span class="op">=</span> <span class="st">"chlor_a"</span>,</span></span>
+<span class="r-in"><span>                sdate <span class="op">=</span> <span class="st">"1997-09-01"</span>, edate <span class="op">=</span> <span class="st">"2011-01-01"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  postprocess <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
+<span class="r-in"><span>  collection_size <span class="op">=</span> <span class="fl">7.2</span>,</span></span>
+<span class="r-in"><span>  user <span class="op">=</span> <span class="st">"USERNAME"</span>, password <span class="op">=</span> <span class="st">"PASSWORD"</span>,</span></span>
+<span class="r-in"><span>  data_group <span class="op">=</span> <span class="st">"Ocean colour"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
