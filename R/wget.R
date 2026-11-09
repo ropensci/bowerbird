@@ -298,7 +298,7 @@ bb_install_wget <- function(force=FALSE,use_appdata_dir=FALSE) {
         ## Do we want 32 or 64 bit exe? Default to 32, since 32-bit wget will run on 64-bit windows if it has to
         bits <- tryCatch(if (.Machine$sizeof.pointer==8) 64 else 32,error=function(e) 32)
         ## 8-byte address space is 64-bit. Note that we're actually detecting the R address space here, not the OS address space. But I don't think there's a reliable way of detecting the machine architecture
-        wgurl <- paste0("https://eternallybored.org/misc/wget/1.19.4/",bits,"/wget.exe")
+        wgurl <- paste0("https://eternallybored.org/misc/wget/1.25.0/",bits,"/wget.exe")
         err <- download.file(wgurl,
                       destfile=file.path(path,"wget.exe"),
                       mode="wb")
