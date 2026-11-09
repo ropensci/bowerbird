@@ -200,7 +200,7 @@ test_that("bb_data_source_dir works", {
     ## we can combine search parms in a way that maps the results to multiple final directories
     ods$name <- "Oceandata VIIRS Level-3 mapped daily 4km chl-a"
     ods$method[[1]] <- list("bb_handler_oceandata", search = "*.CHL.chlor_a.*", sensor = "VIIRS", dtype = "L3m", dtid = c(1007, 1019), period = c("YR", "MO"), resolution_id = "4km", prod_id = "chlor_a", sdate = "2012-01-01")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/") ## only unique to this level, files go in both Annual and Monthly below this
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped") ## only unique to this level, files go in both Annual and Monthly below this
 
 
 })
