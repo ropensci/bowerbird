@@ -128,79 +128,80 @@ test_that("bb_handler_oceandata works when no files match",{
 })
 
 test_that("bb_data_source_dir works", {
+    tmproot <- tempdir()
     ods <- bb_source(id = "bilbobaggins", name = "Oceandata MODIS Aqua Level-3 mapped 8-day 9km chl-a",
                      description = "Oceandata test", doc_url = "https://oceancolor.gsfc.nasa.gov/",
                      citation = "See https://oceancolor.gsfc.nasa.gov/cms/citations", source_url = "",
                      method = list("bb_handler_oceandata", sensor = "MODISA", dtype = "L3m", dtid = c(1043, 1055), period = "8D", resolution_id = "9km", prod_id = "chlor_a", sdate = "2002-01-01"),
                      license = "Please cite", user = "YOUR_EARTHDATA_USERNAME", password = "YOUR_EARTHDATA_PASSWORD",
                      postprocess = NULL)
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/8Day/9km/chlor")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/8Day/9km/chlor"))
 
     ods$name <- "Oceandata MODIS Aqua Level-3 mapped 8-day 4km PAR"
     ods$method[[1]] <- list("bb_handler_oceandata", dtype = "L3m", sensor = "MODISA", dtid = c(1043, 1055), sdate = "2002-01-01", prod_id = "par", resolution_id = "4km", period = "8D")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/8Day/4km/par")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/8Day/4km/par"))
 
     ods$name <- "Oceandata MODIS Aqua Level-3 mapped 8-day 4km aerosol optical thickness"
     ods$method[[1]] <- list("bb_handler_oceandata", dtype = "L3m", sensor = "MODISA", dtid = c(1043, 1055), sdate = "2002-01-01", prod_id = "aot_869", resolution_id = "4km", period = "8D")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/8Day/4km/aot")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/8Day/4km/aot"))
 
     ods$name <- "Oceandata MODIS Aqua Level-3 mapped monthly 9km POC"
     ods$method[[1]] <- list("bb_handler_oceandata", dtype = "L3m", sensor = "MODISA", dtid = c(1043, 1055), sdate = "2002-01-01", prod_id = "poc", resolution_id = "9km", period = "MO")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Monthly/9km/poc")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Monthly/9km/poc"))
 
     ods$name <- "Oceandata MODIS Aqua Level-3 mapped monthly PAR at 9km resolution"
     ods$method[[1]] <- list("bb_handler_oceandata", dtype = "L3m", sensor = "MODISA", dtid = c(1043, 1055), sdate = "2002-01-01", prod_id = "par", resolution_id = "9km", period = "MO")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Monthly/9km/par")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Monthly/9km/par"))
 
     ods$name <- "Oceandata MODIS Aqua Level-3 mapped annual PAR at 9km resolution"
     ods$method[[1]] <- list("bb_handler_oceandata", dtype = "L3m", sensor = "MODISA", dtid = c(1043, 1055), sdate = "2002-01-01", prod_id = "par", resolution_id = "9km", period = "YR")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Annual/9km/par")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Annual/9km/par"))
 
     ods$name <- "Oceandata MODIS Aqua Level-3 mapped monthly 9km SST"
     ods$method[[1]] <- list("bb_handler_oceandata", search = "*MO.SST.sst*", sdate = "2000-01-01", sensor = "MODISA", dtype = "L3m", period = "MO", prod_id = "sst", dtid = c(1049, 1061), resolution_id = "9km")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Monthly/9km/SST")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Monthly/9km/SST"))
 
     ods$name <- "Oceandata SeaWiFS Level-3 mapped monthly 9km chl-a"
     ods$method[[1]] <- list("bb_handler_oceandata", sensor = "SeaWiFS", dtype = "L3m", dtid = 1123, period = "MO", resolution_id = "9km", prod_id = "chlor_a", sdate = "1997-09-01", edate = "2011-01-01")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/SeaWiFS/Mapped/Monthly/9km/chlor")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/SeaWiFS/Mapped/Monthly/9km/chlor"))
 
     ods$name <- "Oceandata MODIS Aqua Level-3 mapped daily 4km chl-a"
     ods$method[[1]] <- list("bb_handler_oceandata", sensor = "MODISA", dtype = "L3m", dtid = c(1043, 1055), period = "DAY", resolution_id = "4km", prod_id = "chlor_a", sdate = "2002-01-01")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km/chlor")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Daily/4km/chlor"))
 
     ods$name <- "Oceandata MODIS Aqua Level-3 mapped monthly 9km chl-a"
     ods$method[[1]] <- list("bb_handler_oceandata", sensor = "MODISA", dtype = "L3m", dtid = c(1043, 1055), period = "MO", resolution_id = "9km", prod_id = "chlor_a", sdate = "2002-01-01")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Monthly/9km/chlor")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/MODISA/Mapped/Monthly/9km/chlor"))
 
     ods$name <- "Oceandata VIIRS Level-3 mapped monthly 9km chl-a"
     ods$method[[1]] <- list("bb_handler_oceandata", search = "*MO.CHL.chlor_a.*", sensor = "VIIRS", dtype = "L3m", dtid = c(1007, 1019), period = "MO", resolution_id = "9km", prod_id = "chlor_a", sdate = "2012-01-01")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Monthly/9km/chlor")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Monthly/9km/chlor"))
 
     ods$name <- "Oceandata VIIRS Level-3 mapped seasonal 9km chl-a"
     ods$method[[1]] <- list("bb_handler_oceandata", period = c("SNWI", "SNSP", "SNSU", "SNAU"), sensor = "VIIRS", dtype = "L3m", dtid = c(1007, 1019), resolution_id = "9km", prod_id = "chlor_a", sdate = "2012-01-01")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Seasonal/9km/chlor")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Seasonal/9km/chlor"))
 
     ods$name <- "Oceandata VIIRS Level-3 binned daily RRS"
     ods$method[[1]] <- list("bb_handler_oceandata", search = "*DAY.RRS.*", sensor = "VIIRS", dtype = "L3b", dtid = c(1006, 1018), period = "DAY", suite_id = "RRS", sdate = "2012-01-01")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/VIIRS/L3BIN/Daily/RRS")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/VIIRS/L3BIN/Daily/RRS"))
 
     ods$name <- "Oceandata VIIRS Level-3 mapped daily 4km chl-a"
     ods$method[[1]] <- list("bb_handler_oceandata", search = "*DAY.CHL.chlor_a.*", sensor = "VIIRS", dtype = "L3m", dtid = c(1007, 1019), period = "DAY", resolution_id = "4km", prod_id = "chlor_a", sdate = "2012-01-01")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/4km/chlor")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped/Daily/4km/chlor"))
 
     ods$name <- "Oceandata MODIS Aqua Level-3 binned daily RRS"
     ods$method[[1]] <- list("bb_handler_oceandata", search = "*DAY.RRS.*", sensor = "MODISA", dtype = "L3b", dtid = c(1042, 1054), period = "DAY", suite_id = "RRS", sdate = "2002-01-01")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/Daily/RRS")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/MODISA/L3BIN/Daily/RRS"))
 
     ods$name <- "Oceandata SeaWiFS Level-3 binned daily RRS"
     ods$method[[1]] <- list("bb_handler_oceandata", search = "*DAY.RRS.*", sensor = "SeaWiFS", dtype = "L3b", dtid = 1122, period = "DAY", suite_id = "RRS", sdate = "1997-09-01", edate = "2011-01-01")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/SeaWiFS/L3BIN/Daily/RRS")
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/SeaWiFS/L3BIN/Daily/RRS"))
 
 
     ## we can combine search parms in a way that maps the results to multiple final directories
     ods$name <- "Oceandata VIIRS Level-3 mapped daily 4km chl-a"
     ods$method[[1]] <- list("bb_handler_oceandata", search = "*.CHL.chlor_a.*", sensor = "VIIRS", dtype = "L3m", dtid = c(1007, 1019), period = c("YR", "MO"), resolution_id = "4km", prod_id = "chlor_a", sdate = "2012-01-01")
-    expect_equal(bb_data_source_dir(bb_config(local_file_root = "/tmp") %>% bb_add(ods)), "/tmp/oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped") ## only unique to this level, files go in both Annual and Monthly below this
+    expect_equal(bb_data_source_dir(bb_config(local_file_root = tmproot) %>% bb_add(ods)), file.path(tmproot, "oceandata.sci.gsfc.nasa.gov/VIIRS/Mapped")) ## only unique to this level, files go in both Annual and Monthly below this
 
 
 })
