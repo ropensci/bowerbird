@@ -129,13 +129,14 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             out <- file.path(out[1], out[2])
             if (!isTRUE(dots$no_host)) out <- c(temp$hostname, out)
         } else {
-            ## note that we can't use url_mapper here, because the search string in the source definition is unlikely to conform to the expected full pattern
+            ## note that we can't use url_mapper here, because the source definition is unlikely to conform to the expected full pattern
+            ## also, a given source might include products across multiple fine-resolution directories: the result here will be the lowest level output directory that is common to all files associated with the source
             ## highest-level dir
             out <- "" ## optional prefix with hostname, below
             ## refine by platform. Find platform, either full or one-letter abbrev
+            trunc <- FALSE ## if set to TRUE, truncate the output at this point
             if (!is.null(sensor)) {
-                this_platform <- sensor
-                out <- file.path(out, this_platform)
+                out <- file.path(out, sensor)
             } else {
                 this_platform <- oceandata_find_platform(search)
                 if (!is.na(this_platform) && nzchar(this_platform)) {
@@ -144,40 +145,72 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                         this_platform <- oceandata_platform_map(oceandata_platform_to_abbrev(this_platform))
                     }
                     out <- file.path(out, this_platform)
+                } else {
+                    trunc <- TRUE
                 }
             }
-            if (isTRUE(dtype == "L3m") || grepl("L3m", search)) {
-                out <- file.path(out, "Mapped")
-            } else if (isTRUE(dtype == "L3b") || grepl("L3", search)) {
-                out <- file.path(out, "L3BIN")
-            }
-            ## time period, if it's specified in the search string
-            if (!is.null(period)) {
-                if (period %in% oceandata_alltp$abbrev) {
-                    out <- file.path(out, oceandata_alltp$time_period[oceandata_alltp$abbrev == period])
-                }
-            } else {
-                tp <- stringr::str_detect(search, paste0("\\.", oceandata_alltp$abbrev, "\\."))
-                if (sum(tp, na.rm = TRUE) == 1) {
-                    out <- file.path(out, oceandata_alltp$time_period[which(tp)])
+            if (!trunc) {
+                if (isTRUE(dtype == "L3m") || grepl("L3m", search)) {
+                    out <- file.path(out, "Mapped")
+                } else if (isTRUE(dtype == "L3b") || grepl("L3", search)) {
+                    out <- file.path(out, "L3BIN")
+                } else {
+                    trunc <- TRUE
                 }
             }
-            ## spatial res
-            if (!is.null(resolution_id)) {
-                out <- file.path(out, resolution_id)
-            } else {
-                if (grepl("4km", search)) out <- file.path(out, "4km") else if (grepl("9km", search)) out <- file.path(out, "9km")
+            if (!trunc) {
+                ## time period, if it's specified in the search string
+                if (!is.null(period)) {
+                    if (all(period %in% oceandata_alltp$abbrev)) {
+                        chk <- unique(oceandata_alltp$time_period[oceandata_alltp$abbrev %in% period])
+                        if (length(chk) == 1) {
+                            out <- file.path(out, chk)
+                        } else {
+                            trunc <- TRUE
+                        }
+                    } else {
+                        trunc <- TRUE
+                    }
+                } else {
+                    tp <- stringr::str_detect(search, paste0("\\.", oceandata_alltp$abbrev, "\\."))
+                    if (sum(tp, na.rm = TRUE) == 1) {
+                        out <- file.path(out, oceandata_alltp$time_period[which(tp)])
+                    } else {
+                        trunc <- TRUE
+                    }
+                }
             }
-            ## next level down is parameter name
-            if (!is.null(prod_id)) {
-                out <- file.path(out, prod_id)
-            } else {
+            if (!trunc && (isTRUE(dtype == "L3m") || grepl("L3m", search))) {
+                ## spatial res
+                if (!is.null(resolution_id)) {
+                    out <- file.path(out, resolution_id)
+                } else {
+                    if (grepl("4km", search)) out <- file.path(out, "4km") else if (grepl("9km", search)) out <- file.path(out, "9km") else trunc <- TRUE
+                }
+            }
+            if (!trunc) {
+                ## next level down is parameter name
                 ptbl <- oceandata_parameters()
-                pn <- stringr::str_detect(search, ptbl$pattern)
-                if (sum(pn, na.rm = TRUE) > 0) {
-                    dest_p <- unique(ptbl$parameter[which(pn)])
+                if (!is.null(prod_id)) {
+                    dest_p <- NULL
+                    pn <- stringr::str_detect(prod_id, paste0("^", ptbl$prod_id, "$"))
+                    if (sum(pn, na.rm = TRUE) > 0) {
+                        dest_p <- unique(ptbl$parameter[which(pn)])
+                        ## we can match on multiple parameters so long as they all map to the same parameter directory name
+                    }
+                    out <- file.path(out, if (length(dest_p) == 1) dest_p else prod_id)
+                } else {
+                    dest_p <- NULL
+                    pn <- stringr::str_detect(search, ptbl$pattern)
+                    if (sum(pn, na.rm = TRUE) > 0) {
+                        dest_p <- unique(ptbl$parameter[which(pn)])
+                    }
                     ## we can match on multiple parameters so long as they all map to the same parameter directory name
-                    if (length(dest_p) == 1) out <- file.path(out, dest_p)
+                    if (length(dest_p) == 1) {
+                        out <- file.path(out, dest_p)
+                    } else {
+                        trunc <- TRUE
+                    }
                 }
             }
             out <- sub("^/", "", out)
@@ -388,40 +421,40 @@ oceandata_parameters <- function(platform) {
     ## note some VIIRS parameters that appear in the browse file structure but with no associated files, and so have not been coded here:
     ## CHLOCI GSM QAA ZLEE
     ## platforms yet to do: "Q","H" (are different folder structure to the others)
-    tribble(~platform, ~parameter, ~pattern,
-            "SATCO", "Kd", "KD490[_\\.]Kd_490",
-            "SATCO", "Kd", "KD[_\\.]Kd_490", ## changed?
-            "SATCO", "NSST", "NSST",
-            "SATCO", "Rrs", "RRS[_\\.]Rrs_[[:digit:]]+",
-            "SATCO", "SST", "SST",
-            "SATCO", "SST", "SST[_\\.]sst",
-            "SATCO", "SST4", "SST4",
-            "SATCO", "a", "IOP[_\\.]a_.*",
-            "SATCO", "adg", "IOP[_\\.]adg_.*",
-            "SATCO", "angstrom", "RRS[_\\.]angstrom",
-            "SATCO", "aot", "RRS[_\\.]aot_[[:digit:]]+",
-            "SATCO", "aph", "IOP[_\\.]aph_.*",
-            "SATCO", "bb", "IOP[_\\.]bb_.*",
-            "SATCO", "bbp", "IOP[_\\.]bbp_.*",
-            "SATCO", "cdom", "CDOM[_\\.]cdom_index",
-            "SATCO", "chl", "CHL[_\\.]chl_ocx",
-            "SATCO", "chlor", "CHL[_\\.]chlor_a",
-            "SATCO", "ipar", "FLH[_\\.]ipar",
-            "SATCO", "nflh", "FLH[_\\.]nflh",
-            "SATCO", "par", "PAR[_\\.]par",
-            "SATCO", "pic", "PIC[_\\.]pic",
-            "SATCO", "poc", "POC[_\\.]poc",
-            "S", "NDVI", "LAND[_\\.]NDVI",
-            "V", "KD490", "KD490[_\\.]Kd_490",
-            "V", "KD490", "KD[_\\.]Kd_490",
-            "V", "chl", "CHL[_\\.]chl_ocx",
-            "V", "chlor", "CHL[_\\.]chlor_a",
-            "V", "IOP", "IOP[_\\.].*",
-            "V", "par", "PAR[_\\.]par",
-            "V", "pic", "PIC[_\\.]pic",
-            "V", "poc", "POC[_\\.]poc",
-            "SATV", "RRS", "RRS",
-            "SATV", "RRS", "RRS[_\\.].*")
+    tribble(~platform, ~parameter, ~pattern, ~prod_id,
+            "SATCO", "Kd", "KD490[_\\.]Kd_490", "Kd_490",
+            "SATCO", "Kd", "KD[_\\.]Kd_490", "Kd_490",
+            "SATCO", "NSST", "NSST", "NSST",
+            "SATCO", "Rrs", "RRS[_\\.]Rrs_[[:digit:]]+", "Rrs_[[:digit:]]+",
+            "SATCO", "SST", "SST", "sst",
+            "SATCO", "SST", "SST[_\\.]sst", "sst",
+            "SATCO", "SST4", "SST4", "sst4",
+            "SATCO", "a", "IOP[_\\.]a_.*", "",
+            "SATCO", "adg", "IOP[_\\.]adg_.*", "",
+            "SATCO", "angstrom", "RRS[_\\.]angstrom", "angstrom",
+            "SATCO", "aot", "RRS[_\\.]aot_[[:digit:]]+", "aot_[[:digit:]]+",
+            "SATCO", "aph", "IOP[_\\.]aph_.*", "",
+            "SATCO", "bb", "IOP[_\\.]bb_.*", "",
+            "SATCO", "bbp", "IOP[_\\.]bbp_.*", "",
+            "SATCO", "cdom", "CDOM[_\\.]cdom_index", "",
+            "SATCOV", "chl", "CHL[_\\.]chl_ocx", "chl_ocx",
+            "SATCOV", "chlor", "CHL[_\\.]chlor_a", "chlor_a",
+            "SATCO", "ipar", "FLH[_\\.]ipar", "ipar",
+            "SATCO", "nflh", "FLH[_\\.]nflh", "nflh",
+            "SATCOV", "par", "PAR[_\\.]par", "par",
+            "SATCOV", "pic", "PIC[_\\.]pic", "pic",
+            "SATCOV", "poc", "POC[_\\.]poc", "poc",
+            "S", "NDVI", "LAND[_\\.]NDVI", "ndvi",
+            "V", "KD490", "KD490[_\\.]Kd_490", "Kd_490",
+            "V", "KD490", "KD[_\\.]Kd_490", "Kd_490",
+#            "V", "chl", "CHL[_\\.]chl_ocx",
+#            "V", "chlor", "CHL[_\\.]chlor_a",
+            "V", "IOP", "IOP[_\\.].*", "",
+#            "V", "par", "PAR[_\\.]par",
+#            "V", "pic", "PIC[_\\.]pic",
+#            "V", "poc", "POC[_\\.]poc",
+            "SATV", "RRS", "RRS", "Rrs",
+            "SATV", "RRS", "RRS[_\\.][[:digit:]]+", "Rrs_[[:digit:]]+")
 }
 
 
