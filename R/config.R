@@ -420,10 +420,13 @@ bb_validate <- function(config) {
     cfds <- bb_data_sources(config)
     idx <- !is.na(cfds$authentication_note) & (na_or_empty(cfds$user) | na_or_empty(cfds$password))
     if (any(idx) && isTRUE(bb_settings(config)$dry_run)) {
-        ## earthdata dry runs can spider public listings without credentials
-        is_earthdata <- vapply(cfds$method, function(z) isTRUE(tryCatch(check_method_is(z[[1]], bb_handler_earthdata), error = function(e) FALSE)), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-        is_oceandata <- vapply(cfds$method, function(z) isTRUE(tryCatch(check_method_is(z[[1]], bb_handler_oceandata), error = function(e) FALSE)), FUN.VALUE = TRUE, USE.NAMES = FALSE)
-        idx <- idx & !is_earthdata && !is_oceandata
+        ## some authentication-based handlers will allow dry runs without credentials
+        no_creds <- vapply(cfds$method, function(z) {
+            isTRUE(tryCatch(check_method_is(z[[1]], bb_handler_earthdata), error = function(e) FALSE)) ||
+            isTRUE(tryCatch(check_method_is(z[[1]], bb_handler_oceandata), error = function(e) FALSE)) ||
+            isTRUE(tryCatch(check_method_is(z[[1]], bb_handler_copernicus), error = function(e) FALSE))
+        }, FUN.VALUE = TRUE, USE.NAMES = FALSE)
+        idx <- idx & !no_creds
     }
     if (any(idx)) {
         stop(paste(sprintf("The data source \"%s\" requires authentication, but the user and/or password fields have not been set.\nThe authentication_note for this data source is:\n %s\n", cfds$name[idx], cfds$authentication_note[idx]), collapse = "\n"))

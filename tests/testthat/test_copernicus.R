@@ -9,13 +9,21 @@ test_that("bb_handler_copernicus works", {
         citation = "In case of any publication, the Licensee will ensure credit the Copernicus Marine Service and cite the DOIs links guaranteeing the traceability of the scientific studies and experiments, in the following manner: \"This study has been conducted using E.U. Copernicus Marine Service Information; https://doi.org/10.48670/mds-00352\"",
         license = "See http://marine.copernicus.eu/services-portfolio/service-commitments-and-licence/",
         method = list("bb_handler_copernicus", product = "OMI_EXTREME_STATE_GLOBAL_trend", layer = "omi_extreme_state_global_trend_mean_and_extreme"),
-        user = "",
-        password = "",
-        warn_empty_auth = FALSE)
+        authentication_note = "Copernicus Marine login required, see http://marine.copernicus.eu/services-portfolio/register-now/",
+        user = "", password = "", warn_empty_auth = FALSE)
 
+    ## no credentials, should still be able to do a dry run
+    res <- bb_get(src, local_file_root = tempdir(), dry_run = TRUE)
+    expect_true(nrow(res$files[[1]]) > 0)
+    ## but can't do a normal sync
+    expect_error(res <- bb_get(src, local_file_root = tempdir(), dry_run = FALSE), "requires authentication")
+
+    src$authentication_note <- NA_character_
     temp_root <- tempfile()
     dir.create(temp_root)
+    on.exit(unlink(temp_root, recursive = TRUE))
     cf <- bb_add(bb_config(local_file_root = temp_root), src)
+    res <- bb_sync(cf, confirm_downloads_larger_than = NULL)
     expect_true(grepl("data.marine.copernicus.eu/OMI_EXTREME_STATE_GLOBAL_trend", bb_data_source_dir(cf)))
     res <- bb_sync(cf, confirm_downloads_larger_than = NULL)
     expect_equal(nrow(res$files[[1]]), 1)
@@ -39,6 +47,4 @@ test_that("bb_handler_copernicus works", {
     res <- bb_sync(cf, confirm_downloads_larger_than = NULL)
     expect_equal(nrow(res$files[[1]]), 2)
     expect_true(all(file.exists(res$files[[1]]$file)))
-
-    unlink(temp_root, recursive = TRUE)
 })
