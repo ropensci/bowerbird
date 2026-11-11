@@ -249,8 +249,19 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     my_curl_config$options$unrestricted_auth <- 1L ## prior to curl 5.2.1 this was the default, and without it the authentication won't be properly passed to earthdata servers that serve data from a different hostname to the landing hostname
     myfiles$local_filename <- vapply(myfiles$filename, oceandata_url_mapper, no_host = isTRUE(dots$no_host), FUN.VALUE = "", USE.NAMES = FALSE) ## where local copy will go
 
-    bx <- if (!isTRUE(this_att$dry_run) && s3_target) aws_list_objects(target_s3_args, create = TRUE) else tibble(Key = character(), LastModified = as.POSIXct(c()))
+    bx <- if (s3_target) aws_list_objects(target_s3_args, create = !isTRUE(this_att$dry_run), do_error = FALSE) else tibble(Key = character(), LastModified = as.POSIXct(c()))
+    ## bx will be a zero-row tibble if !s3_target, or s3_target and the bucket is empty. If dry_run, bx will be NULL if it doesn't exist
+    if (is.null(bx)) bx <- tibble(Key = character(), LastModified = as.POSIXct(c()))
     f_exists <- if (s3_target) { myfiles$filename %in% basename(bx$Key) } else { file.exists(myfiles$local_filename) }
+    if (s3_target) {
+        f_last_modified <- rep(as.POSIXct(NA), nrow(myfiles))
+        for (idx in seq_len(nrow(myfiles))) {
+            if (f_exists[idx]) f_last_modified[idx] <- bx$LastModified[which(basename(bx$Key) == myfiles$filename[idx])][1]
+        }
+        ## or could do that as a join
+    } else {
+        f_last_modified <- file.info(myfiles$local_filename)$mtime ## will be NA if file does not exist
+    }
     myfiles$existing_checksum <- NA_character_
     ## iterate through file list and figure out which ones we'll actually download
     for (idx in seq_len(nrow(myfiles))) {
@@ -267,11 +278,14 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         } else if (this_att$clobber == 1) {
             ## replace existing if server copy newer than local copy
             if (search_method == "api" && !s3_target) {
-                ## use checksum rather than dates for this
-                if (f_exists[idx]) {
-                    existing_checksum <- file_hash(myfiles$local_filename[idx], hash = "sha1")
-                    download_this <- existing_checksum != myfiles$checksum[idx]
-                }
+                ## ## use checksum rather than dates for this
+                ## if (f_exists[idx]) {
+                ##     existing_checksum <- file_hash(myfiles$local_filename[idx], hash = "sha1")
+                ##     download_this <- existing_checksum != myfiles$checksum[idx]
+                ## }
+                ## checksums can be horribly slow to calculate locally (if the server does not have hardware hashing?)
+                ## use dates
+                if (is.na(f_last_modified[idx]) || (!is.na(myfiles$last_modified[idx]) && myfiles$last_modified[idx] > f_last_modified[idx])) download_this <- TRUE
             } else if (s3_target) {
                 ## check date of object in bucket list, download if oceandata's copy is newer
                 bidx <- which(basename(bx$Key) == myfiles$filename[idx])
@@ -311,7 +325,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             }
         } else if (verbose && f_exists[idx]) {
             if (!s3_target) {
-                cat("not downloading ", myfiles$filename[idx], ", local copy exists with identical checksum\n", sep = "")
+                cat("not downloading ", myfiles$filename[idx], ", local copy exists and remote is not newer\n", sep = "")
             } else {
                 cat("not downloading ", myfiles$filename[idx], ", ", if (this_att$clobber == 1) "newer ", "copy exists in destination bucket\n", sep = "")
             }

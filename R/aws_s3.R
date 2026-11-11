@@ -195,7 +195,7 @@ aws_fun <- function(fun, ...) {
 }
 
 ## internal helper, wrapper around get_bucket_df but checking bucket existence (and optionally creating bucket) first
-aws_list_objects <- function(s3_args, create = FALSE) {
+aws_list_objects <- function(s3_args, create = FALSE, do_error = TRUE) {
     chk <- aws_fun(aws.s3::bucketlist, s3_args[setdiff(names(s3_args), "bucket")])
     ##chk <- tryCatch(aws_fun(aws.s3::bucket_exists, s3_args), error = function(e) stop("no can do"))
     ## bucket_exists returns 404 error if the bucket does not exist, 403 error if it exists but is inaccessible to these credentials?
@@ -203,7 +203,7 @@ aws_list_objects <- function(s3_args, create = FALSE) {
         if (isTRUE(create)) {
             chk <- tryCatch(aws_fun(aws.s3::put_bucket, s3_args), error = function(e) stop("Could not create bucket. ", conditionMessage(e)))
         } else {
-            stop("bucket does not exist")
+            if (do_error) stop("bucket does not exist") else return(NULL)
         }
     }
     ## get bucket contents
