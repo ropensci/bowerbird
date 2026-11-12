@@ -78,35 +78,40 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
     if (is.null(myargs$bucket_browser_url)) {
         ## TODO handle multiple buckets (in s3HTTP_args)
         bx <- do.call(aws.s3::get_bucket, c(s3args[intersect(names(s3args), c("max", "prefix"))], s3HTTP_args, list(verbose = TRUE)))
-        all_urls <- vapply(bx, function(z) do.call(get_aws_s3_url, c(list(path = paste0("/", z$Key)), s3HTTP_args)), FUN.VALUE = "", USE.NAMES = FALSE)
+        bx2 <- do.call(rbind, lapply(unname(bx), function(z) {
+            names(z) <- tolower(names(z))
+            data.frame(url = do.call(get_aws_s3_url, c(list(path = paste0("/", z$key)), s3HTTP_args)), last_modified = z$lastmodified, size = if ("size (b)" %in% names(z)) z$`size (b)` else if (any(grepl("^size", names(z)))) z[[head(grep("^size", names(z)), 1)]] else NA_real_)
+        }))
+        bx2$size <- as.integer(bx2$size)
+        bx2$last_modified <- lubridate::ymd_hms(bx2$last_modified)
         ## haven't tried or tested sources with hierarchical structure
     } else {
-        ## for providers that don't support bucket indexing
-        all_urls <- unlist(lapply(seq_along(myargs$bucket_browser_url), function(bi) s3_faux_bucket_list(bucket_browser_url = myargs$bucket_browser_url[bi], bucket = s3args$bucket[bi], prefix = s3args$prefix, s3HTTP_args = s3HTTP_args)))
+        ## for providers that don't support bucket indexing: we get a url per object only, no size or last-modified info
+        bx2 <- data.frame(url = unlist(lapply(seq_along(myargs$bucket_browser_url), function(bi) s3_faux_bucket_list(bucket_browser_url = myargs$bucket_browser_url[bi], bucket = s3args$bucket[bi], prefix = s3args$prefix, s3HTTP_args = s3HTTP_args))), last_modified = as.POSIXct(NA), size = NA_integer_)
     }
     ## apply accept_download etc filters
-    idx <- rep(TRUE, length(all_urls))
+    idx <- rep(TRUE, nrow(bx2))
     if (!is.null(myargs[["accept_download"]]) && length(myargs[["accept_download"]]) > 0) {
-        idx <- vapply(all_urls, function(this_url) {
+        idx <- vapply(bx2$url, function(this_url) {
             all(vapply(myargs[["accept_download"]], function(rgx) grepl(rgx, this_url), FUN.VALUE = TRUE))
         }, FUN.VALUE = TRUE)
     }
     if (!is.null(myargs[["accept_download_extra"]]) && length(myargs[["accept_download_extra"]]) > 0) {
-        idx <- idx | vapply(all_urls, function(this_url) {
+        idx <- idx | vapply(bx2$url, function(this_url) {
             all(vapply(myargs[["accept_download_extra"]], function(rgx) grepl(rgx, this_url), FUN.VALUE = TRUE))
         }, FUN.VALUE = TRUE)
     }
-    all_urls <- all_urls[idx]
+    bx2 <- bx2[idx, ]
     if (!is.null(myargs[["reject_download"]]) && length(myargs[["reject_download"]]) > 0) {
-        idx <- vapply(all_urls, function(this_url) {
+        idx <- vapply(bx2$url, function(this_url) {
             !any(vapply(myargs[["reject_download"]], function(rgx) grepl(rgx, this_url), FUN.VALUE = TRUE))
         }, FUN.VALUE = TRUE)
-        all_urls <- all_urls[idx]
+        bx2 <- bx2[idx, ]
     }
     ## for aadc sources, we need to force local file names, otherwise they are named with the ?prefix=... nonsense
     ## (hierarchical sources should look like e.g.  https://data.aad.gov.au/dataset/UUID//object/download?prefix=multi/level/structure/file.xyz, so this still works)
-    local_fnames <- if (!is.null(myargs$bucket_browser_url) && all(grepl("data.aad.gov.au", all_urls)) && all(grepl("\\?prefix=[^&]+$", all_urls))) {
-                        stringr::str_match(all_urls, "\\?prefix=(.+)$")[, 2]
+    local_fnames <- if (!is.null(myargs$bucket_browser_url) && all(grepl("data.aad.gov.au", bx2$url)) && all(grepl("\\?prefix=[^&]+$", bx2$url))) {
+                        stringr::str_match(bx2$url, "\\?prefix=(.+)$")[, 2]
                     } else {
                         NULL
                     }
@@ -114,10 +119,16 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
     ## do all in one to avoid the repeated "downloading file 1 of 1" messages
     dummy <- config
     dummy$data_sources$method[[1]] <- list("bb_rget")
-    dummy$data_sources$source_url <- list(all_urls)
+    dummy$data_sources$source_url <- list(bx2$url)
     ## NOTE to support providers that require authorization, we would need to set some extra headers on the curl call - see e.g. inside aws.s3::s3HTTP
     rget_args <- c(list(dummy, verbose = verbose), myargs[intersect(names(myargs), names(formals("bb_rget")))])
-    do.call(bb_handler_rget, rget_args)
+    out <- do.call(bb_handler_rget, rget_args)
+    if (!is.null(out$files[[1]]) && nrow(out$files[[1]]) > 0) {
+        ## add the size and last-modified columns to the results
+        out$files[[1]] <- out$files[[1]][, setdiff(names(out$files[[1]]), c("last_modified", "size"))]
+        out$files[[1]] <- merge(out$files[[1]], bx2, by = "url", all.x = TRUE, sort = FALSE)
+    }
+    out
 }
 
 ## construct s3 URL

@@ -65,6 +65,7 @@ test_that("bb_sync is quiet when asked (wget)",{
         source_url="https://github.com/ropensci/bowerbird/blob/master/README.Rmd") ## just some file to download
     cf <- cf %>% bb_add(myds)
     expect_silent(bb_sync(cf,verbose=FALSE,confirm_downloads_larger_than=NULL))
+    unlink(temp_root, recursive = TRUE)
 })
 
 test_that("bb_sync errors on a source that is missing required authentication info",{

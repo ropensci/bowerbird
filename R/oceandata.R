@@ -206,13 +206,12 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     if (verbose) cat("Downloading file list ... \n")
     myfiles <- bb_oceandata_filesearch(search = search, dtype = dtype, sensor = sensor, period = period, resolution_id = resolution_id, prod_id = prod_id, suite_id = suite_id, dtid = dtid, sdate = sdate, edate = edate)
     if (nrow(myfiles) < 1) stop("No files matched the supplied oceancolour data file search query (", search, ")")
-    myfiles <- myfiles[, c("checksum", "filename", "last_modified")]
-
+    myfiles <- myfiles[, c("checksum", "filename", "last_modified", "size")]
     myfiles <- myfiles[order(myfiles$filename), ]
     if (verbose) cat(sprintf("\n%d file%s to download\n", nrow(myfiles), if (nrow(myfiles)>1) "s" else ""))
     ## for each file, download if needed and store in appropriate directory
     ok <- TRUE
-    downloads <- tibble(url = NA_character_, file = myfiles$filename, was_downloaded = FALSE, to_download = FALSE)
+    downloads <- tibble(url = NA_character_, file = myfiles$filename, was_downloaded = FALSE, to_download = FALSE, size = myfiles$size, last_modified = myfiles$last_modified)
     cookies_file <- tempfile()
     my_curl_config <- build_curl_config(debug = FALSE, show_progress = verbose, user = thisds$user, password = thisds$password, enforce_basic_auth = TRUE)
     ## and some more configs specifically for earthdata

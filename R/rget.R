@@ -79,15 +79,20 @@ bb_handler_rget_inner <- function(config, verbose = FALSE, local_dir_only = FALS
     this_urls <- if (is.list(cfrow$source_url) && length(cfrow$source_url) == 1) cfrow$source_url[[1]] else cfrow$source_url
     this_flags <- c(list(url = this_urls), this_flags, list(verbose = verbose))
     if (!"show_progress" %in% names(this_flags)) this_flags <- c(this_flags, list(show_progress = verbose && sink.number() < 1))
-    if ("snapshot" %in% names(cfrow)) {
-        ## syncing against a previous snapshot, without re-spidering the remote site
-        this_flags$snapshot <- cfrow$snapshot
-        this_flags$url <- NULL
-        do.call(bb_rget_from_snapshot, this_flags)
-    } else {
-        ## normal sync
-        do.call(bb_rget, this_flags)
+    out <- if ("snapshot" %in% names(cfrow)) {
+               ## syncing against a previous snapshot, without re-spidering the remote site
+               this_flags$snapshot <- cfrow$snapshot
+               this_flags$url <- NULL
+               do.call(bb_rget_from_snapshot, this_flags)
+           } else {
+               ## normal sync
+               do.call(bb_rget, this_flags)
+           }
+    if (!is.null(out$files[[1]]) && nrow(out$files[[1]]) > 0) {
+        if (!"last_modified" %in% names(out$files[[1]])) out$files[[1]]$last_modified <- as.POSIXct(NA)
+        if (!"size" %in% names(out$files[[1]])) out$files[[1]]$size <- NA_integer_
     }
+    out
 }
 
 bb_rget_from_snapshot <- function(snapshot, wait = 0, accept_download = bb_rget_default_downloads(), accept_download_extra = character(), reject_download = character(), user, password, clobber = 1, no_check_certificate = FALSE, remote_time = TRUE, verbose = FALSE, show_progress = verbose, debug = FALSE, dry_run = FALSE, stop_on_download_error = FALSE, retries = 0, force_local_filename, use_url_directory = TRUE, no_host = FALSE, cut_dirs = 0L, curl_opts, target_s3_args, ...) {
@@ -152,6 +157,8 @@ bb_rget_from_snapshot <- function(snapshot, wait = 0, accept_download = bb_rget_
     ## construct the downloads tibble from the snapshot, rather than spidering the remote site as the usual bb_rget does
     downloads <- tibble(url = snapshot$files[[1]]$url,
                         file = if (is.null(force_local_filename)) NA_character_ else force_local_filename, ## force_local_filename is a special case: just download one file per url
+                        size = if ("size" %in% names(snapshot$files[[1]])) snapshot$files[[1]]$size else NA_integer_,
+                        last_modified = if ("last_modified" %in% names(snapshot$files[[1]])) snapshot$files[[1]]$last_modified else as.POSIXct(NA),
                         was_downloaded = NA)
     if (is.null(force_local_filename)) {
         ## allow parms to change between the snapshot run and this download run. e.g. we might snapshot an entire site but only download a subset of files
@@ -184,6 +191,10 @@ bb_rget_from_snapshot <- function(snapshot, wait = 0, accept_download = bb_rget_
             cat(" bb_rget exited with an error (", conditionMessage(e), ")\n", sep = "")
         }
     })
+    if (!is.null(downloads) && nrow(downloads) > 0) {
+        if (!"last_modified" %in% names(downloads)) downloads$last_modified <- as.POSIXct(NA)
+        if (!"size" %in% names(downloads)) downloads$size <- NA_integer_
+    }
     tibble(ok = ok, files = list(downloads), message = msg)
 }
 
