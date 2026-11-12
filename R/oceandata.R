@@ -73,8 +73,7 @@ bb_handler_oceandata <- function(search, sensor, dtype, dtid, period, resolution
 # @param config bb_config: a bowerbird configuration (as returned by \code{bb_config}) with a single data source
 # @param verbose logical: if TRUE, provide additional progress output
 # @param local_dir_only logical: if TRUE, just return the local directory into which files from this data source would be saved
-bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, search_method = "api", dtype = NULL, sensor = NULL,
-                                       period = NULL, resolution_id = NULL, prod_id = NULL, suite_id = NULL, dtid = NULL, sdate = NULL, edate = NULL, stop_on_download_error = FALSE, target_s3_args, ...) {
+bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only = FALSE, search, dtype = NULL, sensor = NULL, period = NULL, resolution_id = NULL, prod_id = NULL, suite_id = NULL, dtid = NULL, sdate = NULL, edate = NULL, stop_on_download_error = FALSE, target_s3_args, ...) {
     ## oceandata synchronization handler
 
     ## oceandata provides a file search interface, e.g.:
@@ -94,8 +93,6 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     assert_that(is.flag(verbose), !is.na(verbose))
     assert_that(is.flag(local_dir_only), !is.na(local_dir_only))
     if (!is.null(search)) assert_that(is.string(search), nzchar(search))
-    assert_that(is.string(search_method), nzchar(search_method))
-    search_method <- match.arg(tolower(search_method), c("api")) ## previously , "scrape")) but this is no longer possible
     if (!is.null(dtype)) assert_that(is.string(dtype), nzchar(dtype))
     if (!is.null(sensor)) assert_that(is.string(sensor), nzchar(sensor))
     assert_that(is.flag(stop_on_download_error), !is.na(stop_on_download_error))
@@ -117,123 +114,99 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
             ## if we are syncing to s3, then there is no concept of the target directory beyond the bucket. Objects in the bucket can be named with directory-like prefixes, but there are no directories in an s3 bucket
             return(get_aws_s3_url(bucket = target_s3_args$bucket, region = target_s3_args$region, base_url = target_s3_args$base_url, path = ""))
         }
-        if (search_method == "scrape") {
-            stop("'scrape' method no longer possible for oceandata")
-            ## url will be https://oceandata.sci.gsfc.nasa.gov/SeaWiFS/Mapped/something
-            ## we just want the host and first two path components
-            temp <- httr::parse_url(search)
-            out <- strsplit(temp$path, "/")[[1]]
-            if (is.null(temp$hostname) || !nzchar(temp$hostname) || length(out) < 2) {
-                stop("could not figure out local directory from scrape search URL")
-            }
-            out <- file.path(out[1], out[2])
-            if (!isTRUE(dots$no_host)) out <- c(temp$hostname, out)
+        ## note that we can't use url_mapper here, because the source definition is unlikely to conform to the expected full pattern
+        ## also, a given source might include products across multiple fine-resolution directories: the result here will be the lowest level output directory that is common to all files associated with the source
+        ## highest-level dir
+        out <- "" ## optional prefix with hostname, below
+        ## refine by platform. Find platform, either full or one-letter abbrev
+        trunc <- FALSE ## if set to TRUE, truncate the output at this point
+        if (!is.null(sensor)) {
+            out <- file.path(out, sensor)
         } else {
-            ## note that we can't use url_mapper here, because the source definition is unlikely to conform to the expected full pattern
-            ## also, a given source might include products across multiple fine-resolution directories: the result here will be the lowest level output directory that is common to all files associated with the source
-            ## highest-level dir
-            out <- "" ## optional prefix with hostname, below
-            ## refine by platform. Find platform, either full or one-letter abbrev
-            trunc <- FALSE ## if set to TRUE, truncate the output at this point
-            if (!is.null(sensor)) {
-                out <- file.path(out, sensor)
+            this_platform <- oceandata_find_platform(search)
+            if (!is.na(this_platform) && nzchar(this_platform)) {
+                ## want old platform name for backwards compatibility
+                if (!this_platform %in% oceandata_platform_map()$platform) {
+                    this_platform <- oceandata_platform_map(oceandata_platform_to_abbrev(this_platform))
+                }
+                out <- file.path(out, this_platform)
             } else {
-                this_platform <- oceandata_find_platform(search)
-                if (!is.na(this_platform) && nzchar(this_platform)) {
-                    ## want old platform name for backwards compatibility
-                    if (!this_platform %in% oceandata_platform_map()$platform) {
-                        this_platform <- oceandata_platform_map(oceandata_platform_to_abbrev(this_platform))
-                    }
-                    out <- file.path(out, this_platform)
-                } else {
-                    trunc <- TRUE
-                }
+                trunc <- TRUE
             }
-            if (!trunc) {
-                if (isTRUE(dtype == "L3m") || grepl("L3m", search)) {
-                    out <- file.path(out, "Mapped")
-                } else if (isTRUE(dtype == "L3b") || grepl("L3", search)) {
-                    out <- file.path(out, "L3BIN")
-                } else {
-                    trunc <- TRUE
-                }
-            }
-            if (!trunc) {
-                ## time period, if it's specified in the search string
-                if (!is.null(period)) {
-                    if (all(period %in% oceandata_alltp$abbrev)) {
-                        chk <- unique(oceandata_alltp$time_period[oceandata_alltp$abbrev %in% period])
-                        if (length(chk) == 1) {
-                            out <- file.path(out, chk)
-                        } else {
-                            trunc <- TRUE
-                        }
-                    } else {
-                        trunc <- TRUE
-                    }
-                } else {
-                    tp <- stringr::str_detect(search, paste0("\\.", oceandata_alltp$abbrev, "\\."))
-                    if (sum(tp, na.rm = TRUE) == 1) {
-                        out <- file.path(out, oceandata_alltp$time_period[which(tp)])
-                    } else {
-                        trunc <- TRUE
-                    }
-                }
-            }
-            if (!trunc && (isTRUE(dtype == "L3m") || grepl("L3m", search))) {
-                ## spatial res
-                if (!is.null(resolution_id)) {
-                    out <- file.path(out, resolution_id)
-                } else {
-                    if (grepl("4km", search)) out <- file.path(out, "4km") else if (grepl("9km", search)) out <- file.path(out, "9km") else trunc <- TRUE
-                }
-            }
-            if (!trunc) {
-                ## next level down is parameter name
-                ptbl <- oceandata_parameters()
-                if (!is.null(prod_id)) {
-                    dest_p <- NULL
-                    pn <- stringr::str_detect(prod_id, paste0("^", ptbl$prod_id, "$"))
-                    if (sum(pn, na.rm = TRUE) > 0) {
-                        dest_p <- unique(ptbl$parameter[which(pn)])
-                        ## we can match on multiple parameters so long as they all map to the same parameter directory name
-                    }
-                    out <- file.path(out, if (length(dest_p) == 1) dest_p else prod_id)
-                } else {
-                    dest_p <- NULL
-                    pn <- stringr::str_detect(search, ptbl$pattern)
-                    if (sum(pn, na.rm = TRUE) > 0) {
-                        dest_p <- unique(ptbl$parameter[which(pn)])
-                    }
-                    ## we can match on multiple parameters so long as they all map to the same parameter directory name
-                    if (length(dest_p) == 1) {
-                        out <- file.path(out, dest_p)
-                    } else {
-                        trunc <- TRUE
-                    }
-                }
-            }
-            out <- sub("^/", "", out)
-            if (!isTRUE(dots$no_host)) out <- file.path("oceandata.sci.gsfc.nasa.gov", out)
         }
+        if (!trunc) {
+            if (isTRUE(dtype == "L3m") || grepl("L3m", search)) {
+                out <- file.path(out, "Mapped")
+            } else if (isTRUE(dtype == "L3b") || grepl("L3", search)) {
+                out <- file.path(out, "L3BIN")
+            } else {
+                trunc <- TRUE
+            }
+        }
+        if (!trunc) {
+            ## time period, if it's specified in the search string
+            if (!is.null(period)) {
+                if (all(period %in% oceandata_alltp$abbrev)) {
+                    chk <- unique(oceandata_alltp$time_period[oceandata_alltp$abbrev %in% period])
+                    if (length(chk) == 1) {
+                        out <- file.path(out, chk)
+                    } else {
+                        trunc <- TRUE
+                    }
+                } else {
+                    trunc <- TRUE
+                }
+            } else {
+                tp <- stringr::str_detect(search, paste0("\\.", oceandata_alltp$abbrev, "\\."))
+                if (sum(tp, na.rm = TRUE) == 1) {
+                    out <- file.path(out, oceandata_alltp$time_period[which(tp)])
+                } else {
+                    trunc <- TRUE
+                }
+            }
+        }
+        if (!trunc && (isTRUE(dtype == "L3m") || grepl("L3m", search))) {
+            ## spatial res
+            if (!is.null(resolution_id)) {
+                out <- file.path(out, resolution_id)
+            } else {
+                if (grepl("4km", search)) out <- file.path(out, "4km") else if (grepl("9km", search)) out <- file.path(out, "9km") else trunc <- TRUE
+            }
+        }
+        if (!trunc) {
+            ## next level down is parameter name
+            ptbl <- oceandata_parameters()
+            if (!is.null(prod_id)) {
+                dest_p <- NULL
+                pn <- stringr::str_detect(prod_id, paste0("^", ptbl$prod_id, "$"))
+                if (sum(pn, na.rm = TRUE) > 0) {
+                    dest_p <- unique(ptbl$parameter[which(pn)])
+                    ## we can match on multiple parameters so long as they all map to the same parameter directory name
+                }
+                out <- file.path(out, if (length(dest_p) == 1) dest_p else prod_id)
+            } else {
+                dest_p <- NULL
+                pn <- stringr::str_detect(search, ptbl$pattern)
+                if (sum(pn, na.rm = TRUE) > 0) {
+                    dest_p <- unique(ptbl$parameter[which(pn)])
+                }
+                ## we can match on multiple parameters so long as they all map to the same parameter directory name
+                if (length(dest_p) == 1) {
+                    out <- file.path(out, dest_p)
+                } else {
+                    trunc <- TRUE
+                }
+            }
+        }
+        out <- sub("^/", "", out)
+        if (!isTRUE(dots$no_host)) out <- file.path("oceandata.sci.gsfc.nasa.gov", out)
         return(file.path(this_att$local_file_root, sub("/$", "", out)))
     }
     if (!isTRUE(this_att$dry_run) && (is.null(thisds$user) || is.null(thisds$password) || na_or_empty(thisds$user) || na_or_empty(thisds$password))) stop("Oceandata sources require an Earthdata login: provide your user and password in the source configuration")
     if (verbose) cat("Downloading file list ... \n")
-    if (search_method == "api") {
-        myfiles <- bb_oceandata_filesearch(search = search, dtype = dtype, sensor = sensor, period = period, resolution_id = resolution_id, prod_id = prod_id, suite_id = suite_id, dtid = dtid, sdate = sdate, edate = edate)
-        if (nrow(myfiles) < 1) stop("No files matched the supplied oceancolour data file search query (", search, ")")
-        myfiles <- myfiles[, c("checksum", "filename", "last_modified")]
-    } else if (search_method == "scrape") {
-        stop("'scrape' method no longer possible for oceandata")
-        ## potentially override accept_download etc
-        myfiles <- bb_rget(search, level = 3,
-                           accept_download = if ("accept_download" %in% names(dots)) dots[["accept_download"]] else "/getfile/",
-                           ## follow 3-digit (day of year) or 4-digit (year) folders by default
-                           accept_follow = if ("accept_follow" %in% names(dots)) dots[["accept_follow"]] else "/[[:digit:]]{3}[[:digit:]]?/$",
-                           dry_run = TRUE, no_parent = FALSE, relative = FALSE, verbose = FALSE)
-        myfiles <- tibble(filename = basename(myfiles$files[[1]]$url), checksum = NA_character_, last_modified = NA)
-    }
+    myfiles <- bb_oceandata_filesearch(search = search, dtype = dtype, sensor = sensor, period = period, resolution_id = resolution_id, prod_id = prod_id, suite_id = suite_id, dtid = dtid, sdate = sdate, edate = edate)
+    if (nrow(myfiles) < 1) stop("No files matched the supplied oceancolour data file search query (", search, ")")
+    myfiles <- myfiles[, c("checksum", "filename", "last_modified")]
 
     myfiles <- myfiles[order(myfiles$filename), ]
     if (verbose) cat(sprintf("\n%d file%s to download\n", nrow(myfiles), if (nrow(myfiles)>1) "s" else ""))
@@ -270,14 +243,11 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
         this_fullfile <- myfiles$local_filename[idx]
         downloads$file[idx] <- this_fullfile
         download_this <- !f_exists[idx]
-        ## - with search_method == "api", we can get a cdate (last-modified) for files on the oceandata side, and we can retrieve the local file last-modified dates (or retrieve the target bucket list with last-modified dates)
-        ## - so we could either explicitly compare dates and only queue downloads for appropriate files
-        ## - or we can set clobber = 1 and rget will use the file or bucket last-modified date to set the if-modified-since header, which makes a lot more requests but the code is simpler because we delegate the comparisons to the existing code in rget
         if (this_att$clobber < 1) {
             ## don't clobber existing
         } else if (this_att$clobber == 1) {
             ## replace existing if server copy newer than local copy
-            if (search_method == "api" && !s3_target) {
+            if (!s3_target) {
                 ## ## use checksum rather than dates for this
                 ## if (f_exists[idx]) {
                 ##     existing_checksum <- file_hash(myfiles$local_filename[idx], hash = "sha1")
@@ -287,14 +257,12 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                 ## use dates
                 if (is.na(f_last_modified[idx]) || (!is.na(myfiles$last_modified[idx]) && myfiles$last_modified[idx] > f_last_modified[idx])) download_this <- TRUE
                 ## note though that apparently it is possible to get into the situation where a local file is marginally older than the remote according to the time stamps, but the if-modified-since download attempt does not download it, saying that the remote is not newer. Huh? So we set `remote_time = 2` in the rget call as a horrible workaround
-            } else if (s3_target) {
+            } else {
                 ## check date of object in bucket list, download if oceandata's copy is newer
                 bidx <- which(basename(bx$Key) == myfiles$filename[idx])
                 if (length(bidx) == 1 && !is.na(myfiles$last_modified[idx]) && myfiles$last_modified[idx] > bx$LastModified[bidx]) {
                     download_this <- TRUE
                 }
-            } else {
-                download_this <- TRUE
             }
         } else {
             download_this <- TRUE
