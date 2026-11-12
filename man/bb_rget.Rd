@@ -72,7 +72,7 @@ bb_rget_default_downloads()
 
 \item{relative}{logical: if \code{TRUE}, only follow relative links. This can be useful for restricting what is downloaded in recursive mode}
 
-\item{remote_time}{logical: if \code{TRUE}, attempt to set the local file's time to that of the remote file}
+\item{remote_time}{logical: if \code{TRUE}, attempt to set the local file's time to that of the remote file. As of 2026-11-012 \code{remote_time} can also be numeric, and if greater than 1 then (i) the local file time will be set to the current system time, not the reported remote file last-modification time, and (ii) the local file time will be set even if the remote file is not downloaded}
 
 \item{verbose}{logical: print trace output?}
 

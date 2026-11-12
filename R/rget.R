@@ -206,7 +206,7 @@ bb_rget_from_snapshot <- function(snapshot, wait = 0, accept_download = bb_rget_
 #' @param no_parent_download logical: similar to \code{no_parent}, but applies only to download links. A typical use case is to set \code{no_parent} to \code{TRUE} and \code{no_parent_download} to \code{FALSE}, in which case the spidering process (following links to find downloadable files) will not ascend to the parent directory, but files can be downloaded from a directory that is not within the parent
 #' @param no_check_certificate logical: if \code{TRUE}, don't check the server certificate against the available certificate authorities. Also don't require the URL host name to match the common name presented by the certificate. This option might be useful if trying to download files from a server with an expired certificate, but it is clearly a security risk and so should be used with caution
 #' @param relative logical: if \code{TRUE}, only follow relative links. This can be useful for restricting what is downloaded in recursive mode
-#' @param remote_time logical: if \code{TRUE}, attempt to set the local file's time to that of the remote file
+#' @param remote_time logical: if \code{TRUE}, attempt to set the local file's time to that of the remote file. As of 2026-11-012 \code{remote_time} can also be numeric, and if greater than 1 then (i) the local file time will be set to the current system time, not the reported remote file last-modification time, and (ii) the local file time will be set even if the remote file is not downloaded
 #' @param verbose logical: print trace output?
 #' @param show_progress logical: if \code{TRUE}, show download progress
 #' @param debug logical: if \code{TRUE}, will print additional debugging information. If bb_rget is not behaving as expected, try setting this to \code{TRUE}
@@ -250,7 +250,7 @@ bb_rget <- function(url, level = 0, wait = 0, accept_follow = c("(/|\\.html?)$")
     assert_that(is.flag(no_parent_download), !is.na(no_parent_download))
     assert_that(is.flag(no_check_certificate), !is.na(no_check_certificate))
     assert_that(is.flag(relative), !is.na(relative))
-    assert_that(is.flag(remote_time), !is.na(remote_time))
+    assert_that(is.flag(remote_time) || is.numeric(remote_time), length(remote_time) == 1, !is.na(remote_time))
     assert_that(is.numeric(wait))
     assert_that(is.flag(verbose), !is.na(verbose))
     assert_that(is.flag(debug), !is.na(debug))
@@ -440,11 +440,20 @@ rget_do_downloads <- function(downloads, use_url_directory, no_host, cut_dirs, t
                             file.remove(dlf)
                             ## set local file time if appropriate
                             ## setting the filetime option in the curl request does not appear to modify the local file timestamp
-                            if (remote_time) set_file_timestamp(path = fname, hdrs = parse_headers_list(req$headers))
+                            if (is.numeric(remote_time) && remote_time > 1) {
+                                Sys.setFileTime(path = fname, time = Sys.time())
+                            } else if (remote_time) {
+                                set_file_timestamp(path = fname, hdrs = parse_headers_list(req$headers))
+                            }
                             if (verbose) cat(if (show_progress) "\n", "done.\n")
                         } else {
                             file.remove(dlf)
                             if (verbose) cat(if (show_progress) "\n", "file unchanged on server, not downloading.\n")
+                            if (is.numeric(remote_time) && remote_time > 1) {
+                                ## update the local file time
+                                Sys.setFileTime(path = fname, time = Sys.time())
+                            }
+
                         }
                     }
                 }
@@ -731,7 +740,7 @@ build_curl_config <- function(debug = FALSE, show_progress = FALSE, no_check_cer
         out$options$password <- password
     }
     if (enforce_basic_auth) out$options$httpauth <- 1L # force basic authentication
-    if (!is.na(remote_time)) out$options$filetime <- if (remote_time) 1L else 0L
+    if (!is.na(remote_time)) out$options$filetime <- if (remote_time > 0) 1L else 0L
     if (!is.null(accept_encoding) && nzchar(accept_encoding)) out$options$accept_encoding <- accept_encoding
     out
 }

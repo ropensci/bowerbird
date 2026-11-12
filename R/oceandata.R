@@ -286,6 +286,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
                 ## checksums can be horribly slow to calculate locally (if the server does not have hardware hashing?)
                 ## use dates
                 if (is.na(f_last_modified[idx]) || (!is.na(myfiles$last_modified[idx]) && myfiles$last_modified[idx] > f_last_modified[idx])) download_this <- TRUE
+                ## note though that apparently it is possible to get into the situation where a local file is marginally older than the remote according to the time stamps, but the if-modified-since download attempt does not download it, saying that the remote is not newer. Huh? So we set `remote_time = 2` in the rget call as a horrible workaround
             } else if (s3_target) {
                 ## check date of object in bucket list, download if oceandata's copy is newer
                 bidx <- which(basename(bx$Key) == myfiles$filename[idx])
@@ -336,7 +337,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     if (!this_att$dry_run && any(to_download, na.rm = TRUE)) {
         ## download all the files we identified above
         idx <- which(to_download)
-        res <- bb_rget(downloads$url[idx], force_local_filename = downloads$file[idx], use_url_directory = FALSE, clobber = this_att$clobber, curl_opts = my_curl_config$options, verbose = verbose, target_s3_args = target_s3_args) ## TODO check are there any other args in dots to use here? dots[intersect(names(dots), names(formals("bb_rget")))]
+        res <- bb_rget(downloads$url[idx], force_local_filename = downloads$file[idx], use_url_directory = FALSE, clobber = this_att$clobber, curl_opts = my_curl_config$options, verbose = verbose, target_s3_args = target_s3_args, remote_time = 2) ## TODO check are there any other args in dots to use here? dots[intersect(names(dots), names(formals("bb_rget")))]
         ## merge res back into the downloads tibble
         if (res$ok) {
             downloads[idx, ] <- res$files[[1]]
