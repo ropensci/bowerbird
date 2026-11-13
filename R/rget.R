@@ -382,7 +382,7 @@ rget_do_downloads <- function(downloads, use_url_directory, no_host, cut_dirs, t
                 existing_dt <- if (file.exists(fname)) file.info(fname)$mtime else NA
             }
             ## if clobber == 1, we can use the remote last-modified time if we have it. Check this first, and don't try and download if the remote file is not newer than the local
-            if (do_download && clobber == 1 && !is.na(downloads$last_modified[dfi]) && !is.na(existing_dt)) {
+            if (do_download && clobber == 1 && "last_modified" %in% names(downloads) && !is.na(downloads$last_modified[dfi]) && !is.na(existing_dt)) {
                 if (downloads$last_modified[dfi] <= existing_dt) {
                     do_download <- FALSE
                     if (verbose) cat(" file already exists and remote copy is not newer, not downloading:", df, "\n", df)

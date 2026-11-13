@@ -80,7 +80,7 @@ bb_handler_aws_s3_inner <- function(config, verbose = FALSE, local_dir_only = FA
         bx <- do.call(aws.s3::get_bucket, c(s3args[intersect(names(s3args), c("max", "prefix"))], s3HTTP_args, list(verbose = TRUE)))
         bx2 <- do.call(rbind, lapply(unname(bx), function(z) {
             names(z) <- tolower(names(z))
-            data.frame(url = do.call(get_aws_s3_url, c(list(path = paste0("/", z$key)), s3HTTP_args)), last_modified = z$lastmodified, size = if ("size (b)" %in% names(z)) z$`size (b)` else if (any(grepl("^size", names(z)))) z[[head(grep("^size", names(z)), 1)]] else NA_real_)
+            tibble(url = do.call(get_aws_s3_url, c(list(path = paste0("/", z$key)), s3HTTP_args)), last_modified = z$lastmodified, size = if ("size (b)" %in% names(z)) z$`size (b)` else if (any(grepl("^size", names(z)))) z[[head(grep("^size", names(z)), 1)]] else NA_real_)
         }))
         bx2$size <- as.integer(bx2$size)
         bx2$last_modified <- lubridate::ymd_hms(bx2$last_modified)

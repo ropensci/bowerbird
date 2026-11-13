@@ -267,7 +267,7 @@ do_sync_repo <- function(this_dataset,create_root,verbose,settings,confirm_downl
         temp <- NULL
     }
     if (length(decompressed_files) > 0) {
-        temp <- rbind(temp, tibble(url = NA_character_, file = decompressed_files, note = "decompressed"))
+        temp <- rbind(temp, tibble(url = NA_character_, file = decompressed_files, last_modified = as.POSIXct(NA), size = NA_integer_, note = "decompressed"))
     }
     if (verbose) cat(sprintf("\n%s dataset synchronization complete: %s\n", base::date(), bb_data_sources(this_dataset)$name))
     tibble(ok = ok, files = list(temp))

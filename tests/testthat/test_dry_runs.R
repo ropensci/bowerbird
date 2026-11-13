@@ -4,7 +4,7 @@ test_that("various dry run tests",{
                      id = "VIIRS_L3m_SNxx_SNPP_CHL_chlor_a_9km",
                      description = "Seasonal remote-sensing chlorophyll-a from the VIIRS satellite at 9km spatial resolution",
                      doc_url = "https://oceancolor.gsfc.nasa.gov/",
-                     citation = generic_oceandata_citation,
+                     citation = "Oceandata",
                      license = "Please cite",
                      method = list("bb_handler_oceandata", period = c("SNWI", "SNSP", "SNSU", "SNAU"), sensor = "VIIRS", dtype = "L3m", dtid = 1007, resolution_id = "9km", prod_id = "chlor_a", sdate = "2020-01-01"),
                      postprocess = list("bb_oceandata_cleanup"),
