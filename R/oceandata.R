@@ -236,6 +236,7 @@ bb_handler_oceandata_inner <- function(config, verbose = FALSE, local_dir_only =
     }
     myfiles$existing_checksum <- NA_character_
     ## iterate through file list and figure out which ones we'll actually download
+    ## TODO this could be simplified by delegating to bb_rget, but we would still need to do the oceandata-specific check for NRT files and their refined counterparts
     for (idx in seq_len(nrow(myfiles))) {
         this_url <- paste0("https://oceandata.sci.gsfc.nasa.gov/ob/getfile/", myfiles$filename[idx]) ## full URL
         downloads$url[idx] <- this_url

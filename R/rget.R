@@ -381,7 +381,14 @@ rget_do_downloads <- function(downloads, use_url_directory, no_host, cut_dirs, t
                 do_download <- clobber >= 1 || (!file.exists(fname))
                 existing_dt <- if (file.exists(fname)) file.info(fname)$mtime else NA
             }
-            ## if clobber == 1, we set the if-modified-since option, so we can ask for download and it will not re-download unless needed
+            ## if clobber == 1, we can use the remote last-modified time if we have it. Check this first, and don't try and download if the remote file is not newer than the local
+            if (do_download && clobber == 1 && !is.na(downloads$last_modified[dfi]) && !is.na(existing_dt)) {
+                if (downloads$last_modified[dfi] <= existing_dt) {
+                    do_download <- FALSE
+                    if (verbose) cat(" file already exists and remote copy is not newer, not downloading:", df, "\n", df)
+                }
+            }
+            ## - if the remote last-modified time is not available, we set the if-modified-since option, and it will not re-download unless needed (but it does cost us the time required for the extra request to the remote server)
             if (do_download) {
                 if (verbose) cat(" downloading file ", dfi, " of ", nrow(downloads), ": ", df, " ... ", if (show_progress) "\n", sep = "")
                 myopts <- curl_config$options ## curl options for this particular file, may be modified below depending on clobber
